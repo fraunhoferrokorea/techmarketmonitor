@@ -2,8 +2,6 @@
 __pycache__/
 *.py[cod]
 .env
-data/*.db
 reports/
-*.db
 .DS_Store
 node_modules/

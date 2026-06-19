@@ -31,15 +31,6 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      # Persist the SQLite database between runs so monthly reports work
-      - name: Restore database cache
-        uses: actions/cache@v4
-        with:
-          path: data/monitor.db
-          key: monitor-db-${{ github.run_number }}
-          restore-keys: |
-            monitor-db-
-
       - name: Create required directories
         run: mkdir -p data output/daily output/logs
 
@@ -55,10 +46,10 @@ jobs:
             python -m src.main daily
           fi
 
-      - name: Commit daily report to repo
+      - name: Commit daily report and database to repo
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add output/daily/
+          git add output/daily/ data/monitor.db
           git diff --staged --quiet && echo "No new report to commit." || \
             git commit -m "report: daily $(date -u +%Y-%m-%d)" && git push

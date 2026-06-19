@@ -1,0 +1,81 @@
+name: Monthly Tech Market Report
+
+on:
+  schedule:
+    # 18:30 KST = 09:30 UTC — runs daily, script decides if it's the last business day
+    - cron: '30 9 * * *'
+  workflow_dispatch:
+    inputs:
+      year:
+        description: 'Year (e.g. 2026). Leave blank for current month.'
+        required: false
+        default: ''
+      month:
+        description: 'Month number (e.g. 6). Leave blank for current month.'
+        required: false
+        default: ''
+
+jobs:
+  monthly-report:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install python-docx dependency
+        run: pip install python-docx
+
+      - name: Check if today is last business day (scheduled runs only)
+        if: github.event_name == 'schedule'
+        run: |
+          python run_monthly_if_last_bizday.py --check-only 2>/dev/null || \
+          python - <<'EOF'
+          import calendar, sys
+          from datetime import date
+          today = date.today()
+          last_day = calendar.monthrange(today.year, today.month)[1]
+          candidate = date(today.year, today.month, last_day)
+          while candidate.weekday() >= 5:
+              candidate = date(candidate.year, candidate.month, candidate.day - 1)
+          if today != candidate:
+              print(f"Today ({today}) is not the last business day ({candidate}). Skipping.")
+              sys.exit(1)
+          print(f"Today IS the last business day ({candidate}). Running monthly report.")
+          EOF
+        id: check_day
+        continue-on-error: true
+
+      - name: Run monthly report
+        if: github.event_name == 'workflow_dispatch' || steps.check_day.outcome == 'success'
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_BASE_URL: ${{ secrets.OPENAI_BASE_URL }}
+          MODEL_NAME: ${{ secrets.MODEL_NAME }}
+        run: |
+          if [ -n "${{ github.event.inputs.year }}" ] && [ -n "${{ github.event.inputs.month }}" ]; then
+            python -m src.main monthly --year "${{ github.event.inputs.year }}" --month "${{ github.event.inputs.month }}"
+          else
+            python -m src.main monthly
+          fi
+
+      - name: Commit monthly report to repo
+        if: github.event_name == 'workflow_dispatch' || steps.check_day.outcome == 'success'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add reports/
+          git diff --staged --quiet && echo "No report to commit." || \
+            git commit -m "report: monthly $(date -u +%Y-%m)" && git push
