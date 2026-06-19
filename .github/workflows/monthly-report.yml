@@ -2,8 +2,8 @@ name: Monthly Tech Market Report
 
 on:
   schedule:
-    # 18:30 KST = 09:30 UTC — runs daily, script decides if it's the last business day
-    - cron: '30 9 * * *'
+    # 08:00 KST = 23:00 UTC (previous day) — runs daily, script decides if it's the last business day
+    - cron: '0 23 * * *'
   workflow_dispatch:
     inputs:
       year:
