@@ -8,7 +8,12 @@ from datetime import date, datetime
 from pathlib import Path
 
 from src.models import SummarizedArticle
-from src.summarizer import polish_korean, strip_cjk_from_korean
+from src.summarizer import (
+    normalize_korean_endings,
+    normalize_korean_endings_sentences,
+    polish_korean,
+    strip_cjk_from_korean,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -235,14 +240,17 @@ def _strip_heading(text: str) -> str:
     return text
 
 
-def _build_summary_lines(article: SummarizedArticle) -> list[str]:
+def _build_summary_lines(
+    article: SummarizedArticle,
+    top_keywords: list[str] | None = None,
+) -> list[str]:
     steps = article.ko_summary_steps or article.en_summary_steps
     facts: list[str] = []
 
     for step in steps:
         cleaned = polish_korean(strip_cjk_from_korean(_strip_heading(step)))
         cleaned = re.sub(r"\[\d+\]\s*$", "", cleaned).strip()
-        cleaned = _to_hamche_sentences(cleaned)
+        cleaned = normalize_korean_endings_sentences(cleaned)
         if cleaned and not cleaned.startswith("(해석)"):
             facts.append(cleaned)
         if len(facts) >= 3:
@@ -257,9 +265,12 @@ def _build_summary_lines(article: SummarizedArticle) -> list[str]:
         facts.append("원문 기준 핵심 사실을 추가 확인 필요")
 
     interpretation = ""
-    if article.keyword_relevance:
+    if article.keyword_relevance and _keyword_relevance_is_valid(
+        article, article.keyword_relevance
+    ):
         best = _best_from_relevance(article.keyword_relevance)
-        if best:
+        level = _classify_relevance(article, top_keywords or [])
+        if best and _relevance_trustworthy(article, best, level, top_keywords or []):
             interpretation = best
     if not interpretation and article.key_trends:
         interpretation = f"{article.key_trends[0]} 흐름과 연결되는 시장 신호로 보임"
@@ -274,6 +285,47 @@ def _time_label(article: SummarizedArticle, index: int) -> str:
     if article.published_at:
         return article.published_at.strftime("%H:%M")
     return f"{index:02d}"
+
+
+def _item_heading_text(article: SummarizedArticle, index: int) -> str:
+    return f"{_time_label(article, index)} {article.title}"
+
+
+def _github_heading_slug(text: str, used: set[str]) -> str:
+    """Match GitHub heading anchor slugs so summary links work on github.com."""
+    slug = text.strip().lower()
+    slug = re.sub(r"[^\w\s-]", "", slug)
+    slug = re.sub(r"[\s_]+", "-", slug)
+    slug = re.sub(r"-+", "-", slug).strip("-")
+    base = slug or "section"
+    candidate = base
+    n = 1
+    while candidate in used:
+        candidate = f"{base}-{n}"
+        n += 1
+    used.add(candidate)
+    return candidate
+
+
+def _build_item_slugs(articles: list[SummarizedArticle]) -> dict[str, str]:
+    used: set[str] = set()
+    slugs: dict[str, str] = {}
+    for index, article in enumerate(articles, start=1):
+        slugs[article.url] = _github_heading_slug(_item_heading_text(article, index), used)
+    return slugs
+
+
+def _item_anchor_tag(slug: str) -> str:
+    return f'<a id="{slug}"></a>'
+
+
+def _item_heading_md(article: SummarizedArticle, index: int) -> str:
+    return f"### {_item_heading_text(article, index)}"
+
+
+def _item_summary_link(article: SummarizedArticle, slug: str, max_len: int = 45) -> str:
+    short = article.title[:max_len] + ("…" if len(article.title) > max_len else "")
+    return f"[{short}](#{slug})"
 
 
 def _published_date(article: SummarizedArticle, fallback: date) -> str:
@@ -319,57 +371,244 @@ def _kw_score(text: str, keywords: list[str]) -> int:
     return sum(1 for k in keywords if k.lower() in t)
 
 
-# Compiled patterns for sentence-final -다체 / 합니다체 → -함/임체 normalization.
-# Applied to the one-liner executive-summary bullets so the style is uniform.
-# 합니다/ㅂ니다체 patterns must precede -다체 patterns to avoid partial mismatches.
-_HAMCHE_FIXES: list[tuple[re.Pattern, str]] = [
-    # 합니다/ㅂ니다체 endings
-    (re.compile(r"해야\s*합니다([.。]?)$"), r"해야 함\1"),
-    (re.compile(r"([가-힣])합니다([.。]?)$"), r"\1함\2"),
-    (re.compile(r"([가-힣])입니다([.。]?)$"), r"\1임\2"),
-    (re.compile(r"([가-힣])있습니다([.。]?)$"), r"\1있음\2"),
-    (re.compile(r"([가-힣])없습니다([.。]?)$"), r"\1없음\2"),
-    (re.compile(r"([가-힣])됩니다([.。]?)$"), r"\1됨\2"),
-    (re.compile(r"([가-힣])보입니다([.。]?)$"), r"\1보임\2"),
-    (re.compile(r"([가-힣])줍니다([.。]?)$"), r"\1줌\2"),
-    (re.compile(r"([가-힣])둡니다([.。]?)$"), r"\1둠\2"),
-    (re.compile(r"나타냅니다([.。]?)$"), r"나타냄\1"),
-    (re.compile(r"나타납니다([.。]?)$"), r"나타남\1"),
-    # -다체 endings
-    (re.compile(r"해야\s*한다([.。]?)$"), r"해야 함\1"),
-    (re.compile(r"([가-힣])한다([.。]?)$"), r"\1함\2"),
-    (re.compile(r"([가-힣])이다([.。]?)$"), r"\1임\2"),
-    (re.compile(r"([가-힣])있다([.。]?)$"), r"\1있음\2"),
-    (re.compile(r"([가-힣])없다([.。]?)$"), r"\1없음\2"),
-    (re.compile(r"([가-힣])된다([.。]?)$"), r"\1됨\2"),
-    (re.compile(r"([가-힣])보인다([.。]?)$"), r"\1보임\2"),
-    (re.compile(r"([가-힣])온다([.。]?)$"), r"\1옴\2"),
-    (re.compile(r"([가-힣])진다([.。]?)$"), r"\1짐\2"),
-    (re.compile(r"([가-힣])친다([.。]?)$"), r"\1침\2"),
-    (re.compile(r"나타낸다([.。]?)$"), r"나타냄\1"),
-    (re.compile(r"나타난다([.。]?)$"), r"나타남\1"),
-]
+_POWER_DIRECT_MATCHES = frozenset(
+    {"power system", "power grid", "smart grid", "microgrid", "grid"}
+)
+_POWER_INDIRECT_MATCHES = frozenset(
+    {
+        "data center",
+        "bess",
+        "battery energy storage",
+        "renewable energy",
+        "energy storage",
+        "renewable",
+    }
+)
+_TANGENTIAL_MATCHES = frozenset({"ai infrastructure", "supply chain"})
+
+_NON_POWER_TITLE = re.compile(
+    r"(?:"
+    r"video|happyhorse|sora|seedance|claude|fable|mythos|fugu|sakana|"
+    r"agent\s+orchestr|llm\s+agent|multi-model|multi-agent|layoff|"
+    r"ai\s+video|video\s+model|video\s+gener"
+    r")",
+    re.IGNORECASE,
+)
+_POWER_SUPPLY_HINT = re.compile(
+    r"ppa|power\s*purchase|전력\s*구매|가스\s*발전|natural\s*gas\s*power|"
+    r"grid\s*capacity|전력망|송배전|transmission|distribution\s*grid",
+    re.IGNORECASE,
+)
+_POWER_TEXT_HINT = re.compile(
+    r"전력계통|파워그리드|스마트그리드|전력망|power\s*system|power\s*grid|"
+    r"smart\s*grid|microgrid|grid\s*stability|계통",
+    re.IGNORECASE,
+)
+_RELEVANCE_ORDER = {"direct": 0, "indirect": 1, "weak": 2, "none": 3}
+_RELEVANCE_LABEL = {"direct": "직접", "indirect": "간접", "weak": "약함"}
 
 
-def _to_hamche(text: str) -> str:
-    """Normalize sentence-final Korean -다체/-합니다체 endings to -함/임체 (명사형 종결).
+def _title_anchor_tokens(title: str) -> list[str]:
+    """Return distinctive tokens from a title for relevance validation."""
+    stop = {
+        "the", "and", "for", "with", "from", "plan", "plans", "new", "one",
+        "largest", "over", "into", "that", "this", "their", "about", "beyond",
+        "problem", "achieves", "capture", "rises", "sell", "called", "model",
+    }
+    tokens = re.findall(r"[A-Za-z][A-Za-z0-9'\+.-]{2,}", title)
+    return [t for t in tokens if t.lower() not in stop and len(t) >= 4][:8]
 
-    Applies only to the very end of the string so that mid-sentence
-    clauses ending in -다 (e.g. relative clauses) are not affected.
+
+def _keyword_relevance_is_valid(article: SummarizedArticle, text: str) -> bool:
+    """Reject boilerplate or article-mismatched keyword_relevance text."""
+    if not text or _is_vague(text):
+        return False
+    if _NON_POWER_TITLE.search(article.title) and _POWER_TEXT_HINT.search(text):
+        return False
+    anchors = _title_anchor_tokens(article.title)
+    if not anchors:
+        return True
+    lower = text.lower()
+    if not any(a.lower() in lower for a in anchors):
+        return False
+    if "snec 2026" in lower and "snec" not in article.title.lower():
+        return False
+    return True
+
+
+def _article_text_blob(article: SummarizedArticle) -> str:
+    kr = (
+        article.keyword_relevance
+        if _keyword_relevance_is_valid(article, article.keyword_relevance)
+        else ""
+    )
+    return " ".join(
+        [
+            article.title,
+            " ".join(article.ko_summary_steps[:3]),
+            kr,
+        ]
+    )
+
+
+def _text_mentions_power(text: str, top_keywords: list[str]) -> bool:
+    if _POWER_TEXT_HINT.search(text):
+        return True
+    return _kw_score(text, top_keywords) > 0
+
+
+def _classify_relevance(article: SummarizedArticle, top_keywords: list[str]) -> str:
+    """Classify how strongly an article relates to the top-3 tracking keywords."""
+    matched = {k.lower() for k in article.matched_keywords}
+    blob = _article_text_blob(article)
+    non_power_topic = bool(_NON_POWER_TITLE.search(article.title))
+
+    if non_power_topic:
+        if matched & _POWER_DIRECT_MATCHES:
+            return "direct"
+        if matched & (_POWER_INDIRECT_MATCHES | _TANGENTIAL_MATCHES):
+            return "weak"
+        return "none"
+
+    if matched & _POWER_DIRECT_MATCHES:
+        return "direct"
+    if _text_mentions_power(blob, top_keywords):
+        return "direct"
+    if _POWER_SUPPLY_HINT.search(blob):
+        return "direct"
+    if matched & _POWER_INDIRECT_MATCHES:
+        return "indirect"
+    if matched & _TANGENTIAL_MATCHES:
+        if _text_mentions_power(blob, top_keywords):
+            return "indirect"
+        return "weak"
+    if _text_mentions_power(blob, top_keywords):
+        return "indirect"
+    return "none"
+
+
+def _indirect_reason(article: SummarizedArticle) -> str:
+    matched = {k.lower() for k in article.matched_keywords}
+    blob = _article_text_blob(article)
+    if _POWER_SUPPLY_HINT.search(blob):
+        return "전력 공급·PPA"
+    if "data center" in matched:
+        return "데이터센터 전력 부하"
+    if "bess" in matched or "battery energy storage" in matched:
+        return "ESS·그리드 저장"
+    if "supply chain" in matched:
+        return "계통·스마트그리드용 반도체 공급"
+    if "ai infrastructure" in matched:
+        return "AI 인프라 전력 소비"
+    return "전력 수요·공급 파급"
+
+
+def _keyword_connection(
+    article: SummarizedArticle,
+    top_keywords: list[str],
+    level: str,
+) -> str:
+    kws = top_keywords[:3]
+    kw_label = " · ".join(kws)
+    if level == "direct":
+        hit = [kw for kw in kws if kw in _article_text_blob(article)]
+        target = ", ".join(hit[:2]) if hit else kw_label
+        return f"→ **[{target}]** 직접 연관"
+    if level == "indirect":
+        return f"→ **[{kw_label}]** 간접 연관 ({_indirect_reason(article)})"
+    return f"→ **[{kw_label}]** 관련성 낮음"
+
+
+def _relevance_trustworthy(
+    article: SummarizedArticle,
+    sentence: str,
+    level: str,
+    top_keywords: list[str],
+) -> bool:
+    if level == "direct":
+        return True
+    if _NON_POWER_TITLE.search(article.title):
+        matched = {k.lower() for k in article.matched_keywords}
+        if _text_mentions_power(sentence, top_keywords) and not (matched & _POWER_DIRECT_MATCHES):
+            return False
+    return True
+
+
+def _extract_fact_sentence(
+    article: SummarizedArticle,
+    top_keywords: list[str],
+    level: str,
+) -> str:
+    """Pick the best one-sentence fact for the executive summary.
+
+    Always prefers ko_summary_steps (actual article content) over
+    keyword_relevance, which may contain cross-article boilerplate.
+    Sentences must name their subject explicitly — deictic openers
+    ('이 프레임워크', '이는', '새로운 프레임워크') are skipped.
     """
-    for pattern, replacement in _HAMCHE_FIXES:
-        text = pattern.sub(replacement, text)
-    return text
+    anchors = _title_anchor_tokens(article.title)
+    ranked: list[tuple[tuple, str]] = []
+
+    for idx, raw in enumerate(article.ko_summary_steps):
+        cleaned = polish_korean(strip_cjk_from_korean(_strip_heading(raw)))
+        cleaned = re.sub(r"\[\d+\]\s*$", "", cleaned).strip()
+        if not cleaned or cleaned.startswith("(해석)"):
+            continue
+        for sentence in _split_sentences(cleaned):
+            if _is_vague(sentence):
+                continue
+            anchor_hits = sum(1 for a in anchors if a.lower() in sentence.lower())
+            sort_key = (
+                _has_deictic_subject(sentence) or _has_deictic_reference(sentence),
+                -anchor_hits,
+                -_kw_score(sentence, top_keywords),
+                _STEP_PREF.get(idx, 9),
+            )
+            ranked.append((sort_key, sentence))
+
+    ranked.sort(key=lambda x: x[0])
+    for _, best in ranked:
+        return normalize_korean_endings(best)
+
+    if article.llm_summary:
+        headline = re.sub(r"\s*Source:.*$", "", article.llm_summary, flags=re.IGNORECASE).strip()
+        if headline and not _is_vague(_first_sentence(headline)):
+            return normalize_korean_endings(_first_sentence(headline))
+    return ""
 
 
-def _to_hamche_sentences(text: str) -> str:
-    """Apply _to_hamche to every sentence within a multi-sentence string.
+def _exec_summary_item(
+    article: SummarizedArticle,
+    top_keywords: list[str],
+) -> tuple[str, str, str] | None:
+    """Return (fact, level_label, connection) or None if not relevant enough."""
+    level = _classify_relevance(article, top_keywords)
+    if level in ("none", "weak"):
+        return None
+    fact = _extract_fact_sentence(article, top_keywords, level)
+    if not fact:
+        return None
+    return fact, _RELEVANCE_LABEL[level], _keyword_connection(article, top_keywords, level)
 
-    Splits on sentence boundaries (. ! ? 。 followed by whitespace or string end),
-    normalizes each sentence, then rejoins.
-    """
-    parts = re.split(r"(?<=[.!?。])\s+", text.strip())
-    return " ".join(_to_hamche(part) for part in parts)
+
+def _build_daily_theme(
+    articles: list[SummarizedArticle],
+    top_keywords: list[str],
+) -> str:
+    levels = [_classify_relevance(a, top_keywords) for a in articles]
+    direct_n = levels.count("direct")
+    indirect_n = levels.count("indirect")
+    if direct_n >= 2 and indirect_n >= 1:
+        return (
+            "전력계통·송배전 직접 이슈와 데이터센터 전력 수요·공급이 동시에 부각되는 날"
+        )
+    if direct_n >= 1:
+        return "전력계통·파워그리드와 직접 연결된 기술·정책 이슈가 핵심인 날"
+    if indirect_n >= 2:
+        return "AI·데이터센터 확장이 전력 수요·그리드 부하로 이어지는 간접 신호가 다수인 날"
+    if levels.count("weak") >= 1:
+        return "추적 키워드와 직접 연관은 제한적이나, 데이터센터·인프라 확장의 간접 파급이 관찰되는 날"
+    return "기술·시장 동향"
 
 
 # Patterns that mark a sentence as too vague to display in the executive summary.
@@ -419,22 +658,100 @@ _VAGUE_PATTERNS = re.compile(
     # "우려가 커지고 있다" — generic concern without article specifics
     r"|우려가\s*(커지고|증가하고)\s*(있다|있음)"
     # "관련하여 … 강조됨" — relevance wrapper masquerading as conclusion
-    r"|(관련하여|관련한)\s*.{0,40}(강조됨|시사됨|제시됨)[.。]?$",
+    r"|(관련하여|관련한)\s*.{0,40}(강조됨|시사됨|제시됨)[.。]?$"
+    # Deictic / pronoun subjects — reader cannot tell what is meant without prior context
+    r"|^이러한\s"
+    r"|^이(?:는|가)\s"
+    r"|^이\s*(기술|솔루션|방식|접근|프레임워크|시스템|연구|논문|기사|프로젝트|메커니즘|벤치마크|개발|결과)(?:은|는|이|가|의|에)?\s"
+    r"|^해당\s*(기술|솔루션|방법|프레임워크|접근|분야|시스템)(?:은|는|이|가|의|에)?\s"
+    r"|^본\s*(연구|논문|기사|기술|솔루션|프레임워크)(?:은|는|이|가|의|에)?\s"
+    r"|^새로운\s*(프레임워크|접근(?:법)?|방법|시스템|모델)(?:은|는|이|가|의|에)?\s"
+    r"|^제안된\s*(프레임워크|시스템|방법|접근(?:법)?|모델)(?:은|는|이|가|의|에)?\s"
+    r"|^이\s+\S+\s*의\s*잠재"
+    r"|잠재적\s*시장\s*영향(?:은|이)\s*(?:크|상당)"
+    r"|^구체적인\s*시장\s*규모"
+    r"|,\s*이\s*(기술|솔루션|방식|접근|프레임워크)(?:에|은|는|이|가|의)?\s"
+    r"|,\s*이는\s",
     re.IGNORECASE,
 )
+
+# Standalone check for deictic subjects (used before length heuristics).
+_DEICTIC_SUBJECT_RE = re.compile(
+    r"^이(?:는|가)\s"
+    r"|^이\s+(?:프레임워크|기술|솔루션|방법|접근|시스템|연구|논문|기사|프로젝트|메커니즘|벤치마크|개발|결과|접근법)(?:은|는|이|가|의|에)?\s"
+    r"|^이러한\s"
+    r"|^해당\s"
+    r"|^본\s+(?:연구|논문|기사|기술|솔루션|프레임워크)\s"
+    r"|^새로운\s+(?:프레임워크|접근(?:법)?|방법|시스템|모델)(?:은|는|이|가|의|에)?\s"
+    r"|^제안된\s+(?:프레임워크|시스템|방법|접근(?:법)?|모델)(?:은|는|이|가|의|에)?\s",
+    re.IGNORECASE,
+)
+
+# Mid-sentence deictic references — subject unclear without prior context.
+_DEICTIC_REFERENCE_RE = re.compile(
+    r"(?<![가-힣A-Za-z])이\s+(?:프레임워크|기술|솔루션|방법|접근|시스템|연구|논문|메커니즘|벤치마크|프로젝트)(?:의|은|는|이|가|에)?\s"
+    r"|,\s*이는\s"
+    r"|이러한\s+(?:기술|솔루션|프레임워크|방법|과제|솔루션|워크로드)"
+    r"|해당\s+(?:기술|프레임워크|솔루션|방법|시스템)",
+    re.IGNORECASE,
+)
+
+
+def _has_deictic_reference(sentence: str) -> bool:
+    """True when the sentence refers to the subject via a deictic anywhere."""
+    return bool(_DEICTIC_REFERENCE_RE.search(sentence.strip()))
+
+
+_STEP_PREF = {1: 0, 3: 1, 0: 2, 2: 3, 4: 4}
+
+
+def _has_deictic_subject(sentence: str) -> bool:
+    """True when the sentence subject is a pronoun/deictic, not a named entity."""
+    s = sentence.strip()
+    if not _DEICTIC_SUBJECT_RE.search(s):
+        return False
+    # "제안된 Hierarchical Neural …" — proper name follows; keep.
+    if re.search(r"[A-Za-z][A-Za-z0-9+-]{4,}", s[:70]):
+        return False
+    return True
+
+
+def _min_informative_length(sentence: str) -> int:
+    """Shorter named-entity sentences may still be informative."""
+    if re.search(r"[A-Za-z][A-Za-z0-9+-]{4,}|\d{2,}", sentence):
+        return 32
+    if not _has_deictic_subject(sentence) and not _has_deictic_reference(sentence):
+        return 38
+    return 45
+
+
+def _split_sentences(text: str) -> list[str]:
+    parts = re.split(r"(?<=[.!?])\s+", text.strip())
+    out: list[str] = []
+    for raw in parts:
+        s = raw.strip()
+        if not s:
+            continue
+        if not s.endswith((".", "!", "?")):
+            s += "."
+        out.append(s)
+    return out
 
 
 def _is_vague(sentence: str) -> bool:
     """Return True if *sentence* is a generic, uninformative placeholder.
 
     A sentence is considered vague when it:
-    - Is shorter than 50 characters (too brief to be informative).
+    - Starts with a deictic subject ('이 프레임워크', '이는', …).
+    - Is shorter than the informative minimum (lower for named entities/numbers).
     - Matches one of the _VAGUE_PATTERNS (generic filler phrases).
     """
     s = sentence.strip()
-    if len(s) < 50:
+    if _has_deictic_subject(s) or _has_deictic_reference(s):
         return True
     if _VAGUE_PATTERNS.search(s):
+        return True
+    if len(s) < _min_informative_length(s):
         return True
     return False
 
@@ -458,133 +775,106 @@ def _best_from_relevance(keyword_relevance: str) -> str:
             continue
         candidate = s + ("." if not raw.endswith((".","!","?")) else "")
         if not _is_vague(candidate):
-            return candidate
+            return normalize_korean_endings(candidate)
     return ""
 
 
 def _one_liner(article: SummarizedArticle, top_keywords: list[str] | None = None) -> str:
-    """Extract the single most keyword-relevant sentence for the executive summary.
-
-    Priority:
-      1. keyword_relevance field — scan all sentences for the first specific,
-         non-vague one that mentions a tracked keyword.
-      2. Best-scoring ko_summary_step by top_keywords match count.  When the
-         LLM confirmed relevance (keyword_relevance is non-empty), articles whose
-         steps use synonymous vocabulary (e.g. '전력망' for '파워그리드') are also
-         included — keyword match is preferred but not strictly required.
-    """
+    """Extract the single most keyword-relevant sentence for the executive summary."""
     kws = top_keywords or []
-    # If the LLM already flagged this article as relevant, be lenient in the
-    # ko_summary_step fallback so synonymous vocab doesn't accidentally suppress it.
-    lm_confirmed = bool(article.keyword_relevance)
+    item = _exec_summary_item(article, kws)
+    if not item:
+        return ""
+    fact, _, connection = item
+    return f"{fact} {connection}"
 
-    def _emit(text: str, require_keyword: bool = True) -> str:
-        """Apply _first_sentence + _to_hamche; gate on keyword presence unless relaxed."""
-        out = _to_hamche(_first_sentence(text))
-        if not out:
-            return ""
-        if require_keyword and _kw_score(out, kws) == 0:
-            return ""
-        return out
 
-    # 1. LLM-generated keyword_relevance: scan sentences for one that is specific
-    #    AND explicitly mentions at least one tracked keyword after truncation.
-    if article.keyword_relevance:
-        kr = polish_korean(strip_cjk_from_korean(article.keyword_relevance)).strip()
-        kr = re.sub(r"\[\d+\]\s*$", "", kr).strip()
-        for raw in re.split(r"(?<=[.!?])\s+", kr):
-            s = raw.strip().rstrip(".")
-            if not s:
-                continue
-            candidate = s + ("." if not raw.endswith((".","!","?")) else "")
-            if _is_vague(candidate):
-                continue
-            result = _emit(candidate, require_keyword=True)
-            if result:
-                return result
+def _build_keyword_signals(
+    items: list[tuple[SummarizedArticle, str, str, str]],
+    top_keywords: list[str],
+) -> list[str]:
+    """Build up to 3 keyword-focused signals from direct/indirect items."""
+    signals: list[str] = []
+    kw_label = " · ".join(top_keywords[:3])
 
-    # 2. Score each ko_summary_step by keyword count.
-    #    When LLM confirmed relevance, include steps with score=0 as a fallback
-    #    so articles using synonymous vocab (전력망, 그리드 등) are not silently omitted.
-    steps = article.ko_summary_steps
-    _pref = {1: 0, 3: 1, 0: 2, 2: 3, 4: 4}
-
-    candidates: list[tuple[int, int, int, str]] = []
-    for idx, raw in enumerate(steps):
-        cleaned = polish_korean(strip_cjk_from_korean(_strip_heading(raw)))
-        cleaned = re.sub(r"\[\d+\]\s*$", "", cleaned).strip()
-        if not cleaned or cleaned.startswith("(해석)") or len(cleaned) <= 15:
+    for article, fact, level_label, connection in items:
+        if level_label not in ("직접", "간접"):
             continue
-        score = _kw_score(cleaned, kws)
-        if score > 0 or lm_confirmed:
-            candidates.append((-score, _pref.get(idx, 9), idx, cleaned))
+        bracket = re.search(r"\*\*\[(.+?)\]\*\*", connection)
+        kw_part = bracket.group(1) if bracket else kw_label
+        short_fact = fact[:120] + ("…" if len(fact) > 120 else "")
+        prefix = f"**[{kw_part}]**"
+        signals.append(f"- {prefix} {short_fact}")
+        if len(signals) >= 3:
+            break
 
-    if candidates:
-        candidates.sort()
-        for _, _, _, best in candidates:
-            # Relax keyword requirement when LLM confirmed relevance;
-            # but still drop vague sentences.
-            first = _first_sentence(best)
-            if _is_vague(first):
-                continue
-            result = _emit(best, require_keyword=not lm_confirmed)
-            if result:
-                return result
-
-    # No relevant content found → omit article from executive summary.
-    return ""
+    if not signals:
+        for article, fact, level_label, connection in items[:3]:
+            short_fact = fact[:120] + ("…" if len(fact) > 120 else "")
+            signals.append(f"- **[{kw_label}]** {short_fact}")
+    return signals
 
 
 def _build_executive_summary(
     articles: list[SummarizedArticle],
     top_keywords: list[str] | None = None,
+    article_slugs: dict[str, str] | None = None,
 ) -> list[str]:
-    """Build a concise executive summary covering every article at a glance.
-
-    Structure:
-      1. One-sentence synthesis (count + dominant theme).
-      2. Bullet per article — title + key insight in one line.
-      3. Notable signal + contradiction note.
-    """
-    # Top 3 most representative themes (first trend per article, deduplicated, capped)
-    top_themes = list(dict.fromkeys(t for a in articles for t in a.key_trends[:1]))[:3]
-    themes_str = ", ".join(top_themes) if top_themes else "기술·시장 동향"
+    """Build a concise executive summary with explicit keyword relevance."""
+    kws = top_keywords or []
+    kw_header = " · ".join(kws[:3]) if kws else "(미설정)"
+    theme = _build_daily_theme(articles, kws)
 
     sources = ", ".join(dict.fromkeys(a.source_name for a in articles[:3]))
     extra = f" 외 {len(articles) - 3}개 출처" if len(articles) > 3 else ""
 
-    synthesis = (
-        f"오늘 수집된 {len(articles)}건 ({sources}{extra}) — "
-        f"핵심 흐름: **{themes_str}**. 아래 항목별 1줄 요약으로 전체 내용을 파악할 것."
-    )
-
     lines = [
         "## 오늘의 요약 (Daily Executive Summary)",
         "",
-        synthesis,
+        f"**분석 기준 키워드 (상위 3개):** {kw_header}",
         "",
-        "**항목별 핵심 요약:**",
+        f"**오늘의 공통 흐름:** {theme}",
+        "",
+        f"오늘 수집 {len(articles)}건 ({sources}{extra})",
+        "",
+        "**항목별 핵심 요약 (키워드 연결 포함):**",
+        "",
+        "| 관련도 | 항목 | 한 줄 요약 |",
+        "|--------|------|-----------|",
     ]
 
-    included = 0
+    slugs = article_slugs or _build_item_slugs(articles)
+
+    ranked: list[tuple[int, SummarizedArticle, str, str, str]] = []
     for article in articles:
-        one = _one_liner(article, top_keywords)
-        if not one:
-            continue  # not relevant to tracked keywords — omit from executive summary
-        short_title = article.title[:55] + ("…" if len(article.title) > 55 else "")
-        lines.append(f"- **{short_title}**: {one}")
-        included += 1
+        item = _exec_summary_item(article, kws)
+        if not item:
+            continue
+        fact, level_label, connection = item
+        level_key = next(k for k, v in _RELEVANCE_LABEL.items() if v == level_label)
+        ranked.append((_RELEVANCE_ORDER[level_key], article, fact, level_label, connection))
 
-    skipped = len(articles) - included
+    ranked.sort(key=lambda row: (row[0], row[1].title))
+
+    included_items: list[tuple[SummarizedArticle, str, str, str]] = []
+    for _, article, fact, level_label, connection in ranked:
+        slug = slugs[article.url]
+        link = _item_summary_link(article, slug)
+        cell_fact = f"{fact} {connection}".replace("|", "\\|")
+        lines.append(f"| **{level_label}** | {link} | {cell_fact} |")
+        included_items.append((article, fact, level_label, connection))
+
+    skipped = len(articles) - len(included_items)
     if skipped:
-        lines.append(f"- *(이하 {skipped}건은 추적 키워드와 직접 관련성 없어 생략)*")
+        lines += [
+            "",
+            f"*(이하 {skipped}건은 관련성 낮음 또는 키워드 무관으로 요약에서 생략)*",
+        ]
 
-    all_trends = list(dict.fromkeys(t for a in articles for t in a.key_trends[:2]))[:4]
-    signal = ", ".join(all_trends) if all_trends else themes_str
-
+    lines += ["", "**눈여겨볼 신호 (키워드 관점):**"]
+    lines.extend(_build_keyword_signals(included_items, kws) or [f"- **[{kw_header}]** (해당 없음)"])
     lines += [
         "",
-        f"- **눈여겨볼 신호:** {signal}",
         "- **상충되는 정보:** (해당 없음)",
         "",
         "---",
@@ -598,21 +888,26 @@ def _build_item_block(
     index: int,
     log_date: date,
     top_keywords: list[str] | None,
+    slug: str,
 ) -> list[str]:
     material = _material_type(article)
     credibility = _credibility(article)
     tags = _infer_tags(article)
-    summary_lines = _build_summary_lines(article)
+    summary_lines = _build_summary_lines(article, top_keywords)
 
     note_parts: list[str] = []
     if top_keywords:
         note_parts.append(f"분석 키워드: {', '.join(top_keywords[:3])}")
+    level = _classify_relevance(article, top_keywords or [])
+    if level != "none":
+        note_parts.append(f"키워드 관련도: {_RELEVANCE_LABEL[level]}")
     if article.matched_keywords:
         note_parts.append(f"매칭: {', '.join(article.matched_keywords[:3])}")
     note = " · ".join(note_parts) if note_parts else ""
 
     lines = [
-        f"### {_time_label(article, index)} {article.title}",
+        _item_anchor_tag(slug),
+        _item_heading_md(article, index),
         "",
         f"- **자료유형:** {material}",
         f"- **출처:** {article.source_name}",
@@ -669,12 +964,17 @@ def _build_markdown(
     ]
 
     if articles:
-        lines += _build_executive_summary(articles, top_keywords)
+        article_slugs = _build_item_slugs(articles)
+        lines += _build_executive_summary(articles, top_keywords, article_slugs)
+    else:
+        article_slugs = {}
 
     lines += ["## 항목 기록", ""]
 
     for index, article in enumerate(articles, start=1):
-        lines += _build_item_block(article, index, log_date, top_keywords)
+        lines += _build_item_block(
+            article, index, log_date, top_keywords, article_slugs[article.url]
+        )
 
     lines += [
         "---",
