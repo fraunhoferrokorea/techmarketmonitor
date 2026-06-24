@@ -256,15 +256,12 @@ def _build_summary_lines(article: SummarizedArticle) -> list[str]:
         facts.append("원문 기준 핵심 사실을 추가 확인 필요")
 
     interpretation = ""
-    if article.key_trends:
+    if article.keyword_relevance:
+        best = _best_from_relevance(article.keyword_relevance)
+        if best:
+            interpretation = best
+    if not interpretation and article.key_trends:
         interpretation = f"{article.key_trends[0]} 흐름과 연결되는 시장 신호로 보임"
-    elif article.keyword_relevance:
-        text = polish_korean(article.keyword_relevance)
-        text = re.sub(r"\*\*[^*]+\*\*", "", text)
-        text = re.sub(r"\s+", " ", text).strip()
-        first_sentence = text.split(".")[0].strip()
-        if first_sentence and len(first_sentence) > 20:
-            interpretation = first_sentence
 
     if interpretation:
         facts.append(f"(해석) {interpretation}")
@@ -284,27 +281,159 @@ def _published_date(article: SummarizedArticle, fallback: date) -> str:
     return fallback.isoformat()
 
 
-def _one_liner(article: SummarizedArticle) -> str:
-    """Extract the single most informative sentence from an article for the executive summary.
+def _first_sentence(text: str, hard_limit: int = 280) -> str:
+    """Return the first complete sentence from *text*.
 
-    Priority: "시장 파급력" step (index 3) → "개요" step (index 0) → llm_summary headline.
-    Keeps the result under 130 characters so the summary stays scannable.
+    Always extracts only the first sentence (up to the first . ! ?),
+    even when the full text is shorter than *hard_limit*.
+    Falls back to a word-boundary truncation if no sentence end is found.
     """
-    steps = article.ko_summary_steps
-    for idx in (3, 0, 1, 2, 4):
-        if idx < len(steps):
-            cleaned = polish_korean(strip_cjk_from_korean(_strip_heading(steps[idx])))
-            cleaned = re.sub(r"\[\d+\]\s*$", "", cleaned).strip()
-            if cleaned and not cleaned.startswith("(해석)") and len(cleaned) > 15:
-                return cleaned[:130] + ("…" if len(cleaned) > 130 else "")
-    if article.llm_summary:
-        h = re.sub(r"\s*Source:.*$", "", article.llm_summary, flags=re.IGNORECASE).strip()
-        h = strip_cjk_from_korean(h)
-        return h[:130] + ("…" if len(h) > 130 else "")
+    text = text.strip()
+
+    # Always try to extract the first sentence
+    m = re.search(r"^(.+?[.!?])(?:\s|$)", text, re.DOTALL)
+    if m:
+        candidate = m.group(1).strip()
+        if len(candidate) >= 10:
+            if len(candidate) <= hard_limit:
+                return candidate
+            # Sentence itself is too long — truncate at word boundary
+            last_space = candidate[:hard_limit].rfind(" ")
+            if last_space > hard_limit * 0.6:
+                return candidate[:last_space].rstrip(",.;:") + "…"
+            return candidate[:hard_limit] + "…"
+
+    # No sentence boundary found — return full text or truncate
+    if len(text) <= hard_limit:
+        return text
+    last_space = text[:hard_limit].rfind(" ")
+    if last_space > hard_limit * 0.6:
+        return text[:last_space].rstrip(",.;:") + "…"
+    return text[:hard_limit] + "…"
+
+
+def _kw_score(text: str, keywords: list[str]) -> int:
+    """Count how many of *keywords* appear in *text* (case-insensitive)."""
+    t = text.lower()
+    return sum(1 for k in keywords if k.lower() in t)
+
+
+# Patterns that mark a sentence as too vague to display in the executive summary.
+# Compiled patterns for sentence-final -다체 → -함/임체 normalization.
+# Applied to the one-liner executive-summary bullets so the style is uniform.
+_HAMCHE_FIXES: list[tuple[re.Pattern, str]] = [
+    (re.compile(r"해야\s*한다([.。]?)$"), r"해야 함\1"),
+    (re.compile(r"([가-힣])한다([.。]?)$"), r"\1함\2"),
+    (re.compile(r"([가-힣])이다([.。]?)$"), r"\1임\2"),
+    (re.compile(r"([가-힣])있다([.。]?)$"), r"\1있음\2"),
+    (re.compile(r"([가-힣])없다([.。]?)$"), r"\1없음\2"),
+    (re.compile(r"([가-힣])된다([.。]?)$"), r"\1됨\2"),
+    (re.compile(r"([가-힣])보인다([.。]?)$"), r"\1보임\2"),
+    (re.compile(r"([가-힣])온다([.。]?)$"), r"\1옴\2"),
+]
+
+
+def _to_hamche(text: str) -> str:
+    """Normalize sentence-final Korean -다체 endings to -함/임체 (명사형 종결).
+
+    Applies only to the very end of the string so that mid-sentence
+    clauses ending in -다 (e.g. relative clauses) are not affected.
+    """
+    for pattern, replacement in _HAMCHE_FIXES:
+        text = pattern.sub(replacement, text)
+    return text
+
+
+_VAGUE_PATTERNS = re.compile(
+    r"관련(이|성이|된)\s*(있음|높음|깊음|있다|높다)[.。]?$"
+    r"|^이\s*기사는.{0,20}관련"
+    r"|관련성이\s*높은\s*내용을\s*담고"
+    r"|관련이\s*없는",
+    re.IGNORECASE,
+)
+
+
+def _is_vague(sentence: str) -> bool:
+    """Return True if *sentence* is a generic, uninformative placeholder."""
+    s = sentence.strip()
+    if len(s) < 45:
+        return True
+    if _VAGUE_PATTERNS.search(s):
+        return True
+    return False
+
+
+def _best_from_relevance(keyword_relevance: str) -> str:
+    """Return the first *specific* sentence from keyword_relevance text.
+
+    Splits on sentence-ending punctuation and skips vague sentences.
+    Returns empty string if nothing useful is found.
+    """
+    kr = polish_korean(strip_cjk_from_korean(keyword_relevance)).strip()
+    kr = re.sub(r"\[\d+\]\s*$", "", kr).strip()
+    if not kr:
+        return ""
+
+    # Split into individual sentences
+    raw_sentences = re.split(r"(?<=[.!?])\s+", kr)
+    for raw in raw_sentences:
+        s = raw.strip().rstrip(".")
+        if not s:
+            continue
+        candidate = s + ("." if not raw.endswith((".","!","?")) else "")
+        if not _is_vague(candidate):
+            return candidate
     return ""
 
 
-def _build_executive_summary(articles: list[SummarizedArticle]) -> list[str]:
+def _one_liner(article: SummarizedArticle, top_keywords: list[str] | None = None) -> str:
+    """Extract the single most keyword-relevant sentence for the executive summary.
+
+    Priority:
+      1. keyword_relevance field — scan all sentences for the first specific one.
+         Vague / generic sentences are skipped entirely.
+      2. Best-scoring ko_summary_step by top_keywords match count, then by
+         preferred index order (3 → 0 → 1 → 2 → 4).
+      3. llm_summary headline as last resort.
+    """
+    kws = top_keywords or []
+
+    # 1. LLM-generated keyword_relevance: find the first specific sentence
+    if article.keyword_relevance:
+        best = _best_from_relevance(article.keyword_relevance)
+        if best:
+            return _to_hamche(_first_sentence(best))
+
+    # 2. Pick the ko_summary_step most relevant to the tracked keywords
+    steps = article.ko_summary_steps
+    _pref = {3: 0, 0: 1, 1: 2, 2: 3, 4: 4}  # preferred index order
+
+    candidates: list[tuple[int, int, int, str]] = []  # (neg_score, pref, idx, text)
+    for idx, raw in enumerate(steps):
+        cleaned = polish_korean(strip_cjk_from_korean(_strip_heading(raw)))
+        cleaned = re.sub(r"\[\d+\]\s*$", "", cleaned).strip()
+        if not cleaned or cleaned.startswith("(해석)") or len(cleaned) <= 15:
+            continue
+        score = _kw_score(cleaned, kws)
+        candidates.append((-score, _pref.get(idx, 9), idx, cleaned))
+
+    if candidates:
+        candidates.sort()  # highest score first, then preferred index
+        best = candidates[0][3]
+        return _to_hamche(_first_sentence(best))
+
+    # 3. llm_summary headline
+    if article.llm_summary:
+        h = re.sub(r"\s*Source:.*$", "", article.llm_summary, flags=re.IGNORECASE).strip()
+        h = strip_cjk_from_korean(h)
+        return _to_hamche(_first_sentence(h))
+    return ""
+
+
+def _build_executive_summary(
+    articles: list[SummarizedArticle],
+    top_keywords: list[str] | None = None,
+) -> list[str]:
     """Build a concise executive summary covering every article at a glance.
 
     Structure:
@@ -333,7 +462,7 @@ def _build_executive_summary(articles: list[SummarizedArticle]) -> list[str]:
     ]
 
     for article in articles:
-        one = _one_liner(article)
+        one = _one_liner(article, top_keywords)
         short_title = article.title[:55] + ("…" if len(article.title) > 55 else "")
         if one:
             lines.append(f"- **{short_title}**: {one}")
@@ -429,8 +558,8 @@ def _build_markdown(
         "",
     ]
 
-    if len(articles) >= 2:
-        lines += _build_executive_summary(articles)
+    if articles:
+        lines += _build_executive_summary(articles, top_keywords)
 
     lines += ["## 항목 기록", ""]
 

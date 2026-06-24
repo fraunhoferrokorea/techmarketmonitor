@@ -23,6 +23,7 @@ _CJK_RE = re.compile(r"[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff]+")
 
 # Post-processing fixes for common LLM calques (longer patterns first).
 _KOREAN_PHRASE_FIXES: list[tuple[str, str]] = [
+    # Energy/grid calques
     (r"산업용\s*유연\s*부하\s*보유자", "산업용 수요조절이 가능한 시설·기업"),
     (r"상업용\s*유연\s*부하\s*보유자", "상업용 수요조절이 가능한 시설·기업"),
     (r"유연\s*부하\s*보유자", "수요조절 참여 기업·시설"),
@@ -31,6 +32,33 @@ _KOREAN_PHRASE_FIXES: list[tuple[str, str]] = [
     (r"유연\s*부하", "수요조절 가능 부하"),
     (r"유연\s*자원", "수요·공급 조절 자원"),
     (r"유연\s*전력", "조절 가능 전력"),
+    # Calques of English "underscores/highlights": "X를 강조한다/강조함"
+    # 사물·사건이 주어일 때 한국어에서 '강조하다'는 자연스럽지 않음.
+    (r"수요를\s*강조(?:한다|함)([.。]?)", r"수요가 이어지고 있음을 보여줌\1"),
+    (r"헌신을\s*강조(?:한다|함)([.。]?)", r"역량 강화 의지를 재확인함\1"),
+    (r"헌신을\s*강조(?:한다|함)", "역량 강화 의지를 재확인함"),
+    # Korean grammar errors: redundant topic/possessive markers
+    # e.g. "시장은의" → "시장의", "기업의은" → "기업은"
+    (r"([가-힣A-Za-z0-9]+)은의\s", r"\1의 "),
+    (r"([가-힣A-Za-z0-9]+)는의\s", r"\1의 "),
+    (r"([가-힣A-Za-z0-9]+)의은\s", r"\1은 "),
+    (r"([가-힣A-Za-z0-9]+)의는\s", r"\1는 "),
+    # Redundant copula: "~이다입니다" / "~됩니다" style leakage into -함 endings
+    (r"\s*입니다\.", "임."),
+    (r"\s*합니다\.", "함."),
+    (r"\s*됩니다\.", "됨."),
+    (r"\s*있습니다\.", "있음."),
+    (r"\s*없습니다\.", "없음."),
+    # Terminal -다 → -함/임 normalization (sentence-final -다체 → 명사형 종결)
+    # Longer / more-specific patterns first to avoid partial mismatches.
+    (r"해야\s*한다([.。]?)$", r"해야 함\1"),
+    (r"([가-힣])한다([.。]?)$", r"\1함\2"),
+    (r"([가-힣])이다([.。]?)$", r"\1임\2"),
+    (r"([가-힣])있다([.。]?)$", r"\1있음\2"),
+    (r"([가-힣])없다([.。]?)$", r"\1없음\2"),
+    (r"([가-힣])된다([.。]?)$", r"\1됨\2"),
+    (r"([가-힣])보인다([.。]?)$", r"\1보임\2"),
+    (r"([가-힣])온다([.。]?)$", r"\1옴\2"),
 ]
 
 SYSTEM_PROMPT = """You are a senior tech market intelligence analyst writing for a general audience. Your goal is MARKET RESEARCH — not just technology description. Every analysis must be accurate, clearly written, and easy to understand for someone without a technical background. Avoid jargon; if a technical term is unavoidable, explain it in one plain-language phrase.
@@ -87,6 +115,12 @@ CRITICAL KOREAN GENERATION RULES (반드시 준수):
   * 허용: "~이 발표함" 또는 "~을 발표함"
 - 번역 잉여 표현 남용 금지: '~에 대한', '~를 가짐', '~를 통한'.
 - 긴 영어 문장은 두 문장으로 분리해 명료하게 작성한다.
+- 'underscores / highlights'의 직역어 '강조하다' 금지: 영어 "this underscores X"·"this highlights X"를 "이는 X를 강조한다"로 번역하지 않는다. 한국어에서 사물·사건이 주어가 되어 '강조하다'를 쓰는 표현은 존재하지 않는다.
+  * 금지: "이는 지속적인 수요를 강조한다", "이는 그들의 헌신을 강조한다"
+  * 정답: "지속적인 수요가 이어지고 있음을 보여줌", "역량 강화 의지를 재확인함"
+- 'commitment / dedication'의 직역어 '헌신' 금지: 기업의 전략적 방향성·투자 의지는 '헌신'이 아닌 '의지', '전략 기조', '역량 강화 방향'으로 표현한다.
+  * 금지: "칩 제조 능력 강화에 대한 헌신을 강조한다"
+  * 정답: "칩 제조 역량 강화 의지를 재확인함"
 
 [3. 전문 용어 — 업계 표준 우선, 직역어 금지]
 - 확립된 업계 표준 용어를 그대로 사용한다. 영어 단어를 한국어 어절로 쪼개 번역하지 않는다.
