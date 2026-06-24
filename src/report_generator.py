@@ -18,6 +18,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 
 from src.config import PROJECT_ROOT, Settings
+from src.daily_report import monthly_credibility_distribution, prepare_logs_for_monthly
 
 logger = logging.getLogger(__name__)
 
@@ -25,19 +26,25 @@ CATEGORY_LABELS = {
     "tech_news": "Tech News",
     "academic": "Academic",
     "enterprise": "Enterprise",
+    "energy": "Energy",
+    "semiconductor": "Semiconductor",
+    "korean": "Korea",
 }
 
 CATEGORY_LABELS_KO = {
     "tech_news": "테크 뉴스",
     "academic": "학술",
     "enterprise": "기업",
+    "energy": "에너지",
+    "semiconductor": "반도체",
+    "korean": "한국",
 }
 
 _HEADER_BLUE = RGBColor(0x1F, 0x39, 0x64)
 _SUBTITLE_BLUE = RGBColor(0x44, 0x54, 0x6A)
 
 # ---------------------------------------------------------------------------
-# JSON prompt templates
+# JSON prompt templates – news-monitoring digest (daily article data)
 # ---------------------------------------------------------------------------
 
 _SCHEMA_JSON = """{
@@ -197,7 +204,7 @@ _SCHEMA_JSON = """{
   },
   "sec9": {
     "methodology": "Describe automated data collection: daily API pulls, keyword list and Boolean search strings, deduplication and relevance-scoring logic, monthly report generation process and QA.",
-    "quality": "Identify data gaps by source type; state confidence levels (High/Med/Low) for each major metric; document update frequency per source."
+    "quality": "Identify data gaps by source type; state source credibility (A/B only — C-grade sources excluded from monthly synthesis); document update frequency per source."
   }
 }"""
 
@@ -216,6 +223,11 @@ METRICS DASHBOARD RULES (never violate):
 • The "source" field must be the exact source name (e.g. "IEA", "Financial Times Tech") of the article containing that figure.
   Never use generic labels like "Gartner/IDC" or "KIET/KOTRA" unless those exact names appear in the articles.
 • TRL, patent filing country, and vendor market share must all be "N/A" unless explicitly stated in an article.
+
+SOURCE CREDIBILITY (monthly report only):
+• Each article has a pre-assigned credibility grade: A (high) or B (medium).
+• C-grade sources are excluded before monthly synthesis — do not reference or invent C-grade items.
+• When citing sources, you may note A/B grade where relevant; never use a C grade.
 
 monthly_headline / monthly_context RULES:
 • monthly_headline: The single most important event or trend this month in 1-2 sentences with specific figures.
@@ -403,7 +415,7 @@ _SCHEMA_JSON_KO = """{
   },
   "sec9": {
     "methodology": "자동화 데이터 수집 일정: Gartner·IDC·특허 DB 일일 API 수집; 키워드 목록·불리언 검색 문자열; 중복 제거·관련성 점수 로직; 월간 보고서 생성·QA 프로세스.",
-    "quality": "출처 유형별 데이터 격차 식별; 주요 지표별 신뢰도(높음/중간/낮음); 업데이트 주기별 표시."
+    "quality": "출처 유형별 데이터 격차 식별; 출처 신뢰도는 A(높음)/B(중간) 두 등급만 사용(C 등급은 월간 합성 전 제외); 업데이트 주기별 표시."
   }
 }"""
 
@@ -425,6 +437,11 @@ _PROMPT_KO = """당신은 프라운호퍼 연구소 한국 사무소의 기술 �
   "Gartner/IDC", "KIET/KOTRA" 등 기사에 없는 출처를 임의로 넣지 말라.
 • TRL, 특허 출원국, 시장점유율은 기사에 수치가 없으면 모두 N/A로 기재한다.
 • 한 지표에 여러 기사 출처가 있으면 쉼표로 구분해 기입한다 (예: "IEA, KEPCO").
+
+출처 신뢰도 (월간 보고서 전용):
+• 각 기사에는 사전 부여된 신뢰도 등급 A(높음) 또는 B(중간)만 존재한다.
+• C(참고) 등급 자료는 월간 합성 전에 제외되므로 언급하거나 만들어내지 말라.
+• 필요 시 A/B 등급을 명시할 수 있으나, C 등급은 절대 사용하지 말라.
 
 monthly_headline / monthly_context 작성 규칙:
 • monthly_headline: 이달 기사 전체에서 가장 중요한 단일 사건이나 흐름을 1~2문장으로 서술. 구체적 수치 포함.
@@ -592,6 +609,7 @@ class ReportGenerator:
                 "url": item["url"],
                 "source": item.get("source_name", item["category"]),
                 "category": item["category"],
+                "credibility": item.get("credibility_grade", "B"),
                 "summary": item.get("ko_summary", item["llm_summary"]) if lang == "ko" else item["llm_summary"],
                 "trends": item["key_trends"],
             }
@@ -698,6 +716,8 @@ class ReportGenerator:
             [
                 ("Technology Name", d.get("technology_name", "Tech Market Intelligence")),
                 ("Report Period", f"{year}-{month:02d}"),
+                ("Source Count", f"{len(logs)} articles"),
+                ("Source Credibility (A/B)", monthly_credibility_distribution(logs)),
                 ("Prepared by", "Fraunhofer Korea – Automated Monitoring System"),
                 ("Version", "v1.0"),
                 ("Classification", "Internal / Confidential"),
@@ -1178,13 +1198,14 @@ class ReportGenerator:
         accessed = date.today().isoformat()
         _add_table(
             document,
-            ["No.", "Source", "Title", "Date", "URL"],
+            ["No.", "Source", "Title", "Date", "Credibility", "URL"],
             [
                 [
                     f"[{i}]",
                     item.get("source_name", item.get("category", "Unknown")),
                     item["title"],
                     item["log_date"],
+                    item.get("credibility_grade", "B"),
                     item["url"],
                 ]
                 for i, item in enumerate(logs, start=1)
@@ -1193,16 +1214,17 @@ class ReportGenerator:
 
         # ── SOURCE INDEX ───────────────────────────────────────────────────
         document.add_heading("Source Index", level=1)
-        src_tbl = document.add_table(rows=1, cols=4)
+        src_tbl = document.add_table(rows=1, cols=5)
         src_tbl.style = "Light Grid Accent 1"
-        for i, h in enumerate(["Date", "Title", "Category", "Source URL"]):
+        for i, h in enumerate(["Date", "Title", "Category", "Credibility", "Source URL"]):
             _bold_cell(src_tbl.rows[0].cells[i], h)
         for item in logs:
             row = src_tbl.add_row().cells
             row[0].text = item["log_date"]
             row[1].text = item["title"]
             row[2].text = CATEGORY_LABELS.get(item["category"], item["category"])
-            _add_hyperlink(row[3].paragraphs[0], item["url"], item["url"])
+            row[3].text = item.get("credibility_grade", "B")
+            _add_hyperlink(row[4].paragraphs[0], item["url"], item["url"])
 
         document.add_paragraph(f"\n— End of Report — Generated {accessed}")
         return document
@@ -1221,6 +1243,8 @@ class ReportGenerator:
             [
                 ("기술명", d.get("technology_name", "기술 시장 인텔리전스")),
                 ("보고서 기간", f"{year}년 {month:02d}월"),
+                ("수집 항목", f"{len(logs)}건"),
+                ("신뢰도 분포 (A/B)", monthly_credibility_distribution(logs)),
                 ("작성자", "프라운호퍼 한국 – 자동 모니터링 시스템"),
                 ("버전", "v1.0"),
                 ("분류", "내부용 / 기밀"),
@@ -1701,13 +1725,14 @@ class ReportGenerator:
         accessed = date.today().isoformat()
         _add_table(
             document,
-            ["번호", "출처", "제목", "발행일", "URL"],
+            ["번호", "출처", "제목", "발행일", "신뢰도", "URL"],
             [
                 [
                     f"[{i}]",
                     item.get("source_name", item.get("category", "Unknown")),
                     item["title"],
                     item["log_date"],
+                    item.get("credibility_grade", "B"),
                     item["url"],
                 ]
                 for i, item in enumerate(logs, start=1)
@@ -1716,16 +1741,17 @@ class ReportGenerator:
 
         # ── 출처 색인 ─────────────────────────────────────────────────────
         document.add_heading("출처 색인 (Source Index)", level=1)
-        src_tbl = document.add_table(rows=1, cols=4)
+        src_tbl = document.add_table(rows=1, cols=5)
         src_tbl.style = "Light Grid Accent 1"
-        for i, h in enumerate(["날짜", "제목", "카테고리", "URL"]):
+        for i, h in enumerate(["날짜", "제목", "카테고리", "신뢰도", "URL"]):
             _bold_cell(src_tbl.rows[0].cells[i], h)
         for item in logs:
             row = src_tbl.add_row().cells
             row[0].text = item["log_date"]
             row[1].text = item["title"]
             row[2].text = CATEGORY_LABELS_KO.get(item["category"], item["category"])
-            _add_hyperlink(row[3].paragraphs[0], item["url"], item["url"])
+            row[3].text = item.get("credibility_grade", "B")
+            _add_hyperlink(row[4].paragraphs[0], item["url"], item["url"])
 
         document.add_paragraph(f"\n— 보고서 끝 — 생성일: {accessed}")
         return document
@@ -1741,8 +1767,14 @@ class ReportGenerator:
         logs: list[dict],
     ) -> Path:
         """Generate an English TMR Word document following the Fraunhofer template."""
-        structured = self._synthesize(year, month, logs, lang="en")
-        document = self._build_document(year, month, logs, structured)
+        monthly_logs, excluded = prepare_logs_for_monthly(logs)
+        if excluded:
+            logger.info("Excluded %d C-grade log(s) from monthly report", excluded)
+        if not monthly_logs:
+            raise ValueError("No A/B-grade logs available for monthly report generation.")
+
+        structured = self._synthesize(year, month, monthly_logs, lang="en")
+        document = self._build_document(year, month, monthly_logs, structured)
 
         output_path = self.output_dir / f"tech-market-report-{year}-{month:02d}.docx"
         document.save(output_path)
@@ -1756,8 +1788,14 @@ class ReportGenerator:
         logs: list[dict],
     ) -> Path:
         """Generate a Korean TMR Word document following the Fraunhofer template."""
-        structured = self._synthesize(year, month, logs, lang="ko")
-        document = self._build_document_ko(year, month, logs, structured)
+        monthly_logs, excluded = prepare_logs_for_monthly(logs)
+        if excluded:
+            logger.info("Excluded %d C-grade log(s) from monthly report", excluded)
+        if not monthly_logs:
+            raise ValueError("No A/B-grade logs available for monthly report generation.")
+
+        structured = self._synthesize(year, month, monthly_logs, lang="ko")
+        document = self._build_document_ko(year, month, monthly_logs, structured)
 
         output_path = self.output_dir / f"tech-market-report-{year}-{month:02d}-ko.docx"
         document.save(output_path)

@@ -1,16 +1,59 @@
 from __future__ import annotations
 
 import logging
-from datetime import date
+import os
+import re
+from collections import Counter
+from datetime import date, datetime
 from pathlib import Path
 
-from src.config import PROJECT_ROOT
 from src.models import SummarizedArticle
 from src.summarizer import polish_korean
 
 logger = logging.getLogger(__name__)
 
-_OUTPUT_BASE = PROJECT_ROOT / "output" / "daily"
+_OUTPUT_BASE = Path(__file__).resolve().parent.parent / "output" / "daily"
+
+_TIER1_NEWS = {"reuters", "bloomberg", "ap news", "associated press"}
+_TIER1_RESEARCH = {"gartner", "idc", "mckinsey", "statista"}
+_PEER_REVIEW_HINTS = {"ieee", "springer", "elsevier", "wiley", "nature", "science"}
+_PREPRINT_HINTS = {"arxiv", "biorxiv", "medrxiv", "ssrn"}
+_GOVERNMENT_HINTS = {
+    "motie",
+    "msit",
+    "kistep",
+    "iitp",
+    "kipo",
+    "europa.eu",
+    "ec.europa.eu",
+    "nist.gov",
+    "gov.uk",
+    ".go.kr",
+    ".gov",
+}
+
+_TAG_RULES: list[tuple[str, str]] = [
+    (r"invest|fund|series|valuation|펀딩|투자|유치", "#투자"),
+    (r"acqui|merger|m&a|합병|인수|제휴", "#M&A"),
+    (r"launch|release|출시|런칭|unveil", "#제품출시"),
+    (r"regulat|policy|법안|규제|standard|표준|compliance", "#규제"),
+    (r"market share|compet|경쟁|점유|vendor|leader", "#경쟁"),
+    (r"market size|cagr|revenue|billion|million|시장.?규모|성장률", "#시장수치"),
+    (r"risk|controvers|scandal|사고|논란|threat", "#리스크"),
+    (r"forecast|outlook|predict|전망|analyst|애널리스트", "#전문가전망"),
+    (r"research|study|paper|논문|experiment|method", "#논문"),
+    (r"r&d|technology|tech|기술|innovation|algorithm", "#기술"),
+    (r"company|enterprise|organi|workforce|실적|인력|전략", "#기업동향"),
+]
+
+_CATEGORY_MATERIAL_TYPE = {
+    "academic": "논문",
+    "tech_news": "기사",
+    "enterprise": "기사",
+    "energy": "기사",
+    "semiconductor": "기사",
+    "korean": "기사",
+}
 
 
 def save_daily_report(
@@ -18,8 +61,9 @@ def save_daily_report(
     articles: list[SummarizedArticle],
     output_dir: Path | None = None,
     top_keywords: list[str] | None = None,
+    recorder: str | None = None,
 ) -> Path | None:
-    """Build and write a Markdown daily report, returning the saved path (or None if no articles)."""
+    """Build and write a unified daily research log (Markdown)."""
     if not articles:
         logger.info("No articles to report for %s — skipping daily report", log_date)
         return None
@@ -27,173 +71,343 @@ def save_daily_report(
     out_dir = output_dir or _OUTPUT_BASE
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    report_path = out_dir / f"{log_date.isoformat()}_daily_report.md"
-    report_path.write_text(_build_markdown(log_date, articles, top_keywords), encoding="utf-8")
-    logger.info("Daily Markdown report saved → %s", report_path)
+    report_path = out_dir / f"daily_{log_date.isoformat()}.md"
+    report_path.write_text(
+        _build_markdown(log_date, articles, top_keywords, recorder),
+        encoding="utf-8",
+    )
+    logger.info("Daily research log saved → %s", report_path)
     return report_path
 
 
-def _cite(text: str, n: int) -> str:
-    """Append an IEEE-style in-text citation bracket to a text string."""
-    return f"{text.rstrip()} [{n}]"
+def _material_type(article: SummarizedArticle) -> str:
+    if article.category == "academic":
+        return "논문"
+    source = article.source_name.lower()
+    if any(h in source for h in _TIER1_RESEARCH):
+        return "보고서(시장조사)"
+    if any(h in source for h in _GOVERNMENT_HINTS) or any(h in article.url.lower() for h in _GOVERNMENT_HINTS):
+        return "공식발표(IR·정책)"
+    return _CATEGORY_MATERIAL_TYPE.get(article.category, "기사")
 
 
-def _build_summary_section(articles: list[SummarizedArticle]) -> list[str]:
-    """Build an executive summary block covering all articles."""
-    lines: list[str] = [
-        "## 📋 전체 요약",
+def _credibility(article: SummarizedArticle) -> str:
+    source = article.source_name.lower()
+    url = article.url.lower()
+    combined = f"{source} {url}"
+
+    if article.category == "academic":
+        if any(h in combined for h in _PREPRINT_HINTS):
+            return "B (프리프린트, 동료심사 전)"
+        if any(h in combined for h in _PEER_REVIEW_HINTS):
+            return "A"
+        return "B"
+
+    if any(name in combined for name in _TIER1_NEWS | _TIER1_RESEARCH):
+        return "A"
+    if any(h in combined for h in _GOVERNMENT_HINTS):
+        return "A"
+    if any(h in combined for h in _PREPRINT_HINTS):
+        return "B (프리프린트, 동료심사 전)"
+
+    enterprise_ir = {"press release", "ir.", "investor", "newsroom", "보도자료"}
+    if article.category == "enterprise" or any(h in combined for h in enterprise_ir):
+        return "B"
+
+    return "B"
+
+
+def _credibility_grade(credibility: str) -> str:
+    return credibility[0]
+
+
+_C_SOURCE_HINTS = {
+    "blogspot",
+    "wordpress.com",
+    "medium.com",
+    "substack.com",
+    "reddit.com",
+    "twitter.com",
+    "x.com",
+    "t.co",
+}
+
+
+def log_to_summarized_article(log: dict) -> SummarizedArticle:
+    """Reconstruct a SummarizedArticle from a stored daily log row."""
+    published_at = None
+    raw_published = log.get("published_at")
+    if raw_published:
+        try:
+            published_at = datetime.fromisoformat(str(raw_published))
+        except ValueError:
+            published_at = None
+
+    return SummarizedArticle(
+        title=log["title"],
+        url=log["url"],
+        source_name=log.get("source_name", ""),
+        category=log.get("category", "tech_news"),
+        published_at=published_at,
+        matched_keywords=list(log.get("matched_keywords") or []),
+        llm_summary=log.get("llm_summary", ""),
+        key_trends=list(log.get("key_trends") or []),
+        ko_summary_steps=list(log.get("ko_summary_steps") or []),
+        en_summary_steps=list(log.get("en_summary_steps") or []),
+    )
+
+
+def _is_c_grade_source(article: SummarizedArticle) -> bool:
+    combined = f"{article.source_name} {article.url}".lower()
+    return any(hint in combined for hint in _C_SOURCE_HINTS)
+
+
+def monthly_credibility_grade(log: dict) -> str | None:
+    """Return A or B for monthly reports; None if the source is C-grade."""
+    report_grade = log.get("report_credibility")
+    if report_grade:
+        if report_grade == "C":
+            return None
+        if report_grade in ("A", "B"):
+            return report_grade
+
+    article = log_to_summarized_article(log)
+    if _is_c_grade_source(article):
+        return None
+
+    grade = _credibility_grade(_credibility(article))
+    if grade == "C":
+        return None
+    return grade if grade in ("A", "B") else "B"
+
+
+def prepare_logs_for_monthly(logs: list[dict]) -> tuple[list[dict], int]:
+    """Keep only A/B-grade logs and attach ``credibility_grade`` to each entry."""
+    eligible: list[dict] = []
+    excluded = 0
+
+    for log in logs:
+        grade = monthly_credibility_grade(log)
+        if grade is None:
+            excluded += 1
+            continue
+        eligible.append({**log, "credibility_grade": grade})
+
+    return eligible, excluded
+
+
+def monthly_credibility_distribution(logs: list[dict]) -> str:
+    """Format monthly credibility counts using A/B only."""
+    counts = Counter(log.get("credibility_grade", "B") for log in logs)
+    return f"A {counts.get('A', 0)}건 / B {counts.get('B', 0)}건"
+
+
+def _infer_tags(article: SummarizedArticle) -> list[str]:
+    text = " ".join(
+        [
+            article.title,
+            article.llm_summary,
+            " ".join(article.key_trends),
+            " ".join(article.matched_keywords),
+            article.category,
+        ]
+    ).lower()
+
+    tags: list[str] = []
+    for pattern, tag in _TAG_RULES:
+        if re.search(pattern, text, re.IGNORECASE) and tag not in tags:
+            tags.append(tag)
+
+    if article.category == "academic" and "#논문" not in tags:
+        tags.insert(0, "#논문")
+    if not tags:
+        tags.append("#기술")
+    return tags[:4]
+
+
+def _strip_heading(text: str) -> str:
+    return re.sub(r"^\*\*[^*]+:\*\*\s*", "", text.strip())
+
+
+def _build_summary_lines(article: SummarizedArticle) -> list[str]:
+    steps = article.ko_summary_steps or article.en_summary_steps
+    facts: list[str] = []
+
+    for step in steps:
+        cleaned = polish_korean(_strip_heading(step))
+        cleaned = re.sub(r"\[\d+\]\s*$", "", cleaned).strip()
+        if cleaned and not cleaned.startswith("(해석)"):
+            facts.append(cleaned)
+        if len(facts) >= 3:
+            break
+
+    if len(facts) < 2 and article.llm_summary:
+        headline = re.sub(r"\s*Source:.*$", "", article.llm_summary, flags=re.IGNORECASE).strip()
+        if headline and headline not in facts:
+            facts.insert(0, headline)
+
+    while len(facts) < 2:
+        facts.append("원문 기준 핵심 사실을 추가 확인 필요")
+
+    interpretation = ""
+    if article.key_trends:
+        interpretation = f"{article.key_trends[0]} 흐름과 연결되는 시장 신호로 보임"
+    elif article.keyword_relevance:
+        text = polish_korean(article.keyword_relevance)
+        text = re.sub(r"\*\*[^*]+\*\*", "", text)
+        text = re.sub(r"\s+", " ", text).strip()
+        first_sentence = text.split(".")[0].strip()
+        if first_sentence and len(first_sentence) > 20:
+            interpretation = first_sentence
+
+    if interpretation:
+        facts.append(f"(해석) {interpretation}")
+
+    return facts[:5]
+
+
+def _time_label(article: SummarizedArticle, index: int) -> str:
+    if article.published_at:
+        return article.published_at.strftime("%H:%M")
+    return f"{index:02d}"
+
+
+def _published_date(article: SummarizedArticle, fallback: date) -> str:
+    if article.published_at:
+        return article.published_at.strftime("%Y-%m-%d")
+    return fallback.isoformat()
+
+
+def _build_executive_summary(articles: list[SummarizedArticle]) -> list[str]:
+    highlights: list[str] = []
+    for article in articles[:2]:
+        if article.ko_summary_steps:
+            highlights.append(polish_korean(_strip_heading(article.ko_summary_steps[0])))
+        elif article.llm_summary:
+            highlights.append(re.sub(r"\s*Source:.*$", "", article.llm_summary, flags=re.IGNORECASE).strip())
+
+    sources = ", ".join(dict.fromkeys(a.source_name for a in articles))
+    themes = ", ".join(dict.fromkeys(t for a in articles for t in a.key_trends[:1])) or "전력·그리드·에너지 인프라"
+    synthesis = (
+        f"오늘 수집된 {len(articles)}건({sources})은 {themes} 등을 중심으로 "
+        f"정책·투자·기술 동향이 같은 방향으로 수렴하는 흐름을 보여줌."
+    )
+
+    key_point = highlights[0] if highlights else "당일 핵심 이슈를 추가 확인 필요"
+    signal = (
+        ", ".join(t for a in articles for t in a.key_trends[:1])
+        or "단기 보도에서 반복되는 키워드 추적 필요"
+    )
+
+    return [
+        "## 오늘의 요약 (Daily Executive Summary)",
         "",
-    ]
-
-    # Article index table
-    lines += [
-        "| # | 제목 | 출처 | 카테고리 |",
-        "|---|------|------|----------|",
-    ]
-    for i, a in enumerate(articles, start=1):
-        lines.append(f"| [{i}] | {a.title} | {a.source_name} | {a.category} |")
-    lines.append("")
-
-    # Aggregated key trends (deduplicated, preserving order)
-    seen: set[str] = set()
-    all_trends: list[str] = []
-    for a in articles:
-        for t in a.key_trends:
-            if t not in seen:
-                seen.add(t)
-                all_trends.append(t)
-
-    if all_trends:
-        lines += ["### 🔍 주요 트렌드 종합", ""]
-        for trend in all_trends:
-            lines.append(f"- {trend}")
-        lines.append("")
-
-    # One-line overview per article
-    lines += ["### 📰 기사별 핵심 요점", ""]
-    for i, a in enumerate(articles, start=1):
-        if a.ko_summary_steps:
-            first_step = polish_korean(a.ko_summary_steps[0])
-        elif a.en_summary_steps:
-            first_step = a.en_summary_steps[0]
-        else:
-            first_step = None
-        if first_step:
-            lines.append(f"**[{i}]** {first_step}")
-        else:
-            lines.append(f"**[{i}]** {a.llm_summary[:200]}…" if len(a.llm_summary) > 200 else f"**[{i}]** {a.llm_summary}")
-        lines.append("")
-
-    lines += ["---", ""]
-    return lines
-
-
-def _build_markdown(log_date: date, articles: list[SummarizedArticle], top_keywords: list[str] | None = None) -> str:
-    lines: list[str] = []
-    today_str = log_date.isoformat()
-
-    # ── Header ──────────────────────────────────────────────────────────────
-    lines += [
-        f"# {log_date.year}년 {log_date.month:02d}월 기술 시장 조사",
+        synthesis,
         "",
-        f"| 항목 | 내용 |",
-        f"|------|------|",
-        f"| **날짜** | {log_date.isoformat()} |",
-        f"| **총 요약 기사 수** | {len(articles)}건 |",
+        f"- **오늘의 핵심:** {key_point}",
+        f"- **눈여겨볼 신호:** {signal}",
+        "- **상충되는 정보:** (해당 없음)",
         "",
         "---",
         "",
     ]
 
-    # ── Executive summary ────────────────────────────────────────────────────
-    lines += _build_summary_section(articles)
+
+def _build_item_block(
+    article: SummarizedArticle,
+    index: int,
+    log_date: date,
+    top_keywords: list[str] | None,
+) -> list[str]:
+    material = _material_type(article)
+    credibility = _credibility(article)
+    tags = _infer_tags(article)
+    summary_lines = _build_summary_lines(article)
+
+    note_parts: list[str] = []
+    if top_keywords:
+        note_parts.append(f"분석 키워드: {', '.join(top_keywords[:3])}")
+    if article.matched_keywords:
+        note_parts.append(f"매칭: {', '.join(article.matched_keywords[:3])}")
+    note = " · ".join(note_parts) if note_parts else ""
+
+    lines = [
+        f"### {_time_label(article, index)} {article.title}",
+        "",
+        f"- **자료유형:** {material}",
+        f"- **출처:** {article.source_name}",
+        f"- **저자/발행기관:** {article.source_name}",
+        f"- **발행일:** {_published_date(article, log_date)}",
+        f"- **링크/DOI:** {article.url}",
+        "- **요약 (3~5줄):**",
+    ]
+    for line in summary_lines:
+        lines.append(f"  - {line}")
+    lines += [
+        f"- **신뢰도:** {credibility}",
+        f"- **태그:** {' '.join(tags)}",
+    ]
+    if note:
+        lines.append(f"- **비고:** {note}")
+    lines.append("")
+    return lines
+
+
+def _build_markdown(
+    log_date: date,
+    articles: list[SummarizedArticle],
+    top_keywords: list[str] | None,
+    recorder: str | None,
+) -> str:
+    paper_count = sum(1 for a in articles if _material_type(a) == "논문")
+    article_count = len(articles) - paper_count
+
+    cred_counts = Counter(_credibility_grade(_credibility(a)) for a in articles)
+    author = recorder or os.getenv("DAILY_LOG_RECORDER", "Tech Market Monitor (auto)")
+
+    lines: list[str] = [
+        "# 데일리 리서치 로그",
+        "",
+        f"날짜: {log_date.isoformat()}",
+        f"기록자: {author}",
+        f"총 항목 수: {len(articles)}건 (기사 {article_count} / 논문 {paper_count})",
+        f"신뢰도 분포: A {cred_counts.get('A', 0)}건 / B {cred_counts.get('B', 0)}건 / C {cred_counts.get('C', 0)}건",
+        "",
+    ]
+
+    if len(articles) >= 2:
+        lines += _build_executive_summary(articles)
+
+    lines += ["## 항목 기록", ""]
 
     for index, article in enumerate(articles, start=1):
-        # ── Article heading ────────────────────────────────────────────────
-        lines.append(f"## {index}. {article.title}")
-        lines.append("")
-        lines.append(f"> 🔗 [{article.url}]({article.url})")
-        lines.append("")
+        lines += _build_item_block(article, index, log_date, top_keywords)
 
-        # ── Metadata table ────────────────────────────────────────────────
-        pub = (
-            article.published_at.strftime("%Y-%m-%d %H:%M")
-            if article.published_at
-            else "N/A"
-        )
-        kw_badges = " ".join(f"`{k}`" for k in article.matched_keywords)
-        lines += [
-            "| 항목 | 내용 |",
-            "|------|------|",
-            f"| **출처** | {article.source_name} |",
-            f"| **카테고리** | {article.category} |",
-            f"| **발행일** | {pub} |",
-            f"| **매칭 키워드** | {kw_badges} |",
-            "",
-        ]
-
-        # ── English summary ───────────────────────────────────────────────
-        lines += [
-            "### 🇬🇧 English Summary",
-            "",
-        ]
-        if article.en_summary_steps:
-            for step in article.en_summary_steps:
-                lines.append(f"> {_cite(step, index)}")
-                lines.append("")
-        else:
-            lines += [f"> {_cite(article.llm_summary, index)}", ""]
-
-        # ── Korean summary ────────────────────────────────────────────────
-        lines += [
-            "### 🇰🇷 한국어 요약",
-            "",
-        ]
-        if article.ko_summary_steps:
-            for step in article.ko_summary_steps:
-                lines.append(f"> {_cite(polish_korean(step), index)}")
-                lines.append("")
-        else:
-            lines += ["> *(한국어 요약을 생성하지 못했습니다.)*", ""]
-
-        # ── Key trends ────────────────────────────────────────────────────
-        if article.key_trends:
-            lines += ["### 📊 Key Trends", ""]
-            for trend in article.key_trends:
-                lines.append(f"- {trend}")
-            lines.append("")
-
-        # ── Keyword relevance (top 3 from keywords.txt) ──────────────────
-        top_kw = (top_keywords or [])[:3]
-        kw_badges_top = " ".join(f"`{k}`" for k in top_kw) if top_kw else ""
-        header_line = f"**분석 기준 키워드 (파일 상위 3개): {kw_badges_top}**" if kw_badges_top else "**분석 기준 키워드**"
-        lines += [
-            "---",
-            "",
-            "### 🔑 키워드 관련성 및 시장적 의미",
-            "",
-            header_line,
-            "",
-        ]
-        if article.keyword_relevance:
-            lines.append(_cite(polish_korean(article.keyword_relevance), index))
-        else:
-            lines.append("*(키워드 관련성 설명을 생성하지 못했습니다.)*")
-        lines.append("")
-
-        lines += ["---", ""]
-
-    # ── References section ────────────────────────────────────────────────
-    lines += ["## 참고문헌 (References)", ""]
-    for i, article in enumerate(articles, start=1):
-        pub_date = (
-            article.published_at.strftime("%Y-%m-%d") if article.published_at else "n.d."
-        )
-        lines.append(
-            f'[{i}] {article.source_name}, "{article.title}," '
-            f"{article.source_name}, {pub_date}. "
-            f"[Online]. Available: {article.url} [Accessed: {today_str}]."
-        )
-    lines.append("")
+    lines += [
+        "---",
+        "",
+        "## 태그 분류체계 (월간 보고서 챕터와 매칭)",
+        "",
+        "| 태그 | 의미 |",
+        "|------|------|",
+        "| #기술 | 신기술, R&D, 기술 발표 |",
+        "| #논문 | 학술 연구 결과 (성능, 실험, 방법론) |",
+        "| #투자 | 투자 라운드, 밸류에이션, 펀딩 |",
+        "| #M&A | 인수합병, 전략적 제휴 |",
+        "| #제품출시 | 신제품, 서비스 런칭 |",
+        "| #기업동향 | 조직, 인력, 실적, 전략 |",
+        "| #규제 | 법안, 정책, 표준 |",
+        "| #경쟁 | 경쟁사 비교, 점유율, 포지셔닝 |",
+        "| #시장수치 | 시장규모/성장률 추정치 |",
+        "| #리스크 | 사고, 논란, 부정적 전망 |",
+        "| #전문가전망 | 애널리스트/전문가 예측 |",
+        "",
+        "## 신뢰도 등급 기준",
+        "",
+        "- **A (높음):** 피어리뷰 학술지 논문, 1차 보도(공식발표 인용), Tier-1 통신사(Reuters/Bloomberg/AP), 정부·국제기구 통계, Tier-1 시장조사기관(Gartner/IDC/McKinsey)",
+        "- **B (중간):** 프리프린트(arXiv 등 동료심사 전), 업계 전문매체, 2차 인용 보도, 기업 자체 발표(IR/보도자료)",
+        "- **C (참고):** 익명 소스, 추측성 기사, 단순 재가공 콘텐츠, 미검증 블로그",
+        "",
+    ]
 
     return "\n".join(lines)

@@ -10,6 +10,7 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.interval import IntervalTrigger
 
+from src.catchup import run_daily_catchup
 from src.config import load_settings
 from src.monthly import run_monthly_report
 from src.pipeline import run_daily_monitor
@@ -25,6 +26,16 @@ def _configure_logging(level: str) -> None:
 @click.group()
 def cli() -> None:
     """Tech Market Intelligence Monitor CLI."""
+
+
+@cli.command("daily-catchup")
+def daily_catchup_cmd() -> None:
+    """Run daily pipeline for every missing report through today (KST)."""
+    settings = load_settings()
+    _configure_logging(settings.log_level)
+
+    results = run_daily_catchup(settings=settings)
+    click.echo(json.dumps(results, indent=2))
 
 
 @cli.command("daily")
@@ -49,7 +60,7 @@ def daily_cmd(run_date: datetime | None) -> None:
     help="Keep daily markdown files after report generation.",
 )
 def monthly_cmd(year: int | None, month: int | None, no_cleanup: bool) -> None:
-    """Aggregate daily logs, generate a monthly Word report, and delete daily files."""
+    """Aggregate daily markdown reports, generate a monthly Word report, and delete daily files."""
     settings = load_settings()
     _configure_logging(settings.log_level)
 
@@ -73,8 +84,8 @@ def schedule_cmd(daily_hour: int, monthly_day: str) -> None:
     scheduler = BlockingScheduler()
 
     def daily_job() -> None:
-        result = run_daily_monitor(settings=settings)
-        logging.getLogger(__name__).info("Daily job complete: %s", result)
+        results = run_daily_catchup(settings=settings)
+        logging.getLogger(__name__).info("Daily catch-up complete: %s", results)
 
     def monthly_job() -> None:
         today = date.today()

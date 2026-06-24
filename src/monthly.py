@@ -5,8 +5,9 @@ from datetime import date
 from pathlib import Path
 
 from src.config import PROJECT_ROOT, load_settings
+from src.daily_markdown_loader import load_logs_from_daily_markdown
+from src.daily_report import prepare_logs_for_monthly
 from src.report_generator import ReportGenerator
-from src.storage import DailyLogStore
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +24,7 @@ def _delete_daily_reports(year: int, month: int) -> list[str]:
     if not _DAILY_OUTPUT_DIR.exists():
         return deleted
 
-    for path in sorted(_DAILY_OUTPUT_DIR.glob(f"{prefix}*_daily_report.md")):
+    for path in sorted(_DAILY_OUTPUT_DIR.glob(f"daily_{prefix}*.md")):
         try:
             path.unlink()
             deleted.append(path.name)
@@ -43,8 +44,14 @@ def run_monthly_report(
     month = month or today.month
 
     settings = load_settings()
-    store = DailyLogStore(settings.database_path)
-    logs = store.get_logs_for_month(year, month)
+    logs = load_logs_from_daily_markdown(year, month, _DAILY_OUTPUT_DIR)
+    source_files = sorted(
+        {
+            f"daily_{entry['log_date']}.md"
+            for entry in logs
+            if entry.get("log_date")
+        }
+    )
 
     if not logs:
         return {
@@ -52,12 +59,35 @@ def run_monthly_report(
             "month": month,
             "entries": 0,
             "report_path": None,
-            "message": "No daily logs found for this month.",
+            "source": "daily_markdown",
+            "source_files": [],
+            "message": "No daily markdown reports found for this month.",
+        }
+
+    monthly_logs, excluded_c = prepare_logs_for_monthly(logs)
+    if excluded_c:
+        logger.info(
+            "Excluded %d C-grade log(s) from monthly report for %04d-%02d",
+            excluded_c,
+            year,
+            month,
+        )
+
+    if not monthly_logs:
+        return {
+            "year": year,
+            "month": month,
+            "entries": 0,
+            "excluded_c_grade": excluded_c,
+            "report_path": None,
+            "source": "daily_markdown",
+            "source_files": source_files,
+            "message": "No A/B-grade entries found in daily markdown reports for this month.",
         }
 
     generator = ReportGenerator(settings)
-    report_path = generator.generate_monthly_report(year, month, logs)
-    report_path_ko = generator.generate_monthly_report_ko(year, month, logs)
+    report_path = generator.generate_monthly_report(year, month, monthly_logs)
+    report_path_ko = generator.generate_monthly_report_ko(year, month, monthly_logs)
 
     deleted_files: list[str] = []
     if cleanup_daily:
@@ -69,7 +99,10 @@ def run_monthly_report(
     return {
         "year": year,
         "month": month,
-        "entries": len(logs),
+        "entries": len(monthly_logs),
+        "excluded_c_grade": excluded_c,
+        "source": "daily_markdown",
+        "source_files": source_files,
         "report_path": str(report_path),
         "report_path_ko": str(report_path_ko),
         "deleted_daily_reports": deleted_files,

@@ -1,0 +1,1175 @@
+﻿=== PARAGRAPHS ===
+[1] Style=None | Technology Market Research Report
+[2] Style=None | Fraunhofer Institute | Korea Office
+[4] Style=None | Technology Name:   [Enter technology name]
+[5] Style=None | Report Period:   [e.g., Q2 2026 ??Q1 2027]
+[6] Style=None | Prepared by:   [Analyst / Author Name]
+[7] Style=None | Department:   [Department / Team Name]
+[8] Style=None | Version:   [e.g., v1.0 ??Draft]
+[9] Style=None | Classification:   Internal / Confidential
+[11] Style=Heading 1 | SECTION 1 ??EXECUTIVE BRIEF
+[12] Style=Heading 2 | 1.1 Technology Snapshot
+[13] Style=None | [Provide a 3-sentence plain-language description of what the technology is, how it works at a high level, and why it matters right now. Lead with the "so what" before the technical detail. Source cont
+[14] Style=Heading 2 | 1.2 Key Findings
+[15] Style=List Paragraph | [Market signal: e.g., Global market grew X% YoY, driven by ??(Source: IDC / Gartner)]
+[16] Style=List Paragraph | [Competitive signal: e.g., Top 3 vendors hold X% of revenue; consolidation expected ??(Source: IDC MarketScape)]
+[17] Style=List Paragraph | [Korea-specific signal: e.g., Korean government allocated ??X]B under IITP programme ??(Source: IITP / KOTRA)]
+[18] Style=List Paragraph | [Risk signal: e.g., EU regulatory uncertainty may delay deployment by [X] quarters ??(Source: Gartner / EC)]
+[19] Style=Heading 2 | 1.3 Metrics Dashboard
+[21] Style=Heading 1 | SECTION 2 ??TECHNOLOGY PROFILE
+[22] Style=Heading 2 | 2.1 Technology Definition & Principles
+[23] Style=None | [Describe the technology: core function, underlying principles, key variants or sub-technologies. Cite primary sources: IEEE Xplore, Fraunhofer-Publica, ETRI, arXiv.]
+[24] Style=Heading 2 | 2.2 Technology Readiness Level (TRL)
+[26] Style=Heading 2 | 2.3 Technology Differentiation
+[27] Style=None | [Explain what makes this technology distinct versus alternatives: performance envelope, cost structure, IP position, maturity level, and Korea adoption trajectory.]
+[29] Style=Heading 2 | 2.4 Patent Landscape
+[30] Style=None | Sources: Espacenet (EPO), KIPO, DPMA, JPO, CNIPA, Google Patents
+[32] Style=Heading 1 | SECTION 3 ??MARKET ANALYSIS
+[33] Style=Heading 2 | 3.1 Market Overview
+[34] Style=None | [Global market size ($XB), CAGR, historical trajectory (last 5 years), and forecast horizon (5??0 years). Sources: Gartner, IDC, Statista, McKinsey Global Institute, KIET, KOTRA, ADB.]
+[35] Style=Heading 2 | 3.2 Market Segmentation
+[37] Style=Heading 2 | 3.3 Regional Deep-Dive
+[39] Style=Heading 2 | 3.4 Market Drivers & Barriers
+[41] Style=Heading 1 | SECTION 4 ??COMPETITIVE LANDSCAPE
+[42] Style=Heading 2 | 4.1 Vendor Mapping
+[44] Style=Heading 2 | 4.2 Korea-Specific Competitive Context
+[45] Style=None | [Describe the Korean competitive landscape: government-backed players (ETRI, KAIST, POSTECH), chaebol involvement (Samsung, SK, LG, Hyundai), and the startup ecosystem. Sources: KOTRA, KIET, KISDI.]
+[46] Style=Heading 2 | 4.3 SWOT Analysis
+[48] Style=Heading 2 | 4.4 Porter's Five Forces Summary
+[50] Style=Heading 1 | SECTION 5 ??INNOVATION & R&D LANDSCAPE
+[51] Style=Heading 2 | 5.1 Academic Publication Trends
+[52] Style=None | Sources: IEEE Xplore, ACM Digital Library, arXiv, Springer/Elsevier, ETRI Journal, KISTI
+[54] Style=Heading 2 | 5.2 R&D Funding Programs
+[56] Style=Heading 2 | 5.3 Emerging Research Directions
+[57] Style=List Paragraph | [Next frontier topic 1: an emerging research area at the intersection of this technology with AI, materials science, or another discipline. Cite: arXiv / IEEE Xplore.]
+[58] Style=List Paragraph | [Next frontier topic 2: a convergence trend or cross-sector application gaining traction in peer-reviewed literature.]
+[59] Style=List Paragraph | [Next frontier topic 3: a white-space R&D opportunity relevant to Fraunhofer Korea's applied research mandate.]
+[61] Style=Heading 1 | SECTION 6 ??REGULATORY & POLICY ENVIRONMENT
+[62] Style=Heading 2 | 6.1 Policy Tracker
+[64] Style=Heading 2 | 6.2 Compliance Considerations
+[65] Style=List Paragraph | [Data governance: applicable data localisation, privacy, or cross-border data transfer requirements relevant to this technology.]
+[66] Style=List Paragraph | [Intellectual property: IP licensing obligations, standard-essential patent considerations, or open-source compliance requirements.]
+[67] Style=List Paragraph | [Export control: dual-use classifications, Wassenaar Arrangement items, or Korea / EU export restrictions that may apply.]
+[69] Style=Heading 1 | SECTION 7 ??TECHNOLOGY FORECAST
+[70] Style=Heading 2 | 7.1 Gartner Hype Cycle Position
+[71] Style=None | Current Phase:
+[72] Style=None | [Innovation Trigger / Peak of Inflated Expectations / Trough of Disillusionment / Slope of Enlightenment / Plateau of Productivity]
+[73] Style=None | Time to Plateau:
+[74] Style=None | [X] years
+[75] Style=None | Source:
+[76] Style=None | Gartner [Year] Hype Cycle for [Category]
+[77] Style=Heading 2 | 7.2 IDC-Style 5-Year Predictions
+[79] Style=Heading 2 | 7.3 Technology Roadmap
+[81] Style=Heading 1 | SECTION 8 ??STRATEGIC IMPLICATIONS FOR FRAUNHOFER KOREA
+[82] Style=Heading 2 | 8.1 Opportunity Assessment
+[84] Style=Heading 2 | 8.2 Risk Register
+[86] Style=Heading 2 | 8.3 Recommended Actions (Next 90 Days)
+[87] Style=List Paragraph | [Action 1: Schedule a structured technology briefing with ETRI / KISTEP to align on current TRL and co-funding opportunities under the IITP programme.]
+[88] Style=List Paragraph | [Action 2: Initiate a patent freedom-to-operate analysis via Espacenet and KIPO to identify white-space areas for Fraunhofer IP development.]
+[89] Style=List Paragraph | [Action 3: Draft a Horizon Europe partnership proposal targeting at least one Korean research university or chaebol R&D lab as a named consortium member.]
+[91] Style=Heading 1 | SECTION 9 ??SOURCES & METHODOLOGY
+[92] Style=Heading 2 | 9.1 Source Registry
+[93] Style=None | Academic & Research:
+[94] Style=List Paragraph | IEEE Xplore ??ieee.org/xplore
+[95] Style=List Paragraph | ACM Digital Library ??dl.acm.org
+[96] Style=List Paragraph | arXiv ??arxiv.org
+[97] Style=List Paragraph | Fraunhofer-Publica ??publica.fraunhofer.de
+[98] Style=List Paragraph | ETRI Journal ??etri.re.kr
+[99] Style=List Paragraph | KISTI ??kisti.re.kr
+[100] Style=List Paragraph | Springer / Elsevier / Wiley ??via institutional access
+[102] Style=None | Market Intelligence:
+[103] Style=List Paragraph | Gartner ??gartner.com
+[104] Style=List Paragraph | IDC ??idc.com
+[105] Style=List Paragraph | Statista ??statista.com
+[106] Style=List Paragraph | McKinsey Global Institute ??mckinsey.com/mgi
+[107] Style=List Paragraph | KIET ??kiet.re.kr
+[108] Style=List Paragraph | KOTRA ??kotra.or.kr
+[109] Style=List Paragraph | KISDI ??kisdi.re.kr
+[110] Style=List Paragraph | ADB ??adb.org
+[111] Style=List Paragraph | OECD iLibrary ??oecd-ilibrary.org
+[112] Style=List Paragraph | Eurostat ??ec.europa.eu/eurostat
+[113] Style=List Paragraph | Destatis ??destatis.de
+[114] Style=List Paragraph | KOSTAT ??kostat.go.kr
+[116] Style=None | Patent & IP:
+[117] Style=List Paragraph | Espacenet (EPO) ??espacenet.epo.org
+[118] Style=List Paragraph | KIPO ??kipo.go.kr
+[119] Style=List Paragraph | DPMA ??dpma.de
+[120] Style=List Paragraph | JPO ??j-platpat.inpit.go.jp
+[121] Style=List Paragraph | CNIPA ??cnipa.gov.cn
+[122] Style=List Paragraph | Google Patents ??patents.google.com
+[124] Style=None | Government & Policy:
+[125] Style=List Paragraph | EU Commission ??ec.europa.eu
+[126] Style=List Paragraph | BMBF ??bmbf.de
+[127] Style=List Paragraph | MOTIE ??motie.go.kr
+[128] Style=List Paragraph | MSIT ??msit.go.kr
+[129] Style=List Paragraph | KISTEP ??kistep.re.kr
+[130] Style=List Paragraph | IITP ??iitp.kr
+[131] Style=List Paragraph | NIST ??nist.gov
+[132] Style=List Paragraph | IEA ??iea.org
+[133] Style=List Paragraph | NEDO ??nedo.go.jp
+[134] Style=List Paragraph | METI ??meti.go.jp
+[135] Style=List Paragraph | APEC ??apec.org
+[136] Style=List Paragraph | NITI Aayog ??niti.gov.in
+[137] Style=List Paragraph | EDB Singapore ??edb.gov.sg
+[139] Style=Heading 2 | 9.2 Automated Monitoring Methodology
+[140] Style=None | [Describe the automated data collection schedule: daily API pulls from Gartner, IDC, and patent databases; keyword list and Boolean search strings; deduplication and relevance-scoring logic; monthly r
+[141] Style=Heading 2 | 9.3 Data Quality & Limitations
+[142] Style=None | [Identify known data gaps by source type (e.g., Korean SME revenue data has limited public availability). State confidence levels (High / Medium / Low) for each major metric. Document update frequency
+[144] Style=None | ??End of Report ??
+[147] Style=None | 湲곗닠 ?쒖옣 議곗궗 蹂닿퀬??
+[148] Style=None | ?꾨씪?댄샇???곌뎄??| ?쒓뎅 ?щТ??
+[150] Style=None | 湲곗닠紐?   [湲곗닠紐??낅젰]
+[151] Style=None | 蹂닿퀬??湲곌컙:   [?? 2026??2遺꾧린 ??2027??1遺꾧린]
+[152] Style=None | ?묒꽦??   [遺꾩꽍媛 / ?묒꽦???대쫫]
+[153] Style=None | 遺??   [遺??/ ? ?대쫫]
+[154] Style=None | 踰꾩쟾:   [?? v1.0 ??珥덉븞]
+[155] Style=None | 遺꾨쪟:   ?대???/ 湲곕?
+[157] Style=Heading 1 | ?뱀뀡 1 ???듭떖 ?붿빟
+[158] Style=Heading 2 | 1.1 湲곗닠 媛쒖슂
+[159] Style=None | [?대떦 湲곗닠??臾댁뾿?몄?, ?대뼸寃??묐룞?섎뒗吏, 洹몃━怨?吏湲???以묒슂?쒖?瑜??됱씠???몄뼱濡?3臾몄옣?쇰줈 ?ㅻ챸?섏떗?쒖삤. 湲곗닠???몃? ?ы빆???욎꽌 ?듭떖 ?쒖궗??"So What")??癒쇱? ?쒖닠?⑸땲?? 李멸퀬: Gartner, IDC, Fraunhofer-Publica.]
+[160] Style=Heading 2 | 1.2 二쇱슂 諛쒓껄 ?ы빆
+[161] Style=List Paragraph | [?쒖옣 ?좏샇: ?? 湲濡쒕쾶 ?쒖옣???꾨뀈 ?鍮?X% ?깆옣, 二쇱슂 ?숈씤? ??(異쒖쿂: IDC / Gartner)]
+[162] Style=List Paragraph | [寃쎌웳 ?좏샇: ?? ?곸쐞 3媛?踰ㅻ뜑媛 留ㅼ텧??X% 李⑥?, ?낃퀎 ?듯빀 ?덉긽 ??(異쒖쿂: IDC MarketScape)]
+[163] Style=List Paragraph | [?쒓뎅 ?뱁솕 ?좏샇: ?? ?쒓뎅 ?뺣? IITP ?꾨줈洹몃옩????X]??諛곕텇 ??(異쒖쿂: IITP / KOTRA)]
+[164] Style=List Paragraph | [由ъ뒪???좏샇: ?? EU 洹쒖젣 遺덊솗?ㅼ꽦?쇰줈 ?꾩엯??[X]遺꾧린 吏??媛????(異쒖쿂: Gartner / EC)]
+[165] Style=Heading 2 | 1.3 ?듭떖 吏????쒕낫??
+[167] Style=Heading 1 | ?뱀뀡 2 ??湲곗닠 ?꾨줈?뚯씪
+[168] Style=Heading 2 | 2.1 湲곗닠 ?뺤쓽 諛??먮━
+[169] Style=None | [湲곗닠???듭떖 湲곕뒫, ?묐룞 ?먮━, 二쇱슂 蹂???먮뒗 ?섏쐞 湲곗닠???ㅻ챸?섏떗?쒖삤. 1李?異쒖쿂: IEEE Xplore, Fraunhofer-Publica, ETRI, arXiv.]
+[170] Style=Heading 2 | 2.2 湲곗닠 以鍮??섏? (TRL)
+[172] Style=Heading 2 | 2.3 湲곗닠 李⑤퀎??
+[173] Style=None | [???湲곗닠 ?鍮???湲곗닠??李⑤퀎?먯쓣 ?ㅻ챸?섏떗?쒖삤: ?깅뒫 踰붿쐞, 鍮꾩슜 援ъ“, 吏?앹옱?곌텒 ?꾩튂, ?깆닕???섏?, ?쒓뎅 ???꾩엯 ?꾪솴.]
+[175] Style=Heading 2 | 2.4 ?뱁뿀 ?꾪솴
+[176] Style=None | 異쒖쿂: Espacenet (EPO), KIPO, DPMA, JPO, CNIPA, Google Patents
+[178] Style=Heading 1 | ?뱀뀡 3 ???쒖옣 遺꾩꽍
+[179] Style=Heading 2 | 3.1 ?쒖옣 媛쒖슂
+[180] Style=None | [湲濡쒕쾶 ?쒖옣 洹쒕え($X??뼲), CAGR, 怨쇨굅 5??異붿씠, ?덉륫 湲곌컙(5~10?????쒓났?섏떗?쒖삤. 異쒖쿂: Gartner, IDC, Statista, McKinsey Global Institute, KIET, KOTRA, ADB.]
+[181] Style=Heading 2 | 3.2 ?쒖옣 ?몃텇??
+[183] Style=Heading 2 | 3.3 吏??퀎 ?ъ링 遺꾩꽍
+[185] Style=Heading 2 | 3.4 ?쒖옣 ?숈씤 諛??λ꼍
+[187] Style=Heading 1 | ?뱀뀡 4 ??寃쎌웳 ?섍꼍
+[188] Style=Heading 2 | 4.1 踰ㅻ뜑 留ㅽ븨
+[190] Style=Heading 2 | 4.2 ?쒓뎅 ?뱁솕 寃쎌웳 ?섍꼍
+[191] Style=None | [?쒓뎅 寃쎌웳 ?섍꼍???ㅻ챸?섏떗?쒖삤: ?뺣? 吏??湲곌?(ETRI, KAIST, POSTECH), ?щ쾶 李몄뿬(?쇱꽦, SK, LG, ?꾨?), ?ㅽ??몄뾽 ?앺깭怨? 異쒖쿂: KOTRA, KIET, KISDI.]
+[192] Style=Heading 2 | 4.3 SWOT 遺꾩꽍
+[194] Style=Heading 2 | 4.4 ?ы꽣??5媛吏 寃쎌웳 ?붿씤 ?붿빟
+[196] Style=Heading 1 | ?뱀뀡 5 ???곸떊 諛??곌뎄媛쒕컻(R&D) ?꾪솴
+[197] Style=Heading 2 | 5.1 ?숈닠 ?쇰Ц 諛쒗몴 ?숉뼢
+[198] Style=None | 異쒖쿂: IEEE Xplore, ACM Digital Library, arXiv, Springer/Elsevier, ETRI Journal, KISTI
+[200] Style=Heading 2 | 5.2 ?곌뎄媛쒕컻 吏???꾨줈洹몃옩
+[202] Style=Heading 2 | 5.3 ?좏씎 ?곌뎄 諛⑺뼢
+[203] Style=List Paragraph | [誘몃옒 ?곌뎄 二쇱젣 1: ??湲곗닠怨?AI, ?뚯옱 怨쇳븰 ?먮뒗 ?ㅻⅨ 遺꾩빞??援먯감?먯뿉???섑??섎뒗 ?덈줈???곌뎄 ?곸뿭???ㅻ챸?섏떗?쒖삤. ?몄슜: arXiv / IEEE Xplore.]
+[204] Style=List Paragraph | [誘몃옒 ?곌뎄 二쇱젣 2: ?숈닠 臾명뿄?먯꽌 二쇰ぉ諛쏅뒗 湲곗닠 ?듯빀 ?몃젋???먮뒗 遺꾩빞 媛??묒슜???ㅻ챸?섏떗?쒖삤.]
+[205] Style=List Paragraph | [誘몃옒 ?곌뎄 二쇱젣 3: ?꾨씪?댄샇???쒓뎅???묒슜 ?곌뎄 ??븷怨?愿?⑤맂 ?꾩옱 R&D ?섍꼍??怨듬갚 湲고쉶瑜??뚯븙?섏떗?쒖삤.]
+[207] Style=Heading 1 | ?뱀뀡 6 ??洹쒖젣 諛??뺤콉 ?섍꼍
+[208] Style=Heading 2 | 6.1 ?뺤콉 ?몃옒而?
+[210] Style=Heading 2 | 6.2 而댄뵆?쇱씠?몄뒪 怨좊젮 ?ы빆
+[211] Style=List Paragraph | [?곗씠??嫄곕쾭?뚯뒪: ??湲곗닠???곸슜?섎뒗 ?곗씠???꾩??? 媛쒖씤?뺣낫蹂댄샇, ?먮뒗 援?꼍 媛??곗씠???댁쟾 ?붽굔???ㅻ챸?섏떗?쒖삤.]
+[212] Style=List Paragraph | [吏?앹옱?곌텒: IP ?쇱씠?좎떛 ?섎Т, ?쒖??꾩닔?뱁뿀(SEP) 怨좊젮 ?ы빆, ?먮뒗 ?ㅽ뵂?뚯뒪 而댄뵆?쇱씠?몄뒪 ?붽굔???ㅻ챸?섏떗?쒖삤.]
+[213] Style=List Paragraph | [?섏텧 ?듭젣: ?댁쨷 ?⑸룄 遺꾨쪟, 諛붿꽭?섎Ⅴ 泥댁젣 ?덈ぉ, ?먮뒗 ?쒓뎅/EU ?섏텧 ?쒗븳 ?ы빆???뚯븙?섏떗?쒖삤.]
+[215] Style=Heading 1 | ?뱀뀡 7 ??湲곗닠 ?꾨쭩
+[216] Style=Heading 2 | 7.1 媛?몃꼫 ?섏씠???ъ씠???꾩튂
+[217] Style=None | ?꾩옱 ?④퀎:
+[218] Style=None | [?곸떊 珥됰컻 / 怨쇰? 湲곕????뺤젏 / ?섎㈇??怨꾧끝 / 怨꾨そ??寃쎌궗硫?/ ?앹궛?깆쓽 怨좎썝]
+[219] Style=None | 怨좎썝 ?꾨떖 ?덉긽 湲곌컙:
+[220] Style=None | [X]??
+[221] Style=None | 異쒖쿂:
+[222] Style=None | Gartner [?곕룄] Hype Cycle for [移댄뀒怨좊━]
+[223] Style=Heading 2 | 7.2 IDC 諛⑹떇 5???덉륫
+[225] Style=Heading 2 | 7.3 湲곗닠 濡쒕뱶留?
+[227] Style=Heading 1 | ?뱀뀡 8 ???꾨씪?댄샇???쒓뎅???꾪븳 ?꾨왂???쒖궗??
+[228] Style=Heading 2 | 8.1 湲고쉶 ?됯?
+[230] Style=Heading 2 | 8.2 由ъ뒪???깅줉遺
+[232] Style=Heading 2 | 8.3 沅뚭퀬 議곗튂 ?ы빆 (?ν썑 90??
+[233] Style=List Paragraph | [議곗튂 1: ETRI / KISTEP怨?援ъ“?붾맂 湲곗닠 釉뚮━?묒쓣 媛쒖턀?섏뿬 ?꾩옱 TRL 諛?IITP ?꾨줈洹몃옩??怨듬룞 ?ъ썝 湲고쉶瑜?議곗쑉?섏떗?쒖삤.]
+[234] Style=List Paragraph | [議곗튂 2: Espacenet 諛?KIPO瑜??듯빐 ?뱁뿀 ?먯쑀 ?ㅼ떆(FTO) 遺꾩꽍??李⑹닔?섏뿬 ?꾨씪?댄샇??IP 媛쒕컻???꾪븳 怨듬갚 ?곸뿭???뚯븙?섏떗?쒖삤.]
+[235] Style=List Paragraph | [議곗튂 3: 理쒖냼 1媛쒖쓽 ?쒓뎅 ?곌뎄 ????먮뒗 ?湲곗뾽 R&D ?곌뎄?뚮? ?ы븿?섎뒗 Horizon Europe ?뚰듃?덉떗 ?쒖븞??珥덉븞???묒꽦?섏떗?쒖삤.]
+[237] Style=Heading 1 | ?뱀뀡 9 ??異쒖쿂 諛?諛⑸쾿濡?
+[238] Style=Heading 2 | 9.1 異쒖쿂 ?깅줉遺
+[239] Style=None | ?숈닠 諛??곌뎄:
+[240] Style=List Paragraph | IEEE Xplore ??ieee.org/xplore
+[241] Style=List Paragraph | ACM Digital Library ??dl.acm.org
+[242] Style=List Paragraph | arXiv ??arxiv.org
+[243] Style=List Paragraph | Fraunhofer-Publica ??publica.fraunhofer.de
+[244] Style=List Paragraph | ETRI Journal ??etri.re.kr
+[245] Style=List Paragraph | KISTI ??kisti.re.kr
+[246] Style=List Paragraph | Springer / Elsevier / Wiley ??湲곌? 援щ룆???듯븳 ?묎렐
+[248] Style=None | ?쒖옣 ?명뀛由ъ쟾??
+[249] Style=List Paragraph | Gartner ??gartner.com
+[250] Style=List Paragraph | IDC ??idc.com
+[251] Style=List Paragraph | Statista ??statista.com
+[252] Style=List Paragraph | McKinsey Global Institute ??mckinsey.com/mgi
+[253] Style=List Paragraph | KIET ??kiet.re.kr
+[254] Style=List Paragraph | KOTRA ??kotra.or.kr
+[255] Style=List Paragraph | KISDI ??kisdi.re.kr
+[256] Style=List Paragraph | ADB ??adb.org
+[257] Style=List Paragraph | OECD iLibrary ??oecd-ilibrary.org
+[258] Style=List Paragraph | Eurostat ??ec.europa.eu/eurostat
+[259] Style=List Paragraph | Destatis ??destatis.de
+[260] Style=List Paragraph | KOSTAT ??kostat.go.kr
+[262] Style=None | ?뱁뿀 諛?IP:
+[263] Style=List Paragraph | Espacenet (EPO) ??espacenet.epo.org
+[264] Style=List Paragraph | KIPO ??kipo.go.kr
+[265] Style=List Paragraph | DPMA ??dpma.de
+[266] Style=List Paragraph | JPO ??j-platpat.inpit.go.jp
+[267] Style=List Paragraph | CNIPA ??cnipa.gov.cn
+[268] Style=List Paragraph | Google Patents ??patents.google.com
+[270] Style=None | ?뺣? 諛??뺤콉:
+[271] Style=List Paragraph | EU Commission ??ec.europa.eu
+[272] Style=List Paragraph | BMBF ??bmbf.de
+[273] Style=List Paragraph | MOTIE ??motie.go.kr
+[274] Style=List Paragraph | MSIT ??msit.go.kr
+[275] Style=List Paragraph | KISTEP ??kistep.re.kr
+[276] Style=List Paragraph | IITP ??iitp.kr
+[277] Style=List Paragraph | NIST ??nist.gov
+[278] Style=List Paragraph | IEA ??iea.org
+[279] Style=List Paragraph | NEDO ??nedo.go.jp
+[280] Style=List Paragraph | METI ??meti.go.jp
+[281] Style=List Paragraph | APEC ??apec.org
+[282] Style=List Paragraph | NITI Aayog ??niti.gov.in
+[283] Style=List Paragraph | EDB Singapore ??edb.gov.sg
+[285] Style=Heading 2 | 9.2 ?먮룞??紐⑤땲?곕쭅 諛⑸쾿濡?
+[286] Style=None | [?먮룞???곗씠???섏쭛 ?쇱젙???ㅻ챸?섏떗?쒖삤: Gartner, IDC 諛??뱁뿀 ?곗씠?곕쿋?댁뒪?먯꽌???쇱씪 API ?섏쭛; ?ㅼ썙??紐⑸줉 諛?遺덈━??寃??臾몄옄?? 以묐났 ?쒓굅 諛?愿?⑥꽦 ?먯닔 濡쒖쭅; ?붽컙 蹂닿퀬???앹꽦 ?몃━嫄?諛?QA 寃???꾨줈?몄뒪.]
+[287] Style=Heading 2 | 9.3 ?곗씠???덉쭏 諛??쒓퀎
+[288] Style=None | [異쒖쿂 ?좏삎蹂??뚮젮吏??곗씠??寃⑹감瑜??뚯븙?섏떗?쒖삤(?? ?쒓뎅 以묒냼湲곗뾽 留ㅼ텧 ?곗씠?곕뒗 怨듦컻 媛?⑹꽦 ?쒗븳). 二쇱슂 吏?쒕퀎 ?좊ː???섏?(?믪쓬 / 以묎컙 / ??쓬)??紐낆떆?섏떗?쒖삤. ?낅뜲?댄듃 二쇨린: ?뱁뿀 ?곗씠??二?1?? ?쒖옣 洹쒕え 遺꾧린 1?? ?뺤콉 ?몃옒而???1??]
+[290] Style=None | ??蹂닿퀬??????
+
+=== TABLES ===
+Table 0: 6 rows x 5 cols
+  [0,0]: Metric
+  [0,1]: Current Value
+  [0,2]: YoY Change
+  [0,3]: Forecast (3yr)
+  [0,4]: Source
+  [1,0]: Global Market Size
+  [1,1]: $[X]B
+  [1,2]: [+X%]
+  [1,3]: $[X]B
+  [1,4]: Gartner / IDC
+  [2,0]: Korea Market Size
+  [2,1]: $[X]B
+  [2,2]: [+X%]
+  [2,3]: $[X]B
+  [2,4]: KIET / KOTRA
+  [3,0]: TRL Level
+  [3,1]: TRL [X]
+  [3,2]: ??
+  [3,3]: TRL [X]
+  [3,4]: Fraunhofer
+  [4,0]: Top Filing Country (Patents)
+  [4,1]: [Country]
+  [4,2]: ??
+  [4,3]: ??
+  [4,4]: KIPO / Espacenet
+  [5,0]: Leading Vendor Market Share
+  [5,1]: [X]%
+  [5,2]: ??
+  [5,3]: ??
+  [5,4]: IDC MarketScape
+Table 1: 5 rows x 3 cols
+  [0,0]: Dimension
+  [0,1]: Assessment
+  [0,2]: Basis
+  [1,0]: Current TRL
+  [1,1]: [1??]
+  [1,2]: [Standard / Fraunhofer internal assessment]
+  [2,0]: Target TRL
+  [2,1]: [1??]
+  [2,2]: [Product / project roadmap]
+  [3,0]: Estimated time to TRL 9
+  [3,1]: [X] years
+  [3,2]: [Expert assessment / foresight study]
+  [4,0]: Comparable technology benchmark
+  [4,1]: [Tech name]
+  [4,2]: [Source / benchmark report]
+Table 2: 6 rows x 4 cols
+  [0,0]: Feature
+  [0,1]: This Technology
+  [0,2]: Alternative A
+  [0,3]: Alternative B
+  [1,0]: Performance
+  [1,1]: [Assessment]
+  [1,2]: [Assessment]
+  [1,3]: [Assessment]
+  [2,0]: Cost
+  [2,1]: [Assessment]
+  [2,2]: [Assessment]
+  [2,3]: [Assessment]
+  [3,0]: Maturity
+  [3,1]: [Assessment]
+  [3,2]: [Assessment]
+  [3,3]: [Assessment]
+  [4,0]: IP Position
+  [4,1]: [Assessment]
+  [4,2]: [Assessment]
+  [4,3]: [Assessment]
+  [5,0]: Korea Adoption
+  [5,1]: [Assessment]
+  [5,2]: [Assessment]
+  [5,3]: [Assessment]
+Table 3: 3 rows x 6 cols
+  [0,0]: Patent No.
+  [0,1]: Title
+  [0,2]: Assignee
+  [0,3]: Country
+  [0,4]: Year
+  [0,5]: Source
+  [1,0]: [EP-XXXXXXX]
+  [1,1]: [Patent title placeholder]
+  [1,2]: [Assignee name]
+  [1,3]: [Country]
+  [1,4]: [Year]
+  [1,5]: Espacenet
+  [2,0]: [KR-XXXXXXX]
+  [2,1]: [Patent title placeholder]
+  [2,2]: [Assignee name]
+  [2,3]: [Country]
+  [2,4]: [Year]
+  [2,5]: KIPO
+Table 4: 5 rows x 6 cols
+  [0,0]: Segment Type
+  [0,1]: Segment Name
+  [0,2]: Size
+  [0,3]: Share
+  [0,4]: Growth
+  [0,5]: Notes
+  [1,0]: By Application
+  [1,1]: [App 1] / [App 2]
+  [1,2]: $[X]B
+  [1,3]: [X]%
+  [1,4]: [X]% CAGR
+  [1,5]: [Note on growth driver]
+  [2,0]: By End-User
+  [2,1]: [Industry sector]
+  [2,2]: $[X]B
+  [2,3]: [X]%
+  [2,4]: [X]% CAGR
+  [2,5]: [Note on demand pattern]
+  [3,0]: By Deployment
+  [3,1]: [Deployment model]
+  [3,2]: $[X]B
+  [3,3]: [X]%
+  [3,4]: [X]% CAGR
+  [3,5]: [Note on model shift]
+  [4,0]: By Geography
+  [4,1]: Korea / APAC / EU / US
+  [4,2]: $[X]B
+  [4,3]: [X]%
+  [4,4]: [X]% CAGR
+  [4,5]: [Note on regional variance]
+Table 5: 8 rows x 6 cols
+  [0,0]: Region
+  [0,1]: Market Size
+  [0,2]: Key Drivers
+  [0,3]: Policy Environment
+  [0,4]: Top Players
+  [0,5]: Source
+  [1,0]: Korea
+  [1,1]: $[X]B
+  [1,2]: [Driver]
+  [1,3]: MOTIE, MSIT, IITP
+  [1,4]: [Company / Institute]
+  [1,5]: KIET / KOTRA
+  [2,0]: Japan
+  [2,1]: $[X]B
+  [2,2]: [Driver]
+  [2,3]: METI, NEDO
+  [2,4]: [Company]
+  [2,5]: METI
+  [3,0]: China
+  [3,1]: $[X]B
+  [3,2]: [Driver]
+  [3,3]: MIIT, CAICT
+  [3,4]: [Company]
+  [3,5]: CAICT
+  [4,0]: EU
+  [4,1]: $[X]B
+  [4,2]: [Driver]
+  [4,3]: EU Commission, BMBF
+  [4,4]: [Company]
+  [4,5]: Eurostat
+  [5,0]: US
+  [5,1]: $[X]B
+  [5,2]: [Driver]
+  [5,3]: NIST, DOE
+  [5,4]: [Company]
+  [5,5]: IDC
+  [6,0]: SE Asia
+  [6,1]: $[X]B
+  [6,2]: [Driver]
+  [6,3]: EDB Singapore, IMDA
+  [6,4]: [Company]
+  [6,5]: ADB
+  [7,0]: India
+  [7,1]: $[X]B
+  [7,2]: [Driver]
+  [7,3]: NITI Aayog, DST
+  [7,4]: [Company]
+  [7,5]: ADB
+Table 6: 4 rows x 2 cols
+  [0,0]: Drivers (with Source)
+  [0,1]: Barriers (with Source)
+  [1,0]: [Driver 1: description ??Source: Gartner / IDC]
+  [1,1]: [Barrier 1: description ??Source: Gartner / IDC]
+  [2,0]: [Driver 2: description ??Source: KIET / KOTRA]
+  [2,1]: [Barrier 2: description ??Source: KIET / KOTRA]
+  [3,0]: [Driver 3: description ??Source: McKinsey MGI]
+  [3,1]: [Barrier 3: description ??Source: IDC / Statista]
+Table 7: 4 rows x 7 cols
+  [0,0]: Vendor
+  [0,1]: HQ
+  [0,2]: Type
+  [0,3]: Core Offering
+  [0,4]: Strategy
+  [0,5]: Market Position
+  [0,6]: Source
+  [1,0]: [Global Vendor A]
+  [1,1]: [Country]
+  [1,2]: Private
+  [1,3]: [Product / service]
+  [1,4]: [Differentiation strategy]
+  [1,5]: [Leader / Challenger]
+  [1,6]: IDC MarketScape
+  [2,0]: [Global Vendor B]
+  [2,1]: [Country]
+  [2,2]: Public
+  [2,3]: [Product / service]
+  [2,4]: [Differentiation strategy]
+  [2,5]: [Niche / Contender]
+  [2,6]: Gartner MQ
+  [3,0]: ETRI / KAIST
+  [3,1]: Korea
+  [3,2]: Public Research
+  [3,3]: [R&D programme]
+  [3,4]: Gov-backed applied research
+  [3,5]: Key domestic player
+  [3,6]: KOTRA / KIET
+Table 8: 4 rows x 2 cols
+  [0,0]: Strengths
+  [0,1]: Weaknesses
+  [1,0]: [Strength 1: Describe a key technological or market advantage in a complete sentence.]
+[Strength 2: Describe IP position
+  [1,1]: [Weakness 1: Identify a gap in technology maturity or product portfolio.]
+[Weakness 2: Note dependency on imported compo
+  [2,0]: Opportunities
+  [2,1]: Threats
+  [3,0]: [Opportunity 1: Identify an emerging application area or market opening.]
+[Opportunity 2: Describe a policy incentive or
+  [3,1]: [Threat 1: Identify a competitor with disruptive technology or cost advantage.]
+[Threat 2: Note regulatory or export con
+Table 9: 6 rows x 4 cols
+  [0,0]: Force
+  [0,1]: Intensity
+  [0,2]: Key Factor
+  [0,3]: Implication
+  [1,0]: Supplier Power
+  [1,1]: [High / Med / Low]
+  [1,2]: [Key concentration or switching cost factor]
+  [1,3]: [Strategic implication]
+  [2,0]: Buyer Power
+  [2,1]: [High / Med / Low]
+  [2,2]: [Buyer concentration or price sensitivity]
+  [2,3]: [Strategic implication]
+  [3,0]: Rivalry
+  [3,1]: [High / Med / Low]
+  [3,2]: [Number of competitors, market growth rate]
+  [3,3]: [Strategic implication]
+  [4,0]: New Entrants
+  [4,1]: [High / Med / Low]
+  [4,2]: [Capital requirements, IP barriers]
+  [4,3]: [Strategic implication]
+  [5,0]: Substitutes
+  [5,1]: [High / Med / Low]
+  [5,2]: [Availability of alternative technologies]
+  [5,3]: [Strategic implication]
+Table 10: 3 rows x 6 cols
+  [0,0]: Title
+  [0,1]: Authors
+  [0,2]: Journal / Conference
+  [0,3]: Year
+  [0,4]: Citations
+  [0,5]: DOI
+  [1,0]: [Publication title placeholder]
+  [1,1]: [Author A et al.]
+  [1,2]: [Journal / Conference name]
+  [1,3]: [Year]
+  [1,4]: [X]
+  [1,5]: [doi:XX.XXXX/XXXXX]
+  [2,0]: [Publication title placeholder]
+  [2,1]: [Author B et al.]
+  [2,2]: [Journal / Conference name]
+  [2,3]: [Year]
+  [2,4]: [X]
+  [2,5]: [doi:XX.XXXX/XXXXX]
+Table 11: 7 rows x 7 cols
+  [0,0]: Program
+  [0,1]: Funding Body
+  [0,2]: Region
+  [0,3]: Budget
+  [0,4]: Focus Area
+  [0,5]: Timeline
+  [0,6]: Source
+  [1,0]: [Program name]
+  [1,1]: EU Horizon Europe
+  [1,2]: EU
+  [1,3]: ??X]B
+  [1,4]: [Focus area]
+  [1,5]: [Years]
+  [1,6]: ec.europa.eu
+  [2,0]: [Program name]
+  [2,1]: BMBF
+  [2,2]: Germany
+  [2,3]: ??X]M
+  [2,4]: [Focus area]
+  [2,5]: [Years]
+  [2,6]: bmbf.de
+  [3,0]: [Program name]
+  [3,1]: IITP
+  [3,2]: Korea
+  [3,3]: ??X]B
+  [3,4]: [Focus area]
+  [3,5]: [Years]
+  [3,6]: iitp.kr
+  [4,0]: [Program name]
+  [4,1]: KISTEP
+  [4,2]: Korea
+  [4,3]: ??X]B
+  [4,4]: [Focus area]
+  [4,5]: [Years]
+  [4,6]: kistep.re.kr
+  [5,0]: [Program name]
+  [5,1]: NEDO
+  [5,2]: Japan
+  [5,3]: 짜[X]B
+  [5,4]: [Focus area]
+  [5,5]: [Years]
+  [5,6]: nedo.go.jp
+  [6,0]: [Program name]
+  [6,1]: NIST
+  [6,2]: US
+  [6,3]: $[X]M
+  [6,4]: [Focus area]
+  [6,5]: [Years]
+  [6,6]: nist.gov
+Table 12: 6 rows x 7 cols
+  [0,0]: Policy / Regulation
+  [0,1]: Issuing Body
+  [0,2]: Region
+  [0,3]: Status
+  [0,4]: Effective Date
+  [0,5]: Impact
+  [0,6]: Source
+  [1,0]: [EU Act / Directive name]
+  [1,1]: EU Commission
+  [1,2]: EU
+  [1,3]: Active / Pending
+  [1,4]: [Date]
+  [1,5]: [High / Med / Low]
+  [1,6]: ec.europa.eu
+  [2,0]: [Korean policy name]
+  [2,1]: MOTIE / MSIT
+  [2,2]: Korea
+  [2,3]: Active / Pending
+  [2,4]: [Date]
+  [2,5]: [High / Med / Low]
+  [2,6]: motie.go.kr
+  [3,0]: [Japanese policy name]
+  [3,1]: METI
+  [3,2]: Japan
+  [3,3]: Active / Pending
+  [3,4]: [Date]
+  [3,5]: [High / Med / Low]
+  [3,6]: meti.go.jp
+  [4,0]: [US standard / policy]
+  [4,1]: NIST
+  [4,2]: US
+  [4,3]: Active / Pending
+  [4,4]: [Date]
+  [4,5]: [High / Med / Low]
+  [4,6]: nist.gov
+  [5,0]: [International standard]
+  [5,1]: OECD / ISO
+  [5,2]: Global
+  [5,3]: Active / Pending
+  [5,4]: [Date]
+  [5,5]: [High / Med / Low]
+  [5,6]: oecd.org
+Table 13: 6 rows x 5 cols
+  [0,0]: Year
+  [0,1]: Prediction
+  [0,2]: Confidence
+  [0,3]: Implication
+  [0,4]: Source
+  [1,0]: [Year+1]
+  [1,1]: [Prediction: expected market or technology milestone]
+  [1,2]: [High / Med / Low]
+  [1,3]: [Strategic implication for industry]
+  [1,4]: IDC
+  [2,0]: [Year+2]
+  [2,1]: [Prediction: expected adoption or competitive shift]
+  [2,2]: [High / Med / Low]
+  [2,3]: [Strategic implication for industry]
+  [2,4]: IDC
+  [3,0]: [Year+3]
+  [3,1]: [Prediction: expected regulatory or policy development]
+  [3,2]: [High / Med / Low]
+  [3,3]: [Strategic implication for industry]
+  [3,4]: IDC / Gartner
+  [4,0]: [Year+4]
+  [4,1]: [Prediction: expected technology consolidation]
+  [4,2]: [High / Med / Low]
+  [4,3]: [Strategic implication for industry]
+  [4,4]: Gartner
+  [5,0]: [Year+5]
+  [5,1]: [Prediction: long-range market structure outlook]
+  [5,2]: [High / Med / Low]
+  [5,3]: [Strategic implication for industry]
+  [5,4]: McKinsey MGI
+Table 14: 4 rows x 6 cols
+  [0,0]: Phase
+  [0,1]: Timeframe
+  [0,2]: Milestone
+  [0,3]: TRL
+  [0,4]: Key Enabler
+  [0,5]: Risk
+  [1,0]: Short-term
+  [1,1]: 0?? years
+  [1,2]: [Milestone: e.g., POC validation, pilot deployment]
+  [1,3]: TRL [X]
+  [1,4]: [Key enabling technology or policy]
+  [1,5]: [Primary risk factor]
+  [2,0]: Mid-term
+  [2,1]: 2?? years
+  [2,2]: [Milestone: e.g., commercial launch, standard adoption]
+  [2,3]: TRL [X]
+  [2,4]: [Key enabling technology or policy]
+  [2,5]: [Primary risk factor]
+  [3,0]: Long-term
+  [3,1]: 5??0 years
+  [3,2]: [Milestone: e.g., mass market, ecosystem maturity]
+  [3,3]: TRL [X]
+  [3,4]: [Key enabling technology or policy]
+  [3,5]: [Primary risk factor]
+Table 15: 5 rows x 6 cols
+  [0,0]: Opportunity
+  [0,1]: Type
+  [0,2]: Potential Partners
+  [0,3]: Funding Source
+  [0,4]: Priority
+  [0,5]: Timeline
+  [1,0]: Joint R&D
+  [1,1]: Research
+  [1,2]: ETRI / KAIST / POSTECH
+  [1,3]: IITP / BMBF
+  [1,4]: [High / Med / Low]
+  [1,5]: [Year]
+  [2,0]: Tech Transfer
+  [2,1]: Commercialization
+  [2,2]: [Korean SME / Chaebol]
+  [2,3]: MOTIE / KISTEP
+  [2,4]: [High / Med / Low]
+  [2,5]: [Year]
+  [3,0]: Policy Contribution
+  [3,1]: Advisory
+  [3,2]: MSIT / MOTIE
+  [3,3]: ??
+  [3,4]: [High / Med / Low]
+  [3,5]: [Year]
+  [4,0]: EU?밙orea Bridge
+  [4,1]: Collaboration
+  [4,2]: [EU research partner]
+  [4,3]: Horizon Europe
+  [4,4]: [High / Med / Low]
+  [4,5]: [Year]
+Table 16: 4 rows x 5 cols
+  [0,0]: Risk
+  [0,1]: Likelihood
+  [0,2]: Impact
+  [0,3]: Mitigation
+  [0,4]: Owner
+  [1,0]: [Risk 1: e.g., technology obsolescence due to competing standard]
+  [1,1]: [H/M/L]
+  [1,2]: [H/M/L]
+  [1,3]: [Mitigation: dual-track R&D, standard participation]
+  [1,4]: [Owner / Function]
+  [2,0]: [Risk 2: e.g., partner dependency or IP dispute]
+  [2,1]: [H/M/L]
+  [2,2]: [H/M/L]
+  [2,3]: [Mitigation: diversification, legal review]
+  [2,4]: [Owner / Function]
+  [3,0]: [Risk 3: e.g., funding programme discontinuation]
+  [3,1]: [H/M/L]
+  [3,2]: [H/M/L]
+  [3,3]: [Mitigation: alternative funding pipeline]
+  [3,4]: [Owner / Function]
+Table 17: 6 rows x 5 cols
+  [0,0]: 吏??
+  [0,1]: ?꾩옱 媛?
+  [0,2]: ?꾨뀈 ?鍮?蹂??
+  [0,3]: ?덉륫 (3??
+  [0,4]: 異쒖쿂
+  [1,0]: 湲濡쒕쾶 ?쒖옣 洹쒕え
+  [1,1]: $[X]??뼲
+  [1,2]: [+X%]
+  [1,3]: $[X]??뼲
+  [1,4]: Gartner / IDC
+  [2,0]: ?쒓뎅 ?쒖옣 洹쒕え
+  [2,1]: $[X]??뼲
+  [2,2]: [+X%]
+  [2,3]: $[X]??뼲
+  [2,4]: KIET / KOTRA
+  [3,0]: TRL ?섏?
+  [3,1]: TRL [X]
+  [3,2]: ??
+  [3,3]: TRL [X]
+  [3,4]: ?꾨씪?댄샇??
+  [4,0]: 二쇱슂 ?뱁뿀 異쒖썝援?
+  [4,1]: [援??紐?
+  [4,2]: ??
+  [4,3]: ??
+  [4,4]: KIPO / Espacenet
+  [5,0]: ?좊룄 踰ㅻ뜑 ?쒖옣 ?먯쑀??
+  [5,1]: [X]%
+  [5,2]: ??
+  [5,3]: ??
+  [5,4]: IDC MarketScape
+Table 18: 5 rows x 3 cols
+  [0,0]: ?됯? ??ぉ
+  [0,1]: ?됯? 寃곌낵
+  [0,2]: ?됯? 洹쇨굅
+  [1,0]: ?꾩옱 TRL
+  [1,1]: [1??]
+  [1,2]: [?쒖? 湲곗? / ?꾨씪?댄샇???대? ?됯?]
+  [2,0]: 紐⑺몴 TRL
+  [2,1]: [1??]
+  [2,2]: [?쒗뭹 / ?꾨줈?앺듃 濡쒕뱶留?
+  [3,0]: TRL 9 ?꾨떖 ?덉긽 湲곌컙
+  [3,1]: [X]??
+  [3,2]: [?꾨Ц媛 ?됯? / 誘몃옒?덉륫 ?곌뎄]
+  [4,0]: 鍮꾧탳 湲곗닠 踰ㅼ튂留덊겕
+  [4,1]: [湲곗닠紐?
+  [4,2]: [異쒖쿂 / 踰ㅼ튂留덊겕 蹂닿퀬??
+Table 19: 6 rows x 4 cols
+  [0,0]: ??ぉ
+  [0,1]: ?대떦 湲곗닠
+  [0,2]: ???湲곗닠 A
+  [0,3]: ???湲곗닠 B
+  [1,0]: ?깅뒫
+  [1,1]: [?됯?]
+  [1,2]: [?됯?]
+  [1,3]: [?됯?]
+  [2,0]: 鍮꾩슜
+  [2,1]: [?됯?]
+  [2,2]: [?됯?]
+  [2,3]: [?됯?]
+  [3,0]: ?깆닕??
+  [3,1]: [?됯?]
+  [3,2]: [?됯?]
+  [3,3]: [?됯?]
+  [4,0]: IP ?꾩튂
+  [4,1]: [?됯?]
+  [4,2]: [?됯?]
+  [4,3]: [?됯?]
+  [5,0]: ?쒓뎅 ?꾩엯 ?꾪솴
+  [5,1]: [?됯?]
+  [5,2]: [?됯?]
+  [5,3]: [?됯?]
+Table 20: 3 rows x 6 cols
+  [0,0]: ?뱁뿀 踰덊샇
+  [0,1]: ?쒕ぉ
+  [0,2]: 異쒖썝??
+  [0,3]: 援??
+  [0,4]: ?곕룄
+  [0,5]: 異쒖쿂
+  [1,0]: [EP-XXXXXXX]
+  [1,1]: [?뱁뿀 ?쒕ぉ ?낅젰]
+  [1,2]: [異쒖썝?몃챸]
+  [1,3]: [援??]
+  [1,4]: [?곕룄]
+  [1,5]: Espacenet
+  [2,0]: [KR-XXXXXXX]
+  [2,1]: [?뱁뿀 ?쒕ぉ ?낅젰]
+  [2,2]: [異쒖썝?몃챸]
+  [2,3]: [援??]
+  [2,4]: [?곕룄]
+  [2,5]: KIPO
+Table 21: 5 rows x 6 cols
+  [0,0]: ?몃텇???좏삎
+  [0,1]: ?멸렇癒쇳듃紐?
+  [0,2]: 洹쒕え
+  [0,3]: ?먯쑀??
+  [0,4]: ?깆옣瑜?
+  [0,5]: 鍮꾧퀬
+  [1,0]: ?묒슜 遺꾩빞蹂?
+  [1,1]: [??1] / [??2]
+  [1,2]: $[X]??뼲
+  [1,3]: [X]%
+  [1,4]: [X]% CAGR
+  [1,5]: [?깆옣 ?숈씤 鍮꾧퀬]
+  [2,0]: 理쒖쥌 ?ъ슜?먮퀎
+  [2,1]: [?곗뾽 遺꾩빞]
+  [2,2]: $[X]??뼲
+  [2,3]: [X]%
+  [2,4]: [X]% CAGR
+  [2,5]: [?섏슂 ?⑦꽩 鍮꾧퀬]
+  [3,0]: 諛고룷 諛⑹떇蹂?
+  [3,1]: [諛고룷 紐⑤뜽]
+  [3,2]: $[X]??뼲
+  [3,3]: [X]%
+  [3,4]: [X]% CAGR
+  [3,5]: [紐⑤뜽 ?꾪솚 鍮꾧퀬]
+  [4,0]: 吏??퀎
+  [4,1]: ?쒓뎅 / APAC / EU / 誘멸뎅
+  [4,2]: $[X]??뼲
+  [4,3]: [X]%
+  [4,4]: [X]% CAGR
+  [4,5]: [吏??퀎 李⑥씠 鍮꾧퀬]
+Table 22: 8 rows x 6 cols
+  [0,0]: 吏??
+  [0,1]: ?쒖옣 洹쒕え
+  [0,2]: 二쇱슂 ?숈씤
+  [0,3]: ?뺤콉 ?섍꼍
+  [0,4]: 二쇱슂 ?뚮젅?댁뼱
+  [0,5]: 異쒖쿂
+  [1,0]: ?쒓뎅
+  [1,1]: $[X]??뼲
+  [1,2]: [?숈씤]
+  [1,3]: MOTIE, MSIT, IITP
+  [1,4]: [湲곗뾽 / ?곌뎄湲곌?]
+  [1,5]: KIET / KOTRA
+  [2,0]: ?쇰낯
+  [2,1]: $[X]??뼲
+  [2,2]: [?숈씤]
+  [2,3]: METI, NEDO
+  [2,4]: [湲곗뾽]
+  [2,5]: METI
+  [3,0]: 以묎뎅
+  [3,1]: $[X]??뼲
+  [3,2]: [?숈씤]
+  [3,3]: MIIT, CAICT
+  [3,4]: [湲곗뾽]
+  [3,5]: CAICT
+  [4,0]: EU
+  [4,1]: $[X]??뼲
+  [4,2]: [?숈씤]
+  [4,3]: EU Commission, BMBF
+  [4,4]: [湲곗뾽]
+  [4,5]: Eurostat
+  [5,0]: 誘멸뎅
+  [5,1]: $[X]??뼲
+  [5,2]: [?숈씤]
+  [5,3]: NIST, DOE
+  [5,4]: [湲곗뾽]
+  [5,5]: IDC
+  [6,0]: ?숇궓??
+  [6,1]: $[X]??뼲
+  [6,2]: [?숈씤]
+  [6,3]: EDB Singapore, IMDA
+  [6,4]: [湲곗뾽]
+  [6,5]: ADB
+  [7,0]: ?몃룄
+  [7,1]: $[X]??뼲
+  [7,2]: [?숈씤]
+  [7,3]: NITI Aayog, DST
+  [7,4]: [湲곗뾽]
+  [7,5]: ADB
+Table 23: 4 rows x 2 cols
+  [0,0]: ?숈씤 (異쒖쿂 ?ы븿)
+  [0,1]: ?λ꼍 (異쒖쿂 ?ы븿)
+  [1,0]: [?숈씤 1: ?ㅻ챸 ??異쒖쿂: Gartner / IDC]
+  [1,1]: [?λ꼍 1: ?ㅻ챸 ??異쒖쿂: Gartner / IDC]
+  [2,0]: [?숈씤 2: ?ㅻ챸 ??異쒖쿂: KIET / KOTRA]
+  [2,1]: [?λ꼍 2: ?ㅻ챸 ??異쒖쿂: KIET / KOTRA]
+  [3,0]: [?숈씤 3: ?ㅻ챸 ??異쒖쿂: McKinsey MGI]
+  [3,1]: [?λ꼍 3: ?ㅻ챸 ??異쒖쿂: IDC / Statista]
+Table 24: 4 rows x 7 cols
+  [0,0]: 踰ㅻ뜑
+  [0,1]: 蹂몄궗
+  [0,2]: ?좏삎
+  [0,3]: ?듭떖 ?쒓났 ?쒕퉬??
+  [0,4]: ?꾨왂
+  [0,5]: ?쒖옣 ?ъ???
+  [0,6]: 異쒖쿂
+  [1,0]: [湲濡쒕쾶 踰ㅻ뜑 A]
+  [1,1]: [援??]
+  [1,2]: 誘쇨컙
+  [1,3]: [?쒗뭹/?쒕퉬??
+  [1,4]: [李⑤퀎???꾨왂]
+  [1,5]: [由щ뜑 / 梨뚮┛?]
+  [1,6]: IDC MarketScape
+  [2,0]: [湲濡쒕쾶 踰ㅻ뜑 B]
+  [2,1]: [援??]
+  [2,2]: ?곸옣
+  [2,3]: [?쒗뭹/?쒕퉬??
+  [2,4]: [李⑤퀎???꾨왂]
+  [2,5]: [?덉깉 / 寃쎌웳??
+  [2,6]: Gartner MQ
+  [3,0]: ETRI / KAIST
+  [3,1]: ?쒓뎅
+  [3,2]: 怨듦났 ?곌뎄湲곌?
+  [3,3]: [R&D ?꾨줈洹몃옩]
+  [3,4]: ?뺣? 吏???묒슜 ?곌뎄
+  [3,5]: ?듭떖 援?궡 ?뚮젅?댁뼱
+  [3,6]: KOTRA / KIET
+Table 25: 4 rows x 2 cols
+  [0,0]: 媛뺤젏 (Strengths)
+  [0,1]: ?쎌젏 (Weaknesses)
+  [1,0]: [媛뺤젏 1: ?듭떖 湲곗닠???먮뒗 ?쒖옣 ?곗쐞瑜??꾩쟾??臾몄옣?쇰줈 ?ㅻ챸?섏떗?쒖삤.]
+[媛뺤젏 2: 吏?앹옱?곌텒 ?꾩튂, ?쒖“ ??웾, ?먮뒗 ?뺣┰??怨좉컼 湲곕컲???ㅻ챸?섏떗?쒖삤.]
+[媛뺤젏 3: ?뺣? 吏?? 怨듦툒留?洹쇱젒?????쒓뎅 ?뱁솕 ??
+  [1,1]: [?쎌젏 1: 湲곗닠 ?깆닕???먮뒗 ?쒗뭹 ?ы듃?대━?ㅼ쓽 寃⑹감瑜??뚯븙?섏떗?쒖삤.]
+[?쎌젏 2: ?섏엯 遺???섏〈???먮뒗 ?쒗븳??援?궡 IP瑜??ㅻ챸?섏떗?쒖삤.]
+[?쎌젏 3: ?쒖옣 吏묒쨷 由ъ뒪???먮뒗 ?몄옱 遺議깆쓣 ?ㅻ챸?섏떗?쒖삤.]
+  [2,0]: 湲고쉶 (Opportunities)
+  [2,1]: ?꾪삊 (Threats)
+  [3,0]: [湲고쉶 1: ?덈줈???묒슜 遺꾩빞 ?먮뒗 ?쒖옣 湲고쉶瑜??뚯븙?섏떗?쒖삤.]
+[湲고쉶 2: ?뺤콉 ?몄꽱?곕툕 ?먮뒗 ?뺣? 議곕떖 湲고쉶瑜??ㅻ챸?섏떗?쒖삤.]
+[湲고쉶 3: Horizon Europe???듯븳 EU?볧븳援??묐젰 寃쎈줈瑜??ㅻ챸?섏떗?쒖삤.]
+  [3,1]: [?꾪삊 1: ?뚭눼??湲곗닠 ?먮뒗 鍮꾩슜 ?곗쐞瑜?媛吏?寃쎌웳?먮? ?뚯븙?섏떗?쒖삤.]
+[?꾪삊 2: 洹쒖젣 ?먮뒗 ?섏텧 ?듭젣 由ъ뒪?щ? ?ㅻ챸?섏떗?쒖삤.]
+[?꾪삊 3: 嫄곗떆寃쎌젣 ?먮뒗 吏?뺥븰??由ъ뒪???붿씤???ㅻ챸?섏떗?쒖삤.]
+Table 26: 6 rows x 4 cols
+  [0,0]: 寃쎌웳 ?붿씤
+  [0,1]: 媛뺣룄
+  [0,2]: ?듭떖 ?붿씤
+  [0,3]: ?쒖궗??
+  [1,0]: 怨듦툒??援먯꽠??
+  [1,1]: [?믪쓬 / 以묎컙 / ??쓬]
+  [1,2]: [?듭떖 吏묒쨷???먮뒗 ?꾪솚 鍮꾩슜 ?붿씤]
+  [1,3]: [?꾨왂???쒖궗??
+  [2,0]: 援щℓ??援먯꽠??
+  [2,1]: [?믪쓬 / 以묎컙 / ??쓬]
+  [2,2]: [援щℓ??吏묒쨷???먮뒗 媛寃?誘쇨컧??
+  [2,3]: [?꾨왂???쒖궗??
+  [3,0]: 寃쎌웳 媛뺣룄
+  [3,1]: [?믪쓬 / 以묎컙 / ??쓬]
+  [3,2]: [寃쎌웳???? ?쒖옣 ?깆옣瑜?
+  [3,3]: [?꾨왂???쒖궗??
+  [4,0]: ?좉퇋 吏꾩엯??
+  [4,1]: [?믪쓬 / 以묎컙 / ??쓬]
+  [4,2]: [?먮낯 ?붽굔, IP ?λ꼍]
+  [4,3]: [?꾨왂???쒖궗??
+  [5,0]: ?泥댁옱
+  [5,1]: [?믪쓬 / 以묎컙 / ??쓬]
+  [5,2]: [???湲곗닠??媛?⑹꽦]
+  [5,3]: [?꾨왂???쒖궗??
+Table 27: 3 rows x 6 cols
+  [0,0]: ?쒕ぉ
+  [0,1]: ???
+  [0,2]: ???/ ?숉쉶
+  [0,3]: ?곕룄
+  [0,4]: ?몄슜 ??
+  [0,5]: DOI
+  [1,0]: [?쇰Ц ?쒕ぉ ?낅젰]
+  [1,1]: [???A ??
+  [1,2]: [???/ ?숉쉶紐?
+  [1,3]: [?곕룄]
+  [1,4]: [X]
+  [1,5]: [doi:XX.XXXX/XXXXX]
+  [2,0]: [?쇰Ц ?쒕ぉ ?낅젰]
+  [2,1]: [???B ??
+  [2,2]: [???/ ?숉쉶紐?
+  [2,3]: [?곕룄]
+  [2,4]: [X]
+  [2,5]: [doi:XX.XXXX/XXXXX]
+Table 28: 7 rows x 7 cols
+  [0,0]: ?꾨줈洹몃옩
+  [0,1]: 吏??湲곌?
+  [0,2]: 吏??
+  [0,3]: ?덉궛
+  [0,4]: ?듭떖 遺꾩빞
+  [0,5]: 湲곌컙
+  [0,6]: 異쒖쿂
+  [1,0]: [?꾨줈洹몃옩紐?
+  [1,1]: EU Horizon Europe
+  [1,2]: EU
+  [1,3]: ??X]??뼲
+  [1,4]: [?듭떖 遺꾩빞]
+  [1,5]: [湲곌컙]
+  [1,6]: ec.europa.eu
+  [2,0]: [?꾨줈洹몃옩紐?
+  [2,1]: BMBF
+  [2,2]: ?낆씪
+  [2,3]: ??X]諛깅쭔
+  [2,4]: [?듭떖 遺꾩빞]
+  [2,5]: [湲곌컙]
+  [2,6]: bmbf.de
+  [3,0]: [?꾨줈洹몃옩紐?
+  [3,1]: IITP
+  [3,2]: ?쒓뎅
+  [3,3]: ??X]??
+  [3,4]: [?듭떖 遺꾩빞]
+  [3,5]: [湲곌컙]
+  [3,6]: iitp.kr
+  [4,0]: [?꾨줈洹몃옩紐?
+  [4,1]: KISTEP
+  [4,2]: ?쒓뎅
+  [4,3]: ??X]??
+  [4,4]: [?듭떖 遺꾩빞]
+  [4,5]: [湲곌컙]
+  [4,6]: kistep.re.kr
+  [5,0]: [?꾨줈洹몃옩紐?
+  [5,1]: NEDO
+  [5,2]: ?쇰낯
+  [5,3]: 짜[X]??뼲
+  [5,4]: [?듭떖 遺꾩빞]
+  [5,5]: [湲곌컙]
+  [5,6]: nedo.go.jp
+  [6,0]: [?꾨줈洹몃옩紐?
+  [6,1]: NIST
+  [6,2]: 誘멸뎅
+  [6,3]: $[X]諛깅쭔
+  [6,4]: [?듭떖 遺꾩빞]
+  [6,5]: [湲곌컙]
+  [6,6]: nist.gov
+Table 29: 6 rows x 7 cols
+  [0,0]: ?뺤콉 / 洹쒖젣
+  [0,1]: 諛쒗뻾 湲곌?
+  [0,2]: 吏??
+  [0,3]: ?곹깭
+  [0,4]: ?쒗뻾 ?쇱옄
+  [0,5]: 湲곗닠 ?곹뼢
+  [0,6]: 異쒖쿂
+  [1,0]: [EU 踰뺤븞 / 吏移⑤챸]
+  [1,1]: EU Commission
+  [1,2]: EU
+  [1,3]: ?쒗뻾 / ?湲?
+  [1,4]: [?좎쭨]
+  [1,5]: [?믪쓬 / 以묎컙 / ??쓬]
+  [1,6]: ec.europa.eu
+  [2,0]: [?쒓뎅 ?뺤콉紐?
+  [2,1]: MOTIE / MSIT
+  [2,2]: ?쒓뎅
+  [2,3]: ?쒗뻾 / ?湲?
+  [2,4]: [?좎쭨]
+  [2,5]: [?믪쓬 / 以묎컙 / ??쓬]
+  [2,6]: motie.go.kr
+  [3,0]: [?쇰낯 ?뺤콉紐?
+  [3,1]: METI
+  [3,2]: ?쇰낯
+  [3,3]: ?쒗뻾 / ?湲?
+  [3,4]: [?좎쭨]
+  [3,5]: [?믪쓬 / 以묎컙 / ??쓬]
+  [3,6]: meti.go.jp
+  [4,0]: [誘멸뎅 ?쒖? / ?뺤콉]
+  [4,1]: NIST
+  [4,2]: 誘멸뎅
+  [4,3]: ?쒗뻾 / ?湲?
+  [4,4]: [?좎쭨]
+  [4,5]: [?믪쓬 / 以묎컙 / ??쓬]
+  [4,6]: nist.gov
+  [5,0]: [援?젣 ?쒖?]
+  [5,1]: OECD / ISO
+  [5,2]: 湲濡쒕쾶
+  [5,3]: ?쒗뻾 / ?湲?
+  [5,4]: [?좎쭨]
+  [5,5]: [?믪쓬 / 以묎컙 / ??쓬]
+  [5,6]: oecd.org
+Table 30: 6 rows x 5 cols
+  [0,0]: ?곕룄
+  [0,1]: ?덉륫
+  [0,2]: ?좊ː??
+  [0,3]: ?쒖궗??
+  [0,4]: 異쒖쿂
+  [1,0]: [Year+1]
+  [1,1]: [Year+1] ?덉륫: ?쒖옣 ?먮뒗 湲곗닠 留덉씪?ㅽ넠 ?ㅻ챸
+  [1,2]: [?믪쓬/以묎컙/??쓬]
+  [1,3]: [?낃퀎 ?꾨왂???쒖궗??
+  [1,4]: IDC
+  [2,0]: [Year+2]
+  [2,1]: [Year+2] ?덉륫: ?꾩엯 ?먮뒗 寃쎌웳 援щ룄 蹂???ㅻ챸
+  [2,2]: [?믪쓬/以묎컙/??쓬]
+  [2,3]: [?낃퀎 ?꾨왂???쒖궗??
+  [2,4]: IDC
+  [3,0]: [Year+3]
+  [3,1]: [Year+3] ?덉륫: 洹쒖젣 ?먮뒗 ?뺤콉 媛쒕컻 ?ㅻ챸
+  [3,2]: [?믪쓬/以묎컙/??쓬]
+  [3,3]: [?낃퀎 ?꾨왂???쒖궗??
+  [3,4]: IDC / Gartner
+  [4,0]: [Year+4]
+  [4,1]: [Year+4] ?덉륫: 湲곗닠 ?듯빀 ?꾨쭩 ?ㅻ챸
+  [4,2]: [?믪쓬/以묎컙/??쓬]
+  [4,3]: [?낃퀎 ?꾨왂???쒖궗??
+  [4,4]: Gartner
+  [5,0]: [Year+5]
+  [5,1]: [Year+5] ?덉륫: ?κ린 ?쒖옣 援ъ“ ?꾨쭩 ?ㅻ챸
+  [5,2]: [?믪쓬/以묎컙/??쓬]
+  [5,3]: [?낃퀎 ?꾨왂???쒖궗??
+  [5,4]: McKinsey MGI
+Table 31: 4 rows x 6 cols
+  [0,0]: ?④퀎
+  [0,1]: 湲곌컙
+  [0,2]: 留덉씪?ㅽ넠
+  [0,3]: TRL
+  [0,4]: ?듭떖 珥됱쭊 ?붿씤
+  [0,5]: 由ъ뒪??
+  [1,0]: ?④린
+  [1,1]: 0????
+  [1,2]: [留덉씪?ㅽ넠: POC 寃利? ?뚯씪??諛고룷 ??
+  [1,3]: TRL [X]
+  [1,4]: [?듭떖 湲곗닠 ?먮뒗 ?뺤콉]
+  [1,5]: [二쇱슂 由ъ뒪??
+  [2,0]: 以묎린
+  [2,1]: 2????
+  [2,2]: [留덉씪?ㅽ넠: ?곸슜??異쒖떆, ?쒖? 梨꾪깮 ??
+  [2,3]: TRL [X]
+  [2,4]: [?듭떖 湲곗닠 ?먮뒗 ?뺤콉]
+  [2,5]: [二쇱슂 由ъ뒪??
+  [3,0]: ?κ린
+  [3,1]: 5??0??
+  [3,2]: [留덉씪?ㅽ넠: ????쒖옣, ?앺깭怨??깆닕 ??
+  [3,3]: TRL [X]
+  [3,4]: [?듭떖 湲곗닠 ?먮뒗 ?뺤콉]
+  [3,5]: [二쇱슂 由ъ뒪??
+Table 32: 5 rows x 6 cols
+  [0,0]: 湲고쉶
+  [0,1]: ?좏삎
+  [0,2]: ?좎옱???뚰듃??
+  [0,3]: ?ъ썝
+  [0,4]: ?곗꽑?쒖쐞
+  [0,5]: ??꾨씪??
+  [1,0]: 怨듬룞 ?곌뎄媛쒕컻
+  [1,1]: ?곌뎄
+  [1,2]: ETRI / KAIST / POSTECH
+  [1,3]: IITP / BMBF
+  [1,4]: [?믪쓬 / 以묎컙 / ??쓬]
+  [1,5]: [?곕룄]
+  [2,0]: 湲곗닠 ?댁쟾
+  [2,1]: ?곸슜??
+  [2,2]: [?쒓뎅 以묒냼湲곗뾽 / ?湲곗뾽]
+  [2,3]: MOTIE / KISTEP
+  [2,4]: [?믪쓬 / 以묎컙 / ??쓬]
+  [2,5]: [?곕룄]
+  [3,0]: ?뺤콉 湲곗뿬
+  [3,1]: ?먮Ц
+  [3,2]: MSIT / MOTIE
+  [3,3]: ??
+  [3,4]: [?믪쓬 / 以묎컙 / ??쓬]
+  [3,5]: [?곕룄]
+  [4,0]: EU-?쒓뎅 釉뚮━吏
+  [4,1]: ?묐젰
+  [4,2]: [EU ?곌뎄 ?뚰듃??
+  [4,3]: Horizon Europe
+  [4,4]: [?믪쓬 / 以묎컙 / ??쓬]
+  [4,5]: [?곕룄]
+Table 33: 4 rows x 5 cols
+  [0,0]: 由ъ뒪??
+  [0,1]: 諛쒖깮 媛?μ꽦
+  [0,2]: ?곹뼢
+  [0,3]: ?꾪솕 諛⑹븞
+  [0,4]: ?대떦??
+  [1,0]: [由ъ뒪??1: 寃쎌웳 ?쒖??쇰줈 ?명븳 湲곗닠 吏꾨???
+  [1,1]: [?믪쓬/以묎컙/??쓬]
+  [1,2]: [?믪쓬/以묎컙/??쓬]
+  [1,3]: [?꾪솕 ?꾨왂: ?댁쨷 ?몃옓 R&D, ?쒖? 李몄뿬]
+  [1,4]: [?대떦??
+  [2,0]: [由ъ뒪??2: ?뚰듃???섏〈???먮뒗 IP 遺꾩웳]
+  [2,1]: [?믪쓬/以묎컙/??쓬]
+  [2,2]: [?믪쓬/以묎컙/??쓬]
+  [2,3]: [?꾪솕 ?꾨왂: ?ㅺ컖?? 踰뺤쟻 寃??
+  [2,4]: [?대떦??
+  [3,0]: [由ъ뒪??3: 吏???꾨줈洹몃옩 以묐떒]
+  [3,1]: [?믪쓬/以묎컙/??쓬]
+  [3,2]: [?믪쓬/以묎컙/??쓬]
+  [3,3]: [?꾪솕 ?꾨왂: ?泥??ъ썝 ?뚯씠?꾨씪??
+  [3,4]: [?대떦??

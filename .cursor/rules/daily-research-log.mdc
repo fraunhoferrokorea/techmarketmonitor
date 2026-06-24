@@ -1,0 +1,58 @@
+---
+description: Daily research log format for articles and papers (unified markdown template)
+globs: output/daily/daily_*.md,templates/daily_research_log_template.md
+alwaysApply: false
+---
+
+# Daily Research Log Format
+
+Use one Markdown file per day: `daily_YYYY-MM-DD.md`.
+
+Articles and papers share the same item template; distinguish only with **자료유형**.
+
+## File header (once per file)
+
+```
+날짜: YYYY-MM-DD
+기록자:
+총 항목 수: N건 (기사 n / 논문 n)
+신뢰도 분포: A n건 / B n건 / C n건
+```
+
+## Daily Executive Summary
+
+Add when there are **2+ items** in the day (optional for a single item).
+
+- Synthesize what the day's items mean together (3–5 lines, not a bullet list of titles)
+- **오늘의 핵심:** top 1–2 points
+- **눈여겨볼 신호:** subtle trend signals
+- **상충되는 정보:** conflicting sources, if any
+
+## Item block (repeat per entry)
+
+```markdown
+### [HH:MM or sequence] Title
+
+- **자료유형:** 기사 / 논문 / 보고서(시장조사) / 공식발표(IR·정책) / 기타
+- **출처:**
+- **저자/발행기관:**
+- **발행일:** YYYY-MM-DD
+- **링크/DOI:**
+- **요약 (3~5줄):**
+  - Fact-focused bullets; put interpretation on the last line as `(해석) ...`
+- **신뢰도:** A / B / C
+- **태그:** #tag1 #tag2
+- **비고:** (optional)
+```
+
+## Tags (monthly report chapters)
+
+#기술 #논문 #투자 #M&A #제품출시 #기업동향 #규제 #경쟁 #시장수치 #리스크 #전문가전망
+
+## Credibility
+
+- **A:** peer-reviewed journals, Tier-1 wire (Reuters/Bloomberg/AP), gov/international stats, Gartner/IDC/McKinsey
+- **B:** preprints, industry media, secondary reporting, corporate IR/press releases
+- **C:** anonymous sources, speculation, repackaged/unverified content
+
+Full template: `templates/daily_research_log_template.md`

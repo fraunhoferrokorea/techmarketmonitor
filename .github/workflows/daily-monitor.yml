@@ -45,11 +45,12 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_BASE_URL: ${{ secrets.OPENAI_BASE_URL }}
           MODEL_NAME: ${{ secrets.MODEL_NAME }}
+          TZ: Asia/Seoul
         run: |
           if [ -n "${{ github.event.inputs.date }}" ]; then
             python -m src.main daily --date "${{ github.event.inputs.date }}"
           else
-            python -m src.main daily
+            python -m src.main daily-catchup
           fi
 
       - name: List generated files
@@ -63,8 +64,8 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A output/daily/*.md data/monitor.db 2>/dev/null || true
-          git add output/daily/ data/monitor.db
+          git add -A output/daily/*.md data/monitor.db data/daily_scheduler_state.json 2>/dev/null || true
+          git add output/daily/ data/monitor.db data/daily_scheduler_state.json
           if git diff --staged --quiet; then
             echo "No new report to commit."
             exit 0

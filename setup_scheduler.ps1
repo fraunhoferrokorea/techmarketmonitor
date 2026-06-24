@@ -2,7 +2,7 @@
 # Tech Market Monitor — Windows Task Scheduler Setup
 #
 # 등록 작업 2개:
-#   1. TechMarketMonitor-Daily   : 매일 08:00  →  python -m src.main daily
+#   1. TechMarketMonitor-Daily   : 매일 08:00  →  python -m src.main daily-catchup
 #   2. TechMarketMonitor-Monthly : 매일 18:30  →  run_monthly_if_last_bizday.py
 #                                  (마지막 영업일에만 실제로 월간 보고서 생성)
 # ─────────────────────────────────────────────────────────────────────────────
@@ -27,7 +27,7 @@ function Remove-TaskIfExists($Name) {
 # ─────────────────────────────────────────────────────────────────────────────
 $DailyName    = "TechMarketMonitor-Daily"
 $DailyLog     = "$LOGDIR\daily.log"
-$DailyArgs    = "-m src.main daily"
+$DailyArgs    = "-m src.main daily-catchup"
 $DailyAction  = New-ScheduledTaskAction `
     -Execute $PYTHON `
     -Argument $DailyArgs `

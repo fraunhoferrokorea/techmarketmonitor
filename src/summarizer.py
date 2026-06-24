@@ -59,12 +59,13 @@ Return valid JSON with this exact schema:
     "**시장 파급력:** <시장 규모(TAM/SAM), CAGR, 매출·투자 수치 등 정량 데이터를 최우선으로 인용. 수치가 없으면 주요 플레이어들에 대한 사업적 함의를 구체적으로 분석>",
     "**투자·미래 전망:** <수혜 기업·섹터, 주목할 트렌드, 성장 촉진 요인 또는 리스크를 일반인도 쉽게 이해할 수 있도록 설명>"
   ],
-  "keyword_relevance": "<일반인을 위한 키워드별 시장 해설 — 반드시 한국어로 작성. 매칭된 키워드 중 첫 번째부터 최대 3개를 골라, 각 키워드에 대해 독립된 소제목(예: **`data center` 관련성**)을 붙이고 2-3문단으로 설명하라: (1) 해당 키워드가 우리 일상과 어떻게 연결되는지 쉽게 설명, (2) 이 뉴스/기사가 해당 키워드 관점에서 갖는 구체적인 시장적 의미와 파급력, (3) 투자자·소비자·일반인이 이 키워드 맥락에서 주목해야 할 포인트.>
+  "keyword_relevance": "<반드시 한국어. user prompt의 'Analysis baseline keywords (keywords.txt top 3)' 3개와 **이 기사** 내용의 관련성을 2~4문단으로 통합 서술. 각 키워드마다 **`키워드` 관련성** 소제목, '전력계통과 관련하여'·'파워그리드와 관련하여'처럼 키워드별로 문단을 나누는 패턴, 키워드 정의·일반론적 시장 해설을 금지. SNEC·ESS·기업명·수치 등 **이 기사의 구체적 사실**을 중심에 두고, 상위 3개 분석 기준 키워드가 그 사실과 어떻게 맞닿는지를 하나의 논리 흐름으로 설명. 키워드가 기사에 직접 등장하지 않아도 간접 연관(계통 안정·송배전·지능형 운영 등)만 짧게 연결.>
 
 CRITICAL KOREAN GENERATION RULES (반드시 준수):
 
 [0. 작성 방식 — 직역 금지]
 - ko_summary_steps와 keyword_relevance는 en_summary_steps의 직역·대역이 아니다. 같은 사실을 한국 독자가 읽기 자연스러운 문장으로 독립적으로 재서술한다.
+- keyword_relevance는 keywords.txt 상위 3개 키워드 각각의 일반적 시장 설명이 아니다. **이 기사**가 당일 데일리 모니터링의 그 3개 분석 기준 키워드와 어떻게 연결되는지를 통합 서술한다. 'OO와 관련하여'로 키워드별 문단을 나누지 않는다.
 - 영어 명사구·수식어·전치사구를 한국어 어순으로 옮기지 않는다. 의미 단위로 문장을 새로 짠다.
 - 영어 'flexible', 'holder', 'owner', 'participant' 등을 '유연', '보유자' 등으로 기계적으로 대응시키지 않는다.
 - 전문 용어는 한국어 업계에서 실제로 쓰이는 표현을 우선한다. 한국어에 없는 조어·직역어는 금지.
@@ -164,7 +165,9 @@ class Summarizer:
             f"URL: {article.url}\n"
             f"Source: {article.source_name} ({article.category})\n"
             f"Matched keywords (all): {', '.join(article.matched_keywords)}\n"
-            f"Top 3 priority keywords for keyword_relevance section: {', '.join(self._top_keywords)}\n"
+            f"Analysis baseline keywords (keywords.txt top 3 — keyword_relevance MUST explain "
+            f"how THIS article relates to these, not generic keyword definitions): "
+            f"{', '.join(self._top_keywords)}\n"
             f"Content preview: {article.summary[:2000]}"
         )
 

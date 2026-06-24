@@ -21,28 +21,50 @@ _MAX_AGE_HOURS = 24
 _MAX_ARTICLES_PER_RUN = int(os.getenv("MAX_ARTICLES_PER_RUN", "30"))
 
 
-def _within_24h(articles: list[RawArticle]) -> list[RawArticle]:
-    """Keep only articles published within the last 24 hours.
+def _within_24h(
+    articles: list[RawArticle],
+    window_end: datetime | None = None,
+) -> list[RawArticle]:
+    """Keep articles published in the 24 hours ending at window_end.
 
-    Articles with no published_at are kept (we cannot determine their age).
+    Articles with no published_at are kept only for live runs (no window_end).
     """
-    cutoff = datetime.now(tz=timezone.utc) - timedelta(hours=_MAX_AGE_HOURS)
+    if window_end is None:
+        cutoff = datetime.now(tz=timezone.utc) - timedelta(hours=_MAX_AGE_HOURS)
+        upper = None
+    else:
+        end = window_end
+        if end.tzinfo is None:
+            end = end.replace(tzinfo=timezone.utc)
+        end_utc = end.astimezone(timezone.utc)
+        cutoff = end_utc - timedelta(hours=_MAX_AGE_HOURS)
+        upper = end_utc
+
     recent: list[RawArticle] = []
     for article in articles:
         if article.published_at is None:
-            recent.append(article)
+            if window_end is None:
+                recent.append(article)
             continue
         pub = article.published_at
         if pub.tzinfo is None:
             pub = pub.replace(tzinfo=timezone.utc)
-        if pub >= cutoff:
-            recent.append(article)
-        else:
+        pub_utc = pub.astimezone(timezone.utc)
+        if pub_utc < cutoff:
             logger.debug("Skipping old article (%s): %s", pub.date(), article.title[:60])
+            continue
+        if upper is not None and pub_utc > upper:
+            logger.debug("Skipping future article (%s): %s", pub.date(), article.title[:60])
+            continue
+        recent.append(article)
     return recent
 
 
-def run_daily_monitor(log_date: date | None = None, settings: Settings | None = None) -> dict:
+def run_daily_monitor(
+    log_date: date | None = None,
+    settings: Settings | None = None,
+    window_end: datetime | None = None,
+) -> dict:
     settings = settings or load_settings()
     log_date = log_date or date.today()
 
@@ -60,9 +82,10 @@ def run_daily_monitor(log_date: date | None = None, settings: Settings | None = 
         except Exception as exc:
             logger.error("Fetcher failed (%s): %s", fetcher.__class__.__name__, exc)
 
-    recent_articles = _within_24h(raw_articles)
+    recent_articles = _within_24h(raw_articles, window_end=window_end)
     logger.info(
-        "24h filter: %d → %d articles (dropped %d old)",
+        "24h filter (window_end=%s): %d → %d articles (dropped %d old)",
+        (window_end or datetime.now(tz=timezone.utc)).isoformat(),
         len(raw_articles),
         len(recent_articles),
         len(raw_articles) - len(recent_articles),
