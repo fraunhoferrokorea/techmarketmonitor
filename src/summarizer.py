@@ -72,6 +72,52 @@ _KOREAN_PHRASE_FIXES: list[tuple[str, str]] = [
     (r"나타난다([.。]?)$", r"나타남\1"),
 ]
 
+# Sentence-final -다체/-합니다체 → -함/임체 (명사형 종결).
+_ENDING_NORMALIZERS: list[tuple[re.Pattern[str], str]] = [
+    (re.compile(r"고\s*있도록\s*한다([.。？]?)$"), r"고 있도록 함\1"),
+    (re.compile(r"지\s*않\s*있다([.。？]?)$"), r"지 않음\1"),
+    (re.compile(r"지\s*않\s*한다([.。？]?)$"), r"지 않음\1"),
+    (re.compile(r"지\s*않\s*습니다([.。？]?)$"), r"지 않음\1"),
+    (re.compile(r"지\s*않\s*는다([.。？]?)$"), r"지 않음\1"),
+    (re.compile(r"고\s*있습니다([.。？]?)$"), r"고 있음\1"),
+    (re.compile(r"고\s*있다([.。？]?)$"), r"고 있음\1"),
+    (re.compile(r"되었습니다([.。？]?)$"), r"됨\1"),
+    (re.compile(r"됐습니다([.。？]?)$"), r"됨\1"),
+    (re.compile(r"되었다([.。？]?)$"), r"됨\1"),
+    (re.compile(r"됐다([.。？]?)$"), r"됨\1"),
+    (re.compile(r"하였습니다([.。？]?)$"), r"함\1"),
+    (re.compile(r"했습니다([.。？]?)$"), r"함\1"),
+    (re.compile(r"하였다([.。？]?)$"), r"함\1"),
+    (re.compile(r"했다([.。？]?)$"), r"함\1"),
+    (re.compile(r"겠습니다([.。？]?)$"), r"겠음\1"),
+    (re.compile(r"였습니다([.。？]?)$"), r"였음\1"),
+    (re.compile(r"었습니다([.。？]?)$"), r"었음\1"),
+    (re.compile(r"해야\s*합니다([.。？]?)$"), r"해야 함\1"),
+    (re.compile(r"해야\s*한다([.。？]?)$"), r"해야 함\1"),
+    (re.compile(r"있습니다([.。？]?)$"), r"있음\1"),
+    (re.compile(r"없습니다([.。？]?)$"), r"없음\1"),
+    (re.compile(r"됩니다([.。？]?)$"), r"됨\1"),
+    (re.compile(r"보입니다([.。？]?)$"), r"보임\1"),
+    (re.compile(r"줍니다([.。？]?)$"), r"줌\1"),
+    (re.compile(r"둡니다([.。？]?)$"), r"둠\1"),
+    (re.compile(r"나타냅니다([.。？]?)$"), r"나타냄\1"),
+    (re.compile(r"나타납니다([.。？]?)$"), r"나타남\1"),
+    (re.compile(r"입니다([.。？]?)$"), r"임\1"),
+    (re.compile(r"합니다([.。？]?)$"), r"함\1"),
+    (re.compile(r"나타낸다([.。？]?)$"), r"나타냄\1"),
+    (re.compile(r"나타난다([.。？]?)$"), r"나타남\1"),
+    (re.compile(r"겠다([.。？]?)$"), r"겠음\1"),
+    (re.compile(r"보인다([.。？]?)$"), r"보임\1"),
+    (re.compile(r"온다([.。？]?)$"), r"옴\1"),
+    (re.compile(r"진다([.。？]?)$"), r"짐\1"),
+    (re.compile(r"친다([.。？]?)$"), r"침\1"),
+    (re.compile(r"한다([.。？]?)$"), r"함\1"),
+    (re.compile(r"된다([.。？]?)$"), r"됨\1"),
+    (re.compile(r"있다([.。？]?)$"), r"있음\1"),
+    (re.compile(r"없다([.。？]?)$"), r"없음\1"),
+    (re.compile(r"이다([.。？]?)$"), r"임\1"),
+]
+
 SYSTEM_PROMPT = """You are a senior tech market intelligence analyst writing for a general audience. Your goal is MARKET RESEARCH — not just technology description. Every analysis must be accurate, clearly written, and easy to understand for someone without a technical background. Avoid jargon; if a technical term is unavoidable, explain it in one plain-language phrase.
 
 For every article you analyze:
@@ -197,12 +243,29 @@ def strip_cjk_from_korean(text: str) -> str:
     return _CJK_RE.sub("", text)
 
 
+def normalize_korean_endings(text: str) -> str:
+    """Normalize sentence-final -다체/-합니다체 to -함/임체 within one sentence."""
+    for _ in range(3):
+        prev = text
+        for pattern, replacement in _ENDING_NORMALIZERS:
+            text = pattern.sub(replacement, text)
+        if text == prev:
+            break
+    return text
+
+
+def normalize_korean_endings_sentences(text: str) -> str:
+    """Apply normalize_korean_endings to each sentence in a multi-sentence string."""
+    parts = re.split(r"(?<=[.!?。？])\s+", text.strip())
+    return " ".join(normalize_korean_endings(part) for part in parts if part)
+
+
 def polish_korean(text: str) -> str:
     """Fix common literal calques and remove stray CJK characters in Korean LLM output."""
     polished = strip_cjk_from_korean(text)
     for pattern, replacement in _KOREAN_PHRASE_FIXES:
         polished = re.sub(pattern, replacement, polished)
-    return polished
+    return normalize_korean_endings_sentences(polished)
 
 
 def _extract_json(content: str) -> dict:
