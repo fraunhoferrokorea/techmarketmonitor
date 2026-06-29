@@ -59,6 +59,12 @@ class DailyLogStore:
                 )
             except sqlite3.OperationalError:
                 pass
+            try:
+                conn.execute(
+                    "ALTER TABLE daily_logs ADD COLUMN ko_one_liner TEXT NOT NULL DEFAULT ''"
+                )
+            except sqlite3.OperationalError:
+                pass
 
     def update_korean_text(
         self,
@@ -92,8 +98,9 @@ class DailyLogStore:
                         INSERT INTO daily_logs (
                             log_date, title, url, source_name, category,
                             published_at, matched_keywords, llm_summary,
-                            key_trends, ko_summary_steps, en_summary_steps, created_at
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            key_trends, ko_summary_steps, en_summary_steps,
+                            keyword_relevance, ko_one_liner, created_at
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """,
                         (
                             log_date.isoformat(),
@@ -107,6 +114,8 @@ class DailyLogStore:
                             json.dumps(entry.key_trends),
                             json.dumps(entry.ko_summary_steps),
                             json.dumps(entry.en_summary_steps),
+                            entry.keyword_relevance,
+                            entry.ko_one_liner,
                             now,
                         ),
                     )
@@ -135,6 +144,7 @@ class DailyLogStore:
             item["ko_summary_steps"] = json.loads(item.get("ko_summary_steps") or "[]")
             item["en_summary_steps"] = json.loads(item.get("en_summary_steps") or "[]")
             item["keyword_relevance"] = item.get("keyword_relevance") or ""
+            item["ko_one_liner"] = item.get("ko_one_liner") or ""
             results.append(item)
         return results
 
@@ -178,6 +188,7 @@ class DailyLogStore:
             item["ko_summary_steps"] = json.loads(item.get("ko_summary_steps") or "[]")
             item["en_summary_steps"] = json.loads(item.get("en_summary_steps") or "[]")
             item["keyword_relevance"] = item.get("keyword_relevance") or ""
+            item["ko_one_liner"] = item.get("ko_one_liner") or ""
             results.append(item)
         return results
 

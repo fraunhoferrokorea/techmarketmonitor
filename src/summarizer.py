@@ -200,6 +200,7 @@ Return valid JSON with this exact schema:
     "**시장 파급력:** <시장 규모(TAM/SAM), CAGR, 매출·투자 수치 등 정량 데이터를 최우선으로 인용. 수치가 없으면 주요 플레이어들에 대한 사업적 함의를 구체적으로 분석>",
     "**투자·미래 전망:** <수혜 기업·섹터, 주목할 트렌드, 성장 촉진 요인 또는 리스크를 일반인도 쉽게 이해할 수 있도록 설명>"
   ],
+  "ko_one_liner": "<데일리 Executive Summary 표용 1문장. 시장조사 담당자가 스캔할 핵심 팩트. 육하원칙(누가·언제·어디·무엇·왜·어떻게) 중 기사에 있는 요소를 최대한 압축: (1)누가=주체·기관·인물 (2)어디=지역·시장 (3)무엇=사업·투자·제품·정책 (4)언제=일정·분기·년도 (5)왜/어떻게=동기·방식·규모. 수치($·GW·%·인원)·일정·지명·기업명 중 3가지 이상 반드시 포함. 70~150자. 명사형 종결(-었음/-함/-임). 지시대명사·'중요성 강조'·키워드 정의·'의문을 불러일으켰음' 같은 추상 표현 금지.>\n예시(데이터센터): '오스트레일리아 AI 인프라 Firmus Technologies가 Nvidia와 협력해 인도네시아에 첫 데이터센터를 건설하며, 6년간 최대 $300억 규모 수주(offtake) 계약을 유치할 전망임.'\n예시(비판·논란): '소프트뱅크 CEO를 포함한 업계 리더들이 엘론 머스크의 궤도 데이터센터 구상에 기술·재무 feasibility 한계로 회의적 입장을 표명함.'",
   "keyword_relevance": "<반드시 한국어. 2~4문단으로 작성.\n\n[첫 문장 규칙 — 절대 준수]\n첫 문장은 반드시 이 기사에 등장하는 고유명사·수치·날짜·이벤트 중 하나로 시작해야 함. 다음 표현으로 시작하는 첫 문장 금지:\n- '이 기사는', '이 논문은', '이 연구는'\n- 'X 산업은 빠르게 발전하고 있다'\n- 'X의 중요성을 강조한다/보여준다'\n- '전력계통·파워그리드·스마트그리드와 관련된 X 산업은'\n- 키워드만 나열하고 '관련이 있다/높다'로 끝나는 문장\n\n올바른 첫 문장 예시:\n- 'SNEC 2026에서 나트륨이온 배터리와 장기 ESS가 전력망 핵심 자산으로 부상하면서...'\n- '오라클이 21,000명 감원으로 확보한 재원을 AI 데이터센터 인프라에 투입함에 따라...'\n- '미국 전력망이 설비 용량의 절반만 활용 중이라는 IEEE Spectrum 분석은...'\n\n[본문 작성]\n각 키워드마다 **`키워드` 관련성** 소제목·'전력계통과 관련하여'처럼 키워드별로 문단을 나누는 패턴·키워드 정의·일반론적 시장 해설 금지. SNEC·ESS·기업명·수치 등 **이 기사의 구체적 사실**을 중심에 두고, 상위 3개 분석 기준 키워드가 그 사실과 어떻게 맞닿는지를 하나의 논리 흐름으로 설명. 키워드가 기사에 직접 등장하지 않아도 간접 연관(계통 안정·송배전·지능형 운영 등)만 짧게 연결.>
 
 CRITICAL KOREAN GENERATION RULES (반드시 준수):
@@ -319,6 +320,7 @@ def repolish_summarized_article(article: SummarizedArticle) -> SummarizedArticle
     """Re-apply Korean ending normalization to stored summary fields."""
     ko_steps = [polish_korean(str(s).strip()) for s in article.ko_summary_steps if str(s).strip()]
     keyword_relevance = polish_korean(article.keyword_relevance.strip()) if article.keyword_relevance else ""
+    ko_one_liner = polish_korean(article.ko_one_liner.strip()) if article.ko_one_liner else ""
     return SummarizedArticle(
         title=article.title,
         url=article.url,
@@ -331,6 +333,7 @@ def repolish_summarized_article(article: SummarizedArticle) -> SummarizedArticle
         ko_summary_steps=ko_steps,
         en_summary_steps=article.en_summary_steps,
         keyword_relevance=keyword_relevance,
+        ko_one_liner=ko_one_liner,
     )
 
 
@@ -416,6 +419,7 @@ class Summarizer:
         ko_steps = [polish_korean(str(s).strip()) for s in (payload.get("ko_summary_steps") or []) if str(s).strip()]
         en_steps = payload.get("en_summary_steps") or []
         keyword_relevance = polish_korean((payload.get("keyword_relevance") or "").strip())
+        ko_one_liner = polish_korean((payload.get("ko_one_liner") or "").strip())
 
         if article.url not in summary:
             summary = f"{summary} Source: {article.url}".strip()
@@ -432,6 +436,7 @@ class Summarizer:
             ko_summary_steps=[str(s).strip() for s in ko_steps if str(s).strip()],
             en_summary_steps=[str(s).strip() for s in en_steps if str(s).strip()],
             keyword_relevance=keyword_relevance,
+            ko_one_liner=ko_one_liner,
         )
 
     def summarize_batch(self, articles: list[FilteredArticle]) -> list[SummarizedArticle]:

@@ -50,6 +50,7 @@ def _row_to_article(row: dict) -> SummarizedArticle:
         ko_summary_steps=row["ko_summary_steps"],
         en_summary_steps=row["en_summary_steps"],
         keyword_relevance=row.get("keyword_relevance") or "",
+        ko_one_liner=row.get("ko_one_liner") or "",
     )
 
 

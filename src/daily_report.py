@@ -160,6 +160,7 @@ def log_to_summarized_article(log: dict) -> SummarizedArticle:
         ko_summary_steps=list(log.get("ko_summary_steps") or []),
         en_summary_steps=list(log.get("en_summary_steps") or []),
         keyword_relevance=str(log.get("keyword_relevance") or ""),
+        ko_one_liner=str(log.get("ko_one_liner") or ""),
     )
 
 
@@ -559,11 +560,16 @@ def _extract_fact_sentence(
 ) -> str:
     """Pick the best one-sentence fact for the executive summary.
 
-    Always prefers ko_summary_steps (actual article content) over
-    keyword_relevance, which may contain cross-article boilerplate.
-    Sentences must name their subject explicitly — deictic openers
-    ('이 프레임워크', '이는', '새로운 프레임워크') are skipped.
+    Prefers LLM-generated ko_one_liner (5W1H-dense), then ko_summary_steps
+    ranked by informativeness. Sentences must name their subject explicitly.
     """
+    if article.ko_one_liner:
+        one_liner = polish_korean(
+            strip_cjk_from_korean(re.sub(r"\[\d+\]\s*$", "", article.ko_one_liner).strip())
+        )
+        if one_liner and not _is_vague(one_liner):
+            return one_liner
+
     anchors = _title_anchor_tokens(article.title)
     ranked: list[tuple[tuple, str]] = []
 
@@ -576,8 +582,14 @@ def _extract_fact_sentence(
             if _is_vague(sentence):
                 continue
             anchor_hits = sum(1 for a in anchors if a.lower() in sentence.lower())
+            info_score = _informative_score(sentence)
+            quant_rich = info_score >= 5 and bool(_QUANT_RE.search(sentence))
+            deictic_bad = not quant_rich and (
+                _has_deictic_subject(sentence) or _has_deictic_reference(sentence)
+            )
             sort_key = (
-                _has_deictic_subject(sentence) or _has_deictic_reference(sentence),
+                deictic_bad,
+                -info_score,
                 -anchor_hits,
                 -_kw_score(sentence, top_keywords),
                 _STEP_PREF.get(idx, 9),
@@ -658,6 +670,10 @@ _VAGUE_PATTERNS = re.compile(
     # "worth paying attention" filler
     r"|주목할\s*(만한|필요가\s*있)"
     r"|눈여겨봐야"
+    # Abstract reactions without specifics — poor market intel
+    r"|의문을\s*불러일으"
+    r"|논란을\s*일으"
+    r"|회의적\s*반응"
     # Negative / weak relevance: "관련하여 파급력을 미치지 않지만", "직접 관련이 없는"
     r"|관련하여.{0,40}않"
     r"|파급력을\s*미치지\s*않"
@@ -693,6 +709,26 @@ _VAGUE_PATTERNS = re.compile(
     re.IGNORECASE,
 )
 
+# Always vague regardless of numbers — abstract reactions, meta-commentary, keyword filler.
+_ABSTRACT_VAGUE_RE = re.compile(
+    r"관련(이|성이|된)\s*(있음|높음|깊음|있다|높다)[.。]?$"
+    r"|관련성이\s*높은\s*내용을\s*담고"
+    r"|^이\s*(기사|논문|연구|보고서)는"
+    r"|빠르게\s*(발전하고|성장하고|확산되고|변화하고|발전함|성장함)"
+    r"|중요성을\s*(강조|보여|나타내|시사)"
+    r"|필요성을\s*(강조|보여|나타내|시사)"
+    r"|의문을\s*불러일으"
+    r"|논란을\s*일으"
+    r"|주목할\s*(만한|필요가\s*있)"
+    r"|눈여겨봐야"
+    r"|관련하여.{0,40}않"
+    r"|파급력을\s*미치지\s*않"
+    r"|직접.*관련.{0,20}없"
+    r"|관련성이\s*낮"
+    r"|^(전력계통|파워그리드|스마트그리드)(은|는)\s*.{0,60}(시스템으로|시스템임|시스템이다|네트워크로|기술임|기술이다)",
+    re.IGNORECASE,
+)
+
 # Standalone check for deictic subjects (used before length heuristics).
 _DEICTIC_SUBJECT_RE = re.compile(
     r"^이(?:는|가)\s"
@@ -721,6 +757,44 @@ def _has_deictic_reference(sentence: str) -> bool:
 
 
 _STEP_PREF = {1: 0, 3: 1, 0: 2, 2: 3, 4: 4}
+
+# Patterns that boost informativeness for market-research one-liners (5W1H signals).
+_QUANT_RE = re.compile(
+    r"\$\s?\d|"
+    r"\d[\d,.]*\s*(억|조|만|%)|"
+    r"\d[\d,.]*\s*(GW|MW|kW|GWh|MWh|"
+    r"billion|million|trillion)|"
+    r"\d{4}\s*년|"
+    r"\d+\s*명",
+    re.IGNORECASE,
+)
+_LOCATION_RE = re.compile(
+    r"인도네시아|한국|일본|중국|미국|유럽|동남아|아시아|"
+    r"Indonesia|Korea|Japan|China|US|Europe|Asia|"
+    r"서울|도쿄|싱가포르|베트남|인도|호주|오스트레일리아",
+    re.IGNORECASE,
+)
+_ACTION_RE = re.compile(
+    r"건설|투자|계약|파트너십|인수|출시|발표|승인|도입|"
+    r"감원|수주|공급|설치|확대|개발|협력|제휴|"
+    r"회의적|의구심|비판|우려|반대",
+)
+
+
+def _informative_score(sentence: str) -> int:
+    """Score how many 5W1H-style facts a sentence packs (higher = better)."""
+    score = 0
+    if _QUANT_RE.search(sentence):
+        score += 3
+    if _LOCATION_RE.search(sentence):
+        score += 2
+    if re.search(r"[A-Za-z][A-Za-z0-9+-]{3,}", sentence):
+        score += 2
+    if _ACTION_RE.search(sentence):
+        score += 1
+    if len(sentence) >= 70:
+        score += 1
+    return score
 
 
 def _has_deictic_subject(sentence: str) -> bool:
@@ -759,12 +833,19 @@ def _split_sentences(text: str) -> list[str]:
 def _is_vague(sentence: str) -> bool:
     """Return True if *sentence* is a generic, uninformative placeholder.
 
-    A sentence is considered vague when it:
-    - Starts with a deictic subject ('이 프레임워크', '이는', …).
-    - Is shorter than the informative minimum (lower for named entities/numbers).
-    - Matches one of the _VAGUE_PATTERNS (generic filler phrases).
+    Quant-rich sentences (5W1H facts with numbers/dates) stay even when they
+    open with '이 프로젝트' etc. Abstract filler ('의문을 불러일으') is always vague.
     """
     s = sentence.strip()
+    info = _informative_score(s)
+    quant_rich = info >= 5 and bool(_QUANT_RE.search(s))
+
+    if _ABSTRACT_VAGUE_RE.search(s):
+        return True
+
+    if quant_rich:
+        return False
+
     if _has_deictic_subject(s) or _has_deictic_reference(s):
         return True
     if _VAGUE_PATTERNS.search(s):
