@@ -10,9 +10,13 @@ Use one Markdown file per day: `daily_YYYY-MM-DD.md`.
 
 Articles and papers share the same item template; distinguish only with **자료유형**.
 
+Full manual: `templates/daily_research_log_template.md` · Code rules: `src/daily_report.py`
+
 ## File header (once per file)
 
 ```
+# 데일리 리서치 로그
+
 날짜: YYYY-MM-DD
 기록자:
 총 항목 수: N건 (기사 n / 논문 n)
@@ -21,28 +25,37 @@ Articles and papers share the same item template; distinguish only with **자료
 
 ## Daily Executive Summary
 
-Add when there are **2+ items** in the day (optional for a single item).
+Add when there are **1+ items** in the day (auto pipeline always generates for 1+).
 
-- Synthesize what the day's items mean together (3–5 lines, not a bullet list of titles)
-- **오늘의 핵심:** top 1–2 points
-- **눈여겨볼 신호:** subtle trend signals
-- **상충되는 정보:** conflicting sources, if any
+Structure (auto-generated):
+- **분석 기준 키워드 (상위 3개)**
+- **오늘의 공통 흐름** (one-line theme)
+- Table: `| 관련도 | 항목 | 한 줄 요약 |` with **직접/간접** relevance
+- Item links `[title](#slug)` must match `<a id="slug"></a>` before `### N. Title`
+- **눈여겨볼 신호 (키워드 관점)** — up to 3 keyword signals
+- **상충되는 정보**
+
+Avoid vague filler in summary cells: no deictic subjects ("이 기술은"), no generic "importance emphasized", no keyword definitions without article facts.
 
 ## Item block (repeat per entry)
 
 ```markdown
-### [HH:MM or sequence] Title
+<a id="anchor-slug"></a>
+### 1. Title
 
 - **자료유형:** 기사 / 논문 / 보고서(시장조사) / 공식발표(IR·정책) / 기타
 - **출처:**
 - **저자/발행기관:**
 - **발행일:** YYYY-MM-DD
 - **링크/DOI:**
-- **요약 (3~5줄):**
-  - Fact-focused bullets; put interpretation on the last line as `(해석) ...`
-- **신뢰도:** A / B / C
-- **태그:** #tag1 #tag2
-- **비고:** (optional)
+- **요약 (영문 원문):** (optional for manual; auto includes en_summary_steps)
+  - **Overview:** ...
+- **요약 (한국어 번역):**
+  - Fact bullets; noun-style endings (-함/-임)
+  - Last line: `(해석) ...`
+- **신뢰도:** A / B / C (auto never assigns C)
+- **태그:** #tag1 #tag2 (max 4)
+- **비고:** analysis keywords · relevance (직접/간접) · matched keywords
 ```
 
 ## Tags (monthly report chapters)
@@ -53,6 +66,6 @@ Add when there are **2+ items** in the day (optional for a single item).
 
 - **A:** peer-reviewed journals, Tier-1 wire (Reuters/Bloomberg/AP), gov/international stats, Gartner/IDC/McKinsey
 - **B:** preprints, industry media, secondary reporting, corporate IR/press releases
-- **C:** anonymous sources, speculation, repackaged/unverified content
+- **C:** anonymous sources, speculation, repackaged/unverified content — **manual entries only**
 
 Full template: `templates/daily_research_log_template.md`

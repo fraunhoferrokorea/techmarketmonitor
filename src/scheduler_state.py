@@ -21,6 +21,24 @@ def report_exists(log_date: date) -> bool:
     return report_path(log_date).is_file()
 
 
+def remove_report(log_date: date) -> bool:
+    """Delete the daily markdown file for log_date if it exists."""
+    path = report_path(log_date)
+    if not path.is_file():
+        return False
+    path.unlink()
+    return True
+
+
+def report_dates_from_disk() -> list[date]:
+    dates: list[date] = []
+    for path in _REPORT_DIR.glob("daily_*.md"):
+        match = _REPORT_PATTERN.match(path.name)
+        if match:
+            dates.append(date.fromisoformat(match.group(1)))
+    return dates
+
+
 def load_last_completed_log_date() -> date | None:
     if not _STATE_FILE.is_file():
         return _infer_last_completed_log_date()

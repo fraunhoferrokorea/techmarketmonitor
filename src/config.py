@@ -11,6 +11,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 CONFIG_DIR = PROJECT_ROOT / "config"
 
 _KEYWORDS_TXT = PROJECT_ROOT / "keywords.txt"
+_SOURCES_TXT = PROJECT_ROOT / "sources.txt"
 
 _DEFAULT_KEYWORDS: list[str] = [
     "artificial intelligence", "machine learning", "large language model",
@@ -90,7 +91,29 @@ _SOURCE_GROUPS = (
 )
 
 
-def load_sources() -> list[dict]:
+def _load_sources_txt(path: Path) -> list[dict]:
+    """Read one source per line: name | url | category."""
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except FileNotFoundError:
+        return []
+
+    sources: list[dict] = []
+    for line in lines:
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        parts = [part.strip() for part in stripped.split("|")]
+        if len(parts) < 2:
+            continue
+        name, url = parts[0], parts[1]
+        category = parts[2] if len(parts) > 2 else "general"
+        if url:
+            sources.append({"name": name, "url": url, "category": category})
+    return sources
+
+
+def _load_sources_yaml() -> list[dict]:
     with (CONFIG_DIR / "sources.yaml").open(encoding="utf-8") as handle:
         data = yaml.safe_load(handle) or {}
 
@@ -99,3 +122,10 @@ def load_sources() -> list[dict]:
         for item in data.get(group, []):
             sources.append(item)
     return sources
+
+
+def load_sources() -> list[dict]:
+    raw = _load_sources_txt(_SOURCES_TXT)
+    if raw:
+        return raw
+    return _load_sources_yaml()

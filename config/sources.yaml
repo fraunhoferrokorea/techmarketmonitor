@@ -122,15 +122,69 @@ market_intel:
 
 # ── 7. 국내 ICT / 정책 / 공공 R&D ─────────────────────────────────────────
 korean:
-  - name: ETRI 전자통신동향분석
-    url: https://www.etri.re.kr/rss/news.xml
+  - name: 과기정통부 보도자료
+    url: https://www.msit.go.kr/user/rss/rss.do?bbsSeqNo=94
+    category: korean
+  - name: 과기정통부 정보통신
+    url: https://www.msit.go.kr/user/rss/rss.do?bbsSeqNo=67
+    category: korean
+  - name: 과기정통부 과학기술정책
+    url: https://www.msit.go.kr/user/rss/rss.do?bbsSeqNo=70
+    category: korean
+  - name: 과기정통부 연구성과
+    url: https://www.msit.go.kr/user/rss/rss.do?bbsSeqNo=89
+    category: korean
+  - name: 정책브리핑 산업통상부
+    url: https://www.korea.kr/rss/dept_motir.xml
+    category: korean
+  - name: 정책브리핑 과기정통부
+    url: https://www.korea.kr/rss/dept_msit.xml
+    category: korean
+  - name: KISTEP
+    url: https://www.kistep.re.kr/rss/board.es?bid=0051
+    category: korean
+  - name: KIPO 보도자료
+    url: https://www.kipo.go.kr/ko/report/UXmlRssApp.do?menuCd=SCD0200618
+    category: korean
+  - name: 연합뉴스 산업
+    url: https://www.yna.co.kr/rss/industry.xml
+    category: korean
+  - name: 연합뉴스 경제
+    url: https://www.yna.co.kr/rss/economy.xml
+    category: korean
+  - name: 뉴시스 속보
+    url: https://newsis.com/RSS/sokbo.xml
+    category: korean
+  - name: 한국경제
+    url: https://www.hankyung.com/feed/all-news
+    category: korean
+  - name: 동아일보 경제
+    url: https://rss.donga.com/economy.xml
+    category: korean
+  - name: 경향신문 경제
+    url: http://www.khan.co.kr/rss/rssdata/economy_news.xml
+    category: korean
+  - name: 파이낸셜뉴스
+    url: https://www.fnnews.com/rss/r20/fn_realnews_all.xml
+    category: korean
+  - name: 헤럴드경제
+    url: https://biz.heraldcorp.com/rss/google/newsAll
+    category: korean
+  - name: 전자신문 IT
+    url: http://rss.etnews.com/Section901.xml
+    category: korean
+  - name: 전자신문 통신/방송
+    url: http://rss.etnews.com/Section902.xml
     category: korean
   - name: ZDNet Korea
-    url: https://www.zdnet.co.kr/rss/news.xml
+    url: http://feeds.feedburner.com/zdkorea
     category: korean
-  - name: 전자신문
-    url: https://www.etnews.com/rss/allArticle.xml
+  - name: 조선일보 IT/과학
+    url: https://www.chosun.com/arc/outboundfeeds/rss/category/it-science/?outputType=xml
     category: korean
-  - name: IT Chosun
-    url: https://it.chosun.com/rss/
+  - name: 한겨레 과학
+    url: https://www.hani.co.kr/rss/science
+    category: korean
+  - name: 동아일보 과학
+    url: https://rss.donga.com/science.xml
     category: korean

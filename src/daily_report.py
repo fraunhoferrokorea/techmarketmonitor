@@ -408,6 +408,23 @@ _RELEVANCE_ORDER = {"direct": 0, "indirect": 1, "weak": 2, "none": 3}
 _RELEVANCE_LABEL = {"direct": "직접", "indirect": "간접", "weak": "약함"}
 
 
+def _relevance_sort_key(
+    article: SummarizedArticle,
+    top_keywords: list[str],
+) -> tuple[int, str]:
+    level = _classify_relevance(article, top_keywords)
+    return _RELEVANCE_ORDER[level], article.title.lower()
+
+
+def _sort_articles_by_relevance(
+    articles: list[SummarizedArticle],
+    top_keywords: list[str] | None,
+) -> list[SummarizedArticle]:
+    """Direct keyword relevance first, then indirect, weak, and none."""
+    kws = top_keywords or []
+    return sorted(articles, key=lambda a: _relevance_sort_key(a, kws))
+
+
 def _title_anchor_tokens(title: str) -> list[str]:
     """Return distinctive tokens from a title for relevance validation."""
     stop = {
@@ -797,7 +814,11 @@ def _build_keyword_signals(
     signals: list[str] = []
     kw_label = " · ".join(top_keywords[:3])
 
-    for article, fact, level_label, connection in items:
+    ordered = sorted(
+        items,
+        key=lambda row: 0 if row[2] == "직접" else 1 if row[2] == "간접" else 2,
+    )
+    for article, fact, level_label, connection in ordered:
         if level_label not in ("직접", "간접"):
             continue
         bracket = re.search(r"\*\*\[(.+?)\]\*\*", connection)
@@ -809,7 +830,7 @@ def _build_keyword_signals(
             break
 
     if not signals:
-        for article, fact, level_label, connection in items[:3]:
+        for article, fact, level_label, connection in ordered[:3]:
             short_fact = fact[:120] + ("…" if len(fact) > 120 else "")
             signals.append(f"- **[{kw_label}]** {short_fact}")
     return signals
@@ -854,7 +875,7 @@ def _build_executive_summary(
         level_key = next(k for k, v in _RELEVANCE_LABEL.items() if v == level_label)
         ranked.append((_RELEVANCE_ORDER[level_key], article, fact, level_label, connection))
 
-    ranked.sort(key=lambda row: (row[0], row[1].title))
+    ranked.sort(key=lambda row: (_relevance_sort_key(row[1], kws)))
 
     included_items: list[tuple[SummarizedArticle, str, str, str]] = []
     for _, article, fact, level_label, connection in ranked:
@@ -963,15 +984,17 @@ def _build_markdown(
         "",
     ]
 
-    if articles:
-        article_slugs = _build_item_slugs(articles)
-        lines += _build_executive_summary(articles, top_keywords, article_slugs)
+    sorted_articles = _sort_articles_by_relevance(articles, top_keywords) if articles else []
+
+    if sorted_articles:
+        article_slugs = _build_item_slugs(sorted_articles)
+        lines += _build_executive_summary(sorted_articles, top_keywords, article_slugs)
     else:
         article_slugs = {}
 
     lines += ["## 항목 기록", ""]
 
-    for index, article in enumerate(articles, start=1):
+    for index, article in enumerate(sorted_articles, start=1):
         lines += _build_item_block(
             article, index, log_date, top_keywords, article_slugs[article.url]
         )

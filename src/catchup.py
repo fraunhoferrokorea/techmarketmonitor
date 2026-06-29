@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import logging
-from datetime import date, datetime, time, timedelta
-from zoneinfo import ZoneInfo
+from datetime import date, datetime, timedelta
 
 from src.config import Settings, load_settings
+from src.daily_sync import repair_inconsistencies
+from src.daily_windows import now_kst, window_end_for_log_date
 from src.pipeline import run_daily_monitor
+from src.storage import DailyLogStore
 from src.scheduler_state import (
     load_last_completed_log_date,
     report_exists,
@@ -13,14 +15,6 @@ from src.scheduler_state import (
 )
 
 logger = logging.getLogger(__name__)
-
-KST = ZoneInfo("Asia/Seoul")
-DAILY_RUN_HOUR = 8
-DAILY_RUN_MINUTE = 0
-
-
-def now_kst() -> datetime:
-    return datetime.now(tz=KST)
 
 
 def owed_log_dates(now: datetime | None = None) -> list[date]:
@@ -43,19 +37,6 @@ def owed_log_dates(now: datetime | None = None) -> list[date]:
     return dates
 
 
-def window_end_for_log_date(log_date: date, now: datetime) -> datetime:
-    """Define the article collection window for a report date."""
-    today = now.date()
-    if log_date >= today:
-        return now
-
-    return datetime.combine(
-        log_date + timedelta(days=1),
-        time(DAILY_RUN_HOUR, DAILY_RUN_MINUTE),
-        tzinfo=KST,
-    )
-
-
 def run_daily_catchup(
     settings: Settings | None = None,
     now: datetime | None = None,
@@ -63,13 +44,22 @@ def run_daily_catchup(
     """Run the daily pipeline for every missing report through today."""
     settings = settings or load_settings()
     current = now or now_kst()
+    store = DailyLogStore(settings.database_path)
     results: list[dict] = []
+
+    repair_results = repair_inconsistencies(settings=settings, now=current)
+    for item in repair_results:
+        item["phase"] = "repair"
+        results.append(item)
 
     for log_date in owed_log_dates(current):
         window_end = window_end_for_log_date(log_date, current)
 
-        if report_exists(log_date):
-            logger.info("Report already exists for %s — marking complete", log_date)
+        if report_exists(log_date) and store.count_for_date(log_date) > 0:
+            logger.info(
+                "Report and DB entries already exist for %s — marking complete",
+                log_date,
+            )
             save_last_completed_log_date(log_date)
             results.append(
                 {
@@ -78,6 +68,12 @@ def run_daily_catchup(
                 }
             )
             continue
+
+        if report_exists(log_date):
+            logger.warning(
+                "Report file exists for %s but DB has no entries — re-running pipeline",
+                log_date,
+            )
 
         logger.info(
             "Catch-up run for report %s (window ends %s KST)",

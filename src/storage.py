@@ -124,3 +124,39 @@ class DailyLogStore:
                 (log_date.isoformat(),),
             ).fetchone()
         return int(row["count"]) if row else 0
+
+    def get_log_dates(self) -> list[date]:
+        with self._connect() as conn:
+            rows = conn.execute(
+                "SELECT DISTINCT log_date FROM daily_logs ORDER BY log_date ASC"
+            ).fetchall()
+        return [date.fromisoformat(row["log_date"]) for row in rows]
+
+    def get_entries_for_date(self, log_date: date) -> list[dict]:
+        with self._connect() as conn:
+            rows = conn.execute(
+                """
+                SELECT * FROM daily_logs
+                WHERE log_date = ?
+                ORDER BY id ASC
+                """,
+                (log_date.isoformat(),),
+            ).fetchall()
+
+        results: list[dict] = []
+        for row in rows:
+            item = dict(row)
+            item["matched_keywords"] = json.loads(item["matched_keywords"])
+            item["key_trends"] = json.loads(item["key_trends"])
+            item["ko_summary_steps"] = json.loads(item.get("ko_summary_steps") or "[]")
+            item["en_summary_steps"] = json.loads(item.get("en_summary_steps") or "[]")
+            results.append(item)
+        return results
+
+    def delete_for_date(self, log_date: date) -> int:
+        with self._connect() as conn:
+            cursor = conn.execute(
+                "DELETE FROM daily_logs WHERE log_date = ?",
+                (log_date.isoformat(),),
+            )
+            return cursor.rowcount

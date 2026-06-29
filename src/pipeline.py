@@ -4,17 +4,20 @@ import json
 import logging
 import os
 from datetime import date, datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 
 from src.config import Settings, load_settings, load_sources
 from src.daily_report import save_daily_report
 from src.fetchers.registry import build_fetchers
 from src.filter import filter_articles
 from src.models import RawArticle
+from src.scheduler_state import remove_report, report_exists
 from src.storage import DailyLogStore
 from src.summarizer import Summarizer
 
 logger = logging.getLogger(__name__)
 
+KST = ZoneInfo("Asia/Seoul")
 _MAX_AGE_HOURS = 24
 # Groq free tier: ~100k tokens/day. Each article uses ~2,500 tokens → cap at 30.
 # Override with MAX_ARTICLES_PER_RUN env var if needed.
@@ -60,6 +63,47 @@ def _within_24h(
     return recent
 
 
+def _within_log_date(
+    articles: list[RawArticle],
+    log_date: date,
+    window_end: datetime | None = None,
+) -> list[RawArticle]:
+    """Keep articles published on log_date (KST calendar day).
+
+    Used for catch-up runs so consecutive report dates do not share a rolling
+    24h window. Articles without published_at are excluded.
+    """
+    end_kst: datetime | None = None
+    if window_end is not None:
+        end = window_end
+        if end.tzinfo is None:
+            end = end.replace(tzinfo=KST)
+        end_kst = end.astimezone(KST)
+
+    matched: list[RawArticle] = []
+    for article in articles:
+        if article.published_at is None:
+            logger.debug("Skipping undated article: %s", article.title[:60])
+            continue
+        pub = article.published_at
+        if pub.tzinfo is None:
+            pub = pub.replace(tzinfo=timezone.utc)
+        pub_kst = pub.astimezone(KST)
+        if pub_kst.date() != log_date:
+            logger.debug(
+                "Skipping article outside log_date (%s vs %s): %s",
+                pub_kst.date(),
+                log_date,
+                article.title[:60],
+            )
+            continue
+        if end_kst is not None and pub_kst > end_kst:
+            logger.debug("Skipping future article (%s): %s", pub_kst, article.title[:60])
+            continue
+        matched.append(article)
+    return matched
+
+
 def run_daily_monitor(
     log_date: date | None = None,
     settings: Settings | None = None,
@@ -82,14 +126,25 @@ def run_daily_monitor(
         except Exception as exc:
             logger.error("Fetcher failed (%s): %s", fetcher.__class__.__name__, exc)
 
-    recent_articles = _within_24h(raw_articles, window_end=window_end)
-    logger.info(
-        "24h filter (window_end=%s): %d → %d articles (dropped %d old)",
-        (window_end or datetime.now(tz=timezone.utc)).isoformat(),
-        len(raw_articles),
-        len(recent_articles),
-        len(raw_articles) - len(recent_articles),
-    )
+    if window_end is not None:
+        recent_articles = _within_log_date(
+            raw_articles, log_date, window_end=window_end
+        )
+        logger.info(
+            "Calendar-day filter (log_date=%s, window_end=%s): %d → %d articles",
+            log_date.isoformat(),
+            window_end.isoformat(),
+            len(raw_articles),
+            len(recent_articles),
+        )
+    else:
+        recent_articles = _within_24h(raw_articles, window_end=None)
+        logger.info(
+            "24h filter (window_end=now): %d → %d articles (dropped %d old)",
+            len(raw_articles),
+            len(recent_articles),
+            len(raw_articles) - len(recent_articles),
+        )
 
     filtered = filter_articles(recent_articles, keywords)
     logger.info("Filtered to %d keyword-matching articles", len(filtered))
@@ -105,6 +160,12 @@ def run_daily_monitor(
         filtered = filtered[:_MAX_ARTICLES_PER_RUN]
 
     if not filtered:
+        if window_end is not None and report_exists(log_date):
+            remove_report(log_date)
+            logger.info(
+                "Removed stale daily report for %s (no articles for this date)",
+                log_date.isoformat(),
+            )
         return {
             "log_date": log_date.isoformat(),
             "fetched": len(raw_articles),
@@ -123,6 +184,12 @@ def run_daily_monitor(
 
     if not filtered:
         logger.info("No new articles after dedup filter — skipping summarization")
+        if window_end is not None and report_exists(log_date):
+            remove_report(log_date)
+            logger.info(
+                "Removed stale daily report for %s (all articles already processed)",
+                log_date.isoformat(),
+            )
         return {
             "log_date": log_date.isoformat(),
             "fetched": len(raw_articles),
