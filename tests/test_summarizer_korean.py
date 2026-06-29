@@ -1,0 +1,45 @@
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from src.summarizer import polish_korean
+
+
+def test_polish_korean_converts_formal_endings_to_noun_style() -> None:
+    cases = {
+        "엘론 머스크의 궤도 데이터 센터 비전은 다양한 산업 리더들의 의문을 불러일으켰습니다.": (
+            "엘론 머스크의 궤도 데이터 센터 비전은 다양한 산업 리더들의 의문을 불러일으켰음."
+        ),
+        "중국 PV 산업에서 폴리실리콘 가격이 계속해서 하락하고 있는 것으로 나타났습니다.": (
+            "중국 PV 산업에서 폴리실리콘 가격이 계속해서 하락하고 있는 것으로 나타났음."
+        ),
+        "Firmus는 인도네시아에서 첫 데이터 센터를 건설하기 위해 Nvidia와 파트너십을 맺었다.": (
+            "Firmus는 인도네시아에서 첫 데이터 센터를 건설하기 위해 Nvidia와 파트너십을 맺었음."
+        ),
+        "Firmus는 Nvidia와 파트너십을 맺음.": "Firmus는 Nvidia와 파트너십을 맺었음.",
+        "의문을 불러일으킴.": "의문을 불러일으켰음.",
+        "집중되어 있는 것으로 나타남.": "집중되어 있는 것으로 나타났음.",
+        "성능과 효율성을 향상시킵니다.": "성능과 효율성을 향상시킴.",
+        "중점을 둔다.": "중점을 둠.",
+        "폴리실리콘 가격은 변하지 않았습니다.": "폴리실리콘 가격은 변하지 않았음.",
+        "SNEC 2026 컨퍼런스에서 에너지 저장 분야는 장기 에너지 저장 시스템에 초점을 맞춘 것으로 나타났다.": (
+            "SNEC 2026 컨퍼런스에서 에너지 저장 분야는 장기 에너지 저장 시스템에 초점을 맞춘 것으로 나타났음."
+        ),
+        "여러 AI 관련 스타트업이 큰 규모의 펀딩을 받았으며, Baseten이 100만 달러의 펀딩을 받았다.": (
+            "여러 AI 관련 스타트업이 큰 규모의 펀딩을 받았으며, Baseten이 100만 달러의 펀딩을 받았음."
+        ),
+        "이 협력은 데이터 센터 및 AI 성장에 대한 전기를 충족하는 데 중요하다.": (
+            "이 협력은 데이터 센터 및 AI 성장에 대한 전기를 충족하는 데 중요함."
+        ),
+        "NOVOSENSE는 Isolation+ 플랫폼을 도입하여 시스템 안전성을 높였다.": (
+            "NOVOSENSE는 Isolation+ 플랫폼을 도입하여 시스템 안전성을 높였음."
+        ),
+    }
+    for raw, expected in cases.items():
+        assert polish_korean(raw) == expected, f"{raw!r} -> {polish_korean(raw)!r}, expected {expected!r}"
+
+
+if __name__ == "__main__":
+    test_polish_korean_converts_formal_endings_to_noun_style()
+    print("ok")

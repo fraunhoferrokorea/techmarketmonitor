@@ -159,6 +159,7 @@ def log_to_summarized_article(log: dict) -> SummarizedArticle:
         key_trends=list(log.get("key_trends") or []),
         ko_summary_steps=list(log.get("ko_summary_steps") or []),
         en_summary_steps=list(log.get("en_summary_steps") or []),
+        keyword_relevance=str(log.get("keyword_relevance") or ""),
     )
 
 
@@ -585,12 +586,12 @@ def _extract_fact_sentence(
 
     ranked.sort(key=lambda x: x[0])
     for _, best in ranked:
-        return normalize_korean_endings(best)
+        return polish_korean(best)
 
     if article.llm_summary:
         headline = re.sub(r"\s*Source:.*$", "", article.llm_summary, flags=re.IGNORECASE).strip()
         if headline and not _is_vague(_first_sentence(headline)):
-            return normalize_korean_endings(_first_sentence(headline))
+            return polish_korean(_first_sentence(headline))
     return ""
 
 

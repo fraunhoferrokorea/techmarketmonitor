@@ -9,6 +9,7 @@ from src.config import Settings, load_settings
 from src.daily_windows import window_end_for_log_date
 from src.daily_report import save_daily_report
 from src.models import SummarizedArticle
+from src.summarizer import repolish_summarized_article
 from src.pipeline import run_daily_monitor
 from src.scheduler_state import (
     load_last_completed_log_date,
@@ -48,6 +49,7 @@ def _row_to_article(row: dict) -> SummarizedArticle:
         key_trends=row["key_trends"],
         ko_summary_steps=row["ko_summary_steps"],
         en_summary_steps=row["en_summary_steps"],
+        keyword_relevance=row.get("keyword_relevance") or "",
     )
 
 
@@ -160,6 +162,8 @@ def rebuild_markdown_from_db(
     log_date: date,
     store: DailyLogStore,
     settings: Settings,
+    *,
+    repolish_db: bool = True,
 ) -> dict:
     """Regenerate markdown from stored summaries (no LLM)."""
     rows = store.get_entries_for_date(log_date)
@@ -169,7 +173,25 @@ def rebuild_markdown_from_db(
             "status": "skipped_no_db_entries",
         }
 
-    articles = [_row_to_article(row) for row in rows]
+    articles: list[SummarizedArticle] = []
+    repolished_rows = 0
+    for row in rows:
+        article = repolish_summarized_article(_row_to_article(row))
+        articles.append(article)
+        if repolish_db:
+            original_ko = row.get("ko_summary_steps") or []
+            original_kr = row.get("keyword_relevance") or ""
+            if (
+                article.ko_summary_steps != original_ko
+                or article.keyword_relevance != original_kr
+            ):
+                store.update_korean_text(
+                    row["id"],
+                    article.ko_summary_steps,
+                    article.keyword_relevance,
+                )
+                repolished_rows += 1
+
     path = save_daily_report(
         log_date,
         articles,
@@ -179,6 +201,7 @@ def rebuild_markdown_from_db(
         "log_date": log_date.isoformat(),
         "status": "rebuilt_markdown",
         "stored": len(articles),
+        "repolished_rows": repolished_rows,
         "daily_report": str(path) if path else None,
     }
 

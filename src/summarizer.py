@@ -43,79 +43,132 @@ _KOREAN_PHRASE_FIXES: list[tuple[str, str]] = [
     (r"([가-힣A-Za-z0-9]+)는의\s", r"\1의 "),
     (r"([가-힣A-Za-z0-9]+)의은\s", r"\1은 "),
     (r"([가-힣A-Za-z0-9]+)의는\s", r"\1는 "),
-    # 합니다/ㅂ니다체 → -함/임체 normalization (sentence-final, . optional)
-    # Must precede -다체 patterns to avoid partial mismatches.
-    (r"해야\s*합니다([.。]?)$", r"해야 함\1"),
-    (r"([가-힣])합니다([.。]?)$", r"\1함\2"),
-    (r"([가-힣])입니다([.。]?)$", r"\1임\2"),
-    (r"([가-힣])있습니다([.。]?)$", r"\1있음\2"),
-    (r"([가-힣])없습니다([.。]?)$", r"\1없음\2"),
-    (r"([가-힣])됩니다([.。]?)$", r"\1됨\2"),
-    (r"([가-힣])보입니다([.。]?)$", r"\1보임\2"),
-    (r"([가-힣])줍니다([.。]?)$", r"\1줌\2"),
-    (r"([가-힣])둡니다([.。]?)$", r"\1둠\2"),
-    (r"나타냅니다([.。]?)$", r"나타냄\1"),
-    (r"나타납니다([.。]?)$", r"나타남\1"),
-    # Terminal -다 → -함/임 normalization (sentence-final -다체 → 명사형 종결)
-    # Longer / more-specific patterns first to avoid partial mismatches.
-    (r"해야\s*한다([.。]?)$", r"해야 함\1"),
-    (r"([가-힣])한다([.。]?)$", r"\1함\2"),
-    (r"([가-힣])이다([.。]?)$", r"\1임\2"),
-    (r"([가-힣])있다([.。]?)$", r"\1있음\2"),
-    (r"([가-힣])없다([.。]?)$", r"\1없음\2"),
-    (r"([가-힣])된다([.。]?)$", r"\1됨\2"),
-    (r"([가-힣])보인다([.。]?)$", r"\1보임\2"),
-    (r"([가-힣])온다([.。]?)$", r"\1옴\2"),
-    (r"([가-힣])진다([.。]?)$", r"\1짐\2"),
-    (r"([가-힣])친다([.。]?)$", r"\1침\2"),
-    (r"나타낸다([.。]?)$", r"나타냄\1"),
-    (r"나타난다([.。]?)$", r"나타남\1"),
+    # 합니다/ㅂ니다체 → -함/-임/-었음 (sentence-final, . optional)
+    # Past tense before present; longer patterns before shorter.
+    (r"지\s*않\s*았습니다([.。？!?]?)$", r"지 않았음\1"),
+    (r"지\s*않\s*았다([.。？!?]?)$", r"지 않았음\1"),
+    (r"났습니다([.。？!?]?)$", r"났음\1"),
+    (r"났다([.。？!?]?)$", r"났음\1"),
+    (r"켰습니다([.。？!?]?)$", r"켰음\1"),
+    (r"켰다([.。？!?]?)$", r"켰음\1"),
+    (r"렸습니다([.。？!?]?)$", r"렸음\1"),
+    (r"렸다([.。？!?]?)$", r"렸음\1"),
+    (r"하였습니다([.。？!?]?)$", r"했음\1"),
+    (r"했습니다([.。？!?]?)$", r"했음\1"),
+    (r"하였다([.。？!?]?)$", r"했음\1"),
+    (r"했다([.。？!?]?)$", r"했음\1"),
+    (r"되었습니다([.。？!?]?)$", r"되었음\1"),
+    (r"됐습니다([.。？!?]?)$", r"됐음\1"),
+    (r"되었다([.。？!?]?)$", r"되었음\1"),
+    (r"됐다([.。？!?]?)$", r"됐음\1"),
+    (r"였습니다([.。？!?]?)$", r"였음\1"),
+    (r"([가-힣])였다([.。？!?]?)$", r"\1였음\2"),
+    (r"었습니다([.。？!?]?)$", r"었음\1"),
+    (r"([가-힣])었다([.。？!?]?)$", r"\1었음\2"),
+    (r"([가-힣])았다([.。？!?]?)$", r"\1았음\2"),
+    (r"않았습니다([.。？!?]?)$", r"않았음\1"),
+    (r"해야\s*합니다([.。？!?]?)$", r"해야 함\1"),
+    (r"([가-힣])합니다([.。？!?]?)$", r"\1함\2"),
+    (r"([가-힣])입니다([.。？!?]?)$", r"\1임\2"),
+    (r"([가-힣])있습니다([.。？!?]?)$", r"\1있음\2"),
+    (r"([가-힣])없습니다([.。？!?]?)$", r"\1없음\2"),
+    (r"([가-힣])됩니다([.。？!?]?)$", r"\1됨\2"),
+    (r"([가-힣])보입니다([.。？!?]?)$", r"\1보임\2"),
+    (r"([가-힣])줍니다([.。？!?]?)$", r"\1줌\2"),
+    (r"([가-힣])둡니다([.。？!?]?)$", r"\1둠\2"),
+    (r"나타냅니다([.。？!?]?)$", r"나타냄\1"),
+    (r"나타납니다([.。？!?]?)$", r"나타남\1"),
+    (r"습니다([.。？!?]?)$", r"음\1"),
+    (r"해야\s*한다([.。？!?]?)$", r"해야 함\1"),
+    (r"([가-힣])한다([.。？!?]?)$", r"\1함\2"),
+    (r"([가-힣])하다([.。？!?]?)$", r"\1함\2"),
+    (r"([가-힣])이다([.。？!?]?)$", r"\1임\2"),
+    (r"([가-힣])있다([.。？!?]?)$", r"\1있음\2"),
+    (r"([가-힣])없다([.。？!?]?)$", r"\1없음\2"),
+    (r"([가-힣])된다([.。？!?]?)$", r"\1됨\2"),
+    (r"([가-힣])보인다([.。？!?]?)$", r"\1보임\2"),
+    (r"([가-힣])온다([.。？!?]?)$", r"\1옴\2"),
+    (r"([가-힣])진다([.。？!?]?)$", r"\1짐\2"),
+    (r"([가-힣])친다([.。？!?]?)$", r"\1침\2"),
+    (r"나타낸다([.。？!?]?)$", r"나타냄\1"),
+    (r"나타난다([.。？!?]?)$", r"나타남\1"),
+    (r"([가-힣]+)킵니다([.。？!?]?)$", r"\1킴\2"),
+    (r"둔다([.。？!?]?)$", r"둠\1"),
+    (r"보여준다([.。？!?]?)$", r"보여줬음\1"),
+    (r"만든다([.。？!?]?)$", r"만듦\1"),
 ]
 
-# Sentence-final -다체/-합니다체 → -함/임체 (명사형 종결).
+# Repairs for past tense truncated by an older normalizer (맺음→맺었음, etc.).
+_TRUNCATED_PAST_REPAIRS: list[tuple[str, str]] = [
+    (r"불러일으킴([.。？!?]?)$", r"불러일으켰음\1"),
+    (r"일으킴([.。？!?]?)$", r"일으켰음\1"),
+    (r"것으로 나타남([.。？!?]?)$", r"것으로 나타났음\1"),
+    (r"으로 나타남([.。？!?]?)$", r"으로 나타났음\1"),
+    (r"맺음([.。？!?]?)$", r"맺었음\1"),
+]
+
+# Sentence-final -다체/-합니다체 → -함/임/-었음 (명사형 종결).
 _ENDING_NORMALIZERS: list[tuple[re.Pattern[str], str]] = [
-    (re.compile(r"고\s*있도록\s*한다([.。？]?)$"), r"고 있도록 함\1"),
-    (re.compile(r"지\s*않\s*있다([.。？]?)$"), r"지 않음\1"),
-    (re.compile(r"지\s*않\s*한다([.。？]?)$"), r"지 않음\1"),
-    (re.compile(r"지\s*않\s*습니다([.。？]?)$"), r"지 않음\1"),
-    (re.compile(r"지\s*않\s*는다([.。？]?)$"), r"지 않음\1"),
-    (re.compile(r"고\s*있습니다([.。？]?)$"), r"고 있음\1"),
-    (re.compile(r"고\s*있다([.。？]?)$"), r"고 있음\1"),
-    (re.compile(r"되었습니다([.。？]?)$"), r"됨\1"),
-    (re.compile(r"됐습니다([.。？]?)$"), r"됨\1"),
-    (re.compile(r"되었다([.。？]?)$"), r"됨\1"),
-    (re.compile(r"됐다([.。？]?)$"), r"됨\1"),
-    (re.compile(r"하였습니다([.。？]?)$"), r"함\1"),
-    (re.compile(r"했습니다([.。？]?)$"), r"함\1"),
-    (re.compile(r"하였다([.。？]?)$"), r"함\1"),
-    (re.compile(r"했다([.。？]?)$"), r"함\1"),
-    (re.compile(r"겠습니다([.。？]?)$"), r"겠음\1"),
-    (re.compile(r"였습니다([.。？]?)$"), r"였음\1"),
-    (re.compile(r"었습니다([.。？]?)$"), r"었음\1"),
-    (re.compile(r"해야\s*합니다([.。？]?)$"), r"해야 함\1"),
-    (re.compile(r"해야\s*한다([.。？]?)$"), r"해야 함\1"),
-    (re.compile(r"있습니다([.。？]?)$"), r"있음\1"),
-    (re.compile(r"없습니다([.。？]?)$"), r"없음\1"),
-    (re.compile(r"됩니다([.。？]?)$"), r"됨\1"),
-    (re.compile(r"보입니다([.。？]?)$"), r"보임\1"),
-    (re.compile(r"줍니다([.。？]?)$"), r"줌\1"),
-    (re.compile(r"둡니다([.。？]?)$"), r"둠\1"),
-    (re.compile(r"나타냅니다([.。？]?)$"), r"나타냄\1"),
-    (re.compile(r"나타납니다([.。？]?)$"), r"나타남\1"),
-    (re.compile(r"입니다([.。？]?)$"), r"임\1"),
-    (re.compile(r"합니다([.。？]?)$"), r"함\1"),
-    (re.compile(r"나타낸다([.。？]?)$"), r"나타냄\1"),
-    (re.compile(r"나타난다([.。？]?)$"), r"나타남\1"),
-    (re.compile(r"겠다([.。？]?)$"), r"겠음\1"),
-    (re.compile(r"보인다([.。？]?)$"), r"보임\1"),
-    (re.compile(r"온다([.。？]?)$"), r"옴\1"),
-    (re.compile(r"진다([.。？]?)$"), r"짐\1"),
-    (re.compile(r"친다([.。？]?)$"), r"침\1"),
-    (re.compile(r"한다([.。？]?)$"), r"함\1"),
-    (re.compile(r"된다([.。？]?)$"), r"됨\1"),
-    (re.compile(r"있다([.。？]?)$"), r"있음\1"),
-    (re.compile(r"없다([.。？]?)$"), r"없음\1"),
-    (re.compile(r"이다([.。？]?)$"), r"임\1"),
+    (re.compile(r"고\s*있도록\s*한다([.。？!?]?)$"), r"고 있도록 함\1"),
+    (re.compile(r"지\s*않\s*있다([.。？!?]?)$"), r"지 않음\1"),
+    (re.compile(r"지\s*않\s*한다([.。？!?]?)$"), r"지 않음\1"),
+    (re.compile(r"지\s*않\s*습니다([.。？!?]?)$"), r"지 않음\1"),
+    (re.compile(r"지\s*않\s*는다([.。？!?]?)$"), r"지 않음\1"),
+    (re.compile(r"지\s*않\s*았습니다([.。？!?]?)$"), r"지 않았음\1"),
+    (re.compile(r"지\s*않\s*았다([.。？!?]?)$"), r"지 않았음\1"),
+    (re.compile(r"고\s*있습니다([.。？!?]?)$"), r"고 있음\1"),
+    (re.compile(r"고\s*있다([.。？!?]?)$"), r"고 있음\1"),
+    (re.compile(r"났습니다([.。？!?]?)$"), r"났음\1"),
+    (re.compile(r"났다([.。？!?]?)$"), r"났음\1"),
+    (re.compile(r"켰습니다([.。？!?]?)$"), r"켰음\1"),
+    (re.compile(r"켰다([.。？!?]?)$"), r"켰음\1"),
+    (re.compile(r"렸습니다([.。？!?]?)$"), r"렸음\1"),
+    (re.compile(r"렸다([.。？!?]?)$"), r"렸음\1"),
+    (re.compile(r"하였습니다([.。？!?]?)$"), r"했음\1"),
+    (re.compile(r"했습니다([.。？!?]?)$"), r"했음\1"),
+    (re.compile(r"하였다([.。？!?]?)$"), r"했음\1"),
+    (re.compile(r"했다([.。？!?]?)$"), r"했음\1"),
+    (re.compile(r"되었습니다([.。？!?]?)$"), r"되었음\1"),
+    (re.compile(r"됐습니다([.。？!?]?)$"), r"됐음\1"),
+    (re.compile(r"되었다([.。？!?]?)$"), r"되었음\1"),
+    (re.compile(r"됐다([.。？!?]?)$"), r"됐음\1"),
+    (re.compile(r"겠습니다([.。？!?]?)$"), r"겠음\1"),
+    (re.compile(r"였습니다([.。？!?]?)$"), r"였음\1"),
+    (re.compile(r"([가-힣])였다([.。？!?]?)$"), r"\1였음\2"),
+    (re.compile(r"었습니다([.。？!?]?)$"), r"었음\1"),
+    (re.compile(r"([가-힣])었다([.。？!?]?)$"), r"\1었음\2"),
+    (re.compile(r"([가-힣])았다([.。？!?]?)$"), r"\1았음\2"),
+    (re.compile(r"않았습니다([.。？!?]?)$"), r"않았음\1"),
+    (re.compile(r"해야\s*합니다([.。？!?]?)$"), r"해야 함\1"),
+    (re.compile(r"해야\s*한다([.。？!?]?)$"), r"해야 함\1"),
+    (re.compile(r"있습니다([.。？!?]?)$"), r"있음\1"),
+    (re.compile(r"없습니다([.。？!?]?)$"), r"없음\1"),
+    (re.compile(r"됩니다([.。？!?]?)$"), r"됨\1"),
+    (re.compile(r"보입니다([.。？!?]?)$"), r"보임\1"),
+    (re.compile(r"줍니다([.。？!?]?)$"), r"줌\1"),
+    (re.compile(r"둡니다([.。？!?]?)$"), r"둠\1"),
+    (re.compile(r"나타냅니다([.。？!?]?)$"), r"나타냄\1"),
+    (re.compile(r"나타납니다([.。？!?]?)$"), r"나타남\1"),
+    (re.compile(r"입니다([.。？!?]?)$"), r"임\1"),
+    (re.compile(r"합니다([.。？!?]?)$"), r"함\1"),
+    (re.compile(r"나타낸다([.。？!?]?)$"), r"나타냄\1"),
+    (re.compile(r"나타난다([.。？!?]?)$"), r"나타남\1"),
+    (re.compile(r"겠다([.。？!?]?)$"), r"겠음\1"),
+    (re.compile(r"보인다([.。？!?]?)$"), r"보임\1"),
+    (re.compile(r"온다([.。？!?]?)$"), r"옴\1"),
+    (re.compile(r"진다([.。？!?]?)$"), r"짐\1"),
+    (re.compile(r"친다([.。？!?]?)$"), r"침\1"),
+    (re.compile(r"([가-힣])한다([.。？!?]?)$"), r"\1함\2"),
+    (re.compile(r"([가-힣])하다([.。？!?]?)$"), r"\1함\2"),
+    (re.compile(r"([가-힣]+)킵니다([.。？!?]?)$"), r"\1킴\2"),
+    (re.compile(r"둔다([.。？!?]?)$"), r"둠\1"),
+    (re.compile(r"보여준다([.。？!?]?)$"), r"보여줬음\1"),
+    (re.compile(r"만든다([.。？!?]?)$"), r"만듦\1"),
+    (re.compile(r"된다([.。？!?]?)$"), r"됨\1"),
+    (re.compile(r"있다([.。？!?]?)$"), r"있음\1"),
+    (re.compile(r"없다([.。？!?]?)$"), r"없음\1"),
+    (re.compile(r"이다([.。？!?]?)$"), r"임\1"),
+    (re.compile(r"습니다([.。？!?]?)$"), r"음\1"),
 ]
 
 SYSTEM_PROMPT = """You are a senior tech market intelligence analyst writing for a general audience. Your goal is MARKET RESEARCH — not just technology description. Every analysis must be accurate, clearly written, and easy to understand for someone without a technical background. Avoid jargon; if a technical term is unavoidable, explain it in one plain-language phrase.
@@ -210,9 +263,11 @@ CRITICAL KOREAN GENERATION RULES (반드시 준수):
 - 같은 용어는 두 번째 등장부터 원어만 사용.
 
 [4. 문체 및 종결어미 — 절대 통일]
-- **ko_summary_steps와 keyword_relevance의 모든 문장**은 예외 없이 명사형 종결로 마친다: '-함', '-임', '-전망됨', '-분석됨', '-확인됨', '-나타남', '-이어짐'.
-- '-입니다', '-합니다', '-됩니다', '-있습니다', '-있다', '-한다', '-이다' 등 -다체/-합니다체 어미는 ko_summary_steps와 keyword_relevance에서 절대 사용하지 않는다.
-- 한 응답 내 여러 문장의 종결어미가 통일되어야 한다. 일부는 '-함', 일부는 '-한다', 일부는 '-합니다'로 혼용하는 것은 금지.
+- **ko_summary_steps와 keyword_relevance의 모든 문장**은 예외 없이 명사형 종결로 마친다.
+- **과거 사실·완료**: '-었음', '-았음', '-였음', '-했음', '-났음', '-켰음' (예: '맺었다'→'맺었음', '나타났다'→'나타났음', '받았다'→'받았음').
+- **현재·일반 서술**: '-함', '-임', '-됨', '-전망됨', '-분석됨', '-확인됨', '-이어짐' (예: '강조한다'→'강조함', '중요하다'→'중요함').
+- '-입니다', '-합니다', '-됩니다', '-있습니다', '-있다', '-한다', '-이다', '-었다', '-았다' 등 -다체/-합니다체 어미는 절대 사용하지 않는다.
+- 한 응답 내 여러 문장의 종결어미가 통일되어야 한다. '-습니다/ㅂ니다'와 '-다' 종결 혼용 금지.
 - 서술어가 명사구로 자연스럽게 끝나는 경우, 종결어미 없이 명사로 마친다.
   * 허용 예: "~에 주목할 필요" / 금지 예: "~에 주목할 필요가 있다", "~에 주목할 필요가 있습니다"
 
@@ -260,12 +315,40 @@ def normalize_korean_endings_sentences(text: str) -> str:
     return " ".join(normalize_korean_endings(part) for part in parts if part)
 
 
+def repolish_summarized_article(article: SummarizedArticle) -> SummarizedArticle:
+    """Re-apply Korean ending normalization to stored summary fields."""
+    ko_steps = [polish_korean(str(s).strip()) for s in article.ko_summary_steps if str(s).strip()]
+    keyword_relevance = polish_korean(article.keyword_relevance.strip()) if article.keyword_relevance else ""
+    return SummarizedArticle(
+        title=article.title,
+        url=article.url,
+        source_name=article.source_name,
+        category=article.category,
+        published_at=article.published_at,
+        matched_keywords=article.matched_keywords,
+        llm_summary=article.llm_summary,
+        key_trends=article.key_trends,
+        ko_summary_steps=ko_steps,
+        en_summary_steps=article.en_summary_steps,
+        keyword_relevance=keyword_relevance,
+    )
+
+
 def polish_korean(text: str) -> str:
     """Fix common literal calques and remove stray CJK characters in Korean LLM output."""
     polished = strip_cjk_from_korean(text)
     for pattern, replacement in _KOREAN_PHRASE_FIXES:
         polished = re.sub(pattern, replacement, polished)
-    return normalize_korean_endings_sentences(polished)
+    polished = normalize_korean_endings_sentences(polished)
+    parts = re.split(r"(?<=[.!?。？])\s+", polished.strip())
+    repaired: list[str] = []
+    for part in parts:
+        if not part:
+            continue
+        for pattern, replacement in _TRUNCATED_PAST_REPAIRS:
+            part = re.sub(pattern, replacement, part)
+        repaired.append(part)
+    return " ".join(repaired)
 
 
 def _extract_json(content: str) -> dict:

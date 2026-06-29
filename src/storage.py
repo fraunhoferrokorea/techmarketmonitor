@@ -53,6 +53,32 @@ class DailyLogStore:
                     )
                 except sqlite3.OperationalError:
                     pass  # Column already exists
+            try:
+                conn.execute(
+                    "ALTER TABLE daily_logs ADD COLUMN keyword_relevance TEXT NOT NULL DEFAULT ''"
+                )
+            except sqlite3.OperationalError:
+                pass
+
+    def update_korean_text(
+        self,
+        row_id: int,
+        ko_summary_steps: list[str],
+        keyword_relevance: str = "",
+    ) -> None:
+        with self._connect() as conn:
+            conn.execute(
+                """
+                UPDATE daily_logs
+                SET ko_summary_steps = ?, keyword_relevance = ?
+                WHERE id = ?
+                """,
+                (
+                    json.dumps(ko_summary_steps),
+                    keyword_relevance,
+                    row_id,
+                ),
+            )
 
     def save_entries(self, log_date: date, entries: list[SummarizedArticle]) -> int:
         inserted = 0
@@ -108,6 +134,7 @@ class DailyLogStore:
             item["key_trends"] = json.loads(item["key_trends"])
             item["ko_summary_steps"] = json.loads(item.get("ko_summary_steps") or "[]")
             item["en_summary_steps"] = json.loads(item.get("en_summary_steps") or "[]")
+            item["keyword_relevance"] = item.get("keyword_relevance") or ""
             results.append(item)
         return results
 
@@ -150,6 +177,7 @@ class DailyLogStore:
             item["key_trends"] = json.loads(item["key_trends"])
             item["ko_summary_steps"] = json.loads(item.get("ko_summary_steps") or "[]")
             item["en_summary_steps"] = json.loads(item.get("en_summary_steps") or "[]")
+            item["keyword_relevance"] = item.get("keyword_relevance") or ""
             results.append(item)
         return results
 
