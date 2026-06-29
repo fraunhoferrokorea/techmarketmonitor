@@ -22,6 +22,9 @@ from src.daily_report import monthly_credibility_distribution, prepare_logs_for_
 
 logger = logging.getLogger(__name__)
 
+_MAX_MONTHLY_SYNTHESIS_ENTRIES = int(os.getenv("MONTHLY_SYNTHESIS_MAX_ENTRIES", "7"))
+_SYNTHESIS_SUMMARY_MAX_CHARS = int(os.getenv("MONTHLY_SYNTHESIS_SUMMARY_CHARS", "240"))
+
 CATEGORY_LABELS = {
     "tech_news": "Tech News",
     "academic": "Academic",
@@ -581,6 +584,23 @@ def _extract_json(raw: str) -> dict:
 # ---------------------------------------------------------------------------
 
 
+def _truncate_text(text: str, limit: int) -> str:
+    cleaned = " ".join(str(text).split())
+    if len(cleaned) <= limit:
+        return cleaned
+    return cleaned[: limit - 1].rstrip() + "…"
+
+
+def _compact_logs_for_synthesis(logs: list[dict], max_entries: int) -> list[dict]:
+    """Pick a representative subset so Groq/free-tier prompts stay under token limits."""
+    ordered = sorted(logs, key=lambda item: item.get("log_date", ""), reverse=True)
+    ordered = sorted(
+        ordered,
+        key=lambda item: 0 if item.get("credibility_grade") == "A" else 1,
+    )
+    return ordered[:max_entries]
+
+
 class ReportGenerator:
     def __init__(self, settings: Settings) -> None:
         load_dotenv(PROJECT_ROOT / ".env")
@@ -601,65 +621,107 @@ class ReportGenerator:
 
     def _synthesize(self, year: int, month: int, logs: list[dict], lang: str = "en") -> dict:
         """Call LLM and return the structured report dict."""
-        indexed_logs = [
-            {
-                "ref": i,
-                "date": item["log_date"],
-                "title": item["title"],
-                "url": item["url"],
-                "source": item.get("source_name", item["category"]),
-                "category": item["category"],
-                "credibility": item.get("credibility_grade", "B"),
-                "summary": item.get("ko_summary", item["llm_summary"]) if lang == "ko" else item["llm_summary"],
-                "trends": item["key_trends"],
-            }
-            for i, item in enumerate(logs, start=1)
-        ]
+        max_entries = min(_MAX_MONTHLY_SYNTHESIS_ENTRIES, len(logs))
+        last_error: Exception | None = None
 
-        if lang == "ko":
-            prompt = _PROMPT_KO.format(
-                year=year,
-                month=month,
-                count=len(logs),
-                schema=_SCHEMA_JSON_KO,
-                articles_json=json.dumps(indexed_logs, ensure_ascii=False),
-            )
-            system_msg = (
-                "당신은 간결하고 인용이 풍부한 한국어 기술 시장 조사 리포트를 작성한다. "
-                "모든 사실적 문장 끝에 [N] 인텍스트 인용을 반드시 붙인다. "
-                "소스 데이터에 없는 정보는 절대 추가하지 않는다. "
-                "'-습니다/ㅂ니다' 어미 사용 절대 금지. 명사형 종결 필수. "
-                "전문 약어 첫 등장 시 괄호 병기 필수."
-            )
-        else:
-            prompt = _PROMPT_EN.format(
-                year=year,
-                month=month,
-                count=len(logs),
-                schema=_SCHEMA_JSON,
-                articles_json=json.dumps(indexed_logs, ensure_ascii=False),
-            )
-            system_msg = (
-                "You write concise, citation-heavy technology market research reports. "
-                "Attach [N] in-text citations at every factual sentence. "
-                "Never fabricate information not present in the source data. "
-                "Return only valid JSON – no markdown, no explanation."
-            )
+        while max_entries >= 3:
+            synthesis_logs = _compact_logs_for_synthesis(logs, max_entries)
+            if len(logs) > len(synthesis_logs):
+                logger.info(
+                    "Monthly synthesis using %d/%d log(s) to stay within LLM token limits",
+                    len(synthesis_logs),
+                    len(logs),
+                )
 
-        response = self.llm.chat.completions.create(
-            model=os.getenv("MODEL_NAME", "gemini-1.5-flash"),
-            messages=[
-                {"role": "system", "content": system_msg},
-                {"role": "user", "content": prompt},
-            ],
-            temperature=0.3,
-        )
-        raw = (response.choices[0].message.content or "").strip()
-        try:
-            return _extract_json(raw)
-        except Exception as exc:
-            logger.error("JSON parse failed: %s\nRaw output (first 500 chars): %s", exc, raw[:500])
-            raise
+            indexed_logs = [
+                {
+                    "ref": i,
+                    "date": item["log_date"],
+                    "title": _truncate_text(item["title"], 120),
+                    "url": item["url"],
+                    "source": item.get("source_name", item["category"]),
+                    "category": item["category"],
+                    "credibility": item.get("credibility_grade", "B"),
+                    "summary": _truncate_text(
+                        item.get("ko_summary", item["llm_summary"])
+                        if lang == "ko"
+                        else item["llm_summary"],
+                        _SYNTHESIS_SUMMARY_MAX_CHARS,
+                    ),
+                    "trends": [
+                        _truncate_text(str(trend), 80)
+                        for trend in (item.get("key_trends") or [])[:2]
+                    ],
+                }
+                for i, item in enumerate(synthesis_logs, start=1)
+            ]
+
+            if lang == "ko":
+                prompt = _PROMPT_KO.format(
+                    year=year,
+                    month=month,
+                    count=len(logs),
+                    schema=_SCHEMA_JSON_KO,
+                    articles_json=json.dumps(indexed_logs, ensure_ascii=False),
+                )
+                system_msg = (
+                    "당신은 간결하고 인용이 풍부한 한국어 기술 시장 조사 리포트를 작성한다. "
+                    "모든 사실적 문장 끝에 [N] 인텍스트 인용을 반드시 붙인다. "
+                    "소스 데이터에 없는 정보는 절대 추가하지 않는다. "
+                    "'-습니다/ㅂ니다' 어미 사용 절대 금지. 명사형 종결 필수. "
+                    "전문 약어 첫 등장 시 괄호 병기 필수."
+                )
+            else:
+                prompt = _PROMPT_EN.format(
+                    year=year,
+                    month=month,
+                    count=len(logs),
+                    schema=_SCHEMA_JSON,
+                    articles_json=json.dumps(indexed_logs, ensure_ascii=False),
+                )
+                system_msg = (
+                    "You write concise, citation-heavy technology market research reports. "
+                    "Attach [N] in-text citations at every factual sentence. "
+                    "Never fabricate information not present in the source data. "
+                    "Return only valid JSON – no markdown, no explanation."
+                )
+
+            try:
+                response = self.llm.chat.completions.create(
+                    model=os.getenv("MODEL_NAME", "gemini-1.5-flash"),
+                    response_format={"type": "json_object"},
+                    messages=[
+                        {"role": "system", "content": system_msg},
+                        {"role": "user", "content": prompt},
+                    ],
+                    temperature=0.3,
+                )
+                raw = (response.choices[0].message.content or "").strip()
+                try:
+                    return _extract_json(raw)
+                except Exception as exc:
+                    logger.warning(
+                        "Monthly synthesis JSON parse failed with %d entries (%s) — retrying with fewer",
+                        max_entries,
+                        exc,
+                    )
+                    max_entries = max(3, max_entries // 2)
+                    last_error = exc
+                    continue
+            except Exception as exc:
+                last_error = exc
+                status = getattr(exc, "status_code", None)
+                message = str(exc).lower()
+                if status == 413 or "too large" in message or "payload too large" in message:
+                    logger.warning(
+                        "Monthly synthesis prompt too large with %d entries — retrying with fewer",
+                        max_entries,
+                    )
+                    max_entries = max(3, max_entries // 2)
+                    continue
+                raise
+
+        raise RuntimeError("Monthly synthesis failed after reducing prompt size") from last_error
 
     # ------------------------------------------------------------------
     # Document builders

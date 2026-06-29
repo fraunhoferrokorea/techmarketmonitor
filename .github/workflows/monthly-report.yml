@@ -2,8 +2,8 @@ name: Monthly Tech Market Report
 
 on:
   schedule:
-    # 08:00 KST = 23:00 UTC (previous day) — runs daily, script decides if it's the last business day
-    - cron: '0 23 * * *'
+    # 08:30 KST = 23:30 UTC (after daily-monitor to avoid repo-push queue)
+    - cron: '30 23 * * *'
   workflow_dispatch:
     inputs:
       year:
@@ -56,6 +56,8 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_BASE_URL: ${{ secrets.OPENAI_BASE_URL }}
           MODEL_NAME: ${{ secrets.MODEL_NAME }}
+          REPORTS_OUTPUT_DIR: reports/
+          TZ: Asia/Seoul
         run: |
           if [ -n "${{ github.event.inputs.year }}" ] && [ -n "${{ github.event.inputs.month }}" ]; then
             python -m src.main monthly --year "${{ github.event.inputs.year }}" --month "${{ github.event.inputs.month }}" --no-cleanup
@@ -66,16 +68,16 @@ jobs:
       - name: List generated files
         if: github.event_name == 'workflow_dispatch' || steps.check_day.outcome == 'success'
         run: |
-          echo "=== output/monthly ==="
-          ls -la output/monthly/ || true
+          echo "=== reports ==="
+          ls -la reports/ || true
 
       - name: Commit monthly report to repo
         if: github.event_name == 'workflow_dispatch' || steps.check_day.outcome == 'success'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A output/monthly/*.docx 2>/dev/null || true
-          git add output/monthly/
+          git add -A reports/*.docx 2>/dev/null || true
+          git add reports/
           if git diff --staged --quiet; then
             echo "No report to commit."
             exit 0
