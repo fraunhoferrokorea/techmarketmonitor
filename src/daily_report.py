@@ -988,14 +988,8 @@ def _direct_implication_plain(top_keywords: list[str]) -> str:
 
 
 def _indirect_implication_plain(reason: str, top_keywords: list[str]) -> str:
-    """Plain multi-sentence explanation for indirect keyword linkage."""
-    narrative = _kw_impact_narrative(top_keywords, reason)
-    closing = (
-        "위 표는 기사 사실(누가·무엇·수치)을 정리한 것이고, "
-        "여기서는 '왜 전력 키워드와 연결되는지'만 설명함. "
-        "기사 1차 주제가 전력망·스마트그리드 정책·기술이 아니므로 '간접'으로 표시함"
-    )
-    return f"{narrative}. {closing}"
+    """Plain explanation for indirect keyword linkage."""
+    return _kw_impact_narrative(top_keywords, reason)
 
 
 def _short_item_label(article: SummarizedArticle, limit: int = 48) -> str:
