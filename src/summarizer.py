@@ -72,6 +72,8 @@ _KOREAN_PHRASE_FIXES: list[tuple[str, str]] = [
     (r"([가-힣])입니다([.。？!?]?)$", r"\1임\2"),
     (r"([가-힣])있습니다([.。？!?]?)$", r"\1있음\2"),
     (r"([가-힣])없습니다([.。？!?]?)$", r"\1없음\2"),
+    (r"([가-힣])하고\s*있음([.。？!?]?)$", r"\1 중임\2"),
+    (r"([가-힣])고\s*있음([.。？!?]?)$", r"\1 중임\2"),
     (r"([가-힣])됩니다([.。？!?]?)$", r"\1됨\2"),
     (r"([가-힣])보입니다([.。？!?]?)$", r"\1보임\2"),
     (r"([가-힣])줍니다([.。？!?]?)$", r"\1줌\2"),
@@ -194,11 +196,11 @@ Return valid JSON with this exact schema:
   ],
   "key_trends": ["market-oriented trend phrase 1", "market-oriented trend phrase 2"],
   "ko_summary_steps": [
-    "**개요:** <어떤 시장·산업 분야를 다루며 왜 지금 중요한지, 일반인도 쉽게 이해할 수 있도록 1-2문장으로 설명>",
-    "**핵심 내용:** <주요 발표·연구 결과·제품 내용을 전문 용어 없이 풀어서 설명>",
-    "**기술적 차별성:** <기존 솔루션 대비 무엇이 새롭고 다른지, 쉬운 언어로 설명>",
-    "**시장 파급력:** <시장 규모(TAM/SAM), CAGR, 매출·투자 수치 등 정량 데이터를 최우선으로 인용. 수치가 없으면 주요 플레이어들에 대한 사업적 함의를 구체적으로 분석>",
-    "**투자·미래 전망:** <수혜 기업·섹터, 주목할 트렌드, 성장 촉진 요인 또는 리스크를 일반인도 쉽게 이해할 수 있도록 설명>"
+    "**개요:** <육하원칙 기반 1-2문장. 누가(기관·기업·저자)·어디(지역·시장)·무엇(사업·정책·연구)·언제(일정·연도) 중 기사에 있는 요소를 고유명사로 명시. '이/그/저/해당/본/이러한' 금지>",
+    "**핵심 내용:** <무엇·어떻게·왜를 수치·일정·규모와 함께 구체 서술. 주어는 반드시 고유명사(기업·기관·기술명·정부부처)>",
+    "**기술적 차별성:** <경쟁·기존 대비 차별점. 지시어 없이 기술·제품·방법의 정식 명칭으로 서술>",
+    "**시장 파급력:** <TAM/CAGR/매출·투자·용량(GW/MWh) 등 정량 데이터 우선. 없으면 영향받는 플레이어를 이름으로 명시>",
+    "**투자·미래 전망:** <수혜·리스크 주체를 기업·섹터명으로 명시. 일정·규모 포함>"
   ],
   "ko_one_liner": "<데일리 Executive Summary 표용 1문장. 시장조사 담당자가 스캔할 핵심 팩트. 육하원칙(누가·언제·어디·무엇·왜·어떻게) 중 기사에 있는 요소를 최대한 압축: (1)누가=주체·기관·인물 (2)어디=지역·시장 (3)무엇=사업·투자·제품·정책 (4)언제=일정·분기·년도 (5)왜/어떻게=동기·방식·규모. 수치($·GW·%·인원)·일정·지명·기업명 중 3가지 이상 반드시 포함. 70~150자. 명사형 종결(-었음/-함/-임). 지시대명사·'중요성 강조'·키워드 정의·'의문을 불러일으켰음' 같은 추상 표현 금지.>\n예시(데이터센터): '오스트레일리아 AI 인프라 Firmus Technologies가 Nvidia와 협력해 인도네시아에 첫 데이터센터를 건설하며, 6년간 최대 $300억 규모 수주(offtake) 계약을 유치할 전망임.'\n예시(비판·논란): '소프트뱅크 CEO를 포함한 업계 리더들이 엘론 머스크의 궤도 데이터센터 구상에 기술·재무 feasibility 한계로 회의적 입장을 표명함.'",
   "keyword_relevance": "<반드시 한국어. 2~4문단으로 작성.\n\n[첫 문장 규칙 — 절대 준수]\n첫 문장은 반드시 이 기사에 등장하는 고유명사·수치·날짜·이벤트 중 하나로 시작해야 함. 다음 표현으로 시작하는 첫 문장 금지:\n- '이 기사는', '이 논문은', '이 연구는'\n- 'X 산업은 빠르게 발전하고 있다'\n- 'X의 중요성을 강조한다/보여준다'\n- '전력계통·파워그리드·스마트그리드와 관련된 X 산업은'\n- 키워드만 나열하고 '관련이 있다/높다'로 끝나는 문장\n\n올바른 첫 문장 예시:\n- 'SNEC 2026에서 나트륨이온 배터리와 장기 ESS가 전력망 핵심 자산으로 부상하면서...'\n- '오라클이 21,000명 감원으로 확보한 재원을 AI 데이터센터 인프라에 투입함에 따라...'\n- '미국 전력망이 설비 용량의 절반만 활용 중이라는 IEEE Spectrum 분석은...'\n\n[본문 작성]\n각 키워드마다 **`키워드` 관련성** 소제목·'전력계통과 관련하여'처럼 키워드별로 문단을 나누는 패턴·키워드 정의·일반론적 시장 해설 금지. SNEC·ESS·기업명·수치 등 **이 기사의 구체적 사실**을 중심에 두고, 상위 3개 분석 기준 키워드가 그 사실과 어떻게 맞닿는지를 하나의 논리 흐름으로 설명. 키워드가 기사에 직접 등장하지 않아도 간접 연관(계통 안정·송배전·지능형 운영 등)만 짧게 연결.>
@@ -264,15 +266,24 @@ CRITICAL KOREAN GENERATION RULES (반드시 준수):
 - 같은 용어는 두 번째 등장부터 원어만 사용.
 
 [4. 문체 및 종결어미 — 절대 통일]
-- **ko_summary_steps와 keyword_relevance의 모든 문장**은 예외 없이 명사형 종결로 마친다.
-- **과거 사실·완료**: '-었음', '-았음', '-였음', '-했음', '-났음', '-켰음' (예: '맺었다'→'맺었음', '나타났다'→'나타났음', '받았다'→'받았음').
-- **현재·일반 서술**: '-함', '-임', '-됨', '-전망됨', '-분석됨', '-확인됨', '-이어짐' (예: '강조한다'→'강조함', '중요하다'→'중요함').
-- '-입니다', '-합니다', '-됩니다', '-있습니다', '-있다', '-한다', '-이다', '-었다', '-았다' 등 -다체/-합니다체 어미는 절대 사용하지 않는다.
-- 한 응답 내 여러 문장의 종결어미가 통일되어야 한다. '-습니다/ㅂ니다'와 '-다' 종결 혼용 금지.
-- 서술어가 명사구로 자연스럽게 끝나는 경우, 종결어미 없이 명사로 마친다.
-  * 허용 예: "~에 주목할 필요" / 금지 예: "~에 주목할 필요가 있다", "~에 주목할 필요가 있습니다"
+- **ko_summary_steps, keyword_relevance, ko_one_liner의 모든 문장**은 예외 없이 명사형 종결(-함/-임/-됨/-었음/-였음)로만 마친다.
+- '-입니다', '-합니다', '-있다', '-한다', '-이다', '-고 있다', '-하고 있음'(진행형) 절대 금지.
+- **현재·일반**: '-함', '-임', '-됨', '-전망됨', '-분석됨' (예: '발생하고 있음'→'발생 중임' 또는 '기록됨').
+- **과거·완료**: '-었음', '-았음', '-였음', '-했음'.
+- 한 응답 내 종결어미 혼용 금지.
 
-[5. 직역 금지 예시 — 에너지·전력]
+[5. 지시어(이·그·저) 금지 — 절대 원칙]
+- **'이', '그', '저', '이는', '그는', '이러한', '해당', '본', '그것', '이것'** 등 지시어로 주어·목적어를 가리키지 않는다.
+- **기사에 나온 고유명사·기관명·기술명·인물명·수치**를 반복해 쓴다. 앞 문맥 없이도 주체가 분명해야 함.
+- 금지: "이 논문은 ~함", "이 트렌드는 ~함", "해당 방법은 ~함", "제안된 접근법은 ~함", "이는 ~을 보여줌"
+- 정답: "arXiv EESS.SY 논문은 ~함", "미국 전력 M&A $200bn 보도는 ~함", "NH농협은행은 ~함"
+
+[6. 육하원칙(5W1H) — 구체성 필수]
+- 모든 한국어 요약은 **누가·언제·어디·무엇·왜·어떻게** 중 기사에 있는 요소를 구체적으로 포함.
+- ko_summary_steps **각 불릿**마다 수치·지명·기관·일정·규모 중 **최소 2가지** 포함.
+- 추상 일반론·키워드 정의·'중요성 강조'·'의문을 불러일으켰음' 금지.
+
+[7. 직역 금지 예시 — 에너지·전력]
 - 원문: "BESS, EVs, and industrial flexible load holders can earn new revenue."
   * 금지: "BESS·전기차·산업용 유연 부하 보유자에게 새로운 수익 창출 경로가 열림."
   * 정답: "BESS·전기차·산업용 수요조절이 가능한 시설·기업에 새로운 수익원이 생김."
@@ -280,7 +291,7 @@ CRITICAL KOREAN GENERATION RULES (반드시 준수):
   * 금지: "유연 수요를 집합하고 유연 용량 18GW를 관리함."
   * 정답: "수요조절(DR) 자원을 묶어 포트폴리오로 운영하며, 조절 가능 용량 18GW를 관리함."
 
-[올바른 예시]
+[8. 올바른 예시]
 - 원문 의미: "The rapid integration of renewable energy is considered to pose a threat to grid stability."
 - 금지(직역체): "재생에너지의 빠른 통합은 전력망 안정성에 위협을 가하는 것으로 간주됩니다."
 - 금지(과잉의역): "재생에너지가 너무 급하게 늘어나서 전력망이 곧 터질 위기임."
@@ -308,6 +319,15 @@ def normalize_korean_endings(text: str) -> str:
         if text == prev:
             break
     return text
+
+
+def _coerce_text(value: object) -> str:
+    """Normalize LLM JSON fields that may be str or list (common with smaller models)."""
+    if value is None:
+        return ""
+    if isinstance(value, list):
+        return " ".join(str(part).strip() for part in value if str(part).strip())
+    return str(value).strip()
 
 
 def normalize_korean_endings_sentences(text: str) -> str:
@@ -340,6 +360,7 @@ def repolish_summarized_article(article: SummarizedArticle) -> SummarizedArticle
 def polish_korean(text: str) -> str:
     """Fix common literal calques and remove stray CJK characters in Korean LLM output."""
     polished = strip_cjk_from_korean(text)
+    polished = polished.replace("…", "").replace("...", "")
     for pattern, replacement in _KOREAN_PHRASE_FIXES:
         polished = re.sub(pattern, replacement, polished)
     polished = normalize_korean_endings_sentences(polished)
@@ -414,12 +435,12 @@ class Summarizer:
                 time.sleep(wait)
 
         payload = _extract_json(response.choices[0].message.content or "{}")
-        summary = (payload.get("summary") or "").strip()
+        summary = _coerce_text(payload.get("summary"))
         trends = payload.get("key_trends") or []
         ko_steps = [polish_korean(str(s).strip()) for s in (payload.get("ko_summary_steps") or []) if str(s).strip()]
         en_steps = payload.get("en_summary_steps") or []
-        keyword_relevance = polish_korean((payload.get("keyword_relevance") or "").strip())
-        ko_one_liner = polish_korean((payload.get("ko_one_liner") or "").strip())
+        keyword_relevance = polish_korean(_coerce_text(payload.get("keyword_relevance")))
+        ko_one_liner = polish_korean(_coerce_text(payload.get("ko_one_liner")))
 
         if article.url not in summary:
             summary = f"{summary} Source: {article.url}".strip()

@@ -62,9 +62,7 @@ semiconductor:
   - name: Tom's Hardware
     url: https://www.tomshardware.com/feeds/all
     category: semiconductor
-  - name: AnandTech
-    url: https://www.anandtech.com/rss/
-    category: semiconductor
+  # AnandTech — site closed, RSS broken (2024)
 
 # ── 4. 논문 / 학술 (arXiv RSS) ────────────────────────────────────────────
 academic:
@@ -95,23 +93,16 @@ enterprise:
   - name: NVIDIA News
     url: https://nvidianews.nvidia.com/cats/press_release.xml
     category: enterprise
-  - name: AMD News
-    url: https://www.amd.com/en/newsroom/feed.rss
-    category: enterprise
-  - name: Fraunhofer Press Releases
-    url: https://www.fraunhofer.de/en/press/press-releases/rss.xml
-    category: enterprise
-  - name: TSMC Newsroom
-    url: https://pr.tsmc.com/english/rss.xml
-    category: enterprise
+  # AMD News, Fraunhofer, TSMC — RSS broken, 0 entries
 
 # ── 6. 시장 인텔리전스 / 투자·M&A ──────────────────────────────────────────
 market_intel:
   - name: Bloomberg Technology
     url: https://feeds.bloomberg.com/technology/news.rss
     category: market_intel
-  - name: Reuters Technology
-    url: https://feeds.reuters.com/reuters/technologyNews
+  # Reuters — feeds.reuters.com discontinued (2020)
+  - name: BBC Technology
+    url: https://feeds.bbci.co.uk/news/technology/rss.xml
     category: market_intel
   - name: Financial Times Tech
     url: https://www.ft.com/technology?format=rss
@@ -179,9 +170,7 @@ korean:
   - name: ZDNet Korea
     url: http://feeds.feedburner.com/zdkorea
     category: korean
-  - name: 조선일보 IT/과학
-    url: https://www.chosun.com/arc/outboundfeeds/rss/category/it-science/?outputType=xml
-    category: korean
+  # 조선일보 IT/과학 — RSS 0 entries (2026-06)
   - name: 한겨레 과학
     url: https://www.hani.co.kr/rss/science
     category: korean

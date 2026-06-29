@@ -35,7 +35,7 @@ EE Times | https://www.eetimes.com/feed/ | semiconductor
 SemiWiki | https://semiwiki.com/feed/ | semiconductor
 Semiconductor Engineering | https://semiengineering.com/feed/ | semiconductor
 Tom's Hardware | https://www.tomshardware.com/feeds/all | semiconductor
-AnandTech | https://www.anandtech.com/rss/ | semiconductor
+# AnandTech | https://www.anandtech.com/rss/ | semiconductor  # [비활성] 사이트 종료·RSS 깨짐 (2024). EE Times·Tom's Hardware로 대체
 
 # ── 4. 논문 / 학술 (arXiv RSS) ────────────────────────────────────────────
 arXiv CS.AI | https://rss.arxiv.org/rss/cs.AI | academic
@@ -48,13 +48,14 @@ arXiv EESS.SP | https://rss.arxiv.org/rss/eess.SP | academic
 Microsoft News | https://news.microsoft.com/feed/ | enterprise
 Google Blog | https://blog.google/rss/ | enterprise
 NVIDIA News | https://nvidianews.nvidia.com/cats/press_release.xml | enterprise
-AMD News | https://www.amd.com/en/newsroom/feed.rss | enterprise
-Fraunhofer Press Releases | https://www.fraunhofer.de/en/press/press-releases/rss.xml | enterprise
-TSMC Newsroom | https://pr.tsmc.com/english/rss.xml | enterprise
+# AMD News | https://www.amd.com/en/newsroom/feed.rss | enterprise  # [비활성] RSS XML 깨짐·기사 0건
+# Fraunhofer Press Releases | https://www.fraunhofer.de/en/press/press-releases/rss.xml | enterprise  # [비활성] RSS XML 깨짐·기사 0건
+# TSMC Newsroom | https://pr.tsmc.com/english/rss.xml | enterprise  # [비활성] RSS XML 깨짐·기사 0건
 
 # ── 6. 시장 인텔리전스 / 투자·M&A ──────────────────────────────────────────
 Bloomberg Technology | https://feeds.bloomberg.com/technology/news.rss | market_intel
-Reuters Technology | https://feeds.reuters.com/reuters/technologyNews | market_intel
+# Reuters Technology | https://feeds.reuters.com/reuters/technologyNews | market_intel  # [비활성] feeds.reuters.com DNS 없음(2020 중단)
+BBC Technology | https://feeds.bbci.co.uk/news/technology/rss.xml | market_intel
 Financial Times Tech | https://www.ft.com/technology?format=rss | market_intel
 Crunchbase News | https://news.crunchbase.com/feed/ | market_intel
 
@@ -83,6 +84,6 @@ KIPO 보도자료 | https://www.kipo.go.kr/ko/report/UXmlRssApp.do?menuCd=SCD020
 전자신문 IT | http://rss.etnews.com/Section901.xml | korean
 전자신문 통신/방송 | http://rss.etnews.com/Section902.xml | korean
 ZDNet Korea | http://feeds.feedburner.com/zdkorea | korean
-조선일보 IT/과학 | https://www.chosun.com/arc/outboundfeeds/rss/category/it-science/?outputType=xml | korean
+# 조선일보 IT/과학 | https://www.chosun.com/arc/outboundfeeds/rss/category/it-science/?outputType=xml | korean  # [비활성] RSS 0건(2026-06 확인)
 한겨레 과학 | https://www.hani.co.kr/rss/science | korean
 동아일보 과학 | https://rss.donga.com/science.xml | korean

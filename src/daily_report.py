@@ -290,7 +290,8 @@ def _time_label(article: SummarizedArticle, index: int) -> str:
 
 
 def _item_heading_text(article: SummarizedArticle, index: int) -> str:
-    return f"{_time_label(article, index)} {article.title}"
+    title = article.title.replace("…", "").replace("...", "").strip()
+    return f"{_time_label(article, index)} {title}"
 
 
 def _github_heading_slug(text: str, used: set[str]) -> str:
@@ -325,8 +326,20 @@ def _item_heading_md(article: SummarizedArticle, index: int) -> str:
     return f"### {_item_heading_text(article, index)}"
 
 
+def _truncate_text(text: str, hard_limit: int) -> str:
+    """Truncate at word boundary without ellipsis."""
+    text = text.strip()
+    if len(text) <= hard_limit:
+        return text
+    last_space = text[:hard_limit].rfind(" ")
+    if last_space > hard_limit * 0.6:
+        return text[:last_space].rstrip(",.;:")
+    return text[:hard_limit].rstrip(",.;:")
+
+
 def _item_summary_link(article: SummarizedArticle, slug: str, max_len: int = 45) -> str:
-    short = article.title[:max_len] + ("…" if len(article.title) > max_len else "")
+    title = article.title.replace("…", "").replace("...", "").strip()
+    short = _truncate_text(title, max_len)
     return f"[{short}](#{slug})"
 
 
@@ -352,19 +365,11 @@ def _first_sentence(text: str, hard_limit: int = 280) -> str:
         if len(candidate) >= 10:
             if len(candidate) <= hard_limit:
                 return candidate
-            # Sentence itself is too long — truncate at word boundary
-            last_space = candidate[:hard_limit].rfind(" ")
-            if last_space > hard_limit * 0.6:
-                return candidate[:last_space].rstrip(",.;:") + "…"
-            return candidate[:hard_limit] + "…"
+            return _truncate_text(candidate, hard_limit)
 
-    # No sentence boundary found — return full text or truncate
     if len(text) <= hard_limit:
         return text
-    last_space = text[:hard_limit].rfind(" ")
-    if last_space > hard_limit * 0.6:
-        return text[:last_space].rstrip(",.;:") + "…"
-    return text[:hard_limit] + "…"
+    return _truncate_text(text, hard_limit)
 
 
 def _kw_score(text: str, keywords: list[str]) -> int:
@@ -522,20 +527,44 @@ def _indirect_reason(article: SummarizedArticle) -> str:
     return "전력 수요·공급 파급"
 
 
+def _keyword_focus_phrase(top_keywords: list[str]) -> str:
+    parts: list[str] = []
+    for kw in top_keywords[:3]:
+        if kw == "전력계통":
+            parts.append("전력망 안정·용량·부하")
+        elif kw == "파워그리드":
+            parts.append("송전·배전·피크·VPP")
+        elif kw == "스마트그리드":
+            parts.append("지능형 운영·분산자원·수요반응")
+    return ", ".join(parts[:2]) if parts else "전력·그리드"
+
+
 def _keyword_connection(
     article: SummarizedArticle,
     top_keywords: list[str],
     level: str,
 ) -> str:
+    """Last sentence in the executive-summary row: keyword relevance rationale."""
     kws = top_keywords[:3]
     kw_label = " · ".join(kws)
+
     if level == "direct":
+        trigger = _relevance_trigger(article, "direct", top_keywords)
         hit = [kw for kw in kws if kw in _article_text_blob(article)]
-        target = ", ".join(hit[:2]) if hit else kw_label
-        return f"→ **[{target}]** 직접 연관"
+        target = " · ".join(hit[:2]) if hit else kw_label
+        focus = _keyword_focus_phrase(kws)
+        return f"**[{target}]**와 직접 연관({trigger}, {focus} 주제와 일치)."
+
     if level == "indirect":
-        return f"→ **[{kw_label}]** 간접 연관 ({_indirect_reason(article)})"
-    return f"→ **[{kw_label}]** 관련성 낮음"
+        reason = _indirect_reason(article)
+        trigger = _relevance_trigger(article, "indirect", top_keywords)
+        implication = _indirect_implication_plain(reason, top_keywords)
+        return (
+            f"**[{kw_label}]**와 간접 연관({trigger} 경로로 수집, 1차 주제는 전력망·스마트그리드가 아님. "
+            f"{implication})."
+        )
+
+    return f"**[{kw_label}]**와 관련성 낮음."
 
 
 def _relevance_trustworthy(
@@ -993,10 +1022,7 @@ def _indirect_implication_plain(reason: str, top_keywords: list[str]) -> str:
 
 
 def _short_item_label(article: SummarizedArticle, limit: int = 48) -> str:
-    title = article.title.strip()
-    if len(title) <= limit:
-        return title
-    return title[: limit - 1].rstrip() + "…"
+    return _truncate_text(article.title.strip(), limit)
 
 
 def _signal_kw_label(
@@ -1134,23 +1160,21 @@ def _build_executive_summary(
 
     ranked.sort(key=lambda row: (_relevance_sort_key(row[1], kws)))
 
-    included_items: list[tuple[SummarizedArticle, str, str, str]] = []
+    included_count = 0
     for _, article, fact, level_label, connection in ranked:
         slug = slugs[article.url]
         link = _item_summary_link(article, slug)
         cell_fact = f"{fact} {connection}".replace("|", "\\|")
         lines.append(f"| **{level_label}** | {link} | {cell_fact} |")
-        included_items.append((article, fact, level_label, connection))
+        included_count += 1
 
-    skipped = len(articles) - len(included_items)
+    skipped = len(articles) - included_count
     if skipped:
         lines += [
             "",
             f"*(이하 {skipped}건은 관련성 낮음 또는 키워드 무관으로 요약에서 생략)*",
         ]
 
-    lines += ["", "**눈여겨볼 신호 (키워드 관점):**"]
-    lines.extend(_build_keyword_signals(included_items, kws) or [f"- **[{kw_header}]** (해당 없음)"])
     lines += [
         "",
         "- **상충되는 정보:** (해당 없음)",

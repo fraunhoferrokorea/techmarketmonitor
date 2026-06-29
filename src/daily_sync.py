@@ -135,7 +135,7 @@ def refresh_all_daily_markdown(
     for log_date in sorted(db_dates):
         results.append(rebuild_markdown_from_db(log_date, store, settings))
 
-    for log_date in sorted(report_dates_from_disk() - db_dates):
+    for log_date in sorted(set(report_dates_from_disk()) - db_dates):
         removed = remove_report(log_date)
         results.append(
             {
