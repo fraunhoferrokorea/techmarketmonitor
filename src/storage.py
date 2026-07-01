@@ -258,3 +258,36 @@ class DailyLogStore:
         with self._connect() as conn:
             cursor = conn.execute("DELETE FROM daily_logs WHERE url = ?", (url,))
             return cursor.rowcount
+
+    def purge_non_domestic_entries(self) -> int:
+        """Remove DB rows whose URL or content is not domestic Korean news."""
+        from src.korea_scope import is_domestic_news, is_foreign_url
+        from src.models import RawArticle
+
+        deleted = 0
+        with self._connect() as conn:
+            rows = conn.execute("SELECT * FROM daily_logs").fetchall()
+            for row in rows:
+                url = row["url"]
+                if is_foreign_url(url):
+                    conn.execute("DELETE FROM daily_logs WHERE id = ?", (row["id"],))
+                    deleted += 1
+                    continue
+                published_at = None
+                if row["published_at"]:
+                    try:
+                        published_at = datetime.fromisoformat(row["published_at"])
+                    except ValueError:
+                        pass
+                article = RawArticle(
+                    title=row["title"],
+                    url=url,
+                    summary=row["llm_summary"] or "",
+                    source_name=row["source_name"],
+                    category=row["category"],
+                    published_at=published_at,
+                )
+                if not is_domestic_news(article):
+                    conn.execute("DELETE FROM daily_logs WHERE id = ?", (row["id"],))
+                    deleted += 1
+        return deleted

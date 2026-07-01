@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import logging
 import re
 
-from src.korea_scope import is_korea_scoped
+from src.korea_scope import is_domestic_news
 from src.models import FilteredArticle, RawArticle
 from src.policy_priority import gov_target_pass_label, is_gov_target
+
+logger = logging.getLogger(__name__)
 
 _HTML_TAG = re.compile(r"<[^>]+>")
 
@@ -26,9 +29,15 @@ def filter_articles(
     filtered: list[FilteredArticle] = []
     seen_urls: set[str] = set()
     target_label = gov_target_pass_label()
+    dropped_foreign = 0
+    dropped_keywords = 0
 
     for article in articles:
         if article.url in seen_urls:
+            continue
+
+        if not is_domestic_news(article):
+            dropped_foreign += 1
             continue
 
         searchable = " ".join([article.title, article.summary, article.source_name])
@@ -37,9 +46,7 @@ def filter_articles(
             matched = [target_label]
 
         if not matched:
-            continue
-
-        if not is_korea_scoped(article):
+            dropped_keywords += 1
             continue
 
         seen_urls.add(article.url)
@@ -53,6 +60,17 @@ def filter_articles(
                 published_at=article.published_at,
                 matched_keywords=matched,
             )
+        )
+
+    if dropped_foreign:
+        logger.info(
+            "Keyword filter: excluded %d non-domestic (foreign) article(s)",
+            dropped_foreign,
+        )
+    if dropped_keywords:
+        logger.debug(
+            "Keyword filter: excluded %d domestic article(s) with no keyword match",
+            dropped_keywords,
         )
 
     return filtered

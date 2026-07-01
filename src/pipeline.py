@@ -11,6 +11,7 @@ from src.config import Settings, load_settings, load_sources
 from src.daily_report import save_daily_report
 from src.fetchers.registry import build_fetchers
 from src.filter import filter_articles
+from src.korea_scope import filter_domestic_articles
 from src.models import FilteredArticle, RawArticle
 from src.policy_priority import gov_target_score
 from src.scheduler_state import remove_report, report_exists
@@ -180,6 +181,7 @@ def run_daily_monitor(
         )
 
     recent_articles = enrich_raw_articles(recent_articles)
+    recent_articles, _ = filter_domestic_articles(recent_articles, label="post-enrichment")
 
     filtered = filter_articles(recent_articles, keywords)
     logger.info("Filtered to %d keyword-matching domestic (Korea-scoped) articles", len(filtered))
@@ -214,6 +216,9 @@ def run_daily_monitor(
 
     # Deduplicate: skip articles whose URL was already processed on a previous run.
     store = DailyLogStore(settings.database_path)
+    purged = store.purge_non_domestic_entries()
+    if purged:
+        logger.info("Purged %d non-domestic (foreign) row(s) from monitor DB", purged)
     seen_urls = store.get_seen_urls()
     new_articles = [a for a in filtered if a.url not in seen_urls]
     skipped = len(filtered) - len(new_articles)

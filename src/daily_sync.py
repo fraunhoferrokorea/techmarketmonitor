@@ -8,6 +8,7 @@ from zoneinfo import ZoneInfo
 from src.config import Settings, load_settings
 from src.daily_windows import window_end_for_log_date
 from src.daily_report import save_daily_report
+from src.korea_scope import is_domestic_news
 from src.models import SummarizedArticle
 from src.summarizer import repolish_summarized_article
 from src.pipeline import run_daily_monitor
@@ -179,8 +180,12 @@ def rebuild_markdown_from_db(
 
     articles: list[SummarizedArticle] = []
     repolished_rows = 0
+    skipped_foreign = 0
     for row in rows:
         article = repolish_summarized_article(_row_to_article(row))
+        if not is_domestic_news(article):
+            skipped_foreign += 1
+            continue
         articles.append(article)
         if repolish_db:
             original_ko = row.get("ko_summary_steps") or []
@@ -196,6 +201,13 @@ def rebuild_markdown_from_db(
                 )
                 repolished_rows += 1
 
+    if not articles:
+        return {
+            "log_date": log_date.isoformat(),
+            "status": "skipped_no_domestic_entries",
+            "skipped_foreign": skipped_foreign,
+        }
+
     path = save_daily_report(
         log_date,
         articles,
@@ -205,6 +217,7 @@ def rebuild_markdown_from_db(
         "log_date": log_date.isoformat(),
         "status": "rebuilt_markdown",
         "stored": len(articles),
+        "skipped_foreign": skipped_foreign,
         "repolished_rows": repolished_rows,
         "daily_report": str(path) if path else None,
     }

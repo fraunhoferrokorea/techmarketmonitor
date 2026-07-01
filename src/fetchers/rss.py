@@ -7,6 +7,7 @@ from email.utils import parsedate_to_datetime
 import feedparser
 
 from src.models import RawArticle
+from src.korea_scope import filter_domestic_articles, is_foreign_url
 
 logger = logging.getLogger(__name__)
 
@@ -80,5 +81,13 @@ class RSSFetcher:
                 )
             )
 
-        logger.debug("Fetched %d entries from %s", len(articles), self.name)
-        return articles
+        kept, dropped = filter_domestic_articles(articles, label=self.name)
+        if dropped:
+            logger.info(
+                "RSS %s: excluded %d foreign/non-domestic entr%s at fetch time",
+                self.name,
+                dropped,
+                "y" if dropped == 1 else "ies",
+            )
+        logger.debug("Fetched %d domestic entries from %s", len(kept), self.name)
+        return kept
