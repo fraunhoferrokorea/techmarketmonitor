@@ -106,10 +106,13 @@ def _within_log_date(
     return matched
 
 
-def _article_pipeline_sort_key(article: FilteredArticle) -> tuple[int, int, str]:
-    """Policy/S&T plans first, then keyword match count."""
+def _article_pipeline_sort_key(article: FilteredArticle) -> tuple[int, int, int, str]:
+    """R&D/investment signals first, then keyword match count."""
+    from src.rd_targeting import investment_signal_score
+
     return (
         -gov_target_score(article),
+        -investment_signal_score(article),
         -len(article.matched_keywords),
         article.title.lower(),
     )

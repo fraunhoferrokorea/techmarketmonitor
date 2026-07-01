@@ -59,9 +59,17 @@ def test_is_domestic_rd_target() -> None:
 
 
 def test_build_rd_targeting_block_renders_markdown() -> None:
-    lines = build_rd_targeting_block(_article().ko_summary_steps)
+    lines = build_rd_targeting_block(_article())
     assert any("R&D 타겟팅" in line for line in lines)
+    assert any("R&D 적합도" in line for line in lines)
     assert any("투자 주체" in line for line in lines)
+
+
+def test_compute_rd_match_score_heuristic() -> None:
+    from src.rd_targeting import compute_rd_match_score
+
+    score = compute_rd_match_score(_article())
+    assert score >= 3
 
 
 if __name__ == "__main__":
@@ -69,4 +77,5 @@ if __name__ == "__main__":
     test_parse_rd_fields_from_ko_steps()
     test_is_domestic_rd_target()
     test_build_rd_targeting_block_renders_markdown()
+    test_compute_rd_match_score_heuristic()
     print("ok")

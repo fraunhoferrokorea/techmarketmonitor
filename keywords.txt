@@ -1,35 +1,58 @@
-# Tech Market Monitor — Keyword Filter
+# Tech Market Intelligence Monitor — R&D Targeting Keywords (Fraunhofer Korea)
 # ─────────────────────────────────────────────────────────────────────────────
 # 한 줄에 키워드 하나. #으로 시작하는 줄과 빈 줄은 무시됩니다.
-# 이 파일만 수정하면 다음 실행 때 바뀐 키워드로 뉴스가 필터링됩니다.
+# Fraunhofer 강점 기술 + 국내 R&D·투자 신호를 함께 추적합니다.
 # ─────────────────────────────────────────────────────────────────────────────
 
-# ── 전력계통 / 스마트그리드 ──────────────────────────────────────────────────
+# ── 전력·에너지 (Fraunhofer 핵심) ───────────────────────────────────────────
+HVDC
 전력계통
-파워그리드
 스마트그리드
-power system
-power grid
-smart grid
-microgrid
-virtual power plant
-VPP
-grid modernization
-grid stability
-energy management system
 BESS
-battery energy storage
-frequency regulation
-demand response
+에너지저장
+마이크로그리드
+전력망
+송배전
+수요반응
+가상발전소
+VPP
+계통안정
+전력품질
 
-# ── 핵심 산업 인프라 동향 ──
-data center
-supply chain
-AI infrastructure
+# ── R&D·투자 신호 (국내 위탁 과제 포착) ─────────────────────────────────────
+R&D
+연구개발
+연구과제
+국책과제
+위탁연구
+실증연구
+기술개발
+국산화
+기술이전
+MOU
+협력연구
+예산
+투자
+공모
+사업계획
+로드맵
 
-# ── 시장 규모 및 투자 동향 ──
-market size
-market forecast
-M&A
-startup funding
+# ── 국내 주요 수요 주체 ─────────────────────────────────────────────────────
+한국전력
+KEPCO
+LS일렉트릭
+HD현대일렉트릭
+과기정통부
+산업통상부
+KETEP
+KISTEP
+IITP
+ETRI
 
+# ── 시험·인증·고난도 R&D ───────────────────────────────────────────────────
+시험인증
+계통해석
+디지털트윈
+EMS
+SCADA
+전력변환

@@ -35,6 +35,12 @@ korean:
   - name: KIPO 보도자료
     url: https://www.kipo.go.kr/ko/report/UXmlRssApp.do?menuCd=SCD0200618
     category: korean
+  - name: KETEP 알림마당
+    url: https://www.ketep.re.kr/board/rss/boardRss.es?mid=a10101000000&bid=0001
+    category: korean
+  - name: 한국전력 보도자료
+    url: https://www.kepco.co.kr/home/customer/publicity/press/rss.do
+    category: korean
   - name: 연합뉴스 산업
     url: https://www.yna.co.kr/rss/industry.xml
     category: korean

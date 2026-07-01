@@ -39,3 +39,6 @@ class SummarizedArticle:
     en_summary_steps: list[str] = field(default_factory=list)
     keyword_relevance: str = ""
     ko_one_liner: str = ""
+    rd_match_score: int = 0
+    rd_proposable_area: str = ""
+    rd_fact_basis: str = ""

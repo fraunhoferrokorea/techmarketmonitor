@@ -1,10 +1,10 @@
 # Tech Market Monitor — Windows Task Scheduler Setup
 # Run in Administrator PowerShell:
 #   Set-ExecutionPolicy -Scope Process Bypass
-#   cd "C:\Users\Admin\OneDrive - Fraunhofer\Documents\python-project"
+#   cd "C:\Users\Admin\Documents\python-project"
 #   .\setup_scheduler.ps1
 
-$PROJECT = "C:\Users\Admin\OneDrive - Fraunhofer\Documents\python-project"
+$PROJECT = "C:\Users\Admin\Documents\python-project"
 $LOGDIR  = "$PROJECT\output\logs"
 
 $IsAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(

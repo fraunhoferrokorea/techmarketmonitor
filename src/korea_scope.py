@@ -23,7 +23,11 @@ _FOREIGN_URL_HOSTS = (
     "nature.com",
     "science.org",
     "pv-magazine.com",
-    "pv-magazine.de",
+    "electrek.co",
+    "venturebeat.com",
+    "technologyreview.com",
+    "google.com",
+    "blog.google",
 )
 
 _KOREA_SCOPE = re.compile(

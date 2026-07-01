@@ -65,6 +65,19 @@ class DailyLogStore:
                 )
             except sqlite3.OperationalError:
                 pass
+            for column, default in (
+                ("rd_match_score", "0"),
+                ("rd_proposable_area", "''"),
+                ("rd_fact_basis", "''"),
+            ):
+                try:
+                    conn.execute(
+                        f"ALTER TABLE daily_logs ADD COLUMN {column} "
+                        f"{'INTEGER' if column == 'rd_match_score' else 'TEXT'} "
+                        f"NOT NULL DEFAULT {default}"
+                    )
+                except sqlite3.OperationalError:
+                    pass
 
     def update_korean_text(
         self,
@@ -96,7 +109,10 @@ class DailyLogStore:
                     ko_summary_steps = ?,
                     en_summary_steps = ?,
                     keyword_relevance = ?,
-                    ko_one_liner = ?
+                    ko_one_liner = ?,
+                    rd_match_score = ?,
+                    rd_proposable_area = ?,
+                    rd_fact_basis = ?
                 WHERE id = ?
                 """,
                 (
@@ -106,6 +122,9 @@ class DailyLogStore:
                     json.dumps(entry.en_summary_steps),
                     entry.keyword_relevance,
                     entry.ko_one_liner,
+                    entry.rd_match_score,
+                    entry.rd_proposable_area,
+                    entry.rd_fact_basis,
                     row_id,
                 ),
             )
@@ -123,8 +142,10 @@ class DailyLogStore:
                             log_date, title, url, source_name, category,
                             published_at, matched_keywords, llm_summary,
                             key_trends, ko_summary_steps, en_summary_steps,
-                            keyword_relevance, ko_one_liner, created_at
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            keyword_relevance, ko_one_liner,
+                            rd_match_score, rd_proposable_area, rd_fact_basis,
+                            created_at
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """,
                         (
                             log_date.isoformat(),
@@ -140,6 +161,9 @@ class DailyLogStore:
                             json.dumps(entry.en_summary_steps),
                             entry.keyword_relevance,
                             entry.ko_one_liner,
+                            entry.rd_match_score,
+                            entry.rd_proposable_area,
+                            entry.rd_fact_basis,
                             now,
                         ),
                     )
@@ -169,6 +193,9 @@ class DailyLogStore:
             item["en_summary_steps"] = json.loads(item.get("en_summary_steps") or "[]")
             item["keyword_relevance"] = item.get("keyword_relevance") or ""
             item["ko_one_liner"] = item.get("ko_one_liner") or ""
+            item["rd_match_score"] = int(item.get("rd_match_score") or 0)
+            item["rd_proposable_area"] = item.get("rd_proposable_area") or ""
+            item["rd_fact_basis"] = item.get("rd_fact_basis") or ""
             results.append(item)
         return results
 
@@ -213,6 +240,9 @@ class DailyLogStore:
             item["en_summary_steps"] = json.loads(item.get("en_summary_steps") or "[]")
             item["keyword_relevance"] = item.get("keyword_relevance") or ""
             item["ko_one_liner"] = item.get("ko_one_liner") or ""
+            item["rd_match_score"] = int(item.get("rd_match_score") or 0)
+            item["rd_proposable_area"] = item.get("rd_proposable_area") or ""
+            item["rd_fact_basis"] = item.get("rd_fact_basis") or ""
             results.append(item)
         return results
 

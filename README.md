@@ -36,10 +36,9 @@
 ## 한 줄 요약
 
 ```
-매일:  (선택) md/DB 불일치 수리 → 국내 RSS 수집 → 본문·PDF 보강(정부 URL) → 날짜 필터(캐치업=KST 캘린더일 / live=24h)
-       → keywords.txt 매칭 + 정부·R&D 타깃 우선 통과 → LLM 요약(R&D 타겟팅) → SQLite 저장
-       → daily_YYYY-MM-DD.md 생성 → (로컬) Git push
-매월:  daily_*.md 파싱·집계 → LLM JSON 합성 → reports/*.docx(EN/KO) 생성 → (선택) 데일리 md 삭제
+매일:  국내 RSS 수집 → 본문·PDF 보강(정부 URL) → Korea-scope 필터 → R&D·투자 신호 우선 LLM 요약(적합도 1–5)
+       → SQLite 저장 → daily_YYYY-MM-DD.md (R&D 기회 스캔 표) → Git push
+매월:  daily_*.md → R&D 적합 4점 이상만 추출 → rd-intelligence-report-YYYY-MM-ko.docx
 ```
 
 ---
