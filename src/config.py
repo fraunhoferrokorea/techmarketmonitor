@@ -80,15 +80,7 @@ def load_settings() -> Settings:
     )
 
 
-_SOURCE_GROUPS = (
-    "tech_news",
-    "energy",
-    "semiconductor",
-    "academic",
-    "enterprise",
-    "market_intel",
-    "korean",
-)
+_SOURCE_GROUPS = ("korean",)
 
 
 def _load_sources_txt(path: Path) -> list[dict]:

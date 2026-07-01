@@ -6,11 +6,13 @@ import os
 from datetime import date, datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
+from src.article_enrichment import enrich_raw_articles
 from src.config import Settings, load_settings, load_sources
 from src.daily_report import save_daily_report
 from src.fetchers.registry import build_fetchers
 from src.filter import filter_articles
-from src.models import RawArticle
+from src.models import FilteredArticle, RawArticle
+from src.policy_priority import gov_target_score
 from src.scheduler_state import remove_report, report_exists
 from src.storage import DailyLogStore
 from src.summarizer import Summarizer
@@ -104,6 +106,34 @@ def _within_log_date(
     return matched
 
 
+def _article_pipeline_sort_key(article: FilteredArticle) -> tuple[int, int, str]:
+    """Policy/S&T plans first, then keyword match count."""
+    return (
+        -gov_target_score(article),
+        -len(article.matched_keywords),
+        article.title.lower(),
+    )
+
+
+def _cap_with_policy_priority(
+    articles: list[FilteredArticle],
+    limit: int,
+) -> list[FilteredArticle]:
+    """Always keep policy-priority items; fill remaining slots by sort order."""
+    if len(articles) <= limit:
+        return articles
+
+    ranked = sorted(articles, key=_article_pipeline_sort_key)
+    priority = [a for a in ranked if gov_target_score(a) > 0]
+    rest = [a for a in ranked if gov_target_score(a) == 0]
+
+    kept = priority[:limit]
+    remaining = limit - len(kept)
+    if remaining > 0:
+        kept.extend(rest[:remaining])
+    return sorted(kept, key=_article_pipeline_sort_key)
+
+
 def run_daily_monitor(
     log_date: date | None = None,
     settings: Settings | None = None,
@@ -146,18 +176,24 @@ def run_daily_monitor(
             len(raw_articles) - len(recent_articles),
         )
 
-    filtered = filter_articles(recent_articles, keywords)
-    logger.info("Filtered to %d keyword-matching articles", len(filtered))
+    recent_articles = enrich_raw_articles(recent_articles)
 
-    # Sort by relevance (most matched keywords first) and cap to avoid blowing token limits.
-    filtered.sort(key=lambda a: len(a.matched_keywords), reverse=True)
+    filtered = filter_articles(recent_articles, keywords)
+    logger.info("Filtered to %d keyword-matching domestic (Korea-scoped) articles", len(filtered))
+
+    priority_count = sum(1 for a in filtered if gov_target_score(a) > 0)
+    if priority_count:
+        logger.info("Gov/Fraunhofer-target articles (정부·R&D 타깃): %d", priority_count)
+
     if len(filtered) > _MAX_ARTICLES_PER_RUN:
         logger.info(
             "Capping summarization to top %d articles (dropped %d lower-relevance)",
             _MAX_ARTICLES_PER_RUN,
             len(filtered) - _MAX_ARTICLES_PER_RUN,
         )
-        filtered = filtered[:_MAX_ARTICLES_PER_RUN]
+        filtered = _cap_with_policy_priority(filtered, _MAX_ARTICLES_PER_RUN)
+    else:
+        filtered = sorted(filtered, key=_article_pipeline_sort_key)
 
     if not filtered:
         if window_end is not None and report_exists(log_date):

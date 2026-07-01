@@ -4,63 +4,13 @@
 # #으로 시작하는 줄과 빈 줄은 무시됩니다.
 # 이 파일만 수정하면 다음 실행부터 수집 소스가 변경됩니다.
 #
-# 카테고리 (7종):
-#   tech_news      — 종합 IT & 혁신 기술
-#   energy         — 전력계통 / 스마트그리드 / 에너지
-#   semiconductor  — 반도체 / HBM / AI 하드웨어
-#   academic       — 논문 / 학술 (arXiv RSS)
-#   enterprise     — 기업 / 빅테크 / 연구소 보도자료
-#   market_intel   — 시장 인텔리전스 / 투자·M&A
-#   korean         — 국내 ICT / 정책 / 공공 R&D
+# 카테고리:
+#   korean — 국내 ICT / 정책 / 공공 R&D
 # ─────────────────────────────────────────────────────────────────────────────
 
-# ── 1. 종합 IT & 혁신 기술 ─────────────────────────────────────────────────
-MIT Technology Review | https://www.technologyreview.com/feed/ | tech_news
-TechCrunch | https://techcrunch.com/feed/ | tech_news
-VentureBeat | https://venturebeat.com/feed/ | tech_news
-Wired | https://www.wired.com/feed/rss | tech_news
-Ars Technica | https://feeds.arstechnica.com/arstechnica/technology-lab | tech_news
-The Verge | https://www.theverge.com/rss/index.xml | tech_news
-
-# ── 2. 전력계통 / 스마트그리드 / 에너지 ──────────────────────────────────
-IEEE Spectrum | https://spectrum.ieee.org/feeds/feed.rss | energy
-CleanTechnica | https://cleantechnica.com/feed/ | energy
-Canary Media | https://www.canarymedia.com/rss.xml | energy
-PV Magazine | https://www.pv-magazine.com/feed/ | energy
-Energy Monitor | https://www.energymonitor.ai/feed/ | energy
-Electrek | https://electrek.co/feed/ | energy
-
-# ── 3. 반도체 / HBM / AI 하드웨어 ─────────────────────────────────────────
-EE Times | https://www.eetimes.com/feed/ | semiconductor
-SemiWiki | https://semiwiki.com/feed/ | semiconductor
-Semiconductor Engineering | https://semiengineering.com/feed/ | semiconductor
-Tom's Hardware | https://www.tomshardware.com/feeds/all | semiconductor
-# AnandTech | https://www.anandtech.com/rss/ | semiconductor  # [비활성] 사이트 종료·RSS 깨짐 (2024). EE Times·Tom's Hardware로 대체
-
-# ── 4. 논문 / 학술 (arXiv RSS) ────────────────────────────────────────────
-arXiv CS.AI | https://rss.arxiv.org/rss/cs.AI | academic
-arXiv CS.LG | https://rss.arxiv.org/rss/cs.LG | academic
-arXiv CS.AR | https://rss.arxiv.org/rss/cs.AR | academic
-arXiv EESS.SY | https://rss.arxiv.org/rss/eess.SY | academic
-arXiv EESS.SP | https://rss.arxiv.org/rss/eess.SP | academic
-
-# ── 5. 기업 / 빅테크 / 연구소 보도자료 ────────────────────────────────────
-Microsoft News | https://news.microsoft.com/feed/ | enterprise
-Google Blog | https://blog.google/rss/ | enterprise
-NVIDIA News | https://nvidianews.nvidia.com/cats/press_release.xml | enterprise
-# AMD News | https://www.amd.com/en/newsroom/feed.rss | enterprise  # [비활성] RSS XML 깨짐·기사 0건
-# Fraunhofer Press Releases | https://www.fraunhofer.de/en/press/press-releases/rss.xml | enterprise  # [비활성] RSS XML 깨짐·기사 0건
-# TSMC Newsroom | https://pr.tsmc.com/english/rss.xml | enterprise  # [비활성] RSS XML 깨짐·기사 0건
-
-# ── 6. 시장 인텔리전스 / 투자·M&A ──────────────────────────────────────────
-Bloomberg Technology | https://feeds.bloomberg.com/technology/news.rss | market_intel
-# Reuters Technology | https://feeds.reuters.com/reuters/technologyNews | market_intel  # [비활성] feeds.reuters.com DNS 없음(2020 중단)
-BBC Technology | https://feeds.bbci.co.uk/news/technology/rss.xml | market_intel
-Financial Times Tech | https://www.ft.com/technology?format=rss | market_intel
-Crunchbase News | https://news.crunchbase.com/feed/ | market_intel
-
-# ── 7. 국내 ICT / 정책 / 공공 R&D ─────────────────────────────────────────
+# ── 국내 ICT / 정책 / 공공 R&D ─────────────────────────────────────────
 # 정부·공공기관 (보도자료·정책)
+정책브리핑 정책뉴스 | https://www.korea.kr/rss/policy.xml | korean
 과기정통부 보도자료 | https://www.msit.go.kr/user/rss/rss.do?bbsSeqNo=94 | korean
 과기정통부 정보통신 | https://www.msit.go.kr/user/rss/rss.do?bbsSeqNo=67 | korean
 과기정통부 과학기술정책 | https://www.msit.go.kr/user/rss/rss.do?bbsSeqNo=70 | korean

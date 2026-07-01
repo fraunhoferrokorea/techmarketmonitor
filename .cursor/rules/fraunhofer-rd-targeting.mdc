@@ -1,0 +1,45 @@
+---
+description: Fraunhofer Korea R&D targeting analysis framework for daily monitor
+globs:
+  - src/summarizer.py
+  - src/daily_report.py
+  - src/rd_targeting.py
+  - output/daily/**
+---
+
+# Fraunhofer R&D Targeting Automation
+
+## Purpose
+
+Identify optimal target customers (Korean government ministries / private companies) for Fraunhofer commissioned research and their strategic needs from collected articles.
+
+## Scope & Filtering
+
+- **Geography:** Analysis focus is **Republic of Korea only**. Foreign articles are excluded at collection/filter stage (`korea_scope.py`).
+- **Targets:** Government budget holders and technology-demand companies.
+- **Priority signals:** Articles mentioning investment, budget, collaboration, roadmap, technology acquisition — not pure tech news without investment plans.
+- **Fact-only:** Extract amounts, program periods, required technologies from source text. No subjective judgment.
+
+## Required Output Structure (per item)
+
+1. **투자 주체** — Ministry / company name investing or needing technology
+2. **투자 목적** — Localization, internalization, upgrade, time compression, capability gap
+3. **위탁 연구 니즈** — High-difficulty R&D pain points where external expert (Fraunhofer) may be needed
+4. **접근 전략** — Government: policy alignment; Company: roadmap linkage
+
+Implemented in `summarizer.py` → `ko_summary_steps` headings and rendered in `daily_report.py` as **R&D 타겟팅 (프라운호퍼)** block + daily **국내 R&D 타겟 시사점** section.
+
+## Execution Prompt (batch analysis)
+
+When analyzing an article list, derive:
+1. Technical keywords (from `keywords.txt`)
+2. Domestic investment actor (ministry/company)
+3. Investment purpose (localization / upgrade / time compression)
+4. Fraunhofer core need (domestic technology limits)
+5. Proposal strategy for that customer
+
+All content must be objective and fact-based.
+
+## Sorting Priority
+
+`rd_targeting.investment_signal_score` + `policy_priority_score` boost items with budget/investment/R&D signals and Korean actors in daily report ordering.

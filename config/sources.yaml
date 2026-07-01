@@ -1,118 +1,16 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # Tech Market Monitor — Source Configuration
 # ─────────────────────────────────────────────────────────────────────────────
-# 카테고리별 RSS/Atom 피드 목록.
+# 국내 시장·정책·ICT 소스만 수집합니다.
 # 새 소스를 추가할 때는 name / url / category 세 필드가 필수입니다.
 # RSSFetcher가 feedparser로 가져오므로 표준 RSS 2.0 / Atom 1.0 URL이면 됩니다.
 # ─────────────────────────────────────────────────────────────────────────────
 
-# ── 1. 종합 IT & 혁신 기술 ─────────────────────────────────────────────────
-tech_news:
-  - name: MIT Technology Review
-    url: https://www.technologyreview.com/feed/
-    category: tech_news
-  - name: TechCrunch
-    url: https://techcrunch.com/feed/
-    category: tech_news
-  - name: VentureBeat
-    url: https://venturebeat.com/feed/
-    category: tech_news
-  - name: Wired
-    url: https://www.wired.com/feed/rss
-    category: tech_news
-  - name: Ars Technica
-    url: https://feeds.arstechnica.com/arstechnica/technology-lab
-    category: tech_news
-  - name: The Verge
-    url: https://www.theverge.com/rss/index.xml
-    category: tech_news
-
-# ── 2. 전력계통 / 스마트그리드 / 에너지 ──────────────────────────────────
-energy:
-  - name: IEEE Spectrum
-    url: https://spectrum.ieee.org/feeds/feed.rss
-    category: energy
-  - name: CleanTechnica
-    url: https://cleantechnica.com/feed/
-    category: energy
-  - name: Canary Media
-    url: https://www.canarymedia.com/rss.xml
-    category: energy
-  - name: PV Magazine
-    url: https://www.pv-magazine.com/feed/
-    category: energy
-  - name: Energy Monitor
-    url: https://www.energymonitor.ai/feed/
-    category: energy
-  - name: Electrek
-    url: https://electrek.co/feed/
-    category: energy
-
-# ── 3. 반도체 / HBM / AI 하드웨어 ─────────────────────────────────────────
-semiconductor:
-  - name: EE Times
-    url: https://www.eetimes.com/feed/
-    category: semiconductor
-  - name: SemiWiki
-    url: https://semiwiki.com/feed/
-    category: semiconductor
-  - name: Semiconductor Engineering
-    url: https://semiengineering.com/feed/
-    category: semiconductor
-  - name: Tom's Hardware
-    url: https://www.tomshardware.com/feeds/all
-    category: semiconductor
-  # AnandTech — site closed, RSS broken (2024)
-
-# ── 4. 논문 / 학술 (arXiv RSS) ────────────────────────────────────────────
-academic:
-  - name: arXiv CS.AI
-    url: https://rss.arxiv.org/rss/cs.AI
-    category: academic
-  - name: arXiv CS.LG
-    url: https://rss.arxiv.org/rss/cs.LG
-    category: academic
-  - name: arXiv CS.AR          # 컴퓨터 아키텍처 / 반도체 설계
-    url: https://rss.arxiv.org/rss/cs.AR
-    category: academic
-  - name: arXiv EESS.SY        # 시스템·제어 / 전력계통
-    url: https://rss.arxiv.org/rss/eess.SY
-    category: academic
-  - name: arXiv EESS.SP        # 신호처리 / 센서 융합
-    url: https://rss.arxiv.org/rss/eess.SP
-    category: academic
-
-# ── 5. 기업 / 빅테크 / 연구소 보도자료 ────────────────────────────────────
-enterprise:
-  - name: Microsoft News
-    url: https://news.microsoft.com/feed/
-    category: enterprise
-  - name: Google Blog
-    url: https://blog.google/rss/
-    category: enterprise
-  - name: NVIDIA News
-    url: https://nvidianews.nvidia.com/cats/press_release.xml
-    category: enterprise
-  # AMD News, Fraunhofer, TSMC — RSS broken, 0 entries
-
-# ── 6. 시장 인텔리전스 / 투자·M&A ──────────────────────────────────────────
-market_intel:
-  - name: Bloomberg Technology
-    url: https://feeds.bloomberg.com/technology/news.rss
-    category: market_intel
-  # Reuters — feeds.reuters.com discontinued (2020)
-  - name: BBC Technology
-    url: https://feeds.bbci.co.uk/news/technology/rss.xml
-    category: market_intel
-  - name: Financial Times Tech
-    url: https://www.ft.com/technology?format=rss
-    category: market_intel
-  - name: Crunchbase News
-    url: https://news.crunchbase.com/feed/
-    category: market_intel
-
-# ── 7. 국내 ICT / 정책 / 공공 R&D ─────────────────────────────────────────
+# ── 국내 ICT / 정책 / 공공 R&D ─────────────────────────────────────────
 korean:
+  - name: 정책브리핑 정책뉴스
+    url: https://www.korea.kr/rss/policy.xml
+    category: korean
   - name: 과기정통부 보도자료
     url: https://www.msit.go.kr/user/rss/rss.do?bbsSeqNo=94
     category: korean

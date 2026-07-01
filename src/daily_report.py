@@ -8,6 +8,12 @@ from datetime import date, datetime
 from pathlib import Path
 
 from src.models import SummarizedArticle
+from src.policy_priority import is_gov_target, gov_target_score
+from src.rd_targeting import (
+    build_daily_rd_insights,
+    build_rd_targeting_block,
+    investment_signal_score,
+)
 from src.summarizer import (
     normalize_korean_endings,
     normalize_korean_endings_sentences,
@@ -41,7 +47,7 @@ _TAG_RULES: list[tuple[str, str]] = [
     (r"invest|fund|series|valuation|펀딩|투자|유치", "#투자"),
     (r"acqui|merger|m&a|합병|인수|제휴", "#M&A"),
     (r"launch|release|출시|런칭|unveil", "#제품출시"),
-    (r"regulat|policy|법안|규제|standard|표준|compliance", "#규제"),
+    (r"regulat|policy|법안|규제|standard|표준|compliance|기본\s*계획|행동\s*계획", "#규제"),
     (r"market share|compet|경쟁|점유|vendor|leader", "#경쟁"),
     (r"market size|cagr|revenue|billion|million|시장.?규모|성장률", "#시장수치"),
     (r"risk|controvers|scandal|사고|논란|threat", "#리스크"),
@@ -221,6 +227,10 @@ def _infer_tags(article: SummarizedArticle) -> list[str]:
     ).lower()
 
     tags: list[str] = []
+    if is_gov_target(article):
+        tags.append("#정부계획")
+        if not any(t == "#협력" for t in tags):
+            tags.append("#협력")
     for pattern, tag in _TAG_RULES:
         if re.search(pattern, text, re.IGNORECASE) and tag not in tags:
             tags.append(tag)
@@ -246,20 +256,23 @@ def _build_summary_lines(
     article: SummarizedArticle,
     top_keywords: list[str] | None = None,
 ) -> list[str]:
-    steps = article.ko_summary_steps or article.en_summary_steps
+    steps = article.ko_summary_steps
     facts: list[str] = []
 
+    rd_heading_prefixes = ("투자 주체", "투자 목적", "위탁 연구 니즈", "접근 전략")
     for step in steps:
         cleaned = polish_korean(strip_cjk_from_korean(_strip_heading(step)))
         cleaned = re.sub(r"\[\d+\]\s*$", "", cleaned).strip()
         cleaned = normalize_korean_endings_sentences(cleaned)
         if cleaned and not cleaned.startswith("(해석)"):
+            if any(label in step for label in rd_heading_prefixes):
+                continue
             facts.append(cleaned)
         if len(facts) >= 3:
             break
 
     if len(facts) < 2 and article.llm_summary:
-        headline = re.sub(r"\s*Source:.*$", "", article.llm_summary, flags=re.IGNORECASE).strip()
+        headline = re.sub(r"\s*(?:Source|출처):.*$", "", article.llm_summary, flags=re.IGNORECASE).strip()
         if headline and headline not in facts:
             facts.insert(0, headline)
 
@@ -418,9 +431,14 @@ _RELEVANCE_LABEL = {"direct": "직접", "indirect": "간접", "weak": "약함"}
 def _relevance_sort_key(
     article: SummarizedArticle,
     top_keywords: list[str],
-) -> tuple[int, str]:
+) -> tuple[int, int, int, str]:
     level = _classify_relevance(article, top_keywords)
-    return _RELEVANCE_ORDER[level], article.title.lower()
+    return (
+        -gov_target_score(article),
+        -investment_signal_score(article),
+        _RELEVANCE_ORDER[level],
+        article.title.lower(),
+    )
 
 
 def _sort_articles_by_relevance(
@@ -630,7 +648,7 @@ def _extract_fact_sentence(
         return polish_korean(best)
 
     if article.llm_summary:
-        headline = re.sub(r"\s*Source:.*$", "", article.llm_summary, flags=re.IGNORECASE).strip()
+        headline = re.sub(r"\s*(?:Source|출처):.*$", "", article.llm_summary, flags=re.IGNORECASE).strip()
         if headline and not _is_vague(_first_sentence(headline)):
             return polish_korean(_first_sentence(headline))
     return ""
@@ -1175,8 +1193,9 @@ def _build_executive_summary(
             f"*(이하 {skipped}건은 관련성 낮음 또는 키워드 무관으로 요약에서 생략)*",
         ]
 
+    lines += build_daily_rd_insights(articles, kws)
+
     lines += [
-        "",
         "- **상충되는 정보:** (해당 없음)",
         "",
         "---",
@@ -1198,6 +1217,8 @@ def _build_item_block(
     summary_lines = _build_summary_lines(article, top_keywords)
 
     note_parts: list[str] = []
+    if is_gov_target(article):
+        note_parts.append("우선: 정부·R&D 타깃 (프라운호퍼 협력 관점)")
     if top_keywords:
         note_parts.append(f"분석 키워드: {', '.join(top_keywords[:3])}")
     level = _classify_relevance(article, top_keywords or [])
@@ -1218,20 +1239,14 @@ def _build_item_block(
         f"- **링크/DOI:** {article.url}",
     ]
 
-    # English original — shown first so readers can compare
-    en_steps = article.en_summary_steps or []
-    if en_steps:
-        lines.append("- **요약 (영문 원문):**")
-        for en_step in en_steps[:3]:
-            en_clean = _strip_heading(en_step)
-            en_clean = re.sub(r"\[\d+\]\s*$", "", en_clean).strip()
-            if en_clean:
-                lines.append(f"  - {en_clean}")
-
-    # Korean translation
-    lines.append("- **요약 (한국어 번역):**")
+    lines.append("- **요약:**")
     for line in summary_lines:
         lines.append(f"  - {line}")
+
+    rd_lines = build_rd_targeting_block(article.ko_summary_steps)
+    if rd_lines:
+        lines.append("")
+        lines.extend(rd_lines)
 
     lines += [
         f"- **신뢰도:** {credibility}",

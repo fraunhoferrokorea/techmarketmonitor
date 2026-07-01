@@ -62,6 +62,11 @@ class RSSFetcher:
                 continue
 
             summary = _clean(getattr(entry, "summary", None) or getattr(entry, "description", None))
+            if hasattr(entry, "content") and entry.content:
+                for block in entry.content:
+                    value = _clean(getattr(block, "value", None))
+                    if len(value) > len(summary):
+                        summary = value
             published_at = _parse_date(entry)
 
             articles.append(

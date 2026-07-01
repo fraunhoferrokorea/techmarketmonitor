@@ -86,6 +86,30 @@ class DailyLogStore:
                 ),
             )
 
+    def update_summarized_entry(self, row_id: int, entry: SummarizedArticle) -> None:
+        with self._connect() as conn:
+            conn.execute(
+                """
+                UPDATE daily_logs
+                SET llm_summary = ?,
+                    key_trends = ?,
+                    ko_summary_steps = ?,
+                    en_summary_steps = ?,
+                    keyword_relevance = ?,
+                    ko_one_liner = ?
+                WHERE id = ?
+                """,
+                (
+                    entry.llm_summary,
+                    json.dumps(entry.key_trends),
+                    json.dumps(entry.ko_summary_steps),
+                    json.dumps(entry.en_summary_steps),
+                    entry.keyword_relevance,
+                    entry.ko_one_liner,
+                    row_id,
+                ),
+            )
+
     def save_entries(self, log_date: date, entries: list[SummarizedArticle]) -> int:
         inserted = 0
         now = datetime.utcnow().isoformat()
@@ -198,4 +222,9 @@ class DailyLogStore:
                 "DELETE FROM daily_logs WHERE log_date = ?",
                 (log_date.isoformat(),),
             )
+            return cursor.rowcount
+
+    def delete_by_url(self, url: str) -> int:
+        with self._connect() as conn:
+            cursor = conn.execute("DELETE FROM daily_logs WHERE url = ?", (url,))
             return cursor.rowcount

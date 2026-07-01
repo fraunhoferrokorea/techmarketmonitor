@@ -4,6 +4,7 @@ import json
 import logging
 import sys
 from datetime import date, datetime, timedelta
+from pathlib import Path
 
 import click
 from apscheduler.schedulers.blocking import BlockingScheduler
@@ -21,6 +22,7 @@ from src.daily_sync import (
 )
 from src.monthly import run_monthly_report
 from src.pipeline import run_daily_monitor
+from src.plan_document import save_plan_summary_markdown, summarize_plan_pdf
 from src.storage import DailyLogStore
 
 
@@ -34,6 +36,54 @@ def _configure_logging(level: str) -> None:
 @click.group()
 def cli() -> None:
     """Tech Market Intelligence Monitor CLI."""
+
+
+@cli.command("summarize-plan")
+@click.option(
+    "--file",
+    "pdf_path",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    required=True,
+    help="Local government plan PDF (e.g. 국가표준기본계획)",
+)
+@click.option("--title", default=None, help="Override document title in the report")
+@click.option(
+    "--save-text",
+    is_flag=True,
+    default=False,
+    help="Save full extracted plain text to output/plans/",
+)
+def summarize_plan_cmd(
+    pdf_path: Path,
+    title: str | None,
+    save_text: bool,
+) -> None:
+    """Summarize a long government plan PDF (saved under output/plans/, not daily log)."""
+    settings = load_settings()
+    _configure_logging(settings.log_level)
+
+    article = summarize_plan_pdf(
+        pdf_path,
+        settings,
+        title=title,
+        save_text=save_text,
+    )
+    summary_path = save_plan_summary_markdown(pdf_path, article)
+
+    result: dict = {
+        "status": "summarized",
+        "title": article.title,
+        "url": article.url,
+        "source": article.source_name,
+        "summary_markdown": str(summary_path),
+        "ko_one_liner": article.ko_one_liner,
+        "summary": article.llm_summary,
+        "ko_summary_steps": article.ko_summary_steps,
+        "keyword_relevance": article.keyword_relevance,
+        "key_trends": article.key_trends,
+    }
+
+    click.echo(json.dumps(result, ensure_ascii=False, indent=2))
 
 
 @cli.command("daily-refresh")

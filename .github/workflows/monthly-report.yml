@@ -46,12 +46,22 @@ jobs:
 
       - name: Check if today is last business day (scheduled runs only)
         if: github.event_name == 'schedule'
-        run: python run_monthly_if_last_bizday.py --check-only
         id: check_day
-        continue-on-error: true
+        env:
+          TZ: Asia/Seoul
+        run: |
+          if python run_monthly_if_last_bizday.py --check-only; then
+            echo "last_bizday=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "last_bizday=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create reports directory
+        if: github.event_name == 'workflow_dispatch' || steps.check_day.outputs.last_bizday == 'true'
+        run: mkdir -p reports
 
       - name: Run monthly report
-        if: github.event_name == 'workflow_dispatch' || steps.check_day.outcome == 'success'
+        if: github.event_name == 'workflow_dispatch' || steps.check_day.outputs.last_bizday == 'true'
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_BASE_URL: ${{ secrets.OPENAI_BASE_URL }}
@@ -66,13 +76,13 @@ jobs:
           fi
 
       - name: List generated files
-        if: github.event_name == 'workflow_dispatch' || steps.check_day.outcome == 'success'
+        if: github.event_name == 'workflow_dispatch' || steps.check_day.outputs.last_bizday == 'true'
         run: |
           echo "=== reports ==="
           ls -la reports/ || true
 
       - name: Commit monthly report to repo
-        if: github.event_name == 'workflow_dispatch' || steps.check_day.outcome == 'success'
+        if: github.event_name == 'workflow_dispatch' || steps.check_day.outputs.last_bizday == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"

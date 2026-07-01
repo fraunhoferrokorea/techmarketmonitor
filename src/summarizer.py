@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 from openai import OpenAI, RateLimitError
 
 from src.config import PROJECT_ROOT, Settings
+from src.policy_priority import is_gov_target
 from src.models import FilteredArticle, SummarizedArticle
 
 logger = logging.getLogger(__name__)
@@ -20,6 +21,7 @@ _MAX_RETRIES = 5
 
 # Matches stray Chinese/Japanese characters embedded in Korean text.
 _CJK_RE = re.compile(r"[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff]+")
+_TPD_WAIT_RE = re.compile(r"try again in (\d+)m([\d.]+)s", re.I)
 
 # Post-processing fixes for common LLM calques (longer patterns first).
 _KOREAN_PHRASE_FIXES: list[tuple[str, str]] = [
@@ -173,42 +175,40 @@ _ENDING_NORMALIZERS: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"습니다([.。？!?]?)$"), r"음\1"),
 ]
 
-SYSTEM_PROMPT = """You are a senior tech market intelligence analyst writing for a general audience. Your goal is MARKET RESEARCH — not just technology description. Every analysis must be accurate, clearly written, and easy to understand for someone without a technical background. Avoid jargon; if a technical term is unavoidable, explain it in one plain-language phrase.
+SYSTEM_PROMPT = """You are a senior R&D targeting analyst for Fraunhofer Korea. Your goal is to identify Korean government ministries and companies that invest in or urgently need specific technologies, and to structure fact-based intelligence so Fraunhofer can answer "why partner with us?" — not merely summarize news.
+
+Analysis scope and filtering (MUST follow):
+- Geographic scope: **Republic of Korea only**. Do not analyze or summarize foreign-only stories.
+- Prioritize articles with concrete investment signals: budget, funding, M&A, collaboration, roadmap, technology acquisition, R&D program, contract, timeline — over pure product/tech announcements with no investment plan.
+- Fact-only: extract investment amount, program period, and required core technologies ONLY when stated in the source. No subjective judgment or speculation.
 
 For every article you analyze:
-- Extract any quantitative market data: market size (USD), CAGR forecasts, revenue figures, unit shipments, funding amounts.
-- Identify key players, competitive positioning, and market share signals.
-- Note supply-chain implications, M&A signals, or investment flows.
-- If the article is a research paper, translate the technical findings into their commercial/market implications.
-- Emphasize market potential, market impact, and real-world significance above all else.
+- Extract quantitative data when present: budget (₩/USD), program period, capacity (GW/MWh), headcount, TRL if stated.
+- Identify the investment actor (ministry/company) and investment purpose (localization, technology internalization, upgrade, time-to-market, domestic capability gap).
+- Derive Fraunhofer-relevant pain points ONLY from stated facts (e.g. domestic technology gap, timeline constraint, high-difficulty R&D area). If insufficient facts, write "팩트 부족으로 판단 보류".
+- Propose approach strategy aligned with actor type: government → policy goal alignment; company → technology roadmap linkage — based on article facts only.
+- For Korean government policy/plan releases (e.g. 국가표준기본계획, 과학기술기본계획, R&D 투자계획, Fraunhofer MOU): prioritize plan period, lead ministries, strategic pillars, execution task counts, budgets, and timelines.
 
-Write both an English and Korean structured summary using the section headings below. Do NOT include any numbered or step labels (no "Step 1", "1단계", etc.) — use only the bold heading shown.
-Every response MUST include the source URL in the English summary text.
+Write a Korean structured summary using the section headings below. Do NOT include any numbered or step labels (no "1단계", etc.) — use only the bold heading shown.
+Every response MUST include the source URL in the summary field.
 Return valid JSON with this exact schema:
 {
-  "summary": "1-sentence English market-focused headline that ends with Source: <url>",
-  "en_summary_steps": [
-    "**Overview:** <1-2 sentences: what market/industry segment does this address and why does it matter now? Write for a general reader.>",
-    "**What's the Development:** <core findings, product announcements, or research results — clearly explained without assumed technical knowledge>",
-    "**Why It Stands Out:** <what is novel or differentiated from existing solutions? Explain in plain language — avoid acronyms unless explained>",
-    "**Market Potential:** <PRIORITIZE quantitative data — cite any TAM/SAM, CAGR, revenue projections, funding rounds, shipment numbers, or market share figures. If none available, clearly assess competitive and commercial implications for major players>",
-    "**Investment Outlook:** <who stands to gain or lose, what trends to watch, what catalysts or risks could accelerate or slow adoption? Keep it accessible.>"
-  ],
-  "key_trends": ["market-oriented trend phrase 1", "market-oriented trend phrase 2"],
+  "summary": "1문장 한국어 R&D·투자 헤드라인. 반드시 '출처: <url>'로 끝남",
+  "key_trends": ["기술·투자 동향 키워드 1", "기술·투자 동향 키워드 2"],
   "ko_summary_steps": [
-    "**개요:** <육하원칙 기반 1-2문장. 누가(기관·기업·저자)·어디(지역·시장)·무엇(사업·정책·연구)·언제(일정·연도) 중 기사에 있는 요소를 고유명사로 명시. '이/그/저/해당/본/이러한' 금지>",
-    "**핵심 내용:** <무엇·어떻게·왜를 수치·일정·규모와 함께 구체 서술. 주어는 반드시 고유명사(기업·기관·기술명·정부부처)>",
-    "**기술적 차별성:** <경쟁·기존 대비 차별점. 지시어 없이 기술·제품·방법의 정식 명칭으로 서술>",
-    "**시장 파급력:** <TAM/CAGR/매출·투자·용량(GW/MWh) 등 정량 데이터 우선. 없으면 영향받는 플레이어를 이름으로 명시>",
-    "**투자·미래 전망:** <수혜·리스크 주체를 기업·섹터명으로 명시. 일정·규모 포함>"
+    "**개요:** <육하원칙 기반 1-2문장. 누가(기관·기업·부처)·어디(지역)·무엇(사업·투자·정책)·언제(일정·연도)·규모(예산·용량) 중 기사 팩트만. '이/그/저/해당/본/이러한' 금지>",
+    "**투자 주체:** <예산·기술 도입 주체인 국내 정부 부처·공기업·민간 기업명. 팩트 없으면 '명시 없음'>",
+    "**투자 목적:** <국산화/원천기술 내재화/기술 고도화/시간 단축/규제·공급망 대응 등 기사에 근거한 목적. 해당 없으면 '해당 없음'>",
+    "**위탁 연구 니즈:** <국내에서 수행 어렵거나 시간이 오래 걸리는 고난도 R&D 영역 — 기사·공고 팩트로만 서술. 근거 없으면 '팩트 부족으로 판단 보류'>",
+    "**접근 전략:** <해당 고객 설득 논리: 정부=정책 목표 정합성, 기업=기술 로드맵·사업 연계. 주관적 판단 금지, 팩트 기반>"
   ],
   "ko_one_liner": "<데일리 Executive Summary 표용 1문장. 시장조사 담당자가 스캔할 핵심 팩트. 육하원칙(누가·언제·어디·무엇·왜·어떻게) 중 기사에 있는 요소를 최대한 압축: (1)누가=주체·기관·인물 (2)어디=지역·시장 (3)무엇=사업·투자·제품·정책 (4)언제=일정·분기·년도 (5)왜/어떻게=동기·방식·규모. 수치($·GW·%·인원)·일정·지명·기업명 중 3가지 이상 반드시 포함. 70~150자. 명사형 종결(-었음/-함/-임). 지시대명사·'중요성 강조'·키워드 정의·'의문을 불러일으켰음' 같은 추상 표현 금지.>\n예시(데이터센터): '오스트레일리아 AI 인프라 Firmus Technologies가 Nvidia와 협력해 인도네시아에 첫 데이터센터를 건설하며, 6년간 최대 $300억 규모 수주(offtake) 계약을 유치할 전망임.'\n예시(비판·논란): '소프트뱅크 CEO를 포함한 업계 리더들이 엘론 머스크의 궤도 데이터센터 구상에 기술·재무 feasibility 한계로 회의적 입장을 표명함.'",
   "keyword_relevance": "<반드시 한국어. 2~4문단으로 작성.\n\n[첫 문장 규칙 — 절대 준수]\n첫 문장은 반드시 이 기사에 등장하는 고유명사·수치·날짜·이벤트 중 하나로 시작해야 함. 다음 표현으로 시작하는 첫 문장 금지:\n- '이 기사는', '이 논문은', '이 연구는'\n- 'X 산업은 빠르게 발전하고 있다'\n- 'X의 중요성을 강조한다/보여준다'\n- '전력계통·파워그리드·스마트그리드와 관련된 X 산업은'\n- 키워드만 나열하고 '관련이 있다/높다'로 끝나는 문장\n\n올바른 첫 문장 예시:\n- 'SNEC 2026에서 나트륨이온 배터리와 장기 ESS가 전력망 핵심 자산으로 부상하면서...'\n- '오라클이 21,000명 감원으로 확보한 재원을 AI 데이터센터 인프라에 투입함에 따라...'\n- '미국 전력망이 설비 용량의 절반만 활용 중이라는 IEEE Spectrum 분석은...'\n\n[본문 작성]\n각 키워드마다 **`키워드` 관련성** 소제목·'전력계통과 관련하여'처럼 키워드별로 문단을 나누는 패턴·키워드 정의·일반론적 시장 해설 금지. SNEC·ESS·기업명·수치 등 **이 기사의 구체적 사실**을 중심에 두고, 상위 3개 분석 기준 키워드가 그 사실과 어떻게 맞닿는지를 하나의 논리 흐름으로 설명. 키워드가 기사에 직접 등장하지 않아도 간접 연관(계통 안정·송배전·지능형 운영 등)만 짧게 연결.>
 
 CRITICAL KOREAN GENERATION RULES (반드시 준수):
 
-[0. 작성 방식 — 직역 금지]
-- ko_summary_steps와 keyword_relevance는 en_summary_steps의 직역·대역이 아니다. 같은 사실을 한국 독자가 읽기 자연스러운 문장으로 독립적으로 재서술한다.
+[0. 작성 방식]
+- ko_summary_steps와 keyword_relevance는 같은 사실을 한국 독자가 읽기 자연스러운 문장으로 독립적으로 재서술한다.
 - keyword_relevance는 keywords.txt 상위 3개 키워드 각각의 일반적 시장 설명이 아니다. **이 기사**가 당일 데일리 모니터링의 그 3개 분석 기준 키워드와 어떻게 연결되는지를 통합 서술한다. 'OO와 관련하여'로 키워드별 문단을 나누지 않는다.
 - 영어 명사구·수식어·전치사구를 한국어 어순으로 옮기지 않는다. 의미 단위로 문장을 새로 짠다.
 - 영어 'flexible', 'holder', 'owner', 'participant' 등을 '유연', '보유자' 등으로 기계적으로 대응시키지 않는다.
@@ -298,6 +298,21 @@ CRITICAL KOREAN GENERATION RULES (반드시 준수):
 - 정답: "신재생에너지 발전 비중 급증으로 전력망 안정성 확보가 당면 과제로 부상함."
 }
 """
+
+
+def _is_tpd_rate_limit(exc: RateLimitError) -> bool:
+    msg = str(exc).lower()
+    return "tokens per day" in msg or "tpd" in msg
+
+
+def _sleep_for_tpd_limit(exc: RateLimitError) -> None:
+    match = _TPD_WAIT_RE.search(str(exc))
+    if match:
+        wait = int(match.group(1)) * 60 + float(match.group(2)) + 10
+    else:
+        wait = 180.0
+    logger.warning("Groq TPD limit — waiting %.0fs before retry", wait)
+    time.sleep(wait)
 
 
 def strip_cjk_from_korean(text: str) -> str:
@@ -398,9 +413,24 @@ class Summarizer:
             base_url=os.getenv("OPENAI_BASE_URL"),
         )
         self._top_keywords: list[str] = settings.keywords[:3]
+        self._settings = settings
 
     def summarize(self, article: FilteredArticle) -> SummarizedArticle:
+        from src.focused_summarize import summarize_with_focus_if_needed
+
+        return summarize_with_focus_if_needed(article, self._settings, self._summarize_standard)
+
+    def _summarize_standard(self, article: FilteredArticle) -> SummarizedArticle:
+        preview_len = 1500 if is_gov_target(article) else 1200
+        fraunhofer_note = ""
+        if is_gov_target(article):
+            fraunhofer_note = (
+                "This is a government/public release relevant to Fraunhofer Korea. "
+                "Emphasize R&D collaboration, tech transfer, investment signals, and "
+                "partnership opportunities for Fraunhofer Institute Korea Office.\n"
+            )
         user_prompt = (
+            f"{fraunhofer_note}"
             f"Title: {article.title}\n"
             f"URL: {article.url}\n"
             f"Source: {article.source_name} ({article.category})\n"
@@ -408,42 +438,53 @@ class Summarizer:
             f"Analysis baseline keywords (keywords.txt top 3 — keyword_relevance MUST explain "
             f"how THIS article relates to these, not generic keyword definitions): "
             f"{', '.join(self._top_keywords)}\n"
-            f"Content preview: {article.summary[:2000]}"
+            f"Content preview: {article.summary[:preview_len]}"
         )
 
         model = os.getenv("MODEL_NAME") or os.getenv("OPENAI_MODEL", "gemini-2.0-flash-lite")
 
-        for attempt in range(1, _MAX_RETRIES + 1):
-            try:
-                response = self.client.chat.completions.create(
-                    model=model,
-                    response_format={"type": "json_object"},
-                    messages=[
-                        {"role": "system", "content": SYSTEM_PROMPT},
-                        {"role": "user", "content": user_prompt},
-                    ],
-                    temperature=0.2,
-                )
+        response = None
+        while response is None:
+            for attempt in range(1, _MAX_RETRIES + 1):
+                try:
+                    response = self.client.chat.completions.create(
+                        model=model,
+                        response_format={"type": "json_object"},
+                        messages=[
+                            {"role": "system", "content": SYSTEM_PROMPT},
+                            {"role": "user", "content": user_prompt},
+                        ],
+                        temperature=0.2,
+                        max_tokens=1024,
+                    )
+                    break
+                except RateLimitError as exc:
+                    if _is_tpd_rate_limit(exc):
+                        _sleep_for_tpd_limit(exc)
+                        break
+                    if attempt == _MAX_RETRIES:
+                        raise
+                    wait = 2 ** attempt
+                    logger.warning(
+                        "Rate limited on attempt %d/%d — retrying in %ds",
+                        attempt,
+                        _MAX_RETRIES,
+                        wait,
+                    )
+                    time.sleep(wait)
+            else:
                 break
-            except RateLimitError as exc:
-                if attempt == _MAX_RETRIES:
-                    raise
-                wait = 2 ** attempt
-                logger.warning(
-                    "Rate limited on attempt %d/%d — retrying in %ds", attempt, _MAX_RETRIES, wait
-                )
-                time.sleep(wait)
 
         payload = _extract_json(response.choices[0].message.content or "{}")
         summary = _coerce_text(payload.get("summary"))
         trends = payload.get("key_trends") or []
         ko_steps = [polish_korean(str(s).strip()) for s in (payload.get("ko_summary_steps") or []) if str(s).strip()]
-        en_steps = payload.get("en_summary_steps") or []
         keyword_relevance = polish_korean(_coerce_text(payload.get("keyword_relevance")))
         ko_one_liner = polish_korean(_coerce_text(payload.get("ko_one_liner")))
+        summary = polish_korean(summary)
 
         if article.url not in summary:
-            summary = f"{summary} Source: {article.url}".strip()
+            summary = f"{summary} 출처: {article.url}".strip()
 
         return SummarizedArticle(
             title=article.title,
@@ -455,7 +496,7 @@ class Summarizer:
             llm_summary=summary,
             key_trends=[str(t).strip() for t in trends if str(t).strip()],
             ko_summary_steps=[str(s).strip() for s in ko_steps if str(s).strip()],
-            en_summary_steps=[str(s).strip() for s in en_steps if str(s).strip()],
+            en_summary_steps=[],
             keyword_relevance=keyword_relevance,
             ko_one_liner=ko_one_liner,
         )

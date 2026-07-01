@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import re
 
+from src.korea_scope import is_korea_scoped
 from src.models import FilteredArticle, RawArticle
+from src.policy_priority import gov_target_pass_label, is_gov_target
 
 _HTML_TAG = re.compile(r"<[^>]+>")
 
@@ -23,6 +25,7 @@ def filter_articles(
 ) -> list[FilteredArticle]:
     filtered: list[FilteredArticle] = []
     seen_urls: set[str] = set()
+    target_label = gov_target_pass_label()
 
     for article in articles:
         if article.url in seen_urls:
@@ -30,7 +33,13 @@ def filter_articles(
 
         searchable = " ".join([article.title, article.summary, article.source_name])
         matched = match_keywords(searchable, keywords)
+        if not matched and is_gov_target(article):
+            matched = [target_label]
+
         if not matched:
+            continue
+
+        if not is_korea_scoped(article):
             continue
 
         seen_urls.add(article.url)
