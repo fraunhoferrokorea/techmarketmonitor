@@ -204,7 +204,9 @@ def regen_daily_report(
         completed.add(row_id)
         _save_progress(log_date, completed)
 
-        result = rebuild_markdown_from_db(log_date, store, settings, repolish_db=False)
+        result = rebuild_markdown_from_db(
+            log_date, store, settings, repolish_db=False, include_foreign=True
+        )
         print(f"  Saved DB + markdown ({result.get('daily_report')})")
         time.sleep(1.5)
 

@@ -30,19 +30,42 @@ class Settings:
     reports_output_dir: Path
     log_level: str
     keywords: list[str]
+    keyword_labels: list[str]
+    analysis_keywords: list[str]
+    keywords_path: Path
+
+
+def _normalize_keyword(keyword: str) -> str:
+    """Lowercase ASCII keywords for case-insensitive matching; keep Korean as-is."""
+    return keyword.lower() if keyword.isascii() else keyword
+
+
+def _load_keywords_config(path: Path) -> tuple[list[str], list[str], list[str]]:
+    """Load keywords.txt → (labels, normalized_for_match, top3_labels).
+
+    Top 3 = first three non-comment, non-blank lines (file order). Used daily for
+    LLM investigation and executive summary; full list is used for RSS filter/match.
+    """
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except FileNotFoundError:
+        return [], [], []
+
+    labels: list[str] = []
+    for line in lines:
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        labels.append(stripped)
+
+    normalized = [_normalize_keyword(k) for k in labels]
+    return labels, normalized, labels[:3]
 
 
 def _load_keywords_txt(path: Path) -> list[str]:
     """Read one keyword per line from *path*; skip blank lines and # comments."""
-    try:
-        lines = path.read_text(encoding="utf-8").splitlines()
-        return [
-            line.strip()
-            for line in lines
-            if line.strip() and not line.strip().startswith("#")
-        ]
-    except FileNotFoundError:
-        return []
+    labels, _, _ = _load_keywords_config(path)
+    return labels
 
 
 def _load_yaml_list(path: Path, key: str) -> list:
@@ -51,14 +74,24 @@ def _load_yaml_list(path: Path, key: str) -> list:
     return data.get(key, [])
 
 
+def resolve_keywords_path() -> Path:
+    """Path to keywords.txt (project root, or KEYWORDS_TXT in .env)."""
+    load_dotenv(PROJECT_ROOT / ".env")
+    override = os.getenv("KEYWORDS_TXT", "").strip()
+    if override:
+        return Path(override).expanduser()
+    return _KEYWORDS_TXT
+
+
 def load_settings() -> Settings:
     load_dotenv(PROJECT_ROOT / ".env")
 
-    raw = _load_keywords_txt(_KEYWORDS_TXT)
-    if not raw:
-        raw = _DEFAULT_KEYWORDS
-
-    keywords = [k.strip().lower() for k in raw if k.strip()]
+    keywords_path = resolve_keywords_path()
+    raw_labels, keywords, analysis = _load_keywords_config(keywords_path)
+    if not keywords:
+        keywords = [_normalize_keyword(k) for k in _DEFAULT_KEYWORDS]
+        raw_labels = list(_DEFAULT_KEYWORDS)
+        analysis = raw_labels[:3]
 
     database_path = Path(os.getenv("DATABASE_PATH", "data/monitor.db"))
     if not database_path.is_absolute():
@@ -77,6 +110,9 @@ def load_settings() -> Settings:
         reports_output_dir=reports_output_dir,
         log_level=os.getenv("LOG_LEVEL", "INFO"),
         keywords=keywords,
+        keyword_labels=raw_labels,
+        analysis_keywords=analysis,
+        keywords_path=keywords_path,
     )
 
 

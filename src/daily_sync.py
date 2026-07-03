@@ -137,7 +137,11 @@ def refresh_all_daily_markdown(
     results: list[dict] = []
 
     for log_date in sorted(db_dates):
-        results.append(rebuild_markdown_from_db(log_date, store, settings))
+        results.append(
+            rebuild_markdown_from_db(
+                log_date, store, settings, include_foreign=True
+            )
+        )
 
     for log_date in sorted(set(report_dates_from_disk()) - db_dates):
         removed = remove_report(log_date)
@@ -169,6 +173,7 @@ def rebuild_markdown_from_db(
     settings: Settings,
     *,
     repolish_db: bool = True,
+    include_foreign: bool = False,
 ) -> dict:
     """Regenerate markdown from stored summaries (no LLM)."""
     rows = store.get_entries_for_date(log_date)
@@ -183,22 +188,19 @@ def rebuild_markdown_from_db(
     skipped_foreign = 0
     for row in rows:
         article = repolish_summarized_article(_row_to_article(row))
-        if not is_domestic_news(article):
+        if not include_foreign and not is_domestic_news(article):
             skipped_foreign += 1
             continue
         articles.append(article)
         if repolish_db:
-            original_ko = row.get("ko_summary_steps") or []
-            original_kr = row.get("keyword_relevance") or ""
             if (
-                article.ko_summary_steps != original_ko
-                or article.keyword_relevance != original_kr
+                article.ko_summary_steps != (row.get("ko_summary_steps") or [])
+                or article.keyword_relevance != (row.get("keyword_relevance") or "")
+                or article.rd_proposable_area != (row.get("rd_proposable_area") or "")
+                or article.ko_one_liner != (row.get("ko_one_liner") or "")
+                or article.llm_summary != (row.get("llm_summary") or "")
             ):
-                store.update_korean_text(
-                    row["id"],
-                    article.ko_summary_steps,
-                    article.keyword_relevance,
-                )
+                store.update_summarized_entry(row["id"], article)
                 repolished_rows += 1
 
     if not articles:
@@ -211,7 +213,7 @@ def rebuild_markdown_from_db(
     path = save_daily_report(
         log_date,
         articles,
-        top_keywords=settings.keywords[:3],
+        top_keywords=settings.analysis_keywords,
     )
     return {
         "log_date": log_date.isoformat(),
@@ -228,9 +230,25 @@ def reprocess_date(
     settings: Settings,
     store: DailyLogStore,
     now: datetime,
+    *,
+    fresh: bool = False,
 ) -> dict:
     """Clear one date and rerun fetch → filter → summarize with current pipeline rules."""
-    cleared = clear_daily(log_date, store)
+    if fresh or store.count_for_date(log_date) == 0:
+        cleared = clear_daily(log_date, store)
+        resume = False
+    else:
+        cleared = {
+            "log_date": log_date.isoformat(),
+            "deleted_db_rows": 0,
+            "removed_markdown": False,
+        }
+        resume = True
+        logger.info(
+            "Resuming partial reprocess for %s (%d rows in DB)",
+            log_date.isoformat(),
+            store.count_for_date(log_date),
+        )
     window_end = window_end_for_log_date(log_date, now)
     logger.info(
         "Reprocessing %s (window ends %s)",
@@ -241,6 +259,7 @@ def reprocess_date(
         log_date=log_date,
         settings=settings,
         window_end=window_end,
+        resume=resume,
     )
     result["status"] = "reprocessed"
     result["cleared"] = cleared
@@ -311,6 +330,8 @@ def reprocess_range(
     end_date: date,
     settings: Settings | None = None,
     now: datetime | None = None,
+    *,
+    fresh: bool = False,
 ) -> list[dict]:
     """Re-run the daily pipeline for each date in [start_date, end_date] (inclusive)."""
     if start_date > end_date:
@@ -323,7 +344,7 @@ def reprocess_range(
 
     cursor = start_date
     while cursor <= end_date:
-        results.append(reprocess_date(cursor, settings, store, current))
+        results.append(reprocess_date(cursor, settings, store, current, fresh=fresh))
         cursor += timedelta(days=1)
 
     save_last_completed_log_date(end_date)

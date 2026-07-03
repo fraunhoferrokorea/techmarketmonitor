@@ -8,18 +8,12 @@ from datetime import date, datetime
 from pathlib import Path
 
 from src.models import SummarizedArticle
-from src.policy_priority import is_gov_target, gov_target_score
-from src.rd_targeting import (
-    build_daily_rd_insights,
-    build_rd_targeting_block,
-    compute_rd_match_score,
-    investment_signal_score,
-    parse_rd_fields,
-)
+from src.policy_priority import is_gov_target
 from src.summarizer import (
     normalize_korean_endings,
     normalize_korean_endings_sentences,
     polish_korean,
+    repolish_summarized_article,
     strip_cjk_from_korean,
 )
 
@@ -156,22 +150,24 @@ def log_to_summarized_article(log: dict) -> SummarizedArticle:
         except ValueError:
             published_at = None
 
-    return SummarizedArticle(
-        title=log["title"],
-        url=log["url"],
-        source_name=log.get("source_name", ""),
-        category=log.get("category", "tech_news"),
-        published_at=published_at,
-        matched_keywords=list(log.get("matched_keywords") or []),
-        llm_summary=log.get("llm_summary", ""),
-        key_trends=list(log.get("key_trends") or []),
-        ko_summary_steps=list(log.get("ko_summary_steps") or []),
-        en_summary_steps=list(log.get("en_summary_steps") or []),
-        keyword_relevance=str(log.get("keyword_relevance") or ""),
-        ko_one_liner=str(log.get("ko_one_liner") or ""),
-        rd_match_score=int(log.get("rd_match_score") or 0),
-        rd_proposable_area=str(log.get("rd_proposable_area") or ""),
-        rd_fact_basis=str(log.get("rd_fact_basis") or ""),
+    return repolish_summarized_article(
+        SummarizedArticle(
+            title=log["title"],
+            url=log["url"],
+            source_name=log.get("source_name", ""),
+            category=log.get("category", "tech_news"),
+            published_at=published_at,
+            matched_keywords=list(log.get("matched_keywords") or []),
+            llm_summary=log.get("llm_summary", ""),
+            key_trends=list(log.get("key_trends") or []),
+            ko_summary_steps=list(log.get("ko_summary_steps") or []),
+            en_summary_steps=list(log.get("en_summary_steps") or []),
+            keyword_relevance=str(log.get("keyword_relevance") or ""),
+            ko_one_liner=str(log.get("ko_one_liner") or ""),
+            rd_match_score=int(log.get("rd_match_score") or 0),
+            rd_proposable_area=str(log.get("rd_proposable_area") or ""),
+            rd_fact_basis=str(log.get("rd_fact_basis") or ""),
+        )
     )
 
 
@@ -436,15 +432,9 @@ _RELEVANCE_LABEL = {"direct": "직접", "indirect": "간접", "weak": "약함"}
 def _relevance_sort_key(
     article: SummarizedArticle,
     top_keywords: list[str],
-) -> tuple[int, int, int, int, str]:
+) -> tuple[int, str]:
     level = _classify_relevance(article, top_keywords)
-    return (
-        -compute_rd_match_score(article),
-        -gov_target_score(article),
-        -investment_signal_score(article),
-        _RELEVANCE_ORDER[level],
-        article.title.lower(),
-    )
+    return _RELEVANCE_ORDER[level], article.title.lower()
 
 
 def _sort_articles_by_relevance(
@@ -1148,92 +1138,70 @@ def _build_executive_summary(
     top_keywords: list[str] | None = None,
     article_slugs: dict[str, str] | None = None,
 ) -> list[str]:
-    """Build R&D intelligence executive summary (Fraunhofer Korea)."""
+    """Build a concise executive summary with explicit keyword relevance."""
     kws = top_keywords or []
     kw_header = " · ".join(kws[:3]) if kws else "(미설정)"
-    theme = _build_rd_daily_theme(articles)
+    theme = _build_daily_theme(articles, kws)
 
     sources = ", ".join(dict.fromkeys(a.source_name for a in articles[:3]))
     extra = f" 외 {len(articles) - 3}개 출처" if len(articles) > 3 else ""
-    high_score = sum(1 for a in articles if compute_rd_match_score(a) >= 4)
 
     lines = [
-        "## 오늘의 R&D 인텔리전스 요약",
+        "## 오늘의 요약 (Daily Executive Summary)",
         "",
-        f"**모니터링 키워드 (상위 3개):** {kw_header}",
+        f"**분석 기준 키워드 (상위 3개):** {kw_header}",
         "",
         f"**오늘의 공통 흐름:** {theme}",
         "",
-        f"오늘 수집 {len(articles)}건 (R&D 적합 4점 이상 {high_score}건) · {sources}{extra}",
+        f"오늘 수집 {len(articles)}건 ({sources}{extra})",
         "",
-        "**R&D 기회 스캔 (누가 · 왜 · 무엇을):**",
+        "**항목별 핵심 요약 (키워드 연결 포함):**",
         "",
-        "| R&D적합 | 핵심 이슈 | 고객 타겟 | R&D 연계 포인트 | 팩트 체크 |",
-        "|---------|----------|----------|----------------|----------|",
+        "| 관련도 | 항목 | 한 줄 요약 |",
+        "|--------|------|-----------|",
     ]
 
     slugs = article_slugs or _build_item_slugs(articles)
-    ranked = sorted(
-        articles,
-        key=lambda a: (
-            -compute_rd_match_score(a),
-            -gov_target_score(a),
-            -investment_signal_score(a),
-            a.title.lower(),
-        ),
-    )
 
-    included_count = 0
-    for article in ranked:
-        score = compute_rd_match_score(article)
-        if score < 2:
+    ranked: list[tuple[int, SummarizedArticle, str, str, str]] = []
+    for article in articles:
+        item = _exec_summary_item(article, kws)
+        if not item:
             continue
-        fields = parse_rd_fields(article.ko_summary_steps)
-        issue = _extract_fact_sentence(article, kws, "direct") or article.ko_one_liner or article.title
-        issue = issue.replace("|", "\\|")
-        target = (fields.get("investment_actor") or "명시 없음").replace("|", "\\|")
-        link_point = (
-            article.rd_proposable_area
-            or fields.get("pain_point")
-            or fields.get("investment_purpose")
-            or "해당 없음"
-        ).replace("|", "\\|")
-        fact = (article.rd_fact_basis or article.url).replace("|", "\\|")
-        slug = slugs[article.url]
-        link = _item_summary_link(article, slug, max_len=30)
-        lines.append(
-            f"| **{score}/5** | {link} {issue} | {target} | {link_point} | {fact} |"
-        )
-        included_count += 1
+        fact, level_label, connection = item
+        level_key = next(k for k, v in _RELEVANCE_LABEL.items() if v == level_label)
+        ranked.append((_RELEVANCE_ORDER[level_key], article, fact, level_label, connection))
 
-    skipped = len(articles) - included_count
+    ranked.sort(key=lambda row: (_relevance_sort_key(row[1], kws)))
+
+    included_items: list[tuple[SummarizedArticle, str, str, str]] = []
+    for _, article, fact, level_label, connection in ranked:
+        slug = slugs[article.url]
+        link = _item_summary_link(article, slug)
+        cell_fact = f"{fact} {connection}".replace("|", "\\|")
+        lines.append(f"| **{level_label}** | {link} | {cell_fact} |")
+        included_items.append((article, fact, level_label, connection))
+
+    skipped = len(articles) - len(included_items)
     if skipped:
         lines += [
             "",
-            f"*(이하 {skipped}건은 R&D 적합 1점 또는 국내 투자 신호 미약으로 표에서 생략)*",
+            f"*(이하 {skipped}건은 관련성 약함 또는 키워드 무관으로 요약에서 생략)*",
         ]
 
-    lines += build_daily_rd_insights(articles, kws)
+    lines += ["", "**눈여겨볼 신호 (키워드 관점):**"]
+    lines.extend(
+        _build_keyword_signals(included_items, kws)
+        or [f"- **[{kw_header}]** (해당 없음)"]
+    )
     lines += [
+        "",
         "- **상충되는 정보:** (해당 없음)",
         "",
         "---",
         "",
     ]
     return lines
-
-
-def _build_rd_daily_theme(articles: list[SummarizedArticle]) -> str:
-    scores = [compute_rd_match_score(a) for a in articles]
-    high = sum(1 for s in scores if s >= 4)
-    mid = sum(1 for s in scores if s == 3)
-    if high >= 2:
-        return "국내 정부·기업의 예산·R&D 프로그램 신호가 다수 포착된 날"
-    if high >= 1:
-        return "국내 R&D 위탁·협력 가능성이 있는 투자·정책 이슈가 부각된 날"
-    if mid >= 2:
-        return "국내 산업·정책 동향은 있으나 구체적 R&D 예산 신호는 제한적인 날"
-    return "국내 R&D 수주 직접 연계 신호는 약하고 배경 모니터링 위주인 날"
 
 
 def _build_item_block(
@@ -1275,11 +1243,6 @@ def _build_item_block(
     for line in summary_lines:
         lines.append(f"  - {line}")
 
-    rd_lines = build_rd_targeting_block(article)
-    if rd_lines:
-        lines.append("")
-        lines.extend(rd_lines)
-
     lines += [
         f"- **신뢰도:** {credibility}",
         f"- **태그:** {' '.join(tags)}",
@@ -1303,7 +1266,7 @@ def _build_markdown(
     author = recorder or os.getenv("DAILY_LOG_RECORDER", "Tech Market Monitor (auto)")
 
     lines: list[str] = [
-        "# 국내 R&D 인텔리전스 데일리 로그",
+        "# 데일리 리서치 로그",
         "",
         f"날짜: {log_date.isoformat()}",
         f"기록자: {author}",
@@ -1348,9 +1311,9 @@ def _build_markdown(
         "",
         "## 신뢰도 등급 기준",
         "",
-        "- **A (높음):** 정부·공공기관(.go.kr) 공식 보도, KISTEP/IITP/KIET 등 공인 연구기관, 1차 보도(공식발표 인용)",
-        "- **B (중간):** 국내 경제·IT 전문매체, 2차 인용 보도, 기업 IR/보도자료",
-        "- **C (참고):** 익명 소스, 추측성 기사, 단순 재가공 콘텐츠, 미검증 블로그",
+        "- **A (높음):** 피어리뷰 학술지 논문, 1차 보도(공식발표 인용), Tier-1 통신사(Reuters/Bloomberg/AP), 정부·국제기구 통계, Tier-1 시장조사기관(Gartner/IDC/McKinsey)",
+        "- **B (중간):** 프리프린트(arXiv 등 동료심사 전), 업계 전문매체, 2차 인용 보도, 기업 자체 발표(IR/보도자료)",
+        "- **C (참고):** 익명 소스, 추측성 기사, 단순 재가공 콘텐츠, 미검증 블로그 — **자동 생성 시에는 C가 나오지 않음. 수동 기록 시에만 사용**",
         "",
     ]
 

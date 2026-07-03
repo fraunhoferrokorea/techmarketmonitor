@@ -10,8 +10,7 @@ from openai import OpenAI, RateLimitError
 from src.config import PROJECT_ROOT, Settings
 from src.llm_utils import MAX_RETRIES, REQUEST_DELAY, extract_json, is_tpd_rate_limit, sleep_for_tpd_limit
 from src.models import FilteredArticle, SummarizedArticle
-from src.policy_priority import gov_target_pass_label, is_gov_target
-from src.summarizer import _coerce_text, polish_korean
+from src.policy_priority import gov_target_pass_label, is_gov_target, is_plan_document
 from src.text_chunking import (
     _CHUNK_CHARS,
     chunk_plan_text,
@@ -22,7 +21,9 @@ from src.text_chunking import (
 logger = logging.getLogger(__name__)
 
 _LONG_CONTENT_THRESHOLD = int(os.getenv("GOV_LONG_CONTENT_CHARS", "10000"))
+_PLAN_CONTENT_THRESHOLD = int(os.getenv("GOV_PLAN_CONTENT_CHARS", "3000"))
 _MAP_MAX_CHUNKS = int(os.getenv("GOV_MAP_MAX_CHUNKS", "3"))
+_PLAN_MAP_MAX_CHUNKS = int(os.getenv("GOV_PLAN_MAP_MAX_CHUNKS", "5"))
 
 _MAP_SYSTEM = """당신은 프라운호퍼 한국 사무소용 R&D·기술협력 타깃팅 분석가입니다.
 정부·공공기관 발표 원문 일부에서, 프라운호퍼 협력·기술이전·R&D 사업 기회와 연관된 사실만 추출합니다.
@@ -36,7 +37,11 @@ JSON만 반환:
 
 
 def needs_focused_summarization(article: FilteredArticle) -> bool:
-    return is_gov_target(article) and len(article.summary) >= _LONG_CONTENT_THRESHOLD
+    if not is_gov_target(article):
+        return False
+    if is_plan_document(article):
+        return len(article.summary) >= _PLAN_CONTENT_THRESHOLD
+    return len(article.summary) >= _LONG_CONTENT_THRESHOLD
 
 
 class FocusedDocumentSummarizer:
@@ -48,7 +53,7 @@ class FocusedDocumentSummarizer:
         if not api_key:
             raise ValueError("OPENAI_API_KEY is required")
         self.client = OpenAI(api_key=api_key, base_url=os.getenv("OPENAI_BASE_URL"))
-        self._keywords = settings.keywords[:3]
+        self._keywords = settings.analysis_keywords
         self._model = os.getenv("MODEL_NAME") or os.getenv("OPENAI_MODEL", "gemini-2.0-flash-lite")
 
     def _chat_json(self, system: str, user: str) -> dict:
@@ -106,7 +111,8 @@ class FocusedDocumentSummarizer:
     def summarize_article(self, article: FilteredArticle) -> SummarizedArticle:
         from src.summarizer import SYSTEM_PROMPT
 
-        facts = self.extract_facts(article.summary, article.title)
+        max_chunks = _PLAN_MAP_MAX_CHUNKS if is_plan_document(article) else _MAP_MAX_CHUNKS
+        facts = self.extract_facts(article.summary, article.title, max_chunks=max_chunks)
         if not facts:
             raise ValueError(f"No relevant facts extracted for: {article.title[:60]}")
 
@@ -131,18 +137,25 @@ class FocusedDocumentSummarizer:
 
 
 def _article_from_payload(article: FilteredArticle, payload: dict) -> SummarizedArticle:
+    from src.summarizer import _coerce_text, polish_korean, polish_rd_field, polish_rd_ko_steps
+
     summary = polish_korean(_coerce_text(payload.get("summary")))
     if article.url not in summary:
         summary = f"{summary} 출처: {article.url}".strip()
 
-    ko_steps = [
-        polish_korean(str(step).strip())
-        for step in (payload.get("ko_summary_steps") or [])
-        if str(step).strip()
-    ]
+    ko_steps = polish_rd_ko_steps(
+        [str(step).strip() for step in (payload.get("ko_summary_steps") or []) if str(step).strip()]
+    )
     keyword_relevance = polish_korean(_coerce_text(payload.get("keyword_relevance")))
     ko_one_liner = polish_korean(_coerce_text(payload.get("ko_one_liner")))
     trends = [str(t).strip() for t in (payload.get("key_trends") or []) if str(t).strip()]
+    rd_proposable_area = polish_rd_field(_coerce_text(payload.get("rd_proposable_area")))
+    rd_fact_basis = polish_korean(_coerce_text(payload.get("fact_basis")))
+    raw_score = payload.get("rd_match_score", 0)
+    try:
+        rd_match_score = max(1, min(5, int(raw_score)))
+    except (TypeError, ValueError):
+        rd_match_score = 0
 
     matched = list(article.matched_keywords)
     label = gov_target_pass_label()
@@ -162,6 +175,9 @@ def _article_from_payload(article: FilteredArticle, payload: dict) -> Summarized
         en_summary_steps=[],
         keyword_relevance=keyword_relevance,
         ko_one_liner=ko_one_liner,
+        rd_match_score=rd_match_score,
+        rd_proposable_area=rd_proposable_area,
+        rd_fact_basis=rd_fact_basis,
     )
 
 

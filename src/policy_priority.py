@@ -9,6 +9,15 @@ _OFFICIAL_SOURCE_HINTS = (
     "과기정통부",
     "정책브리핑",
     "산업통상",
+    "중소벤처",
+    "국토교통",
+    "기후에너지",
+    "환경부",
+    "교육부",
+    "보건복지",
+    "국방부",
+    "우주항공",
+    "전문자료",
     "kistep",
     "iitp",
     "kipo",
@@ -17,6 +26,8 @@ _OFFICIAL_SOURCE_HINTS = (
     "한국연구재단",
     "nrf",
     "etri",
+    "pacst",
+    "국가과학기술자문",
 )
 
 # National master plans and major policy frameworks.
@@ -152,3 +163,20 @@ def is_official_government_source(
     article: RawArticle | FilteredArticle | SummarizedArticle,
 ) -> bool:
     return _is_official_source(article)
+
+
+def is_plan_document(article: RawArticle | FilteredArticle | SummarizedArticle) -> bool:
+    """Government master plan, basic plan, or primary source document (not a short press blurb)."""
+    text = _combined_text(article)
+    url = article.url.lower()
+    if "expdocview" in url or "/archive/expdoc" in url:
+        return True
+    if "전문자료" in article.source_name:
+        return True
+    if _matches_any(_PLAN_TITLE_PATTERNS, article.title):
+        return True
+    if _matches_any(_PLAN_TITLE_PATTERNS, text):
+        return True
+    if re.search(r"\[첨부\s*(?:PDF|문서)\s*원문", text, re.I):
+        return True
+    return False

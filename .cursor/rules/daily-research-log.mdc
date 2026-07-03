@@ -48,9 +48,7 @@ Avoid vague filler in summary cells: no deictic subjects ("이 기술은"), no g
 - **저자/발행기관:**
 - **발행일:** YYYY-MM-DD
 - **링크/DOI:**
-- **요약 (영문 원문):** (optional for manual; auto includes en_summary_steps)
-  - **Overview:** ...
-- **요약 (한국어 번역):**
+- **요약:**
   - Fact bullets; noun-style endings. Past: -었음/-았음/-했음. Present: -함/-임/-됨. Never -습니다/-합니다/-ㅂ니다/-다
   - Last line: `(해석) ...`
 - **신뢰도:** A / B / C (auto never assigns C)

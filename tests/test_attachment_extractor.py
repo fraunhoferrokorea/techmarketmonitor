@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from src.attachment_extractor import discover_pdf_urls, extract_pdf_text
+from src.attachment_extractor import discover_pdf_urls, extract_hwpx_text, extract_pdf_text
 from src.article_enrichment import enrich_raw_article
 from src.models import RawArticle
 
@@ -30,6 +30,22 @@ def test_discover_msit_pdf_only() -> None:
     assert "fileOrd=2" in urls[0]
 
 
+def test_extract_hwpx_text_from_zip_xml() -> None:
+    import io
+    import zipfile
+
+    xml = (
+        '<?xml version="1.0" encoding="UTF-8"?>'
+        "<hp:t>스마트그리드</hp:t><hp:t> 전력계통</hp:t>"
+    )
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w") as archive:
+        archive.writestr("Contents/section0.xml", xml)
+    text = extract_hwpx_text(buffer.getvalue())
+    assert "스마트그리드" in text
+    assert "전력계통" in text
+
+
 def test_enrich_includes_pdf_marker(monkeypatch=None) -> None:
     article = RawArticle(
         title="제6차 국가표준기본계획 발표",
@@ -42,10 +58,10 @@ def test_enrich_includes_pdf_marker(monkeypatch=None) -> None:
     fake_html = '<a href="/common/download.do?fileId=1&tblKey=GMN">a.pdf</a>'
 
     with patch("src.article_enrichment._fetch_page_html", return_value=fake_html):
-        with patch("src.article_enrichment.fetch_pdf_texts", return_value=["PDF 본문 텍스트"]):
+        with patch("src.article_enrichment.fetch_plan_attachment_texts", return_value=["PDF 본문 텍스트"]):
             enriched = enrich_raw_article(article)
 
-    assert "[첨부 PDF 원문 1]" in enriched.summary
+    assert "[첨부 문서 원문 1]" in enriched.summary
     assert "PDF 본문 텍스트" in enriched.summary
 
 

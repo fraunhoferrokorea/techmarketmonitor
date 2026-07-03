@@ -79,7 +79,7 @@ class PlanDocumentSummarizer:
             api_key=os.getenv("OPENAI_API_KEY"),
             base_url=os.getenv("OPENAI_BASE_URL"),
         )
-        self._keywords = settings.keywords[:3]
+        self._keywords = settings.analysis_keywords
         self._model = os.getenv("MODEL_NAME") or os.getenv("OPENAI_MODEL", "gemini-2.0-flash-lite")
 
     def _chat_json(self, system: str, user: str) -> dict:
@@ -236,7 +236,7 @@ def summarize_plan_pdf(
         raise FileNotFoundError(pdf_path)
 
     doc_title = title or _default_title(pdf_path)
-    keywords = focus_keywords or settings.keywords[:3]
+    keywords = focus_keywords or settings.analysis_keywords
     if not keywords:
         raise ValueError("No focus keywords — check keywords.txt")
 

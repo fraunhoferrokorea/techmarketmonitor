@@ -1,5 +1,5 @@
 """
-Run the monthly Word report only if today is the last business day of the month.
+Run the monthly Markdown report only if today is the last business day of the month.
 Registered as a daily Task Scheduler job — no-ops on most days.
 
 GitHub Actions passes --check-only: exit 1 when today is NOT the last business day

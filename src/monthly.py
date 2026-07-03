@@ -5,15 +5,50 @@ import os
 from datetime import date
 from pathlib import Path
 
-from src.config import PROJECT_ROOT, load_settings
+from src.config import PROJECT_ROOT, Settings, load_settings
 from src.daily_markdown_loader import load_logs_from_daily_markdown
+from src.daily_report import log_to_summarized_article
+from src.korea_scope import is_domestic_news
 from src.rd_monthly_report import generate_rd_monthly_report
 from src.rd_targeting import MONTHLY_RD_MIN_SCORE
+from src.storage import DailyLogStore
 
 logger = logging.getLogger(__name__)
 
 _DAILY_OUTPUT_DIR = PROJECT_ROOT / "output" / "daily"
 _GENERATE_LEGACY_TMR = os.getenv("GENERATE_LEGACY_TMR", "").lower() in ("1", "true", "yes")
+
+
+def _load_monthly_logs(
+    year: int,
+    month: int,
+    settings: Settings,
+) -> tuple[list[dict], str, list[str]]:
+    """Load monthly entries from DB (Korea-only) or fall back to daily markdown."""
+    store = DailyLogStore(settings.database_path)
+    db_logs = store.get_logs_for_month(year, month)
+    if db_logs:
+        domestic: list[dict] = []
+        for log in db_logs:
+            if is_domestic_news(log_to_summarized_article(log)):
+                domestic.append(log)
+        if domestic:
+            source_files = sorted(
+                {f"daily_{entry['log_date']}.md" for entry in domestic if entry.get("log_date")}
+            )
+            logger.info(
+                "Loaded %d domestic log(s) from DB for %04d-%02d",
+                len(domestic),
+                year,
+                month,
+            )
+            return domestic, "database", source_files
+
+    logs = load_logs_from_daily_markdown(year, month, _DAILY_OUTPUT_DIR)
+    source_files = sorted(
+        {f"daily_{entry['log_date']}.md" for entry in logs if entry.get("log_date")}
+    )
+    return logs, "daily_markdown", source_files
 
 
 def _delete_daily_reports(year: int, month: int) -> list[str]:
@@ -42,10 +77,7 @@ def run_monthly_report(
     month = month or today.month
 
     settings = load_settings()
-    logs = load_logs_from_daily_markdown(year, month, _DAILY_OUTPUT_DIR)
-    source_files = sorted(
-        {f"daily_{entry['log_date']}.md" for entry in logs if entry.get("log_date")}
-    )
+    logs, source, source_files = _load_monthly_logs(year, month, settings)
 
     if not logs:
         return {
@@ -53,9 +85,9 @@ def run_monthly_report(
             "month": month,
             "entries": 0,
             "report_path": None,
-            "source": "daily_markdown",
+            "source": source,
             "source_files": [],
-            "message": "No daily markdown reports found for this month.",
+            "message": "No domestic logs found for this month (DB or daily markdown).",
         }
 
     try:
@@ -66,7 +98,7 @@ def run_monthly_report(
             "month": month,
             "entries": 0,
             "report_path": None,
-            "source": "daily_markdown",
+            "source": source,
             "source_files": source_files,
             "message": str(exc),
         }
@@ -91,9 +123,10 @@ def run_monthly_report(
         "month": month,
         "entries": len(logs),
         "rd_min_score": MONTHLY_RD_MIN_SCORE,
-        "source": "daily_markdown",
+        "source": source,
         "source_files": source_files,
-        "report_path": str(report_path) if report_path else None,
+        "report_path": str(report_path_ko),
         "report_path_ko": str(report_path_ko),
+        "report_path_legacy_en": str(report_path) if report_path else None,
         "deleted_daily_reports": deleted_files,
     }

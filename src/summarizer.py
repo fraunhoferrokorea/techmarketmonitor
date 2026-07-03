@@ -194,7 +194,7 @@ Return valid JSON with this exact schema:
   "summary": "1문장 한국어 R&D·투자 헤드라인. 반드시 '출처: <url>'로 끝남",
   "key_trends": ["기술·투자 동향 키워드 1", "기술·투자 동향 키워드 2"],
   "rd_match_score": 3,
-  "rd_proposable_area": "Fraunhofer가 제안 가능한 R&D 영역 1문장 (팩트 기반, 없으면 '해당 없음')",
+  "rd_proposable_area": "제안 가능 R&D 영역 1문장 (팩트 기반, 없으면 '해당 없음'). 'Fraunhofer/프라운호퍼' 주어·소유격 명시 금지",
   "fact_basis": "예산·일정·규모 등 팩트 근거 요약 (없으면 '명시 없음')",
   "ko_summary_steps": [
     "**개요:** <육하원칙 1-2문장. 국내 주체·사업·일정·규모 팩트만>",
@@ -210,6 +210,7 @@ Return valid JSON with this exact schema:
 CRITICAL KOREAN RULES:
 - All Korean text: noun-style endings (-함/-임/-었음). Never -습니다/-합니다/-다.
 - No deictic subjects (이/그/저/해당/본). Name institutions explicitly.
+- rd_proposable_area and **접근 전략:** do not write "Fraunhofer는/가/의" or "프라운호퍼는/가/의" — the report is already Fraunhofer-focused.
 - No stray Chinese/Japanese characters.
 - ko_summary_steps and keyword_relevance must be independently written in natural Korean.
 - English terms: use industry-standard Korean or acronym with Korean gloss on first use.
@@ -232,6 +233,62 @@ def _sleep_for_tpd_limit(exc: RateLimitError) -> None:
         wait = 180.0
     logger.warning("Groq TPD limit — waiting %.0fs before retry", wait)
     time.sleep(wait)
+
+
+_FRAUNHOFER_ENTITY = (
+    r"(?:Fraunhofer(?:\s+Institute)?(?:\s+Korea(?:\s+Office)?)?"
+    r"|프라운호퍼(?:\s+한국)?(?:\s+사무소)?)"
+)
+_FRAUNHOFER_LEADING_SUBJECT = re.compile(
+    rf"^(?:{_FRAUNHOFER_ENTITY}(?:은|는|가|의)\s+)+",
+    re.I,
+)
+_FRAUNHOFER_POSSESSIVE = re.compile(
+    rf"(?<=[가-힣\s]){_FRAUNHOFER_ENTITY}의\s+",
+    re.I,
+)
+_FRAUNHOFER_COMMA_SUBJECT = re.compile(
+    rf"(?<=[,，])\s*{_FRAUNHOFER_ENTITY}(?:은|는|가)\s+",
+    re.I,
+)
+_RD_FIELD_SKIP = frozenset({"해당 없음", "명시 없음", "팩트 부족으로 판단 보류"})
+
+
+def strip_implicit_fraunhofer_subject(text: str) -> str:
+    """Remove redundant Fraunhofer subject/possessive — report context already implies it."""
+    cleaned = text.strip()
+    if not cleaned or cleaned in _RD_FIELD_SKIP:
+        return cleaned
+    prev = None
+    while prev != cleaned:
+        prev = cleaned
+        cleaned = _FRAUNHOFER_LEADING_SUBJECT.sub("", cleaned)
+        cleaned = _FRAUNHOFER_COMMA_SUBJECT.sub(" ", cleaned)
+        cleaned = _FRAUNHOFER_POSSESSIVE.sub("", cleaned)
+    return cleaned.strip()
+
+
+def polish_rd_field(text: str) -> str:
+    """Polish Korean R&D linkage fields and drop implicit Fraunhofer subject."""
+    polished = polish_korean(text.strip()) if text.strip() else ""
+    return strip_implicit_fraunhofer_subject(polished)
+
+
+def polish_rd_ko_steps(steps: list[str]) -> list[str]:
+    """Polish ko_summary_steps and strip redundant Fraunhofer phrasing."""
+    polished: list[str] = []
+    for step in steps:
+        raw = str(step).strip()
+        if not raw:
+            continue
+        label = re.match(r"^(\*\*[^*]+:\*\*\s*)", raw, re.I)
+        if label:
+            prefix = label.group(1)
+            body = strip_implicit_fraunhofer_subject(polish_korean(raw[len(prefix) :]))
+            polished.append(f"{prefix}{body}".strip())
+        else:
+            polished.append(strip_implicit_fraunhofer_subject(polish_korean(raw)))
+    return polished
 
 
 def strip_cjk_from_korean(text: str) -> str:
@@ -272,9 +329,23 @@ def normalize_korean_endings_sentences(text: str) -> str:
 
 def repolish_summarized_article(article: SummarizedArticle) -> SummarizedArticle:
     """Re-apply Korean ending normalization to stored summary fields."""
-    ko_steps = [polish_korean(str(s).strip()) for s in article.ko_summary_steps if str(s).strip()]
-    keyword_relevance = polish_korean(article.keyword_relevance.strip()) if article.keyword_relevance else ""
-    ko_one_liner = polish_korean(article.ko_one_liner.strip()) if article.ko_one_liner else ""
+    ko_steps = polish_rd_ko_steps([str(s).strip() for s in article.ko_summary_steps if str(s).strip()])
+    keyword_relevance = (
+        strip_implicit_fraunhofer_subject(polish_korean(article.keyword_relevance.strip()))
+        if article.keyword_relevance
+        else ""
+    )
+    ko_one_liner = (
+        strip_implicit_fraunhofer_subject(polish_korean(article.ko_one_liner.strip()))
+        if article.ko_one_liner
+        else ""
+    )
+    rd_proposable_area = polish_rd_field(article.rd_proposable_area) if article.rd_proposable_area else ""
+    llm_summary = (
+        strip_implicit_fraunhofer_subject(polish_korean(article.llm_summary.strip()))
+        if article.llm_summary
+        else ""
+    )
     return SummarizedArticle(
         title=article.title,
         url=article.url,
@@ -282,14 +353,14 @@ def repolish_summarized_article(article: SummarizedArticle) -> SummarizedArticle
         category=article.category,
         published_at=article.published_at,
         matched_keywords=article.matched_keywords,
-        llm_summary=article.llm_summary,
+        llm_summary=llm_summary,
         key_trends=article.key_trends,
         ko_summary_steps=ko_steps,
         en_summary_steps=article.en_summary_steps,
         keyword_relevance=keyword_relevance,
         ko_one_liner=ko_one_liner,
         rd_match_score=article.rd_match_score,
-        rd_proposable_area=article.rd_proposable_area,
+        rd_proposable_area=rd_proposable_area,
         rd_fact_basis=article.rd_fact_basis,
     )
 
@@ -400,17 +471,22 @@ class Summarizer:
         payload = _extract_json(response.choices[0].message.content or "{}")
         summary = _coerce_text(payload.get("summary"))
         trends = payload.get("key_trends") or []
-        ko_steps = [polish_korean(str(s).strip()) for s in (payload.get("ko_summary_steps") or []) if str(s).strip()]
+        ko_steps = polish_rd_ko_steps(
+            [str(s).strip() for s in (payload.get("ko_summary_steps") or []) if str(s).strip()]
+        )
         keyword_relevance = polish_korean(_coerce_text(payload.get("keyword_relevance")))
-        ko_one_liner = polish_korean(_coerce_text(payload.get("ko_one_liner")))
-        rd_proposable_area = polish_korean(_coerce_text(payload.get("rd_proposable_area")))
+        keyword_relevance = strip_implicit_fraunhofer_subject(keyword_relevance)
+        ko_one_liner = strip_implicit_fraunhofer_subject(
+            polish_korean(_coerce_text(payload.get("ko_one_liner")))
+        )
+        rd_proposable_area = polish_rd_field(_coerce_text(payload.get("rd_proposable_area")))
         rd_fact_basis = polish_korean(_coerce_text(payload.get("fact_basis")))
         raw_score = payload.get("rd_match_score", 0)
         try:
             rd_match_score = max(1, min(5, int(raw_score)))
         except (TypeError, ValueError):
             rd_match_score = 0
-        summary = polish_korean(summary)
+        summary = strip_implicit_fraunhofer_subject(polish_korean(summary))
 
         if article.url not in summary:
             summary = f"{summary} 출처: {article.url}".strip()

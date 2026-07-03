@@ -4,6 +4,7 @@ import os
 import re
 
 from src.models import FilteredArticle, RawArticle, SummarizedArticle
+from src.summarizer import polish_rd_field, strip_implicit_fraunhofer_subject
 
 # Articles with these signals are prioritized over pure technology news.
 _INVESTMENT_SIGNAL = re.compile(
@@ -38,6 +39,29 @@ _FOREIGN_ONLY_MARKERS = (
 )
 
 MONTHLY_RD_MIN_SCORE = int(os.getenv("MONTHLY_RD_MIN_SCORE", "4"))
+
+
+def format_rd_link_point(*candidates: str) -> str:
+    """Pick the best R&D linkage sentence and drop redundant Fraunhofer subject."""
+    for raw in candidates:
+        text = (raw or "").strip()
+        if not text or text in _FOREIGN_ONLY_MARKERS or text in (
+            "해당 없음",
+            "명시 없음",
+            "팩트 부족으로 판단 보류",
+        ):
+            continue
+        cleaned = polish_rd_field(text)
+        if cleaned:
+            return cleaned
+    return "명시 없음"
+
+
+def _display_rd_field(value: str) -> str:
+    cleaned = (value or "").strip()
+    if not cleaned:
+        return ""
+    return strip_implicit_fraunhofer_subject(cleaned)
 
 
 def _combined_text(article: RawArticle | FilteredArticle | SummarizedArticle) -> str:
@@ -143,7 +167,7 @@ def build_rd_targeting_block(article: SummarizedArticle) -> list[str]:
         f"- **R&D 적합도:** {score}/5",
         "- **R&D 타겟팅 (프라운호퍼):**",
     ]
-    prop = (article.rd_proposable_area or "").strip()
+    prop = polish_rd_field(article.rd_proposable_area or "")
     if prop and prop not in ("해당 없음", "명시 없음"):
         lines.append(f"  - **제안 R&D 영역:** {prop}")
     fact = (article.rd_fact_basis or "").strip()
@@ -152,6 +176,8 @@ def build_rd_targeting_block(article: SummarizedArticle) -> list[str]:
     for key, label in label_map.items():
         value = fields.get(key, "").strip()
         if value:
+            if key == "approach_strategy":
+                value = _display_rd_field(value)
             lines.append(f"  - **{label}:** {value}")
     return lines if len(lines) > 2 else []
 
@@ -197,7 +223,7 @@ def build_daily_rd_insights(
         if pain and "보류" not in pain and "부족" not in pain:
             bullet += f" | 니즈: {pain}"
         if strategy and "보류" not in strategy:
-            bullet += f" | 접근: {strategy}"
+            bullet += f" | 접근: {_display_rd_field(strategy)}"
         title_short = article.title if len(article.title) <= 48 else f"{article.title[:48]}…"
         bullet += f" ([{title_short}]({article.url}))"
         lines.append(bullet)

@@ -4,19 +4,23 @@ import json
 import logging
 import os
 from datetime import date, datetime, timedelta, timezone
+from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from src.article_enrichment import enrich_raw_articles
 from src.config import Settings, load_settings, load_sources
-from src.daily_report import save_daily_report
+from src.daily_report import log_to_summarized_article, save_daily_report
+from src.fetchers.korea_kr_archive import fetch_korea_kr_for_date
+from src.fetchers.pacst import fetch_pacst_for_date
 from src.fetchers.registry import build_fetchers
 from src.filter import filter_articles
 from src.korea_scope import filter_domestic_articles
-from src.models import FilteredArticle, RawArticle
+from src.models import FilteredArticle, RawArticle, SummarizedArticle
 from src.policy_priority import gov_target_score
 from src.scheduler_state import remove_report, report_exists
 from src.storage import DailyLogStore
 from src.summarizer import Summarizer
+from src.url_utils import canonical_article_url
 
 logger = logging.getLogger(__name__)
 
@@ -138,10 +142,24 @@ def _cap_with_policy_priority(
     return sorted(kept, key=_article_pipeline_sort_key)
 
 
+def _refresh_daily_markdown(
+    log_date: date,
+    store: DailyLogStore,
+    settings: Settings,
+) -> Path | None:
+    rows = store.get_entries_for_date(log_date)
+    if not rows:
+        return None
+    articles = [log_to_summarized_article(row) for row in rows]
+    return save_daily_report(log_date, articles, top_keywords=settings.analysis_keywords)
+
+
 def run_daily_monitor(
     log_date: date | None = None,
     settings: Settings | None = None,
     window_end: datetime | None = None,
+    *,
+    resume: bool = False,
 ) -> dict:
     settings = settings or load_settings()
     log_date = log_date or date.today()
@@ -159,6 +177,39 @@ def run_daily_monitor(
             raw_articles.extend(fetcher.fetch())
         except Exception as exc:
             logger.error("Fetcher failed (%s): %s", fetcher.__class__.__name__, exc)
+
+    if window_end is not None:
+        archive_articles = fetch_korea_kr_for_date(log_date)
+        if archive_articles:
+            seen_archive_urls = {a.url for a in raw_articles}
+            added = 0
+            for article in archive_articles:
+                if article.url not in seen_archive_urls:
+                    raw_articles.append(article)
+                    seen_archive_urls.add(article.url)
+                    added += 1
+            if added:
+                logger.info(
+                    "Merged %d korea.kr archive article(s) for %s",
+                    added,
+                    log_date.isoformat(),
+                )
+
+        pacst_articles = fetch_pacst_for_date(log_date)
+        if pacst_articles:
+            seen_archive_urls = {a.url for a in raw_articles}
+            added = 0
+            for article in pacst_articles:
+                if article.url not in seen_archive_urls:
+                    raw_articles.append(article)
+                    seen_archive_urls.add(article.url)
+                    added += 1
+            if added:
+                logger.info(
+                    "Merged %d PACST article(s) for %s",
+                    added,
+                    log_date.isoformat(),
+                )
 
     if window_end is not None:
         recent_articles = _within_log_date(
@@ -200,7 +251,24 @@ def run_daily_monitor(
     else:
         filtered = sorted(filtered, key=_article_pipeline_sort_key)
 
+    store = DailyLogStore(settings.database_path)
+
     if not filtered:
+        if window_end is not None and resume and store.count_for_date(log_date) > 0:
+            report_path = _refresh_daily_markdown(log_date, store, settings)
+            logger.info(
+                "No RSS/archive matches for %s — kept %d stored row(s) and rebuilt markdown",
+                log_date.isoformat(),
+                store.count_for_date(log_date),
+            )
+            return {
+                "log_date": log_date.isoformat(),
+                "fetched": len(raw_articles),
+                "filtered": 0,
+                "stored": store.count_for_date(log_date),
+                "resumed": True,
+                "daily_report": str(report_path) if report_path else None,
+            }
         if window_end is not None and report_exists(log_date):
             remove_report(log_date)
             logger.info(
@@ -214,24 +282,51 @@ def run_daily_monitor(
             "stored": 0,
         }
 
-    # Deduplicate: skip articles whose URL was already processed on a previous run.
-    store = DailyLogStore(settings.database_path)
     purged = store.purge_non_domestic_entries()
     if purged:
         logger.info("Purged %d non-domestic (foreign) row(s) from monitor DB", purged)
-    seen_urls = store.get_seen_urls()
-    new_articles = [a for a in filtered if a.url not in seen_urls]
-    skipped = len(filtered) - len(new_articles)
-    if skipped:
-        logger.info("Dedup filter: skipped %d already-seen article(s)", skipped)
-    filtered = new_articles
+
+    filtered_count = len(filtered)
+    existing_urls: set[str] = set()
+    if window_end is not None and resume:
+        existing_urls = {
+            canonical_article_url(row["url"])
+            for row in store.get_entries_for_date(log_date)
+        }
+        if existing_urls:
+            logger.info(
+                "Resume: %d article(s) already stored for %s — summarizing the rest",
+                len(existing_urls),
+                log_date.isoformat(),
+            )
+        filtered = [
+            a for a in filtered if canonical_article_url(a.url) not in existing_urls
+        ]
+    elif window_end is None:
+        seen_urls = store.get_seen_urls()
+        new_articles = [a for a in filtered if a.url not in seen_urls]
+        skipped = len(filtered) - len(new_articles)
+        if skipped:
+            logger.info("Dedup filter: skipped %d already-seen article(s)", skipped)
+        filtered = new_articles
 
     if not filtered:
+        if existing_urls:
+            report_path = _refresh_daily_markdown(log_date, store, settings)
+            return {
+                "log_date": log_date.isoformat(),
+                "fetched": len(raw_articles),
+                "filtered": filtered_count,
+                "summarized": 0,
+                "stored": len(existing_urls),
+                "resumed": True,
+                "daily_report": str(report_path) if report_path else None,
+            }
         logger.info("No new articles after dedup filter — skipping summarization")
         if window_end is not None and report_exists(log_date):
             remove_report(log_date)
             logger.info(
-                "Removed stale daily report for %s (all articles already processed)",
+                "Removed stale daily report for %s (no articles for this date)",
                 log_date.isoformat(),
             )
         return {
@@ -242,17 +337,27 @@ def run_daily_monitor(
         }
 
     summarizer = Summarizer(settings)
-    summarized = summarizer.summarize_batch(filtered)
+    summarized: list[SummarizedArticle] = []
+    stored = 0
+    for index, article in enumerate(filtered, start=1):
+        logger.info("Summarizing %d/%d: %s", index, len(filtered), article.title)
+        try:
+            entry = summarizer.summarize(article)
+        except Exception as exc:
+            logger.error("Failed to summarize '%s': %s", article.title, exc)
+            continue
+        summarized.append(entry)
+        stored += store.save_entries(log_date, [entry])
+        _refresh_daily_markdown(log_date, store, settings)
 
-    stored = store.save_entries(log_date, summarized)
-
-    report_path = save_daily_report(log_date, summarized, top_keywords=settings.keywords[:3])
+    report_path = _refresh_daily_markdown(log_date, store, settings)
 
     return {
         "log_date": log_date.isoformat(),
         "fetched": len(raw_articles),
-        "filtered": len(filtered),
+        "filtered": filtered_count,
         "summarized": len(summarized),
-        "stored": stored,
+        "stored": stored + len(existing_urls),
+        "resumed": bool(existing_urls),
         "daily_report": str(report_path) if report_path else None,
     }

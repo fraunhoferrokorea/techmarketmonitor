@@ -9,14 +9,26 @@
 # ─────────────────────────────────────────────────────────────────────────────
 
 # ── 국내 ICT / 정책 / 공공 R&D ─────────────────────────────────────────
-# 정부·공공기관 (보도자료·정책)
+# 정부·공공기관 (보도자료·정책·원문자료)
 정책브리핑 정책뉴스 | https://www.korea.kr/rss/policy.xml | korean
+정책브리핑 전문자료 | https://www.korea.kr/rss/expdoc.xml | korean
+정책브리핑 K-공감 | https://www.korea.kr/rss/archive.xml | korean
+# ── 과학기술 총괄·분야별 부처 (정책브리핑 RSS) ─────────────────────────
 과기정통부 보도자료 | https://www.msit.go.kr/user/rss/rss.do?bbsSeqNo=94 | korean
 과기정통부 정보통신 | https://www.msit.go.kr/user/rss/rss.do?bbsSeqNo=67 | korean
 과기정통부 과학기술정책 | https://www.msit.go.kr/user/rss/rss.do?bbsSeqNo=70 | korean
 과기정통부 연구성과 | https://www.msit.go.kr/user/rss/rss.do?bbsSeqNo=89 | korean
-정책브리핑 산업통상부 | https://www.korea.kr/rss/dept_motir.xml | korean
 정책브리핑 과기정통부 | https://www.korea.kr/rss/dept_msit.xml | korean
+정책브리핑 산업통상부 | https://www.korea.kr/rss/dept_motir.xml | korean
+정책브리핑 중소벤처기업부 | https://www.korea.kr/rss/dept_mss.xml | korean
+정책브리핑 국토교통부 | https://www.korea.kr/rss/dept_molit.xml | korean
+정책브리핑 기후에너지환경부 | https://www.korea.kr/rss/dept_mcee.xml | korean
+정책브리핑 교육부 | https://www.korea.kr/rss/dept_moe.xml | korean
+정책브리핑 보건복지부 | https://www.korea.kr/rss/dept_mw.xml | korean
+정책브리핑 국방부 | https://www.korea.kr/rss/dept_mnd.xml | korean
+정책브리핑 우주항공청 | https://www.korea.kr/rss/dept_kasa.xml | korean
+중소벤처기업부 보도자료 | https://www.mss.go.kr/rss/smba/board/86.do | korean
+# ── 공공 R&D·지식재산 ─────────────────────────────────────────────────
 KISTEP | https://www.kistep.re.kr/rss/board.es?bid=0051 | korean
 KIPO 보도자료 | https://www.kipo.go.kr/ko/report/UXmlRssApp.do?menuCd=SCD0200618 | korean
 KETEP 알림마당 | https://www.ketep.re.kr/board/rss/boardRss.es?mid=a10101000000&bid=0001 | korean

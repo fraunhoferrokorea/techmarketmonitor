@@ -12,7 +12,7 @@ from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.interval import IntervalTrigger
 
 from src.catchup import run_daily_catchup
-from src.config import load_settings
+from src.config import PROJECT_ROOT, load_settings
 from src.daily_sync import (
     realign_log_dates_from_published_at,
     refresh_all_daily_markdown,
@@ -127,14 +127,20 @@ def daily_repair_cmd() -> None:
 @cli.command("daily-reprocess")
 @click.option("--from", "from_date", required=True, type=click.DateTime(formats=["%Y-%m-%d"]))
 @click.option("--to", "to_date", required=True, type=click.DateTime(formats=["%Y-%m-%d"]))
-def daily_reprocess_cmd(from_date: datetime, to_date: datetime) -> None:
+@click.option(
+    "--fresh",
+    is_flag=True,
+    default=False,
+    help="Clear existing DB/markdown for each date before re-fetching.",
+)
+def daily_reprocess_cmd(from_date: datetime, to_date: datetime, fresh: bool) -> None:
     """Re-run the daily pipeline for a date range using current rules (LLM calls)."""
     settings = load_settings()
     _configure_logging(settings.log_level)
 
     start = from_date.date()
     end = to_date.date()
-    results = reprocess_range(start, end, settings=settings)
+    results = reprocess_range(start, end, settings=settings, fresh=fresh)
     click.echo(json.dumps({"status": "reprocessed", "results": results}, indent=2))
 
 
@@ -170,12 +176,33 @@ def daily_cmd(run_date: datetime | None) -> None:
     help="Keep daily markdown files after report generation.",
 )
 def monthly_cmd(year: int | None, month: int | None, no_cleanup: bool) -> None:
-    """Aggregate daily markdown reports, generate a monthly Word report, and delete daily files."""
+    """Aggregate daily logs, generate a monthly Markdown report, and delete daily files."""
     settings = load_settings()
     _configure_logging(settings.log_level)
 
     result = run_monthly_report(year=year, month=month, cleanup_daily=not no_cleanup)
     click.echo(json.dumps(result, indent=2))
+
+
+@cli.command("show-config")
+def show_config_cmd() -> None:
+    """Print project paths and keywords.txt top-3 (verify local setup)."""
+    settings = load_settings()
+    click.echo(
+        json.dumps(
+            {
+                "project_root": str(PROJECT_ROOT),
+                "keywords_path": str(settings.keywords_path),
+                "keywords_path_exists": settings.keywords_path.is_file(),
+                "analysis_keywords_top3": settings.analysis_keywords,
+                "keyword_count": len(settings.keyword_labels),
+                "database_path": str(settings.database_path),
+                "reports_output_dir": str(settings.reports_output_dir),
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
 
 
 @cli.command("schedule")

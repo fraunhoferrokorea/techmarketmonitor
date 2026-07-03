@@ -203,14 +203,15 @@ def send_daily_report_email(
 
 
 def send_monthly_report_email(
-    report_path_en: Path,
-    report_path_ko: Path,
+    report_path: Path,
     year: int,
     month: int,
     settings: EmailSettings,
     entry_count: int | None = None,
+    *,
+    report_path_legacy_en: Path | None = None,
 ) -> dict:
-    """Email newly generated monthly Word reports (English + Korean)."""
+    """Email newly generated monthly Markdown report (optional legacy EN docx)."""
     period = f"{year}-{month:02d}"
     count_line = (
         f"데일리 로그 {entry_count}건을 집계했습니다.\n"
@@ -220,11 +221,15 @@ def send_monthly_report_email(
     body = (
         f"Tech Market Monitor 월간 보고서 ({period})\n\n"
         f"{count_line}"
-        "첨부: 영문·한국어 Word 보고서(.docx)\n"
+        "첨부: 국내 R&D 인텔리전스 월간 보고서(.md)\n"
     )
+    attachments = [report_path]
+    if report_path_legacy_en and report_path_legacy_en.is_file():
+        body += "첨부: 레거시 영문 Word 보고서(.docx)\n"
+        attachments.append(report_path_legacy_en)
     return send_report_email(
         settings=settings,
         subject=_build_monthly_subject(year, month, settings),
         body=body,
-        attachments=[report_path_en, report_path_ko],
+        attachments=attachments,
     )

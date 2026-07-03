@@ -7,11 +7,31 @@ from datetime import date, timedelta
 from regen_daily_report import regen_daily_report
 
 
+def rebuild_range(start: date, end: date) -> None:
+    from src.config import load_settings
+    from src.daily_sync import rebuild_markdown_from_db
+    from src.storage import DailyLogStore
+
+    settings = load_settings()
+    store = DailyLogStore(settings.database_path)
+    d = start
+    while d <= end:
+        result = rebuild_markdown_from_db(
+            d, store, settings, include_foreign=False
+        )
+        print(f"[{result['status']}] {d.isoformat()}", flush=True)
+        d += timedelta(days=1)
+
+
 def main() -> None:
     args = [a for a in sys.argv[1:] if not a.startswith("-")]
     flags = {a for a in sys.argv[1:] if a.startswith("-")}
     start = date.fromisoformat(args[0]) if len(args) > 0 else date(2026, 6, 21)
     end = date.fromisoformat(args[1]) if len(args) > 1 else date(2026, 6, 29)
+
+    if "--rebuild-only" in flags:
+        rebuild_range(start, end)
+        return
     resume = "--no-resume" not in flags
 
     d = start

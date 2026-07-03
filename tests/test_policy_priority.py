@@ -6,7 +6,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.filter import filter_articles
 from src.models import RawArticle
-from src.policy_priority import gov_target_pass_label, gov_target_score, is_gov_target
+from src.policy_priority import gov_target_pass_label, gov_target_score, is_gov_target, is_plan_document
 
 
 def _article(title: str, source: str = "정책브리핑 산업통상부") -> RawArticle:
@@ -48,6 +48,18 @@ def test_filter_passes_mou_without_keyword_match() -> None:
     article = _article("KISTEP·독일 연구기관, 에너지 기술협력 MOU", source="KISTEP")
     result = filter_articles([article], keywords=["전력계통"])
     assert len(result) == 1
+
+
+def test_is_plan_document_expdoc_url() -> None:
+    article = RawArticle(
+        title="2026 디지털정부 전망",
+        url="https://www.korea.kr/archive/expDocView.do?docId=41730",
+        summary="",
+        source_name="정책브리핑 전문자료 행정안전부",
+        category="korean",
+        published_at=datetime.now(tz=timezone.utc),
+    )
+    assert is_plan_document(article)
 
 
 def test_filter_still_requires_keywords_for_general_news() -> None:

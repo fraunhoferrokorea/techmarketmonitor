@@ -1,4 +1,4 @@
-"""Korea R&D intelligence monthly Word report for Fraunhofer Korea Office."""
+"""Korea R&D intelligence monthly Markdown report for Fraunhofer Korea Office."""
 from __future__ import annotations
 
 import json
@@ -8,9 +8,6 @@ from collections import defaultdict
 from datetime import date
 from pathlib import Path
 
-from docx import Document
-from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.shared import Inches, Pt, RGBColor
 from dotenv import load_dotenv
 from openai import OpenAI
 
@@ -19,14 +16,6 @@ from src.daily_report import log_to_summarized_article, monthly_credibility_dist
 from src.rd_targeting import MONTHLY_RD_MIN_SCORE, compute_rd_match_score, parse_rd_fields, prepare_logs_for_monthly_rd
 
 logger = logging.getLogger(__name__)
-
-_HEADER_BLUE = RGBColor(0x1F, 0x39, 0x64)
-
-
-def _add_heading(doc: Document, text: str, level: int = 1) -> None:
-    p = doc.add_heading(text, level=level)
-    for run in p.runs:
-        run.font.color.rgb = _HEADER_BLUE
 
 
 def _compact_entry(log: dict, ref: int) -> dict:
@@ -45,6 +34,7 @@ def _compact_entry(log: dict, ref: int) -> dict:
         "strategy": fields.get("approach_strategy", ""),
         "proposable": article.rd_proposable_area,
         "fact": article.rd_fact_basis,
+        "keyword_relevance": (article.keyword_relevance or "").strip(),
         "summary": article.ko_one_liner or article.llm_summary,
     }
 
@@ -62,6 +52,7 @@ def _synthesize_monthly_ko(year: int, month: int, entries: list[dict]) -> dict:
 - 한국 국내 정부·기업 R&D 위탁·협력 기회만 다룸. 해외 시장·글로벌 벤더 분석 금지.
 - 모든 문장 명사형 종결(-함/-임/-었음). -습니다/-합니다 금지.
 - 소스에 없는 수치·기관명 추가 금지.
+- keyword_relevance, proposable, fact, actor/purpose/pain/strategy 필드를 적극 활용.
 
 입력 데이터:
 {json.dumps(entries, ensure_ascii=False)}
@@ -92,13 +83,99 @@ JSON 스키마:
     return json.loads(raw)
 
 
+def _escape_table_cell(text: str) -> str:
+    return (text or "").replace("|", "\\|").replace("\n", " ")
+
+
+def _build_markdown(
+    year: int,
+    month: int,
+    rd_logs: list[dict],
+    compact: list[dict],
+    structured: dict,
+) -> str:
+    today = date.today().isoformat()
+    lines: list[str] = [
+        "# 국내 R&D 인텔리전스 월간 보고서",
+        "",
+        f"**기간:** {year}년 {month}월",
+        f"**생성일:** {today}",
+        "**발행:** Fraunhofer Institute Korea Office · Tech Market Intelligence Monitor",
+        "",
+        f"**분석 항목:** {len(rd_logs)}건 (R&D 적합 {MONTHLY_RD_MIN_SCORE}점 이상) · "
+        f"{monthly_credibility_distribution(rd_logs)}",
+        "",
+        "## 1. Executive Summary",
+        "",
+        structured.get("executive_summary", ""),
+        "",
+        "## 2. Opportunities (분야별 R&D 기회)",
+        "",
+    ]
+
+    opportunities = structured.get("opportunities") or []
+    if opportunities:
+        for opp in opportunities:
+            field = opp.get("field", "기타")
+            summary = opp.get("summary", "")
+            lines.append(f"- **{field}:** {summary}")
+    else:
+        lines.append("- (해당 없음)")
+
+    lines += [
+        "",
+        "## 3. Action Plan (접촉 타겟)",
+        "",
+        "| 타겟 (부처/기업) | 제안 R&D 영역 | 접촉 논리 |",
+        "|----------------|--------------|----------|",
+    ]
+
+    action_plan = structured.get("action_plan") or []
+    if action_plan:
+        for action in action_plan:
+            lines.append(
+                f"| {_escape_table_cell(action.get('target', ''))} "
+                f"| {_escape_table_cell(action.get('rd_area', ''))} "
+                f"| {_escape_table_cell(action.get('contact_angle', ''))} |"
+            )
+    else:
+        lines.append("| — | — | — |")
+
+    lines += [
+        "",
+        "## 4. 부록: 월간 R&D 스코어카드",
+        "",
+        "| 점수 | 날짜 | 투자 주체 | 핵심 이슈 | 출처 |",
+        "|------|------|----------|----------|------|",
+    ]
+
+    for item in compact:
+        issue = (item["summary"] or item["title"])[:120]
+        url = item["url"]
+        source_label = item["source"] or url
+        if url:
+            source_cell = f"[{source_label}]({url})"
+        else:
+            source_cell = source_label
+        lines.append(
+            f"| {item['score']}/5 "
+            f"| {item['date']} "
+            f"| {_escape_table_cell(item['actor'] or '—')} "
+            f"| {_escape_table_cell(issue)} "
+            f"| {source_cell} |"
+        )
+
+    lines.append("")
+    return "\n".join(lines)
+
+
 def generate_rd_monthly_report(
     year: int,
     month: int,
     logs: list[dict],
     settings: Settings,
 ) -> Path:
-    """Generate Korea-only R&D intelligence monthly Word report."""
+    """Generate Korea-only R&D intelligence monthly Markdown report."""
     rd_logs, excluded = prepare_logs_for_monthly_rd(logs)
     if excluded:
         logger.info(
@@ -120,74 +197,12 @@ def generate_rd_monthly_report(
         logger.warning("LLM monthly synthesis failed (%s) — using template fallback", exc)
         structured = _fallback_structure(compact)
 
-    doc = Document()
-    section = doc.sections[0]
-    section.top_margin = Inches(1)
-    section.bottom_margin = Inches(1)
-    section.left_margin = Inches(1)
-    section.right_margin = Inches(1)
-
-    title = doc.add_paragraph()
-    title.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    run = title.add_run(f"국내 R&D 인텔리전스 월간 보고서\n{year}년 {month}월")
-    run.bold = True
-    run.font.size = Pt(16)
-    run.font.color.rgb = _HEADER_BLUE
-
-    sub = doc.add_paragraph()
-    sub.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    sub_run = sub.add_run("Fraunhofer Institute Korea Office · Tech Market Intelligence Monitor")
-    sub_run.font.size = Pt(10)
-    sub_run.font.color.rgb = RGBColor(0x44, 0x54, 0x6A)
-
-    doc.add_paragraph(
-        f"분석 항목: {len(rd_logs)}건 (R&D 적합 {MONTHLY_RD_MIN_SCORE}점 이상) · "
-        f"{monthly_credibility_distribution(rd_logs)}"
-    )
-
-    _add_heading(doc, "1. Executive Summary")
-    doc.add_paragraph(structured.get("executive_summary", ""))
-
-    _add_heading(doc, "2. Opportunities (분야별 R&D 기회)")
-    for opp in structured.get("opportunities") or []:
-        p = doc.add_paragraph(style="List Bullet")
-        p.add_run(f"{opp.get('field', '기타')}: ").bold = True
-        p.add_run(opp.get("summary", ""))
-
-    _add_heading(doc, "3. Action Plan (접촉 타겟)")
-    table = doc.add_table(rows=1, cols=3)
-    table.style = "Table Grid"
-    hdr = table.rows[0].cells
-    hdr[0].text = "타겟 (부처/기업)"
-    hdr[1].text = "제안 R&D 영역"
-    hdr[2].text = "접촉 논리"
-    for action in structured.get("action_plan") or []:
-        row = table.add_row().cells
-        row[0].text = action.get("target", "")
-        row[1].text = action.get("rd_area", "")
-        row[2].text = action.get("contact_angle", "")
-
-    _add_heading(doc, "4. 부록: 월간 R&D 스코어카드")
-    score_table = doc.add_table(rows=1, cols=5)
-    score_table.style = "Table Grid"
-    sh = score_table.rows[0].cells
-    sh[0].text = "점수"
-    sh[1].text = "날짜"
-    sh[2].text = "투자 주체"
-    sh[3].text = "핵심 이슈"
-    sh[4].text = "출처"
-    for item in compact:
-        row = score_table.add_row().cells
-        row[0].text = f"{item['score']}/5"
-        row[1].text = str(item["date"])
-        row[2].text = item["actor"] or "—"
-        row[3].text = (item["summary"] or item["title"])[:120]
-        row[4].text = item["url"]
+    markdown = _build_markdown(year, month, rd_logs, compact, structured)
 
     output_dir = settings.reports_output_dir
     output_dir.mkdir(parents=True, exist_ok=True)
-    output_path = output_dir / f"rd-intelligence-report-{year}-{month:02d}-ko.docx"
-    doc.save(output_path)
+    output_path = output_dir / f"monthly_{year:04d}-{month:02d}.md"
+    output_path.write_text(markdown, encoding="utf-8")
     logger.info("Generated R&D monthly report: %s", output_path)
     return output_path
 

@@ -6,15 +6,20 @@ from html import unescape
 
 import httpx
 
-from src.attachment_extractor import discover_pdf_urls, fetch_pdf_texts
+from src.attachment_extractor import (
+    discover_attachment_urls,
+    fetch_attachment_texts,
+    fetch_plan_attachment_texts,
+)
 from src.models import RawArticle
-from src.policy_priority import is_gov_target, is_official_government_source
+from src.policy_priority import is_gov_target, is_official_government_source, is_plan_document
 
 logger = logging.getLogger(__name__)
 
 _MIN_SUMMARY_LEN = 600
 _MAX_BODY_LEN = 8000
 _MAX_MERGED_LEN = 16000
+_MAX_PLAN_MERGED_LEN = int(__import__("os").getenv("GOV_PLAN_MERGED_CHARS", "80000"))
 _TIMEOUT = 20.0
 _USER_AGENT = "TechMarketMonitor/1.0"
 
@@ -23,6 +28,14 @@ _GOV_URL_TOKENS = (
     "korea.kr",
     "msit.go.kr",
     "motie.go.kr",
+    "mss.go.kr",
+    "molit.go.kr",
+    "me.go.kr",
+    "moe.go.kr",
+    "mohw.go.kr",
+    "mnd.go.kr",
+    "kasa.go.kr",
+    "pacst.go.kr",
     "kats.go.kr",
     "kistep.re.kr",
     "kipo.go.kr",
@@ -67,7 +80,7 @@ def _is_government_url(url: str) -> bool:
 def _should_enrich(article: RawArticle) -> bool:
     if not _is_government_url(article.url) and not is_official_government_source(article):
         return False
-    if is_gov_target(article) or is_official_government_source(article):
+    if is_plan_document(article) or is_gov_target(article) or is_official_government_source(article):
         return True
     return len(article.summary.strip()) < _MIN_SUMMARY_LEN
 
@@ -92,21 +105,27 @@ def _fetch_page_html(url: str) -> str:
         return response.text
 
 
-def _merge_parts(base: str, html_body: str, pdf_texts: list[str]) -> str:
+def _merge_parts(
+    base: str,
+    html_body: str,
+    attachment_texts: list[str],
+    *,
+    max_len: int = _MAX_MERGED_LEN,
+) -> str:
     sections = [base.strip()]
     if html_body and html_body not in base:
         sections.append(html_body)
-    for index, pdf_text in enumerate(pdf_texts, start=1):
-        if pdf_text and pdf_text not in base:
-            sections.append(f"[첨부 PDF 원문 {index}]\n{pdf_text}")
+    for index, attachment_text in enumerate(attachment_texts, start=1):
+        if attachment_text and attachment_text not in base:
+            sections.append(f"[첨부 문서 원문 {index}]\n{attachment_text}")
     merged = "\n\n".join(part for part in sections if part).strip()
-    if len(merged) > _MAX_MERGED_LEN:
-        merged = merged[:_MAX_MERGED_LEN].rsplit(" ", 1)[0] + "…"
+    if len(merged) > max_len:
+        merged = merged[:max_len].rsplit(" ", 1)[0] + "…"
     return merged
 
 
 def enrich_raw_article(article: RawArticle) -> RawArticle:
-    """Fetch HTML body and attached PDF text for government press releases."""
+    """Fetch HTML body and attached PDF/HWPX text for government releases and plans."""
     if not _should_enrich(article):
         return article
 
@@ -114,27 +133,42 @@ def enrich_raw_article(article: RawArticle) -> RawArticle:
     if not html:
         return article
 
+    plan_mode = is_plan_document(article)
+    max_body_len = _MAX_PLAN_MERGED_LEN // 4 if plan_mode else _MAX_BODY_LEN
+
     html_body = ""
-    if len(article.summary.strip()) < _MIN_SUMMARY_LEN or is_gov_target(article):
+    if len(article.summary.strip()) < _MIN_SUMMARY_LEN or is_gov_target(article) or plan_mode:
         html_body = _extract_body(html)
-        if len(html_body) > _MAX_BODY_LEN:
-            html_body = html_body[:_MAX_BODY_LEN].rsplit(" ", 1)[0] + "…"
+        if len(html_body) > max_body_len:
+            html_body = html_body[:max_body_len].rsplit(" ", 1)[0] + "…"
 
-    pdf_urls = discover_pdf_urls(html, article.url)
-    pdf_texts = fetch_pdf_texts(pdf_urls) if pdf_urls else []
+    attachment_urls = discover_attachment_urls(html, article.url, include_hwpx=True)
+    if attachment_urls:
+        if plan_mode:
+            attachment_texts = fetch_plan_attachment_texts(attachment_urls)
+        else:
+            attachment_texts = fetch_attachment_texts(attachment_urls)
+    else:
+        attachment_texts = []
 
-    if not html_body and not pdf_texts:
+    if not html_body and not attachment_texts:
         return article
 
-    merged = _merge_parts(article.summary, html_body, pdf_texts)
+    merged = _merge_parts(
+        article.summary,
+        html_body,
+        attachment_texts,
+        max_len=_MAX_PLAN_MERGED_LEN if plan_mode else _MAX_MERGED_LEN,
+    )
     if merged == article.summary.strip():
         return article
 
     logger.info(
-        "Enriched article (%s → %d chars, PDFs=%d): %s",
+        "Enriched article (%s → %d chars, attachments=%d, plan=%s): %s",
         len(article.summary),
         len(merged),
-        len(pdf_texts),
+        len(attachment_texts),
+        plan_mode,
         article.title[:60],
     )
     return RawArticle(
