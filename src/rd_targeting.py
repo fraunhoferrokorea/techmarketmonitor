@@ -4,7 +4,16 @@ import os
 import re
 
 from src.models import FilteredArticle, RawArticle, SummarizedArticle
+from src.policy_priority import gov_target_score
 from src.summarizer import polish_rd_field, strip_implicit_fraunhofer_subject
+
+_RELEVANCE_RANK = {"direct": 0, "indirect": 1, "weak": 2, "none": 3}
+_CONTEXT_POWER_HINT = re.compile(
+    r"전력계통|파워그리드|스마트그리드|전력망|송배전|BESS|에너지저장|"
+    r"마이크로그리드|수요반응|가상발전소|VPP|계통안정|전력품질|"
+    r"power\s*grid|smart\s*grid|microgrid|grid\s*stability",
+    re.I,
+)
 
 # Articles with these signals are prioritized over pure technology news.
 _INVESTMENT_SIGNAL = re.compile(
@@ -16,9 +25,11 @@ _INVESTMENT_SIGNAL = re.compile(
 )
 
 _KOREA_HINT = re.compile(
-    r"한국|대한민국|국내|Korea|Korean|서울|과기정통부|산업통상|"
+    r"한국|대한민국|국내|Korea|Korean|서울|"
+    r"과기정통부|과학기술정보통신부|산업통상|중소벤처|중기부|"
+    r"국토교통|환경부|산림청|방위사업청|기후에너지|보건복지|교육부|"
     r"MOTIE|MSIT|IITP|KISTEP|ETRI|KAIST|삼성|SK|LG|현대|포스코|"
-    r"한국전력|KEPCO|LS\s*일렉트릭|HD현대|"
+    r"한국전력|KEPCO|LS\s*일렉트릭|HD현대|진흥원|연구원|"
     r"\.go\.kr|korea\.kr",
     re.I,
 )
@@ -232,10 +243,61 @@ def build_daily_rd_insights(
     return lines
 
 
+def _rd_context_blob(article: SummarizedArticle) -> str:
+    """Fraunhofer proposal fields only — avoids false positives from generic summaries."""
+    fields = parse_rd_fields(article.ko_summary_steps)
+    return " ".join(
+        [
+            article.rd_proposable_area or "",
+            fields.get("pain_point", ""),
+            fields.get("investment_purpose", ""),
+        ]
+    )
+
+
+def classify_monthly_context_relevance(
+    article: SummarizedArticle,
+    top_keywords: list[str] | None = None,
+) -> str:
+    """Monthly relevance: Fraunhofer proposal alignment first, then daily keyword fit."""
+    focus_blob = _rd_context_blob(article)
+    kws = top_keywords or []
+    hits = [kw for kw in kws if kw and kw in focus_blob]
+    power_hits = bool(_CONTEXT_POWER_HINT.search(focus_blob))
+
+    if len(hits) >= 2 or (len(hits) == 1 and power_hits):
+        return "direct"
+    if hits or power_hits:
+        return "indirect"
+
+    fields = parse_rd_fields(article.ko_summary_steps)
+    if is_domestic_rd_target(fields.get("investment_actor", "")):
+        return "weak"
+
+    from src.daily_report import classify_keyword_relevance
+
+    return classify_keyword_relevance(article, top_keywords)
+
+
+def monthly_context_priority(
+    article: SummarizedArticle,
+    top_keywords: list[str] | None = None,
+) -> tuple[int, int, int, int]:
+    """Sort key: higher R&D score, tighter keyword fit, stronger gov/R&D signals first."""
+    relevance = classify_monthly_context_relevance(article, top_keywords)
+    return (
+        compute_rd_match_score(article),
+        -_RELEVANCE_RANK.get(relevance, 3),
+        gov_target_score(article),
+        investment_signal_score(article),
+    )
+
+
 def prepare_logs_for_monthly_rd(
     logs: list[dict],
     *,
     min_score: int | None = None,
+    top_keywords: list[str] | None = None,
 ) -> tuple[list[dict], int]:
     """Filter monthly logs to R&D match score >= min_score (default 4)."""
     from src.daily_report import log_to_summarized_article, prepare_logs_for_monthly
@@ -253,10 +315,10 @@ def prepare_logs_for_monthly_rd(
         else:
             excluded += 1
 
-    rd_logs.sort(
-        key=lambda row: (
-            -row.get("rd_match_score", 0),
-            row.get("log_date", ""),
-        )
-    )
+    def _sort_key(row: dict) -> tuple:
+        article = log_to_summarized_article(row)
+        rd, rel, gov, inv = monthly_context_priority(article, top_keywords)
+        return (-rd, rel, -gov, -inv, row.get("log_date", ""))
+
+    rd_logs.sort(key=_sort_key)
     return rd_logs, excluded

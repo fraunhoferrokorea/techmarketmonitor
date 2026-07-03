@@ -1352,3 +1352,18 @@ def _build_markdown(
     ]
 
     return "\n".join(lines)
+
+
+RELEVANCE_LABEL_KO = {"direct": "직접", "indirect": "간접", "weak": "약함", "none": "없음"}
+
+
+def classify_keyword_relevance(
+    article: SummarizedArticle,
+    top_keywords: list[str] | None = None,
+) -> str:
+    """Public wrapper for daily/monthly keyword relevance (direct/indirect/weak/none)."""
+    return _classify_relevance(article, top_keywords or [])
+
+
+def keyword_relevance_label(level: str) -> str:
+    return RELEVANCE_LABEL_KO.get(level, "없음")
