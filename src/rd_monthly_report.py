@@ -46,7 +46,7 @@ def _compact_entry(log: dict, ref: int, top_keywords: list[str]) -> dict:
         "title": log.get("title", ""),
         "url": log.get("url", ""),
         "source": log.get("source_name", ""),
-        "score": log.get("rd_match_score") or compute_rd_match_score(article),
+        "score": compute_rd_match_score(article, top_keywords),
         "relevance": keyword_relevance_label(relevance),
         "matched_keywords": ", ".join(article.matched_keywords[:5]),
         "actor": fields.get("investment_actor", ""),

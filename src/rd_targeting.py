@@ -51,6 +51,9 @@ _FOREIGN_ONLY_MARKERS = (
 
 MONTHLY_RD_MIN_SCORE = int(os.getenv("MONTHLY_RD_MIN_SCORE", "4"))
 
+_KEYWORD_RD_DELTA = {"direct": 1, "indirect": 0, "weak": -1, "none": -2}
+_KEYWORD_RD_CAP = {"direct": 5, "indirect": 5, "weak": 4, "none": 3}
+
 
 def format_rd_link_point(*candidates: str) -> str:
     """Pick the best R&D linkage sentence and drop redundant Fraunhofer subject."""
@@ -139,8 +142,8 @@ def is_domestic_rd_target(investment_actor: str) -> bool:
     return False
 
 
-def compute_rd_match_score(article: SummarizedArticle) -> int:
-    """Return R&D suitability 1–5 (LLM score or heuristic fallback)."""
+def _fraunhofer_base_rd_score(article: SummarizedArticle) -> int:
+    """Cooperation/R&D-commission angle only (LLM or heuristic)."""
     stored = getattr(article, "rd_match_score", 0) or 0
     if stored:
         return max(1, min(5, int(stored)))
@@ -162,12 +165,32 @@ def compute_rd_match_score(article: SummarizedArticle) -> int:
     return max(1, min(5, score))
 
 
-def build_rd_targeting_block(article: SummarizedArticle) -> list[str]:
+def compute_rd_match_score(
+    article: SummarizedArticle,
+    top_keywords: list[str] | None = None,
+) -> int:
+    """Return R&D suitability 1–5: Fraunhofer cooperation + top-3 keyword relevance."""
+    base = _fraunhofer_base_rd_score(article)
+    if not top_keywords:
+        return base
+
+    from src.daily_report import classify_keyword_relevance
+
+    relevance = classify_keyword_relevance(article, top_keywords)
+    adjusted = base + _KEYWORD_RD_DELTA.get(relevance, -1)
+    cap = _KEYWORD_RD_CAP.get(relevance, 3)
+    return max(1, min(5, min(adjusted, cap)))
+
+
+def build_rd_targeting_block(
+    article: SummarizedArticle,
+    top_keywords: list[str] | None = None,
+) -> list[str]:
     fields = parse_rd_fields(article.ko_summary_steps)
     if not fields:
         return []
 
-    score = compute_rd_match_score(article)
+    score = compute_rd_match_score(article, top_keywords)
     label_map = {
         "investment_actor": "투자 주체",
         "investment_purpose": "투자 목적",
@@ -206,7 +229,7 @@ def build_daily_rd_insights(
         actor = fields.get("investment_actor", "")
         if not is_domestic_rd_target(actor):
             continue
-        domestic.append((compute_rd_match_score(article), article, fields))
+        domestic.append((compute_rd_match_score(article, top_keywords), article, fields))
 
     if not domestic:
         return [
@@ -286,7 +309,7 @@ def monthly_context_priority(
     """Sort key: higher R&D score, tighter keyword fit, stronger gov/R&D signals first."""
     relevance = classify_monthly_context_relevance(article, top_keywords)
     return (
-        compute_rd_match_score(article),
+        compute_rd_match_score(article, top_keywords),
         -_RELEVANCE_RANK.get(relevance, 3),
         gov_target_score(article),
         investment_signal_score(article),
@@ -309,7 +332,7 @@ def prepare_logs_for_monthly_rd(
 
     for log in eligible:
         article = log_to_summarized_article(log)
-        score = compute_rd_match_score(article)
+        score = compute_rd_match_score(article, top_keywords)
         if score >= threshold:
             rd_logs.append({**log, "rd_match_score": score})
         else:

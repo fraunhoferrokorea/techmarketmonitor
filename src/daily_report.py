@@ -1149,11 +1149,11 @@ def _build_executive_summary(
     """Build R&D intelligence executive summary (Fraunhofer Korea)."""
     kws = top_keywords or []
     kw_header = " · ".join(kws[:3]) if kws else "(미설정)"
-    theme = _build_rd_daily_theme(articles)
+    theme = _build_rd_daily_theme(articles, kws)
 
     sources = ", ".join(dict.fromkeys(a.source_name for a in articles[:3]))
     extra = f" 외 {len(articles) - 3}개 출처" if len(articles) > 3 else ""
-    high_score = sum(1 for a in articles if compute_rd_match_score(a) >= 4)
+    high_score = sum(1 for a in articles if compute_rd_match_score(a, kws) >= 4)
 
     lines = [
         "## 오늘의 R&D 인텔리전스 요약",
@@ -1174,7 +1174,7 @@ def _build_executive_summary(
     ranked = sorted(
         articles,
         key=lambda a: (
-            -compute_rd_match_score(a),
+            -compute_rd_match_score(a, kws),
             -gov_target_score(a),
             -investment_signal_score(a),
             a.title.lower(),
@@ -1183,7 +1183,7 @@ def _build_executive_summary(
 
     included_count = 0
     for article in ranked:
-        score = compute_rd_match_score(article)
+        score = compute_rd_match_score(article, kws)
         if score < 2:
             continue
         fields = parse_rd_fields(article.ko_summary_steps)
@@ -1220,8 +1220,12 @@ def _build_executive_summary(
     return lines
 
 
-def _build_rd_daily_theme(articles: list[SummarizedArticle]) -> str:
-    scores = [compute_rd_match_score(a) for a in articles]
+def _build_rd_daily_theme(
+    articles: list[SummarizedArticle],
+    top_keywords: list[str] | None = None,
+) -> str:
+    kws = top_keywords or []
+    scores = [compute_rd_match_score(a, kws) for a in articles]
     high = sum(1 for s in scores if s >= 4)
     mid = sum(1 for s in scores if s == 3)
     if high >= 2:
@@ -1272,7 +1276,7 @@ def _build_item_block(
     for line in summary_lines:
         lines.append(f"  - {line}")
 
-    rd_lines = build_rd_targeting_block(article)
+    rd_lines = build_rd_targeting_block(article, top_keywords)
     if rd_lines:
         lines.append("")
         lines.extend(rd_lines)

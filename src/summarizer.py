@@ -182,12 +182,14 @@ Scope (MUST follow):
 - Prioritize: budget announcements, R&D programs, MOU/collaboration, infrastructure plans, technology acquisition — over product launches without investment plans.
 - Fact-only: amounts, program periods, required technologies ONLY when stated. No speculation.
 
-R&D suitability scoring (rd_match_score 1–5):
-- 5: Korean gov/company + concrete budget/program period + high-difficulty R&D gap where external institute help is plausible
-- 4: Korean actor + clear investment/R&D intent + identifiable technology need
-- 3: Korean policy/industry signal with partial budget or roadmap detail
-- 2: Tangential tech news with weak investment signal
-- 1: No Korean R&D commission relevance (foreign-only, pure product news, no budget)
+R&D suitability scoring (rd_match_score 1–5) — weigh BOTH:
+(A) Fraunhofer Korea commission/cooperation potential (Korean actor, budget, R&D technology gap)
+(B) Relevance to the monitoring keywords (top 3 in the user message — e.g. grid/power topics)
+- 5: Strong (A) AND direct monitoring-keyword alignment (topic explicitly names or requires those technologies)
+- 4: Strong (A) with indirect keyword link, OR moderate (A) with direct keyword fit
+- 3: Korean policy/industry signal with partial budget OR weak keyword overlap
+- 2: Tangential tech news, weak investment signal, or monitoring keywords barely related
+- 1: No Korean R&D commission relevance OR foreign-only / no keyword connection
 
 Return valid JSON with this exact schema:
 {

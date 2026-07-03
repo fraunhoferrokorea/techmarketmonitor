@@ -72,6 +72,28 @@ def test_compute_rd_match_score_heuristic() -> None:
     assert score >= 3
 
 
+def test_compute_rd_match_score_keyword_adjustment() -> None:
+    from src.rd_targeting import compute_rd_match_score
+
+    grid_kws = ["전력계통", "스마트그리드", "파워그리드"]
+    assert compute_rd_match_score(_article(), grid_kws) >= 4
+
+    off_topic = _article(
+        title="응급환자 이송체계 혁신 시범사업",
+        matched_keywords=[],
+        ko_summary_steps=[
+            "**개요:** 보건복지부와 소방청이 응급환자 이송체계 시범사업을 추진함.",
+            "**투자 주체:** 보건복지부, 소방청",
+            "**투자 목적:** 응급의료 전달체계 개편",
+            "**위탁 연구 니즈:** 팩트 부족으로 판단 보류",
+            "**접근 전략:** 정책 정합성 검토",
+        ],
+        rd_proposable_area="응급의료 전달체계 개편 관련 기술개발",
+        rd_match_score=3,
+    )
+    assert compute_rd_match_score(off_topic, grid_kws) <= 2
+
+
 if __name__ == "__main__":
     test_has_investment_signal_detects_budget_keywords()
     test_parse_rd_fields_from_ko_steps()
