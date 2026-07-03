@@ -251,6 +251,10 @@ _FRAUNHOFER_COMMA_SUBJECT = re.compile(
     rf"(?<=[,，])\s*{_FRAUNHOFER_ENTITY}(?:은|는|가)\s+",
     re.I,
 )
+_FRAUNHOFER_WITH_PARTICLE = re.compile(
+    rf"(?<=[가-힣\s]){_FRAUNHOFER_ENTITY}(?:와|과|와의|과의)\s+",
+    re.I,
+)
 _RD_FIELD_SKIP = frozenset({"해당 없음", "명시 없음", "팩트 부족으로 판단 보류"})
 
 
@@ -265,6 +269,7 @@ def strip_implicit_fraunhofer_subject(text: str) -> str:
         cleaned = _FRAUNHOFER_LEADING_SUBJECT.sub("", cleaned)
         cleaned = _FRAUNHOFER_COMMA_SUBJECT.sub(" ", cleaned)
         cleaned = _FRAUNHOFER_POSSESSIVE.sub("", cleaned)
+        cleaned = _FRAUNHOFER_WITH_PARTICLE.sub("", cleaned)
     return cleaned.strip()
 
 

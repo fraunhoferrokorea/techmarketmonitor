@@ -143,16 +143,6 @@ def refresh_all_daily_markdown(
             )
         )
 
-    for log_date in sorted(set(report_dates_from_disk()) - db_dates):
-        removed = remove_report(log_date)
-        results.append(
-            {
-                "log_date": log_date.isoformat(),
-                "status": "removed_stale_markdown",
-                "removed_markdown": removed,
-            }
-        )
-
     return results
 
 
