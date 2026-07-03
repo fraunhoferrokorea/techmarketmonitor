@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 from collections import defaultdict
 from datetime import date
 from pathlib import Path
@@ -26,6 +27,13 @@ from src.rd_targeting import (
 )
 
 logger = logging.getLogger(__name__)
+
+_THEME_RULES: tuple[tuple[str, re.Pattern[str]], ...] = (
+    ("전력·그리드", re.compile(r"전력|그리드|grid|송배전|BESS|에너지저장", re.I)),
+    ("제조AI·스마트공장", re.compile(r"제조|AI|에이전트|스마트공장|파운데이션", re.I)),
+    ("표준·인증·보안", re.compile(r"표준|KS|인증|드론|대드론", re.I)),
+    ("바이오·그린", re.compile(r"바이오|산림|그린", re.I)),
+)
 
 
 def _compact_entry(log: dict, ref: int, top_keywords: list[str]) -> dict:
@@ -65,30 +73,32 @@ def _synthesize_monthly_ko(
     )
     kw_label = " · ".join(top_keywords) if top_keywords else "(미설정)"
     prompt = f"""당신은 Fraunhofer 한국 사무소 R&D 전략가입니다.
-{year}년 {month}월 국내 R&D 인텔리gence 항목 {len(entries)}건(적합도 {MONTHLY_RD_MIN_SCORE}점 이상)을 바탕으로 월간 보고서 JSON을 작성하세요.
+{year}년 {month}월 국내 R&D 인텔리gence 항목 {len(entries)}건(적합도 {MONTHLY_RD_MIN_SCORE}점 이상)을 바탕으로 **4~5페이지 분량**의 월간 보고서 JSON을 작성하세요.
 
 모니터링 컨텍스트 키워드(상위 3): {kw_label}
 - 각 항목의 relevance(직접/간접/약함), matched_keywords, keyword_relevance 필드를 기준으로 중요도를 판단함.
 - executive_summary·context_highlights·opportunities는 **직접·간접** 관련 항목을 정부·R&D 신호와 함께 우선 배치함.
-- 정부·공공기관 투자 주체(actor)는 유지하되, 전력·에너지·그리드 등 컨텍스트 키워드와 직접 연결된 항목을 상단에 둠.
+- 정부·공공기관 투자 주체(actor)는 유지하되, 전력·에너지·그리드 등 모니터링 키워드와 직접 연결된 항목을 상단에 둠.
 
 규칙:
 - 한국 국내 정부·기업 R&D 위탁·협력 기회만 다룸. 해외 시장·글로벌 벤더 분석 금지.
 - 모든 문장 명사형 종결(-함/-임/-었음). -습니다/-합니다 금지.
 - 소스에 없는 수치·기관명 추가 금지.
 - keyword_relevance, proposable, fact, actor/purpose/pain/strategy, relevance 필드를 적극 활용.
+- opportunities.summary는 분야별 서두 1~2문장(건수·[정부]·[컨텍스트] 라벨 금지).
+- opportunities.items는 항목마다 육하원칙 기반 2~4문장: 누가(주체)·언제(일자)·무엇(발표·사업)·왜(목적)·어떻게(협력·접근). 명사형 종결.
 
 입력 데이터:
 {json.dumps(entries, ensure_ascii=False)}
 
 JSON 스키마:
 {{
-  "executive_summary": "3-4문장. 컨텍스트 키워드 직접·간접 이슈 + 국내 전력·에너지·ICT R&D 투자 트렌드",
+  "executive_summary": "5~7문장. 모니터링 키워드 직접·간접 이슈 + 국내 전력·에너지·ICT R&D 투자 트렌드 + 당월 정부·기업 핵심 수치",
   "context_highlights": [
-    {{"relevance": "직접|간접", "matched_keywords": "매칭 키워드", "summary": "핵심 이슈 1-2문장", "refs": [1]}}
+    {{"relevance": "직접|간접", "matched_keywords": "매칭 키워드", "summary": "핵심 이슈 2~3문장", "refs": [1]}}
   ],
   "opportunities": [
-    {{"field": "분야명(HVDC/BESS/스마트그리드 등)", "summary": "정부·기업 움직임 요약", "priority": "컨텍스트|정부", "refs": [1,2]}}
+    {{"field": "분야명(전력·그리드/제조AI/표준·인증 등)", "summary": "분야 공통 맥락 1~2문장", "items": ["육하원칙 기반 항목 서술", "..."], "refs": [1,2]}}
   ],
   "action_plan": [
     {{"target": "부처/기업명", "contact_angle": "접촉 논리", "rd_area": "제안 R&D", "refs": [1]}}
@@ -172,7 +182,7 @@ def _build_markdown(
             weak_items = [c for c in compact if c.get("relevance") == "약함"]
             if weak_items:
                 lines.append(
-                    f"- 정부·R&D 타깃 {len(weak_items)}건은 §4 Action Plan·§5 스코어카드에 정리함."
+                    f"- 정부·R&D 타깃 {len(weak_items)}건은 §5 Action Plan·§6 스코어카드에 정리함."
                 )
 
     lines += [
@@ -186,15 +196,50 @@ def _build_markdown(
         for opp in opportunities:
             field = opp.get("field", "기타")
             summary = opp.get("summary", "")
-            priority = opp.get("priority", "")
-            tag = f" [{priority}]" if priority else ""
-            lines.append(f"- **{field}{tag}:** {summary}")
+            lines.append(f"- **{field}:** {summary}")
+            for item_line in opp.get("items") or []:
+                lines.append(f"  - {item_line}")
     else:
         lines.append("- (해당 없음)")
 
     lines += [
         "",
-        "## 4. Action Plan (접촉 타겟)",
+        "## 4. 주요 R&D 타겟 상세",
+        "",
+    ]
+    _rel_order_detail = {"직접": 0, "간접": 1, "약함": 2}
+    detail_items = sorted(
+        _dedupe_entries(compact),
+        key=lambda c: (
+            _rel_order_detail.get(c.get("relevance", ""), 9),
+            -c.get("score", 0),
+        ),
+    )[:8]
+    for item in detail_items:
+        title = (item.get("summary") or item["title"])[:140]
+        lines.append(f"### [{item['ref']}] {title}")
+        lines.append("")
+        if item.get("actor"):
+            lines.append(f"- **투자 주체:** {item['actor']}")
+        if item.get("purpose"):
+            lines.append(f"- **투자 목적:** {item['purpose']}")
+        if item.get("pain"):
+            lines.append(f"- **위탁 연구 니즈:** {item['pain']}")
+        if item.get("proposable"):
+            lines.append(f"- **제안 R&D:** {item['proposable']}")
+        if item.get("strategy"):
+            lines.append(f"- **접근 전략:** {item['strategy']}")
+        if item.get("fact"):
+            lines.append(f"- **팩트 근거:** {item['fact']}")
+        rel = item.get("relevance", "—")
+        matched = item.get("matched_keywords") or "—"
+        lines.append(f"- **관련도:** {rel} · 매칭: {matched} · 적합도 {item['score']}/5")
+        if item.get("url"):
+            lines.append(f"- **출처:** [{item.get('source') or '링크'}]({item['url']})")
+        lines.append("")
+
+    lines += [
+        "## 5. Action Plan (접촉 타겟)",
         "",
         "| 타겟 (부처/기업) | 제안 R&D 영역 | 접촉 논리 |",
         "|----------------|--------------|----------|",
@@ -213,7 +258,7 @@ def _build_markdown(
 
     lines += [
         "",
-        "## 5. 부록: 월간 R&D 스코어카드",
+        "## 6. 부록: 월간 R&D 스코어카드",
         "",
         "| 점수 | 관련도 | 날짜 | 투자 주체 | 핵심 이슈 | 출처 |",
         "|------|--------|------|----------|----------|------|",
@@ -267,7 +312,7 @@ def generate_rd_monthly_report(
         structured = _synthesize_monthly_ko(year, month, compact, top_keywords)
     except Exception as exc:
         logger.warning("LLM monthly synthesis failed (%s) — using template fallback", exc)
-        structured = _fallback_structure(compact, top_keywords)
+        structured = _fallback_structure(compact, top_keywords, year, month)
 
     markdown = _build_markdown(year, month, rd_logs, compact, structured, top_keywords)
 
@@ -279,48 +324,228 @@ def generate_rd_monthly_report(
     return output_path
 
 
-def _fallback_structure(entries: list[dict], top_keywords: list[str]) -> dict:
-    by_field: dict[str, list[dict]] = defaultdict(list)
-    for e in entries:
-        kw = e.get("proposable") or "기타"
-        by_field[kw[:30]].append(e)
+def _dedupe_entries(entries: list[dict]) -> list[dict]:
+    seen: set[str] = set()
+    unique: list[dict] = []
+    for entry in entries:
+        key = (entry.get("url") or "").strip() or (
+            f"{entry.get('date', '')}|{entry.get('title', '')}"
+        )
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(entry)
+    return unique
 
-    context_highlights = [
-        {
-            "relevance": e.get("relevance", ""),
-            "matched_keywords": e.get("matched_keywords", ""),
-            "summary": (e.get("summary") or e.get("title", ""))[:200],
-            "refs": [e["ref"]],
-        }
-        for e in entries
-        if e.get("relevance") in ("직접", "간접")
-    ][:8]
 
-    opportunities = [
-        {
-            "field": field,
-            "summary": f"{len(items)}건의 국내 R&D 신호 포착",
-            "priority": "컨텍스트" if any(i.get("relevance") in ("직접", "간접") for i in items) else "정부",
-            "refs": [i["ref"] for i in items[:3]],
-        }
-        for field, items in list(by_field.items())[:5]
-    ]
-    action_plan = [
-        {
-            "target": e.get("actor") or e.get("source", ""),
-            "contact_angle": e.get("strategy") or e.get("purpose", ""),
-            "rd_area": e.get("proposable") or e.get("pain", ""),
-            "refs": [e["ref"]],
-        }
-        for e in entries[:8]
-        if e.get("actor")
-    ]
+def _theme_for_entry(entry: dict) -> str:
+    blob = " ".join(
+        [
+            entry.get("proposable") or "",
+            entry.get("pain") or "",
+            entry.get("purpose") or "",
+            entry.get("summary") or "",
+            entry.get("title") or "",
+        ]
+    )
+    for label, pattern in _THEME_RULES:
+        if pattern.search(blob):
+            return label
+    return "기타 정부·R&D"
+
+
+def _group_by_theme(entries: list[dict]) -> list[tuple[str, list[dict]]]:
+    buckets: dict[str, list[dict]] = defaultdict(list)
+    for entry in entries:
+        buckets[_theme_for_entry(entry)].append(entry)
+
+    order = ["전력·그리드", "제조AI·스마트공장", "표준·인증·보안", "바이오·그린", "기타 정부·R&D"]
+    ranked: list[tuple[str, list[dict]]] = []
+    for label in order:
+        if label in buckets:
+            ranked.append((label, buckets.pop(label)))
+    for label, items in buckets.items():
+        ranked.append((label, items))
+    return ranked
+
+
+def _noun_clause(text: str) -> str:
+    """Return a noun-style clause without duplicating -임/-함 endings."""
+    t = (text or "").strip().rstrip(".。 ")
+    if not t:
+        return ""
+    if re.search(r"(임|함|됨|었음|았음|했음|음)$", t):
+        return t
+    return f"{t}임"
+
+
+def _entry_narrative(entry: dict) -> str:
+    """One opportunity item as 5W1H-based flowing prose."""
+    actor = (entry.get("actor") or entry.get("source") or "국내 주체").strip()
+    when = (entry.get("date") or "").strip()
+    what = (entry.get("summary") or entry.get("title") or "").strip()
+    why = (entry.get("purpose") or "").strip()
+    pain = (entry.get("pain") or "").strip()
+    how = (entry.get("strategy") or entry.get("proposable") or "").strip()
+    fact = (entry.get("fact") or "").strip()
+    rel = entry.get("relevance", "")
+
+    when_phrase = f"{when}에 " if when else ""
+    sentences: list[str] = []
+
+    if what:
+        sentences.append(f"**{actor}** — {when_phrase}{_noun_clause(what)}.")
+    else:
+        sentences.append(f"**{actor}** — {when_phrase}국내 R&D 신호가 포착됨.")
+
+    if why:
+        sentences.append(f"정책·투자 목적은 {_noun_clause(why)}.")
+    if fact and fact not in what:
+        sentences.append(f"근거로는 {_noun_clause(fact)}.")
+    if pain and pain not in why:
+        sentences.append(f"필요한 위탁 연구 영역은 {_noun_clause(pain)}.")
+    if how:
+        sentences.append(f"협력 접근은 {_noun_clause(how)}.")
+    if rel in ("직접", "간접"):
+        sentences.append(f"모니터링 키워드(전력·그리드)와 {rel} 연관됨.")
+
+    return " ".join(sentences)
+
+
+def _theme_intro(theme: str, items: list[dict], top_keywords: list[str]) -> str:
+    """분야별 서두 1~2문장 — 건수 나열 대신 공통 맥락 설명."""
     kw_label = " · ".join(top_keywords) if top_keywords else "모니터링 키워드"
+    actors = sorted({i.get("actor", "") for i in items if i.get("actor")})[:3]
+    actor_text = ", ".join(actors) if actors else "국내 정부·공공기관"
+
+    intros = {
+        "전력·그리드": (
+            f"당월 {actor_text} 등이 {kw_label}와 연계된 국가 R&D·정책 신호를 발표함. "
+            "전력 인프라·지능형 계통·송배전 분야 위탁 연구·국제 공동연구 제안 여지가 있음."
+        ),
+        "제조AI·스마트공장": (
+            f"당월 {actor_text} 등이 제조업 AI 대전환·에이전트 실증·데이터·모델 개발에 "
+            "민·관 합동 투자와 과제를 병행 추진함. 제조 현장 실증·고난도 모델 개발 협력 수요가 큼."
+        ),
+        "표준·인증·보안": (
+            f"당월 {actor_text} 등이 국가표준(KS) 제정·성능시험·인증 체계를 구축함. "
+            "표준 개발·시험평가 방법론·인증 제도 설계 분야 위탁 R&D 기회가 있음."
+        ),
+        "바이오·그린": (
+            f"당월 {actor_text} 등이 산림·그린바이오 기술 이전·공동연구·사업화를 추진함. "
+            "기술 이전 실증·공동 연구 과제 제안이 가능함."
+        ),
+    }
+    return intros.get(
+        theme,
+        f"당월 {actor_text} 등에서 국내 R&D·정책 관련 신호가 확인됨. Action Plan에 투자 주체·니즈를 반영함.",
+    )
+
+
+def _build_executive_summary_fallback(
+    entries: list[dict],
+    top_keywords: list[str],
+    year: int,
+    month: int,
+) -> str:
+    unique = _dedupe_entries(entries)
+    direct = [e for e in unique if e.get("relevance") == "직접"]
+    indirect = [e for e in unique if e.get("relevance") == "간접"]
+    weak = [e for e in unique if e.get("relevance") == "약함"]
+    kw_label = " · ".join(top_keywords) if top_keywords else "모니터링 키워드"
+    themes = [label for label, _ in _group_by_theme(unique)]
+
+    parts = [
+        f"{year}년 {month}월 국내 R&D 인텔리gence 월간 집계에서 R&D 적합 {MONTHLY_RD_MIN_SCORE}점 이상 "
+        f"{len(unique)}건(원본 {len(entries)}건)이 분석됨.",
+        f"{kw_label} 기준 직접 {len(direct)}건·간접 {len(indirect)}건·약함 {len(weak)}건으로 "
+        "모니터링 컨텍스트 중요도를 구분함.",
+    ]
+    if direct:
+        top = direct[0]
+        parts.append(
+            f"최우선 이슈는 **{top.get('actor') or '정부'}** — "
+            f"{(top.get('summary') or top.get('title', ''))[:160]}."
+        )
+    if "제조AI·스마트공장" in themes:
+        parts.append(
+            "제조AI·스마트공장 축에서는 과기정통부·산업통상부·중기부가 "
+            "20조원 규모 민·관 합동 투자와 에이전트 실증 사업을 병행 추진함."
+        )
+    if "표준·인증·보안" in themes:
+        parts.append(
+            "표준·인증 축에서는 산업통상부의 대드론 성능시험 국가표준(KS) 제정이 "
+            "국가중요시설 보안 R&D 수요로 연결됨."
+        )
+    parts.append(
+        "§2 컨텍스트 중요도·§3 분야별 기회·§4 타겟 상세·§5 Action Plan·§6 스코어카드에 "
+        "투자 주체·니즈·접근 전략을 정리함."
+    )
+    return " ".join(parts)
+
+
+def _fallback_structure(
+    entries: list[dict],
+    top_keywords: list[str],
+    year: int,
+    month: int,
+) -> dict:
+    unique = _dedupe_entries(entries)
+    _rel_rank = {"직접": 0, "간접": 1, "약함": 2}
+
+    context_highlights = sorted(
+        [
+            {
+                "relevance": e.get("relevance", ""),
+                "matched_keywords": e.get("matched_keywords", ""),
+                "summary": (e.get("summary") or e.get("title", ""))[:280],
+                "refs": [e["ref"]],
+            }
+            for e in unique
+            if e.get("relevance") in ("직접", "간접")
+        ],
+        key=lambda h: (_rel_rank.get(h["relevance"], 9),),
+    )[:8]
+
+    opportunities = []
+    for theme, items in _group_by_theme(unique):
+        theme_items = sorted(
+            items,
+            key=lambda e: (_rel_rank.get(e.get("relevance", ""), 9), -e.get("score", 0)),
+        )
+        opportunities.append(
+            {
+                "field": theme,
+                "summary": _theme_intro(theme, theme_items, top_keywords),
+                "items": [_entry_narrative(e) for e in theme_items[:5]],
+                "refs": [e["ref"] for e in theme_items[:5]],
+            }
+        )
+
+    seen_actors: set[str] = set()
+    action_plan = []
+    for e in sorted(
+        unique,
+        key=lambda row: (_rel_rank.get(row.get("relevance", ""), 9), -row.get("score", 0)),
+    ):
+        actor = (e.get("actor") or "").strip()
+        if not actor or actor in seen_actors:
+            continue
+        seen_actors.add(actor)
+        action_plan.append(
+            {
+                "target": actor,
+                "contact_angle": e.get("strategy") or e.get("purpose", ""),
+                "rd_area": e.get("proposable") or e.get("pain", ""),
+                "refs": [e["ref"]],
+            }
+        )
+        if len(action_plan) >= 8:
+            break
+
     return {
-        "executive_summary": (
-            f"당월 R&D 적합 {MONTHLY_RD_MIN_SCORE}점 이상 항목 {len(entries)}건이 수집됨. "
-            f"{kw_label} 기준 직접·간접 관련 {len(context_highlights)}건과 "
-            "정부·기업 투자 주체 니즈를 스코어카드·Action Plan에 정리함."
+        "executive_summary": _build_executive_summary_fallback(
+            entries, top_keywords, year, month
         ),
         "context_highlights": context_highlights,
         "opportunities": opportunities,
