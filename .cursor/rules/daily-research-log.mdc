@@ -60,10 +60,10 @@ Avoid vague filler in summary cells: no deictic subjects ("이 기술은"), no g
 
 #기술 #논문 #투자 #M&A #제품출시 #기업동향 #규제 #경쟁 #시장수치 #리스크 #전문가전망
 
-## Credibility
+## Credibility (Korea-only sources)
 
-- **A:** peer-reviewed journals, Tier-1 wire (Reuters/Bloomberg/AP), gov/international stats, Gartner/IDC/McKinsey
-- **B:** preprints, industry media, secondary reporting, corporate IR/press releases
+- **A:** korea.kr / `.go.kr` press releases, Yonhap·Newsis primary wire, public R&D agencies (KISTEP·KIET·KIPO·KETEP·KEPCO), domestic peer-reviewed journals
+- **B:** domestic economy/IT media (Herald·Donga·ETNews·ZDNet Korea), secondary reporting, corporate IR/press releases
 - **C:** anonymous sources, speculation, repackaged/unverified content — **manual entries only**
 
 Full template: `templates/daily_research_log_template.md`

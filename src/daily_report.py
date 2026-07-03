@@ -29,23 +29,78 @@ logger = logging.getLogger(__name__)
 
 _OUTPUT_BASE = Path(__file__).resolve().parent.parent / "output" / "daily"
 
-_TIER1_NEWS = {"연합뉴스", "yna", "reuters", "bloomberg"}
-_TIER1_RESEARCH = {"kistep", "kiet", "iitp", "gartner", "idc", "mckinsey"}
-_PEER_REVIEW_HINTS = {"ieee", "springer", "elsevier", "wiley", "nature", "science"}
-_PREPRINT_HINTS = {"arxiv", "biorxiv", "medrxiv", "ssrn"}
+_TIER1_NEWS = {"연합뉴스", "yna", "뉴시스", "newsis"}
+_TIER1_RESEARCH = {"kistep", "kiet", "iitp", "kipo", "ketep", "kepco", "koita", "kisdi"}
+_PEER_REVIEW_HINTS = {"kci", "dbpia", "ieee", "springer", "elsevier", "wiley", "nature", "science", "kisti", "etri"}
+_PREPRINT_HINTS = {"arxiv", "biorxiv", "medrxiv", "ssrn", "preprint", "프리프린트"}
 _GOVERNMENT_HINTS = {
+    "korea.kr",
+    "정책브리핑",
     "motie",
     "msit",
-    "kistep",
-    "iitp",
+    "mss",
+    "mw",
+    "moe",
+    "molit",
+    "mcee",
+    "mnd",
+    "kasa",
+    "과기정통",
+    "산업통상",
+    "중소벤처",
+    "보건복지",
+    "국토교통",
+    "기후에너지",
+    "우주항공",
     "kipo",
-    "europa.eu",
-    "ec.europa.eu",
-    "nist.gov",
-    "gov.uk",
     ".go.kr",
-    ".gov",
 }
+_KOREAN_MAJOR_MEDIA = {
+    "헤럴드",
+    "herald",
+    "동아",
+    "donga",
+    "경향",
+    "khan",
+    "한겨레",
+    "hani",
+    "파이낸셜",
+    "fnnews",
+    "전자신문",
+    "etnews",
+    "zdnet",
+    "한국경제",
+    "hankyung",
+    "매일경제",
+    "mk.co.kr",
+}
+
+CREDIBILITY_LEGEND_A = (
+    "정부·공공기관 원문(korea.kr·부처 .go.kr 보도자료), "
+    "연합뉴스·뉴시스 1차 보도, "
+    "공공 R&D·정책기관(KISTEP·KIET·KIPO·KETEP·한국전력 등), "
+    "국내 학술지·국책연구원 동료심사 논문"
+)
+CREDIBILITY_LEGEND_B = (
+    "국내 경제·IT 전문매체(헤럴드경제·동아일보·전자신문·ZDNet Korea 등), "
+    "2차 인용·전문자료 요약, 기업·공기업 IR/보도자료"
+)
+CREDIBILITY_LEGEND_C = (
+    "익명 소스, 추측성 기사, 단순 재가공 콘텐츠, 미검증 블로그 — "
+    "**자동 생성 시에는 C가 나오지 않음. 수동 기록 시에만 사용**"
+)
+
+
+def credibility_legend_lines() -> list[str]:
+    """Footer legend for daily markdown (Korea-only source scope)."""
+    return [
+        "## 신뢰도 등급 기준",
+        "",
+        f"- **A (높음):** {CREDIBILITY_LEGEND_A}",
+        f"- **B (중간):** {CREDIBILITY_LEGEND_B}",
+        f"- **C (참고):** {CREDIBILITY_LEGEND_C}",
+        "",
+    ]
 
 _TAG_RULES: list[tuple[str, str]] = [
     (r"invest|fund|series|valuation|펀딩|투자|유치", "#투자"),
@@ -118,15 +173,18 @@ def _credibility(article: SummarizedArticle) -> str:
             return "A"
         return "B"
 
-    if any(name in combined for name in _TIER1_NEWS | _TIER1_RESEARCH):
-        return "A"
     if any(h in combined for h in _GOVERNMENT_HINTS):
+        return "A"
+    if any(name in combined for name in _TIER1_NEWS | _TIER1_RESEARCH):
         return "A"
     if any(h in combined for h in _PREPRINT_HINTS):
         return "B (프리프린트, 동료심사 전)"
 
     enterprise_ir = {"press release", "ir.", "investor", "newsroom", "보도자료"}
     if article.category == "enterprise" or any(h in combined for h in enterprise_ir):
+        return "B"
+
+    if any(hint in combined for hint in _KOREAN_MAJOR_MEDIA):
         return "B"
 
     return "B"
@@ -1347,12 +1405,7 @@ def _build_markdown(
         "| #리스크 | 사고, 논란, 부정적 전망 |",
         "| #전문가전망 | 애널리스트/전문가 예측 |",
         "",
-        "## 신뢰도 등급 기준",
-        "",
-        "- **A (높음):** 피어리뷰 학술지 논문, 1차 보도(공식발표 인용), Tier-1 통신사(Reuters/Bloomberg/AP), 정부·국제기구 통계, Tier-1 시장조사기관(Gartner/IDC/McKinsey)",
-        "- **B (중간):** 프리프린트(arXiv 등 동료심사 전), 업계 전문매체, 2차 인용 보도, 기업 자체 발표(IR/보도자료)",
-        "- **C (참고):** 익명 소스, 추측성 기사, 단순 재가공 콘텐츠, 미검증 블로그 — **자동 생성 시에는 C가 나오지 않음. 수동 기록 시에만 사용**",
-        "",
+        *credibility_legend_lines(),
     ]
 
     return "\n".join(lines)
