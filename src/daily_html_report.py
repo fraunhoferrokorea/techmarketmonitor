@@ -10,7 +10,6 @@ from typing import Any
 from pathlib import Path
 
 from src.daily_report import (
-    _DEFAULT_DASHBOARD_BASE,
     _build_item_slugs,
     _build_rd_daily_theme,
     _build_summary_lines,
@@ -290,10 +289,10 @@ def build_daily_html(
     items = _item_records(sorted_articles, log_date, kws, slugs)
 
     date_str = log_date.isoformat()
-    from src.daily_report import daily_markdown_github_url
+    from src.daily_report import daily_dashboard_public_url, daily_markdown_github_url
 
     md_link = daily_markdown_github_url(log_date)
-    pages_index = f"{_DEFAULT_DASHBOARD_BASE.rstrip('/')}/"
+    pages_index = daily_dashboard_public_url(log_date).rsplit("/", 1)[0] + "/index.html"
 
     opp_high = [c for c in opportunities if c["tier"] == "high"]
     opp_mid = [c for c in opportunities if c["tier"] == "mid"]

@@ -125,8 +125,13 @@ _CATEGORY_MATERIAL_TYPE = {
     "korean": "기사",
 }
 
-# GitHub renders .md but shows .html as source — link md files to Pages for live dashboard.
-_DEFAULT_DASHBOARD_BASE = "https://yenaalisonhong.github.io/techmarketmonitor"
+# GitHub renders .md but shows .html as source — use a CDN wrapper or GitHub Pages.
+# githack: works immediately without Pages admin setup.
+# Pages (optional): set DAILY_DASHBOARD_BASE_URL=https://yenaalisonhong.github.io/techmarketmonitor
+_DEFAULT_DASHBOARD_BASE = os.getenv(
+    "DAILY_DASHBOARD_BASE_URL",
+    "https://raw.githack.com/yenaalisonhong/techmarketmonitor/main/output/daily",
+)
 
 
 def daily_dashboard_public_url(log_date: date, base: str | None = None) -> str:
