@@ -55,13 +55,15 @@ def test_build_daily_html_contains_dashboard_sections() -> None:
     html = build_daily_html(log_date, articles, top_keywords=["전력계통", "스마트그리드"])
 
     assert "<!DOCTYPE html>" in html
-    assert "R&D 기회 스캔 보드" in html
-    assert "한눈에 보기" in html or "오늘의 핵심" in html
+    assert "오늘의 R&D 핵심" in html
     assert "www-grid" in html
-    assert "credChart" in html
-    assert "itemsGrid" in html
+    assert "score-badge" in html
+    assert "credChart" not in html
+    assert "chart.js" not in html.lower()
+    assert "itemsGrid" not in html
+    assert "항목 기록" not in html
+    assert "국내 R&D 타겟 시사점" not in html
     assert "직류 산업 확산 추진" in html
-    assert "daily_2026-07-02.md" in html
 
 
 def test_save_daily_report_writes_html(tmp_path: Path) -> None:
