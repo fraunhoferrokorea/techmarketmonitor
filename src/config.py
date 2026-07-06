@@ -32,6 +32,7 @@ class Settings:
     keywords: list[str]
     keyword_labels: list[str]
     analysis_keywords: list[str]
+    filter_keywords: list[str]
     keywords_path: Path
 
 
@@ -40,16 +41,17 @@ def _normalize_keyword(keyword: str) -> str:
     return keyword.lower() if keyword.isascii() else keyword
 
 
-def _load_keywords_config(path: Path) -> tuple[list[str], list[str], list[str]]:
-    """Load keywords.txt → (labels, normalized_for_match, top3_labels).
+def _load_keywords_config(path: Path) -> tuple[list[str], list[str], list[str], list[str]]:
+    """Load keywords.txt → (labels, normalized_for_match, top3, top5_normalized).
 
-    Top 3 = first three non-comment, non-blank lines (file order). Used daily for
-    LLM investigation and executive summary; full list is used for RSS filter/match.
+    Top 3 = first three keyword lines — LLM analysis and executive summary.
+    Top 5 = first five keyword lines — required for article collection/filter pass.
+    Full list is used for RSS fetch and matched_keywords tagging.
     """
     try:
         lines = path.read_text(encoding="utf-8").splitlines()
     except FileNotFoundError:
-        return [], [], []
+        return [], [], [], []
 
     labels: list[str] = []
     for line in lines:
@@ -59,7 +61,7 @@ def _load_keywords_config(path: Path) -> tuple[list[str], list[str], list[str]]:
         labels.append(stripped)
 
     normalized = [_normalize_keyword(k) for k in labels]
-    return labels, normalized, labels[:3]
+    return labels, normalized, labels[:3], normalized[:5]
 
 
 def _load_keywords_txt(path: Path) -> list[str]:
@@ -87,11 +89,12 @@ def load_settings() -> Settings:
     load_dotenv(PROJECT_ROOT / ".env")
 
     keywords_path = resolve_keywords_path()
-    raw_labels, keywords, analysis = _load_keywords_config(keywords_path)
+    raw_labels, keywords, analysis, filter_kw = _load_keywords_config(keywords_path)
     if not keywords:
         keywords = [_normalize_keyword(k) for k in _DEFAULT_KEYWORDS]
         raw_labels = list(_DEFAULT_KEYWORDS)
         analysis = raw_labels[:3]
+        filter_kw = keywords[:5]
 
     database_path = Path(os.getenv("DATABASE_PATH", "data/monitor.db"))
     if not database_path.is_absolute():
@@ -112,6 +115,7 @@ def load_settings() -> Settings:
         keywords=keywords,
         keyword_labels=raw_labels,
         analysis_keywords=analysis,
+        filter_keywords=filter_kw,
         keywords_path=keywords_path,
     )
 

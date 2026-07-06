@@ -111,11 +111,35 @@ def _within_log_date(
     return matched
 
 
-def _article_pipeline_sort_key(article: FilteredArticle) -> tuple[int, int, int, str]:
-    """R&D/investment signals first, then keyword match count."""
+def _matches_analysis_keywords(
+    article: FilteredArticle,
+    analysis_keywords: list[str],
+) -> bool:
+    """True when title/summary hits a daily analysis keyword (e.g. 전력계통)."""
+    if not analysis_keywords:
+        return False
+    text = f"{article.title} {article.summary}"
+    normalized = text.lower()
+    for kw in analysis_keywords:
+        if kw.isascii():
+            if kw.lower() in normalized:
+                return True
+        elif kw in text:
+            return True
+    return False
+
+
+def _article_pipeline_sort_key(
+    article: FilteredArticle,
+    analysis_keywords: list[str] | None = None,
+) -> tuple[int, int, int, int, str]:
+    """R&D/investment signals first; boost monitoring-context keyword hits."""
     from src.rd_targeting import investment_signal_score
 
+    ctx = analysis_keywords or []
+    context_boost = 1 if _matches_analysis_keywords(article, ctx) else 0
     return (
+        -context_boost,
         -gov_target_score(article),
         -investment_signal_score(article),
         -len(article.matched_keywords),
@@ -126,20 +150,27 @@ def _article_pipeline_sort_key(article: FilteredArticle) -> tuple[int, int, int,
 def _cap_with_policy_priority(
     articles: list[FilteredArticle],
     limit: int,
+    analysis_keywords: list[str] | None = None,
 ) -> list[FilteredArticle]:
-    """Always keep policy-priority items; fill remaining slots by sort order."""
+    """Keep monitoring-context and policy-priority items before filling remaining slots."""
     if len(articles) <= limit:
         return articles
 
-    ranked = sorted(articles, key=_article_pipeline_sort_key)
-    priority = [a for a in ranked if gov_target_score(a) > 0]
-    rest = [a for a in ranked if gov_target_score(a) == 0]
+    ctx = analysis_keywords or []
+    ranked = sorted(articles, key=lambda a: _article_pipeline_sort_key(a, ctx))
+    context = [a for a in ranked if _matches_analysis_keywords(a, ctx)]
+    remaining_pool = [a for a in ranked if a not in context]
 
-    kept = priority[:limit]
+    kept = context[:limit]
     remaining = limit - len(kept)
     if remaining > 0:
+        priority = [a for a in remaining_pool if gov_target_score(a) > 0]
+        kept.extend(priority[:remaining])
+        remaining = limit - len(kept)
+    if remaining > 0:
+        rest = [a for a in remaining_pool if gov_target_score(a) == 0]
         kept.extend(rest[:remaining])
-    return sorted(kept, key=_article_pipeline_sort_key)
+    return sorted(kept, key=lambda a: _article_pipeline_sort_key(a, ctx))
 
 
 def _refresh_daily_markdown(
@@ -234,7 +265,11 @@ def run_daily_monitor(
     recent_articles = enrich_raw_articles(recent_articles)
     recent_articles, _ = filter_domestic_articles(recent_articles, label="post-enrichment")
 
-    filtered = filter_articles(recent_articles, keywords)
+    filtered = filter_articles(
+        recent_articles,
+        keywords,
+        required_keywords=settings.filter_keywords,
+    )
     logger.info("Filtered to %d keyword-matching domestic (Korea-scoped) articles", len(filtered))
 
     priority_count = sum(1 for a in filtered if gov_target_score(a) > 0)
@@ -247,9 +282,14 @@ def run_daily_monitor(
             _MAX_ARTICLES_PER_RUN,
             len(filtered) - _MAX_ARTICLES_PER_RUN,
         )
-        filtered = _cap_with_policy_priority(filtered, _MAX_ARTICLES_PER_RUN)
+        filtered = _cap_with_policy_priority(
+            filtered, _MAX_ARTICLES_PER_RUN, settings.analysis_keywords
+        )
     else:
-        filtered = sorted(filtered, key=_article_pipeline_sort_key)
+        filtered = sorted(
+            filtered,
+            key=lambda a: _article_pipeline_sort_key(a, settings.analysis_keywords),
+        )
 
     store = DailyLogStore(settings.database_path)
 

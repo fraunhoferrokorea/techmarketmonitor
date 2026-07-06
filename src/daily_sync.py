@@ -9,7 +9,7 @@ from src.config import Settings, load_settings
 from src.daily_windows import window_end_for_log_date
 from src.daily_report import save_daily_report
 from src.korea_scope import is_domestic_news
-from src.models import SummarizedArticle
+from src.models import RawArticle, SummarizedArticle
 from src.summarizer import repolish_summarized_article
 from src.pipeline import run_daily_monitor
 from src.scheduler_state import (
@@ -56,6 +56,91 @@ def _row_to_article(row: dict) -> SummarizedArticle:
         rd_proposable_area=row.get("rd_proposable_area") or "",
         rd_fact_basis=row.get("rd_fact_basis") or "",
     )
+
+
+def _row_to_raw_article(row: dict) -> RawArticle:
+    published_at = None
+    raw_pub = row.get("published_at")
+    if raw_pub:
+        try:
+            published_at = datetime.fromisoformat(raw_pub)
+            if published_at.tzinfo is None:
+                published_at = published_at.replace(tzinfo=timezone.utc)
+        except ValueError:
+            pass
+
+    summary = " ".join(
+        part
+        for part in (row.get("ko_one_liner") or "", row.get("llm_summary") or "")
+        if part
+    ).strip()
+
+    return RawArticle(
+        title=row["title"],
+        url=row["url"],
+        summary=summary,
+        source_name=row["source_name"],
+        category=row["category"],
+        published_at=published_at,
+    )
+
+
+def refilter_stored_date(
+    log_date: date,
+    store: DailyLogStore,
+    settings: Settings,
+) -> dict:
+    """Drop stored rows that fail current collection filter; rebuild markdown (no LLM)."""
+    from src.filter import passes_collection_filter
+
+    rows = store.get_entries_for_date(log_date)
+    if not rows:
+        return {
+            "log_date": log_date.isoformat(),
+            "status": "skipped_no_db_entries",
+            "removed": 0,
+        }
+
+    removed = 0
+    for row in rows:
+        raw = _row_to_raw_article(row)
+        if not passes_collection_filter(
+            raw, settings.keywords, settings.filter_keywords
+        ):
+            store.delete_by_url(row["url"])
+            removed += 1
+
+    remaining = store.count_for_date(log_date)
+    if remaining == 0:
+        remove_report(log_date)
+        return {
+            "log_date": log_date.isoformat(),
+            "status": "cleared_all_rows",
+            "removed": removed,
+        }
+
+    rebuilt = rebuild_markdown_from_db(log_date, store, settings, repolish_db=False)
+    rebuilt["removed"] = removed
+    rebuilt["status"] = "refiltered"
+    return rebuilt
+
+
+def refilter_stored_range(
+    start_date: date,
+    end_date: date,
+    settings: Settings | None = None,
+) -> list[dict]:
+    if start_date > end_date:
+        raise ValueError("start_date must be on or before end_date")
+
+    settings = settings or load_settings()
+    store = DailyLogStore(settings.database_path)
+    results: list[dict] = []
+    cursor = start_date
+    while cursor <= end_date:
+        results.append(refilter_stored_date(cursor, store, settings))
+        cursor += timedelta(days=1)
+    return results
 
 
 def scan_inconsistencies(store: DailyLogStore) -> list[dict]:

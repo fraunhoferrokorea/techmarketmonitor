@@ -16,6 +16,7 @@ from src.config import PROJECT_ROOT, load_settings
 from src.daily_sync import (
     realign_log_dates_from_published_at,
     refresh_all_daily_markdown,
+    refilter_stored_range,
     repair_inconsistencies,
     reprocess_range,
     scan_inconsistencies,
@@ -122,6 +123,20 @@ def daily_repair_cmd() -> None:
             indent=2,
         )
     )
+
+
+@cli.command("daily-refilter")
+@click.option("--from", "from_date", required=True, type=click.DateTime(formats=["%Y-%m-%d"]))
+@click.option("--to", "to_date", required=True, type=click.DateTime(formats=["%Y-%m-%d"]))
+def daily_refilter_cmd(from_date: datetime, to_date: datetime) -> None:
+    """Re-apply collection filter to stored DB rows and rebuild markdown (no LLM)."""
+    settings = load_settings()
+    _configure_logging(settings.log_level)
+
+    start = from_date.date()
+    end = to_date.date()
+    results = refilter_stored_range(start, end, settings=settings)
+    click.echo(json.dumps({"status": "refiltered", "results": results}, indent=2))
 
 
 @cli.command("daily-reprocess")

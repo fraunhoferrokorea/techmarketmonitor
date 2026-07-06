@@ -22,15 +22,34 @@ def match_keywords(text: str, keywords: list[str]) -> list[str]:
     return [keyword for keyword in keywords if keyword in normalized]
 
 
+def passes_collection_filter(
+    article: RawArticle,
+    keywords: list[str],
+    required_keywords: list[str] | None = None,
+) -> bool:
+    """True when article would pass fetch-time keyword + top-N core filter."""
+    searchable = " ".join([article.title, article.summary, article.source_name])
+    core = required_keywords or []
+    gov_target = is_gov_target(article)
+    if core and not match_keywords(searchable, core) and not gov_target:
+        return False
+    if match_keywords(searchable, keywords) or gov_target:
+        return True
+    return False
+
+
 def filter_articles(
     articles: list[RawArticle],
     keywords: list[str],
+    required_keywords: list[str] | None = None,
 ) -> list[FilteredArticle]:
     filtered: list[FilteredArticle] = []
     seen_urls: set[str] = set()
     target_label = gov_target_pass_label()
     dropped_foreign = 0
+    dropped_core = 0
     dropped_keywords = 0
+    core = required_keywords or []
 
     for article in articles:
         if article.url in seen_urls:
@@ -41,13 +60,16 @@ def filter_articles(
             continue
 
         searchable = " ".join([article.title, article.summary, article.source_name])
+        if not passes_collection_filter(article, keywords, core):
+            if core:
+                dropped_core += 1
+            else:
+                dropped_keywords += 1
+            continue
+
         matched = match_keywords(searchable, keywords)
         if not matched and is_gov_target(article):
             matched = [target_label]
-
-        if not matched:
-            dropped_keywords += 1
-            continue
 
         seen_urls.add(article.url)
         filtered.append(
@@ -66,6 +88,12 @@ def filter_articles(
         logger.info(
             "Keyword filter: excluded %d non-domestic (foreign) article(s)",
             dropped_foreign,
+        )
+    if dropped_core:
+        logger.info(
+            "Keyword filter: excluded %d domestic article(s) with no top-%d keyword match",
+            dropped_core,
+            len(core),
         )
     if dropped_keywords:
         logger.debug(

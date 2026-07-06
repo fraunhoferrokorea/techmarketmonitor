@@ -37,17 +37,45 @@ def test_gov_target_detects_rd_program() -> None:
     assert is_gov_target(article)
 
 
-def test_filter_passes_gov_target_without_keyword_match() -> None:
+def test_filter_passes_gov_target_with_core_keyword() -> None:
+    article = _article("과기정통부, 스마트그리드 R&D 지원사업 공고")
+    result = filter_articles(
+        [article],
+        keywords=["전력계통", "스마트그리드"],
+        required_keywords=["전력계통", "스마트그리드"],
+    )
+    assert len(result) == 1
+
+
+def test_filter_passes_gov_target_without_core_keyword() -> None:
     article = _article("제6차 국가표준기본계획 확정 발표")
-    result = filter_articles([article], keywords=["전력계통"])
+    result = filter_articles(
+        [article],
+        keywords=["전력계통"],
+        required_keywords=["전력계통"],
+    )
     assert len(result) == 1
     assert result[0].matched_keywords == [gov_target_pass_label()]
 
 
-def test_filter_passes_mou_without_keyword_match() -> None:
+def test_filter_passes_mou_from_official_source_without_core_keyword() -> None:
     article = _article("KISTEP·독일 연구기관, 에너지 기술협력 MOU", source="KISTEP")
-    result = filter_articles([article], keywords=["전력계통"])
+    result = filter_articles(
+        [article],
+        keywords=["전력계통"],
+        required_keywords=["전력계통"],
+    )
     assert len(result) == 1
+
+
+def test_filter_excludes_rd_only_match_without_core_top5() -> None:
+    article = _article("이화여대, 소아암 연구개발 결과 발표", source="연합뉴스")
+    result = filter_articles(
+        [article],
+        keywords=["전력계통", "연구개발"],
+        required_keywords=["전력계통", "스마트그리드", "파워그리드", "bess", "에너지저장"],
+    )
+    assert result == []
 
 
 def test_is_plan_document_expdoc_url() -> None:
@@ -72,7 +100,9 @@ if __name__ == "__main__":
     test_gov_target_detects_national_standard_plan()
     test_gov_target_detects_fraunhofer_mou()
     test_gov_target_detects_rd_program()
-    test_filter_passes_gov_target_without_keyword_match()
-    test_filter_passes_mou_without_keyword_match()
+    test_filter_passes_gov_target_with_core_keyword()
+    test_filter_passes_gov_target_without_core_keyword()
+    test_filter_passes_mou_from_official_source_without_core_keyword()
+    test_filter_excludes_rd_only_match_without_core_top5()
     test_filter_still_requires_keywords_for_general_news()
     print("ok")
