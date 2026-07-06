@@ -1,2 +1,142 @@
 2026-06-25 12:53:19,490 | INFO | src.catchup | No missing daily reports to process
 []
+[07/06/2026 Mon 10:37:32.60] daily-catchup start 
+[
+  {
+    "log_date": "2026-06-21",
+    "status": "skipped_legacy_md_without_db",
+    "message": "markdown without DB but date is on or before last_completed_log_date; run daily-reprocess to rebuild intentionally",
+    "issue": "md_without_db",
+    "phase": "repair"
+  },
+  {
+    "log_date": "2026-06-22",
+    "status": "skipped_legacy_md_without_db",
+    "message": "markdown without DB but date is on or before last_completed_log_date; run daily-reprocess to rebuild intentionally",
+    "issue": "md_without_db",
+    "phase": "repair"
+  },
+  {
+    "log_date": "2026-06-23",
+    "status": "skipped_legacy_md_without_db",
+    "message": "markdown without DB but date is on or before last_completed_log_date; run daily-reprocess to rebuild intentionally",
+    "issue": "md_without_db",
+    "phase": "repair"
+  },
+  {
+    "log_date": "2026-06-24",
+    "status": "skipped_legacy_md_without_db",
+    "message": "markdown without DB but date is on or before last_completed_log_date; run daily-reprocess to rebuild intentionally",
+    "issue": "md_without_db",
+    "phase": "repair"
+  },
+  {
+    "log_date": "2026-06-25",
+    "status": "skipped_legacy_md_without_db",
+    "message": "markdown without DB but date is on or before last_completed_log_date; run daily-reprocess to rebuild intentionally",
+    "issue": "md_without_db",
+    "phase": "repair"
+  },
+  {
+    "log_date": "2026-06-26",
+    "status": "skipped_legacy_md_without_db",
+    "message": "markdown without DB but date is on or before last_completed_log_date; run daily-reprocess to rebuild intentionally",
+    "issue": "md_without_db",
+    "phase": "repair"
+  },
+  {
+    "log_date": "2026-06-27",
+    "status": "skipped_legacy_md_without_db",
+    "message": "markdown without DB but date is on or before last_completed_log_date; run daily-reprocess to rebuild intentionally",
+    "issue": "md_without_db",
+    "phase": "repair"
+  },
+  {
+    "log_date": "2026-06-28",
+    "status": "skipped_legacy_md_without_db",
+    "message": "markdown without DB but date is on or before last_completed_log_date; run daily-reprocess to rebuild intentionally",
+    "issue": "md_without_db",
+    "phase": "repair"
+  },
+  {
+    "log_date": "2026-07-03",
+    "status": "skipped_legacy_md_without_db",
+    "message": "markdown without DB but date is on or before last_completed_log_date; run daily-reprocess to rebuild intentionally",
+    "issue": "md_without_db",
+    "phase": "repair"
+  }
+]
+[main c5371bc] report: daily local sync
+ 2 files changed, 24 insertions(+), 770 deletions(-)
+error: cannot pull with rebase: You have unstaged changes.
+error: Please commit or stash them.
+To https://github.com/yenaalisonhong/techmarketmonitor.git
+   21c03a2..c5371bc  main -> main
+[07/06/2026 Mon 10:37:38.93] daily-catchup done 
+[07/06/2026 Mon 10:39:11.36] daily-catchup start 
+[
+  {
+    "log_date": "2026-06-21",
+    "status": "skipped_legacy_md_without_db",
+    "message": "markdown without DB but date is on or before last_completed_log_date; run daily-reprocess to rebuild intentionally",
+    "issue": "md_without_db",
+    "phase": "repair"
+  },
+  {
+    "log_date": "2026-06-22",
+    "status": "skipped_legacy_md_without_db",
+    "message": "markdown without DB but date is on or before last_completed_log_date; run daily-reprocess to rebuild intentionally",
+    "issue": "md_without_db",
+    "phase": "repair"
+  },
+  {
+    "log_date": "2026-06-23",
+    "status": "skipped_legacy_md_without_db",
+    "message": "markdown without DB but date is on or before last_completed_log_date; run daily-reprocess to rebuild intentionally",
+    "issue": "md_without_db",
+    "phase": "repair"
+  },
+  {
+    "log_date": "2026-06-24",
+    "status": "skipped_legacy_md_without_db",
+    "message": "markdown without DB but date is on or before last_completed_log_date; run daily-reprocess to rebuild intentionally",
+    "issue": "md_without_db",
+    "phase": "repair"
+  },
+  {
+    "log_date": "2026-06-25",
+    "status": "skipped_legacy_md_without_db",
+    "message": "markdown without DB but date is on or before last_completed_log_date; run daily-reprocess to rebuild intentionally",
+    "issue": "md_without_db",
+    "phase": "repair"
+  },
+  {
+    "log_date": "2026-06-26",
+    "status": "skipped_legacy_md_without_db",
+    "message": "markdown without DB but date is on or before last_completed_log_date; run daily-reprocess to rebuild intentionally",
+    "issue": "md_without_db",
+    "phase": "repair"
+  },
+  {
+    "log_date": "2026-06-27",
+    "status": "skipped_legacy_md_without_db",
+    "message": "markdown without DB but date is on or before last_completed_log_date; run daily-reprocess to rebuild intentionally",
+    "issue": "md_without_db",
+    "phase": "repair"
+  },
+  {
+    "log_date": "2026-06-28",
+    "status": "skipped_legacy_md_without_db",
+    "message": "markdown without DB but date is on or before last_completed_log_date; run daily-reprocess to rebuild intentionally",
+    "issue": "md_without_db",
+    "phase": "repair"
+  },
+  {
+    "log_date": "2026-07-03",
+    "status": "skipped_legacy_md_without_db",
+    "message": "markdown without DB but date is on or before last_completed_log_date; run daily-reprocess to rebuild intentionally",
+    "issue": "md_without_db",
+    "phase": "repair"
+  }
+]
+[07/06/2026 Mon 10:39:14.65] daily-catchup done 

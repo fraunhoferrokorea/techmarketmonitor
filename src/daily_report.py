@@ -1373,7 +1373,7 @@ def _build_markdown(
     lines: list[str] = [
         "# 국내 R&D 인텔리전스 데일리 로그",
         "",
-        f"📊 **[대시보드 보기](daily_{iso}.html)** · Markdown 원문",
+        f"📊 **인포그래픽 대시보드 (권장):** [daily_{iso}.html](daily_{iso}.html) · [Markdown 상세 원문](daily_{iso}.md)",
         "",
         f"날짜: {iso}",
         f"기록자: {author}",

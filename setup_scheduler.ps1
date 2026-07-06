@@ -34,18 +34,20 @@ function Register-DailyTask {
     )
 
     schtasks /Delete /TN $Name /F 2>$null | Out-Null
-    $args = @(
-        "/Create", "/TN", $Name,
-        "/TR", $BatchPath,
-        "/SC", "DAILY",
-        "/ST", $Time,
-        "/F"
-    )
-    & schtasks @args
+    $trArg = "`"$BatchPath`""
+    & schtasks /Create /TN $Name /TR $trArg /SC DAILY /ST $Time /F
     if ($LASTEXITCODE -ne 0) {
         Write-Host "FAILED: $Name" -ForegroundColor Red
         exit 1
     }
+
+    $settings = New-ScheduledTaskSettingsSet `
+        -AllowStartIfOnBatteries `
+        -DontStopIfGoingOnBatteries `
+        -StartWhenAvailable `
+        -ExecutionTimeLimit (New-TimeSpan -Hours 72)
+    Set-ScheduledTask -TaskName $Name -Settings $settings | Out-Null
+
     Write-Host "OK: $Name ($Time -> $BatchPath)" -ForegroundColor Green
 }
 

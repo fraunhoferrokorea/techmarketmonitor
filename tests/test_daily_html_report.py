@@ -46,6 +46,8 @@ def test_build_daily_html_contains_dashboard_sections() -> None:
 
     assert "<!DOCTYPE html>" in html
     assert "R&D 기회 스캔 보드" in html
+    assert "한눈에 보기" in html or "오늘의 핵심" in html
+    assert "www-grid" in html
     assert "credChart" in html
     assert "itemsGrid" in html
     assert "직류 산업 확산 추진" in html

@@ -38,7 +38,7 @@
 ```
 매일:  국내 RSS 수집 → 본문·PDF 보강(정부 URL) → Korea-scope 필터 → R&D·투자 신호 우선 LLM 요약(적합도 1–5)
        → SQLite 저장 → daily_YYYY-MM-DD.md (R&D 기회 스캔 표) → Git push
-매월:  daily_*.md → R&D 적합 4점 이상만 추출 → rd-intelligence-report-YYYY-MM-ko.docx
+매월:  daily_*.md/DB → R&D 적합 4점 이상 + 키워드 관련도 → monthly_YYYY-MM.md (6섹션)
 ```
 
 ---
@@ -142,6 +142,7 @@ Python **3.11** 권장 (GitHub Actions 기준).
 | `REPORTS_OUTPUT_DIR` | `output/monthly` (코드 기본) / **`reports/` (로컬·GHA 권장)** | 월간 .docx 출력 폴더 |
 | `LOG_LEVEL` | `INFO` | 로깅 레벨 |
 | `MAX_ARTICLES_PER_RUN` | `30` | 1회 실행당 LLM 요약 상한 (Groq 무료 티어 ~100k tokens/day 대응) |
+| `MONTHLY_RD_MIN_SCORE` | `4` | 월간 보고서 포함 최소 R&D 적합도 (1–5) |
 | `SUMMARIZER_REQUEST_DELAY` | `1.0` | LLM 요청 간 대기(초), RPM 제한 대응 |
 | `DAILY_LOG_RECORDER` | `Tech Market Monitor (auto)` | 데일리 md 상단 `기록자:` 필드 |
 | `EMAIL_ENABLED` | `false` | `true`면 리포트 이메일 발송 (모듈 준비됨, 파이프라인 연동 예정) |
@@ -160,7 +161,14 @@ Python **3.11** 권장 (GitHub Actions 기준).
 - `#`으로 시작하는 줄과 빈 줄은 무시
 - **소문자로 정규화** 후 제목·요약·출처명에서 **부분 문자열 매칭**
 - 이 파일만 수정하면 다음 실행부터 필터 키워드 변경
-- **상위 3개 키워드**가 LLM `keyword_relevance` 분석 기준으로 사용됨
+- **상위 3개** (`analysis_keywords`): LLM `keyword_relevance`·Executive Summary·월간 보고서 모니터링 키워드
+- **상위 5개** (`filter_keywords`): **수집·필터 통과 필수** — 이 중 1개 이상 매칭하지 않으면 **정부·R&D 타깃**이 아닌 한 제외
+
+| 구분 | keywords.txt 위치 | 용도 |
+|------|-------------------|------|
+| 전체 목록 | 모든 키워드 줄 | RSS 매칭·`matched_keywords` 태깅 |
+| 상위 3 | 주석 제외 첫 3줄 | LLM 분석·데일리/월간 Executive Summary |
+| 상위 5 | 주석 제외 첫 5줄 | **핵심 수집 필터** (gov-target 예외) |
 
 현재 주제: **전력계통·스마트그리드·BESS·AI 인프라·시장/투자** 등  
 (전력계통, 파워그리드, power grid, smart grid, BESS, demand response, data center, AI infrastructure, market size, M&A, startup funding …)
@@ -170,7 +178,7 @@ Python **3.11** 권장 (GitHub Actions 기준).
 - 형식: `이름 | RSS URL | 카테고리` (파이프 `|` 구분)
 - `#`으로 시작하는 줄과 빈 줄은 무시
 - 이 파일만 수정하면 다음 실행부터 수집 소스 변경
-- **현재 구성:** 국내 ICT·정책·공공 R&D 중심 **`korean` 22개** 피드
+- **현재 구성:** 국내 ICT·정책·공공 R&D 중심 **34개** RSS + catch-up 시 **korea.kr·PACST** 아카이브
 - `sources.txt`가 없거나 비어 있으면 `config/sources.yaml`의 **`korean` 그룹만** 폴백
 
 | 구분 | 예시 소스 |
@@ -213,6 +221,9 @@ python -m src.main daily-refresh
 # 특정 기간을 현재 규칙으로 전부 재처리 (LLM 재호출, DB·md 덮어씀)
 python -m src.main daily-reprocess --from 2026-06-21 --to 2026-06-23
 
+# 저장된 DB 행에 현재 수집 필터(top-5) 재적용 후 md 재생성 (LLM 없음)
+python -m src.main daily-refilter --from 2026-06-21 --to 2026-06-29
+
 # 정부 마스터플랜 PDF 요약 (output/plans/ — 데일리 24h 로그와 분리)
 python -m src.main summarize-plan --file path/to/plan.pdf --save-text
 
@@ -240,8 +251,10 @@ python -m src.main schedule --daily-hour 8 --monthly-day 28
 | `daily-catchup` | — | — | `daily-repair` 후 `last_completed_log_date` 다음날 ~ **오늘**까지 순차 실행 |
 | `daily-repair` | — | — | md/DB 불일치 스캔·수리. JSON 결과 출력 |
 | `daily-refresh` | — | — | KST `published_at` 기준 DB 날짜 정렬 + 전체 md 재생성 (LLM 없음) |
-| `daily-reprocess` | `--from`, `--to` | (필수) | 기간 내 각 `log_date`를 삭제 후 파이프라인 재실행 (LLM) |
+| `daily-reprocess` | `--from`, `--to`, `--fresh` | (from/to 필수) | 기간 내 각 `log_date` 파이프라인 재실행 (LLM). `--fresh`면 기존 DB·md 선삭제 |
+| `daily-refilter` | `--from`, `--to` | (필수) | DB 저장분에 **현재 top-5 수집 필터** 재적용·불합격 행 삭제·md 재생성 (LLM 없음) |
 | `summarize-plan` | `--file`, `--save-text` | — | 정부 계획 PDF map-reduce 요약 → `output/plans/{stem}_summary.md` (데일리 수집 범위 외) |
+| `show-config` | — | — | `keywords_path`, `analysis_keywords_top3`, DB·reports 경로 JSON 출력 |
 | `monthly` | `--year`, `--month` | (없음 → **이번 달**) | **daily md** 기반 월간 Word 생성 |
 | `monthly` | `--no-cleanup` | off | 해당 월 `daily_*.md` **유지** (기본은 삭제) |
 | `schedule` | `--daily-hour INT` | `8` | `daily-catchup` 첫 실행 시각(로컬) |
@@ -290,10 +303,15 @@ python -m src.main schedule --daily-hour 8 --monthly-day 28
 
 ### 3. 키워드·정부 타깃·국내 범위 필터
 
-- `keywords.txt` 키워드 중 1개 이상 매칭하면 통과
-- **정부·R&D 타깃** (`is_gov_target`)은 키워드 없어도 `정부·R&D 타깃` 라벨로 통과 (`filter.py`)
-- **국내 범위:** `is_domestic_news()` — 해외-only·외신 재인쇄·비한국 URL 제외 (`korea_scope.py`, `filter.py`, `storage.py`)
-- URL 중복 제거 (같은 실행 내)
+구현: `src/filter.py` — `passes_collection_filter()`, `filter_articles()`
+
+1. **국내 범위:** `is_domestic_news()` — 해외-only·외신 재인쇄·비한국 URL 제외 (`korea_scope.py`)
+2. **핵심 키워드 (top-5):** `keywords.txt` **상위 5개** 중 1개 이상이 제목·요약·출처에 없으면 제외  
+   - **예외:** **정부·R&D 타깃** (`is_gov_target`) — 국가계획·MOU·R&D 공고 등은 top-5 없이도 통과
+3. **전체 키워드:** top-5를 통과한 뒤, 전체 `keywords.txt` 목록과 매칭해 `matched_keywords` 부여 (gov-target만 매칭 시 `정부·R&D 타깃` 라벨)
+4. URL 중복 제거 (같은 실행 내)
+
+> **목적:** 제조AI·바이오 등 **R&D 신호만 있고 전력·그리드 핵심 키워드와 무관한** 기사를 수집 단계에서 걸러 노이즈를 줄임. 규칙 변경 후 기존 DB 정리는 `daily-refilter` (LLM 없음) 또는 `daily-reprocess` (LLM) 사용.
 
 ### 4. 관련성 정렬 + 상한
 
@@ -338,7 +356,7 @@ python -m src.main schedule --daily-hour 8 --monthly-day 28
 
 ## 일관성 수리·재처리 (daily-repair)
 
-구현: `src/daily_sync.py`, CLI `daily-repair` / `daily-reprocess`
+구현: `src/daily_sync.py`, CLI `daily-repair` / `daily-refilter` / `daily-reprocess`
 
 ### 불일치 유형
 
@@ -347,10 +365,18 @@ python -m src.main schedule --daily-hour 8 --monthly-day 28
 | `db_without_md` | DB에 행은 있으나 md 없음 | DB 데이터로 md **재생성** (LLM 없음) |
 | `md_without_db` | md만 있고 DB 비어 있음 | 해당 날짜 삭제 후 **파이프라인 재실행** (LLM) |
 
+### `daily-refilter --from --to`
+
+- DB에 저장된 각 행을 `_row_to_raw_article()`로 복원 후 `passes_collection_filter(keywords, filter_keywords)` 재검사
+- 불합격 URL은 `delete_by_url()` — **LLM 재호출 없음**
+- 남은 행으로 `rebuild_markdown_from_db()` → md 재생성. 전부 삭제되면 해당 날짜 md 제거
+- **top-5 수집 규칙** 도입·`keywords.txt` 상위 5개 변경 후 **기존 DB만 정리**할 때 사용 (`daily-reprocess`보다 빠름·저렴)
+
 ### `daily-reprocess --from --to`
 
 - 각 `log_date`에 대해 `clear_daily()` → catch-up과 동일한 `window_end`로 `run_daily_monitor()` 재호출
-- 규칙 변경(캘린더일 필터, 요약 품질 등) 후 **과거 리포트 일괄 재생성** 시 사용
+- 규칙 변경(캘린더일 필터, 요약 품질, 수집 필터 등) 후 **과거 리포트 일괄 재생성** 시 사용
+- `--fresh`: 각 날짜 처리 전 기존 DB·md 선삭제
 - 완료 후 `last_completed_log_date`를 `--to` 날짜로 갱신
 
 ### 유틸리티 연동
@@ -562,6 +588,9 @@ Cursor 규칙: `.cursor/rules/daily-research-log.mdc`
 - **우선:** SQLite `daily_logs` — `is_domestic_news()`로 **국내 기사만** 로드
 - **폴백:** `output/daily/daily_*.md` 파싱 (`daily_markdown_loader.py`)
 - **포함 기준:** `compute_rd_match_score()` ≥ `MONTHLY_RD_MIN_SCORE`(기본 **4**)
+- **적합도 산정:** Fraunhofer 협력 신호(투자 주체·니즈·제안 R&D) **기본 점수** + `keywords.txt` **상위 3개** 관련도 보정  
+  - 관련도 `direct` +1 / `indirect` 0 / `weak` -1 / `none` -2, 상한 `direct·indirect` 5 / `weak` 4 / `none` 3  
+  - 월간 집계 시 `classify_monthly_context_relevance()` — 제안 R&D·니즈 필드와 전력·그리드 힌트 우선
 - C급 신뢰도 항목은 `prepare_logs_for_monthly_rd()`에서 제외
 
 ### 출력 파일
@@ -573,10 +602,12 @@ Cursor 규칙: `.cursor/rules/daily-research-log.mdc`
 
 ### 보고서 구조 (`monthly_YYYY-MM.md`)
 
-1. **Executive Summary** — 당월 국내 R&D·투자 트렌드 (3–4문장)
-2. **Opportunities** — 분야별 R&D 기회 (HVDC/BESS/스마트그리드 등)
-3. **Action Plan** — 부처·기업별 접촉 타겟 표 (제안 R&D 영역·접촉 논리)
-4. **부록: 월간 R&D 스코어카드** — 적합도·투자 주체·핵심 이슈·출처 링크
+1. **Executive Summary** — 당월 국내 R&D·투자 트렌드 (모니터링 키워드·정부 신호 통합)
+2. **컨텍스트 중요도 상위** — `keywords.txt` 상위 3개 대비 **직접·간접** 관련 이슈
+3. **Opportunities (분야별 R&D 기회)** — 전력·그리드 / 제조AI / 표준·인증 / 바이오·그린 등 **육하원칙(5W1H) 서술**
+4. **주요 R&D 타겟 상세** — 상위 8건 투자 주체·니즈·제안 R&D·관련도·출처
+5. **Action Plan (접촉 타겟)** — 부처·기업별 접촉 논리 표
+6. **부록: 월간 R&D 스코어카드** — 적합도·관련도·투자 주체·핵심 이슈·출처 링크
 
 ### LLM 합성
 
@@ -637,13 +668,13 @@ Cursor 규칙: `.cursor/rules/reliable-sources.mdc` (`alwaysApply: true`)
 
 ### Windows Task Scheduler (`setup_scheduler.ps1`)
 
-프로젝트 경로: **`C:\Users\Admin\OneDrive - Fraunhofer\Documents\python-project`** (OneDrive 동기화)
+프로젝트 경로: **`C:\Users\Admin\Documents\python-project`** (스크립트 기본값). OneDrive 동기화 폴더를 쓰는 경우 `$PROJECT` 변수를 해당 경로로 수정 후 실행.
 
 관리자 PowerShell:
 
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
-cd "C:\Users\Admin\OneDrive - Fraunhofer\Documents\python-project"
+cd "C:\Users\Admin\Documents\python-project"
 .\setup_scheduler.ps1
 ```
 
@@ -651,7 +682,7 @@ cd "C:\Users\Admin\OneDrive - Fraunhofer\Documents\python-project"
 |--------|------|-----------|------|
 | `TechMarketMonitor-Daily` | 매일 08:00 | `run_daily_catchup.bat` | `daily-repair` → `daily-catchup` → 변경 시 Git commit/push |
 | `TechMarketMonitor-GitSync` | 매일 08:20 | `run_sync_from_github.bat` | `git pull --rebase origin main` (GHA가 올린 리포트 동기화) |
-| `TechMarketMonitor-Monthly` | 매일 18:30 | `run_monthly_check.bat` | `run_monthly_if_last_bizday.py` → `reports/*.docx` commit/push |
+| `TechMarketMonitor-Monthly` | 매일 18:30 | `run_monthly_check.bat` | `run_monthly_if_last_bizday.py` → `reports/monthly_*.md` commit/push |
 
 **배치 파일 로그:** `output/logs/daily.log`, `sync.log`, `monthly.log`  
 Python 경로: `.venv\Scripts\python.exe` 우선, 없으면 시스템 Python 3.14.
@@ -716,15 +747,22 @@ python-project/
 │   ├── daily/                    # daily_YYYY-MM-DD.md
 │   └── logs/                     # daily.log, sync.log, monthly.log
 ├── reports/                      # tech-market-report-*.docx (REPORTS_OUTPUT_DIR)
+├── scripts/
+│   ├── preview_monthly_candidates.py  # 월간 후보 적합도 미리보기
+│   ├── post_reprocess_status.py       # 재처리 후 DB/md 상태 점검
+│   └── run_recent5_filter_reprocess.ps1
 ├── tests/
-│   └── test_pipeline_filter.py   # KST 캘린더일 필터 테스트
+│   ├── test_pipeline_filter.py   # KST 캘린더일 필터 테스트
+│   ├── test_rd_targeting.py      # R&D 적합도·키워드 보정
+│   ├── test_config_keywords.py   # top-3 / top-5 키워드 로드
+│   └── test_credibility.py       # 국내 소스 신뢰도 등급
 ├── templates/
 │   └── daily_research_log_template.md
 ├── src/
 │   ├── korea_scope.py            # 국내 기사 범위·해외 URL 제외
 │   ├── rd_monthly_report.py      # 월간 R&D Markdown 보고서
 │   ├── url_utils.py              # URL 정규화
-│   ├── main.py                   # CLI (daily, daily-catchup, daily-repair, daily-refresh, daily-reprocess, show-config, summarize-plan, monthly, schedule)
+│   ├── main.py                   # CLI (daily, daily-catchup, daily-repair, daily-refilter, daily-refresh, daily-reprocess, show-config, summarize-plan, monthly, schedule)
 │   ├── catchup.py                # 빠진 날짜 순차 실행 + repair 선행
 │   ├── daily_sync.py             # md/DB 불일치 수리·재처리·refresh
 │   ├── article_enrichment.py     # 정부 URL 본문·PDF 보강
@@ -845,13 +883,15 @@ feedparser, httpx, openai, python-docx, python-dotenv, apscheduler, pyyaml, clic
 - daily-catchup: daily-repair 후 last_completed_log_date+1 ~ 오늘 순차 실행
 - daily-repair: md/DB 불일치 수리
 - daily-refresh: KST published_at 기준 DB 정렬 + md 전체 재생성 (LLM 없음)
-- daily-reprocess --from YYYY-MM-DD --to YYYY-MM-DD: 기간 재처리(LLM)
+- daily-reprocess --from YYYY-MM-DD --to YYYY-MM-DD [--fresh]: 기간 재처리(LLM)
+- daily-refilter --from YYYY-MM-DD --to YYYY-MM-DD: DB에 top-5 수집 필터 재적용·md 재생성 (LLM 없음)
 - summarize-plan --file PDF [--save-text]: 정부 계획 PDF 요약 → output/plans/ (데일리 24h 로그와 분리)
 - monthly [--year INT] [--month INT] [--no-cleanup]: daily md 기반 EN/KO docx
 - schedule [--daily-hour INT] [--monthly-day last|N]: BlockingScheduler
 
 ## 설정
-- keywords.txt, sources.txt (korean 22 feeds), email_recipients.txt
+- keywords.txt: 전체=매칭, top3=LLM·월간 분석, top5=수집 필터 필수(gov-target 예외)
+- sources.txt (korean 34 feeds + korea.kr/PACST catch-up), email_recipients.txt
 - .env: OPENAI_*, MODEL_NAME, DATABASE_PATH, REPORTS_OUTPUT_DIR=reports/, LOG_LEVEL, MAX_ARTICLES_PER_RUN, SUMMARIZER_REQUEST_DELAY, GOV_LONG_CONTENT_CHARS, DAILY_LOG_RECORDER, EMAIL_*(준비 중)
 
 ## 시간 필터 (window_end)
@@ -984,3 +1024,12 @@ templates/daily_research_log_template.md — 사람이 손으로 쓸 때만. 파
 | 2026-07-03 | **수집 확대:** RSS 34개 + `korea.kr` 아카이브 + PACST; `sources.txt` 부처 RSS 추가 |
 | 2026-07-03 | **데일리 md:** R&D 인텔리전스 요약, **R&D 기회 스캔** 표, 적합도 1–5, 제안 R&D 영역·팩트 근거 |
 | 2026-07-03 | **daily-reprocess --fresh**, `sync_code_to_onedrive.ps1`, `run_junction_after_close.bat` |
+| 2026-07-03 | **월간 키워드 우선순위:** `classify_monthly_context_relevance()` — 제안 R&D·전력·그리드 정렬 |
+| 2026-07-03 | **월간 Opportunities:** 건수 스텁 → **육하원칙(5W1H)** 서술, §4 주요 R&D 타겟 상세 섹션 추가 |
+| 2026-07-03 | **R&D 적합도:** `compute_rd_match_score()` — Fraunhofer 협력 신호 + top-3 키워드 관련도 보정 |
+| 2026-07-03 | **신뢰도:** 국내 소스 범위에 맞게 `_credibility()` 재정렬 (`test_credibility.py`) |
+| 2026-07-06 | **수집 필터 강화:** `keywords.txt` **상위 5개** 필수 (`filter_keywords`) — gov-target 예외 |
+| 2026-07-06 | **CLI `daily-refilter`:** DB 저장분에 현재 top-5 필터 재적용·md 재생성 (LLM 없음) |
+| 2026-07-06 | **월간 적합도:** 포함 임계값은 기본 점수, 정렬·표시는 월간 컨텍스트 관련도 반영 |
+| 2026-07-06 | **R&D 문구:** 접근 전략 등에서 중복 「프라운호퍼」 주어 제거 |
+| 2026-07-06 | **스케줄러:** `setup_scheduler.ps1` 기본 경로 `Documents\python-project` |

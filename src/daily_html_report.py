@@ -83,6 +83,15 @@ def _chart_payload(
     }
 
 
+def _at_glance_highlights(
+    opportunities: list[dict[str, Any]],
+    limit: int = 3,
+) -> list[dict[str, Any]]:
+    """Top N opportunities for the hero glance strip."""
+    ranked = sorted(opportunities, key=lambda c: (-c["score"], c["title"].lower()))
+    return ranked[:limit]
+
+
 def _rd_opportunity_cards(
     articles: list[SummarizedArticle],
     top_keywords: list[str],
@@ -242,24 +251,55 @@ def build_daily_html(
     opp_high = [c for c in opportunities if c["tier"] == "high"]
     opp_mid = [c for c in opportunities if c["tier"] == "mid"]
     opp_low = [c for c in opportunities if c["tier"] == "low"]
+    glance = _at_glance_highlights(opportunities)
+
+    def _score_bar(score: int) -> str:
+        pct = score * 20
+        color = _score_color(score)
+        return (
+            f'<div class="score-bar" title="R&D 적합 {score}/5">'
+            f'<div class="score-bar-fill" style="width:{pct}%;background:{color}"></div>'
+            f'<span class="score-bar-label">{score}/5</span></div>'
+        )
+
+    def _who_why_what(card: dict[str, Any]) -> str:
+        return f"""<div class="www-grid">
+  <div class="www-cell who"><span class="www-icon">누가</span><p>{_esc(card['target'])}</p></div>
+  <div class="www-cell why"><span class="www-icon">왜</span><p>{_esc(card['issue'][:140])}</p></div>
+  <div class="www-cell what"><span class="www-icon">무엇을</span><p>{_esc(card['link_point'])}</p></div>
+</div>"""
+
+    def _glance_card(card: dict[str, Any], rank: int) -> str:
+        return f"""<article class="glance-card tier-{card['tier']}">
+  <div class="glance-rank">#{rank}</div>
+  {_score_bar(card['score'])}
+  <h3><a href="#{_esc(card['anchor'])}">{_esc(card['title'][:55])}</a></h3>
+  {_who_why_what(card)}
+  <p class="glance-fact"><strong>팩트</strong> {_esc(card['fact'][:100])}</p>
+</article>"""
+
+    glance_html = "".join(_glance_card(c, i + 1) for i, c in enumerate(glance))
+    if not glance_html:
+        glance_html = (
+            '<p class="muted">당일 R&D 적합 2점 이상 항목 없음 — 배경 모니터링 위주</p>'
+        )
 
     def _opp_column(cards: list[dict[str, Any]], label: str, css: str) -> str:
         if not cards:
-            return ""
+            return f"""<div class="board-col board-col-empty">
+  <div class="board-col-head {css}">{_esc(label)} <span>0</span></div>
+  <p class="muted empty-col">해당 구간 항목 없음</p>
+</div>"""
         inner = []
         for card in cards:
             inner.append(
                 f"""<article class="opp-card {css}">
   <div class="opp-head">
-    <span class="score-badge" style="background:{_score_color(card['score'])}">{card['score']}/5</span>
-    <h3><a href="#{ _esc(card['anchor']) }">{_esc(card['title'][:60])}</a></h3>
+    {_score_bar(card['score'])}
+    <h3><a href="#{_esc(card['anchor'])}">{_esc(card['title'][:60])}</a></h3>
   </div>
-  <p class="opp-issue">{_esc(card['issue'])}</p>
-  <dl class="opp-meta">
-    <div><dt>고객 타겟</dt><dd>{_esc(card['target'])}</dd></div>
-    <div><dt>R&D 연계</dt><dd>{_esc(card['link_point'])}</dd></div>
-    <div><dt>팩트 체크</dt><dd>{_esc(card['fact'][:120])}</dd></div>
-  </dl>
+  {_who_why_what(card)}
+  <p class="opp-fact"><span class="fact-lbl">팩트 체크</span> {_esc(card['fact'][:120])}</p>
   <a class="ext-link" href="{_esc(card['url'])}" target="_blank" rel="noopener">원문 ↗</a>
 </article>"""
             )
@@ -305,9 +345,11 @@ def build_daily_html(
             badges += '<span class="badge gov">정부·R&D 타깃</span>'
 
         kw_note = ", ".join(rec["matched_keywords"]) if rec["matched_keywords"] else ""
+        collapsed = rec["rd_score"] < 2
+        card_class = "item-card item-collapsed" if collapsed else "item-card"
 
         items_html.append(
-            f"""<article class="item-card" id="{_esc(rec['anchor'])}" data-score="{rec['rd_score']}" data-cred="{_esc(rec['cred_grade'])}">
+            f"""<article class="{card_class}" id="{_esc(rec['anchor'])}" data-score="{rec['rd_score']}" data-cred="{_esc(rec['cred_grade'])}">
   <header class="item-head">
     <div class="item-badges">{badges}</div>
     <h3><a href="{_esc(rec['url'])}" target="_blank" rel="noopener">{_esc(rec['title'])}</a></h3>
@@ -317,12 +359,15 @@ def build_daily_html(
       <span>{_esc(rec['published'])}</span>
     </div>
   </header>
-  <ul class="summary-list">{summary}</ul>
-  <dl class="rd-block">{rd_rows}</dl>
-  <footer class="item-foot">
-    <div class="tags">{tags}</div>
-    {f'<span class="kw-note">매칭: {_esc(kw_note)}</span>' if kw_note else ''}
-  </footer>
+  <details class="item-details"{' open' if not collapsed else ''}>
+    <summary>{'상세 보기' if collapsed else '요약 · R&D 타겟팅'}</summary>
+    <ul class="summary-list">{summary}</ul>
+    <dl class="rd-block">{rd_rows}</dl>
+    <footer class="item-foot">
+      <div class="tags">{tags}</div>
+      {f'<span class="kw-note">매칭: {_esc(kw_note)}</span>' if kw_note else ''}
+    </footer>
+  </details>
 </article>"""
         )
 
@@ -363,6 +408,76 @@ a:hover {{ text-decoration: underline; }}
 .hero .sub {{ opacity: .9; font-size: .95rem; }}
 .hero .meta {{ display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem; font-size: .85rem; opacity: .85; }}
 .hero a {{ color: #bfdbfe; }}
+
+.quick-nav {{
+  display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1.25rem;
+  position: sticky; top: 0; z-index: 10; background: var(--bg);
+  padding: .5rem 0; border-bottom: 1px solid var(--border);
+}}
+.quick-nav a {{
+  font-size: .82rem; font-weight: 600; padding: .35rem .9rem;
+  border-radius: 999px; background: var(--surface); border: 1px solid var(--border);
+  color: var(--text); box-shadow: var(--shadow);
+}}
+.quick-nav a:hover {{ background: var(--accent-soft); border-color: #93c5fd; text-decoration: none; }}
+
+.glance {{
+  background: var(--surface); border-radius: var(--radius); padding: 1.25rem 1.35rem;
+  box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 1.5rem;
+}}
+.glance > h2 {{ font-size: 1rem; margin-bottom: 1rem; color: var(--accent); }}
+.glance-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }}
+.glance-card {{
+  border-radius: 10px; padding: 1rem; border-left: 4px solid var(--border);
+  background: #f8fafc;
+}}
+.glance-card.tier-high {{ border-left-color: #059669; background: #ecfdf5; }}
+.glance-card.tier-mid {{ border-left-color: #d97706; background: #fffbeb; }}
+.glance-card.tier-low {{ border-left-color: #6b7280; }}
+.glance-rank {{
+  font-size: .72rem; font-weight: 700; color: var(--muted); margin-bottom: .35rem;
+}}
+.glance-card h3 {{ font-size: .92rem; margin: .5rem 0; line-height: 1.4; }}
+.glance-fact {{ font-size: .78rem; color: var(--muted); margin-top: .5rem; }}
+
+.score-bar {{
+  position: relative; height: 6px; background: #e2e8f0; border-radius: 3px; margin-bottom: .4rem;
+}}
+.score-bar-fill {{ height: 100%; border-radius: 3px; transition: width .3s; }}
+.score-bar-label {{
+  position: absolute; right: 0; top: -1.1rem; font-size: .7rem; font-weight: 700; color: var(--muted);
+}}
+
+.www-grid {{
+  display: grid; grid-template-columns: 1fr; gap: .45rem; margin: .6rem 0;
+}}
+@media (min-width: 480px) {{ .www-grid {{ grid-template-columns: repeat(3, 1fr); }} }}
+.www-cell {{
+  background: rgba(255,255,255,.7); border-radius: 6px; padding: .5rem .6rem;
+  border: 1px solid var(--border);
+}}
+.www-icon {{
+  display: block; font-size: .68rem; font-weight: 800; letter-spacing: .02em;
+  color: var(--accent); margin-bottom: .2rem;
+}}
+.www-cell p {{ font-size: .78rem; line-height: 1.35; color: var(--text); margin: 0; }}
+.www-cell.who .www-icon {{ color: #7c3aed; }}
+.www-cell.why .www-icon {{ color: #2563eb; }}
+.www-cell.what .www-icon {{ color: #059669; }}
+
+.opp-fact, .glance-fact {{ font-size: .78rem; }}
+.fact-lbl {{ font-weight: 700; color: var(--text); margin-right: .25rem; }}
+.empty-col {{ padding: 1rem; text-align: center; font-size: .85rem; }}
+.board-col-empty {{ opacity: .85; }}
+
+.item-details summary {{
+  cursor: pointer; font-size: .8rem; font-weight: 600; color: var(--accent);
+  padding: .4rem 0; list-style: none;
+}}
+.item-details summary::-webkit-details-marker {{ display: none; }}
+.item-details summary::before {{ content: "▸ "; }}
+.item-details[open] summary::before {{ content: "▾ "; }}
+.item-collapsed .item-head {{ margin-bottom: 0; }}
 
 .kpi-grid {{
   display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -499,14 +614,26 @@ a:hover {{ text-decoration: underline; }}
 <body>
 <div class="page">
   <header class="hero">
-    <h1>국내 R&D 인텔리전스 데일리 로그</h1>
-    <p class="sub">프라운호퍼 한국 · 국내 투자·R&D 타겟 모니터링</p>
+    <h1>국내 R&D 인텔리전스 데일리</h1>
+    <p class="sub">프라운호퍼 한국 · 인포그래픽 대시보드 (한눈에 핵심 스캔)</p>
     <div class="meta">
       <span>📅 {date_str}</span>
       <span>✍️ {_esc(author)}</span>
-      <span>📄 <a href="{_esc(md_link)}">Markdown 보기</a></span>
+      <span>📄 <a href="{_esc(md_link)}">상세 원문 (Markdown)</a></span>
     </div>
   </header>
+
+  <nav class="quick-nav" aria-label="섹션 이동">
+    <a href="#glance">한눈에 보기</a>
+    <a href="#board">기회 보드</a>
+    <a href="#insights">타겟 시사점</a>
+    <a href="#items">전체 항목</a>
+  </nav>
+
+  <section class="glance" id="glance">
+    <h2>오늘의 핵심 — 누가 · 왜 · 무엇을</h2>
+    <div class="glance-grid">{glance_html}</div>
+  </section>
 
   <div class="kpi-grid">
     <div class="kpi"><div class="val">{len(articles)}</div><div class="lbl">총 수집 항목</div></div>
@@ -550,7 +677,8 @@ a:hover {{ text-decoration: underline; }}
   <section class="section" id="items">
     <h2>항목 기록</h2>
     <div class="filter-bar">
-      <button class="filter-btn active" data-filter="all">전체 ({len(items)})</button>
+      <button class="filter-btn" data-filter="all">전체 ({len(items)})</button>
+      <button class="filter-btn active" data-filter="mid">R&D 2점+ ({sum(1 for i in items if i['rd_score'] >= 2)})</button>
       <button class="filter-btn" data-filter="high">R&D 4점+ ({sum(1 for i in items if i['rd_score'] >= 4)})</button>
       <button class="filter-btn" data-filter="cred-a">신뢰도 A ({sum(1 for i in items if i['cred_grade'] == 'A')})</button>
     </div>
@@ -619,11 +747,15 @@ document.querySelectorAll('.filter-btn').forEach(btn => {{
       const cred = card.dataset.cred;
       let show = true;
       if (f === 'high') show = score >= 4;
+      else if (f === 'mid') show = score >= 2;
       else if (f === 'cred-a') show = cred === 'A';
       card.style.display = show ? '' : 'none';
     }});
   }});
 }});
+
+// Default: show R&D 2점+ only
+document.querySelector('[data-filter="mid"]')?.click();
 </script>
 </body>
 </html>"""
