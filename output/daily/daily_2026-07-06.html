@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>국내 R&D 인텔리전스 · 2026-07-06</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #f4f6f9;
+  --surface: #ffffff;
+  --text: #1e293b;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --accent: #1d4ed8;
+  --accent-soft: #dbeafe;
+  --shadow: 0 1px 3px rgba(15,23,42,.08), 0 4px 12px rgba(15,23,42,.04);
+  --radius: 12px;
+  --font: "Pretendard", "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.6; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.page { max-width: 1280px; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; }
+
+.hero {
+  background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 55%, #3b82f6 100%);
+  color: #fff; border-radius: var(--radius); padding: 1.75rem 2rem;
+  box-shadow: var(--shadow); margin-bottom: 1.5rem;
+}
+.hero h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: .35rem; }
+.hero .sub { opacity: .9; font-size: .95rem; }
+.hero .meta { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem; font-size: .85rem; opacity: .85; }
+.hero a { color: #bfdbfe; }
+
+.kpi-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: .75rem; margin-bottom: 1.5rem;
+}
+.kpi {
+  background: var(--surface); border-radius: var(--radius); padding: 1rem 1.1rem;
+  box-shadow: var(--shadow); border: 1px solid var(--border);
+}
+.kpi .val { font-size: 1.75rem; font-weight: 700; color: var(--accent); line-height: 1.2; }
+.kpi .lbl { font-size: .78rem; color: var(--muted); margin-top: .2rem; }
+
+.charts-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem; margin-bottom: 1.5rem;
+}
+.chart-card {
+  background: var(--surface); border-radius: var(--radius); padding: 1rem 1.1rem;
+  box-shadow: var(--shadow); border: 1px solid var(--border);
+}
+.chart-card h2 { font-size: .85rem; color: var(--muted); margin-bottom: .75rem; font-weight: 600; }
+.chart-wrap { position: relative; height: 200px; }
+
+.theme-banner {
+  background: var(--accent-soft); border: 1px solid #93c5fd; border-radius: var(--radius);
+  padding: 1rem 1.25rem; margin-bottom: 1.5rem;
+}
+.theme-banner .kw { font-weight: 600; color: var(--accent); margin-bottom: .35rem; }
+.theme-banner .flow { font-size: 1.05rem; font-weight: 600; }
+
+.section { margin-bottom: 2rem; }
+.section > h2 {
+  font-size: 1.1rem; margin-bottom: 1rem; padding-bottom: .4rem;
+  border-bottom: 2px solid var(--accent); display: inline-block;
+}
+
+.board {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem; align-items: start;
+}
+.board-col-head {
+  font-weight: 700; font-size: .9rem; padding: .5rem .75rem; border-radius: 8px;
+  margin-bottom: .75rem; display: flex; justify-content: space-between;
+}
+.board-col-head.high { background: #d1fae5; color: #065f46; }
+.board-col-head.mid { background: #dbeafe; color: #1e40af; }
+.board-col-head.low { background: #f1f5f9; color: #475569; }
+
+.opp-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 1rem; margin-bottom: .75rem; box-shadow: var(--shadow);
+}
+.opp-head { display: flex; gap: .6rem; align-items: flex-start; margin-bottom: .5rem; }
+.opp-head h3 { font-size: .92rem; line-height: 1.4; }
+.opp-issue { font-size: .85rem; color: var(--muted); margin-bottom: .6rem; }
+.opp-meta { font-size: .8rem; }
+.opp-meta div { margin-bottom: .35rem; }
+.opp-meta dt { font-weight: 600; color: var(--text); display: inline; }
+.opp-meta dt::after { content: ": "; }
+.opp-meta dd { display: inline; color: var(--muted); }
+.ext-link { font-size: .78rem; display: inline-block; margin-top: .5rem; }
+
+.score-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 2.4rem; height: 1.5rem; padding: 0 .4rem;
+  border-radius: 6px; color: #fff; font-size: .75rem; font-weight: 700; flex-shrink: 0;
+}
+.score-badge.sm { min-width: 2rem; height: 1.3rem; font-size: .7rem; }
+
+.insights { display: flex; flex-direction: column; gap: .6rem; }
+.insight-card {
+  display: flex; gap: .75rem; background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: .85rem 1rem; box-shadow: var(--shadow);
+}
+.insight-card p { font-size: .85rem; color: var(--muted); margin: .2rem 0; }
+.insight-card a { font-size: .8rem; }
+
+.filter-bar { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1rem; }
+.filter-btn {
+  border: 1px solid var(--border); background: var(--surface); border-radius: 999px;
+  padding: .35rem .85rem; font-size: .8rem; cursor: pointer; color: var(--text);
+}
+.filter-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+.items-grid { display: grid; gap: 1rem; }
+.item-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 1.1rem 1.25rem; box-shadow: var(--shadow);
+}
+.item-badges { display: flex; flex-wrap: wrap; gap: .35rem; margin-bottom: .5rem; }
+.badge {
+  font-size: .7rem; font-weight: 600; padding: .15rem .5rem; border-radius: 4px;
+  background: #e2e8f0; color: #334155;
+}
+.badge.cred-a { background: #d1fae5; color: #065f46; }
+.badge.cred-b { background: #dbeafe; color: #1e40af; }
+.badge.rel { background: #fef3c7; color: #92400e; }
+.badge.gov { background: #ede9fe; color: #5b21b6; }
+.item-head h3 { font-size: 1rem; margin-bottom: .4rem; line-height: 1.45; }
+.item-meta { display: flex; flex-wrap: wrap; gap: .75rem; font-size: .78rem; color: var(--muted); }
+.item-meta span::before { content: "·"; margin-right: .75rem; color: var(--border); }
+.item-meta span:first-child::before { content: none; margin: 0; }
+
+.summary-list { margin: .75rem 0; padding-left: 1.2rem; font-size: .88rem; }
+.summary-list li { margin-bottom: .3rem; }
+.summary-list li.interp { color: var(--muted); font-style: italic; }
+
+.rd-block { font-size: .82rem; margin: .5rem 0; }
+.rd-block div { margin-bottom: .25rem; }
+.rd-block dt { font-weight: 600; display: inline; }
+.rd-block dt::after { content: ": "; }
+.rd-block dd { display: inline; color: var(--muted); }
+
+.item-foot { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
+  gap: .5rem; margin-top: .75rem; padding-top: .6rem; border-top: 1px solid var(--border); }
+.tags { display: flex; flex-wrap: wrap; gap: .3rem; }
+.tag { font-size: .72rem; background: #f1f5f9; color: #475569; padding: .1rem .45rem; border-radius: 4px; }
+.kw-note { font-size: .75rem; color: var(--muted); }
+
+.muted { color: var(--muted); font-size: .9rem; }
+.footer { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border);
+  font-size: .78rem; color: var(--muted); }
+.footer h3 { font-size: .85rem; color: var(--text); margin-bottom: .5rem; }
+.footer ul { padding-left: 1.2rem; }
+.footer li { margin-bottom: .25rem; }
+
+@media (max-width: 640px) {
+  .hero { padding: 1.25rem; }
+  .hero h1 { font-size: 1.25rem; }
+  .chart-wrap { height: 180px; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="hero">
+    <h1>국내 R&D 인텔리전스 데일리 로그</h1>
+    <p class="sub">프라운호퍼 한국 · 국내 투자·R&D 타겟 모니터링</p>
+    <div class="meta">
+      <span>📅 2026-07-06</span>
+      <span>✍️ Tech Market Monitor (auto)</span>
+      <span>📄 <a href="daily_2026-07-06.md">Markdown 보기</a></span>
+    </div>
+  </header>
+
+  <div class="kpi-grid">
+    <div class="kpi"><div class="val">30</div><div class="lbl">총 수집 항목</div></div>
+    <div class="kpi"><div class="val">30</div><div class="lbl">기사</div></div>
+    <div class="kpi"><div class="val">0</div><div class="lbl">논문</div></div>
+    <div class="kpi"><div class="val">0</div><div class="lbl">R&D 적합 4점+</div></div>
+    <div class="kpi"><div class="val">16</div><div class="lbl">신뢰도 A</div></div>
+    <div class="kpi"><div class="val">14</div><div class="lbl">신뢰도 B</div></div>
+  </div>
+
+  <div class="charts-grid">
+    <div class="chart-card"><h2>신뢰도 분포</h2><div class="chart-wrap"><canvas id="credChart"></canvas></div></div>
+    <div class="chart-card"><h2>R&D 적합도 분포</h2><div class="chart-wrap"><canvas id="rdChart"></canvas></div></div>
+    <div class="chart-card"><h2>출처별 항목</h2><div class="chart-wrap"><canvas id="srcChart"></canvas></div></div>
+    <div class="chart-card"><h2>자료유형</h2><div class="chart-wrap"><canvas id="matChart"></canvas></div></div>
+  </div>
+
+  <div class="theme-banner">
+    <div class="kw">모니터링 키워드: 전력계통 · 스마트그리드 · 파워그리드</div>
+    <div class="flow">국내 R&amp;D 수주 직접 연계 신호는 약하고 배경 모니터링 위주인 날</div>
+    <p class="muted" style="margin-top:.4rem;font-size:.85rem">
+      오늘 수집 30건 (R&D 적합 4점 이상 0건)
+    </p>
+  </div>
+
+  <section class="section" id="board">
+    <h2>R&D 기회 스캔 보드</h2>
+    <div class="board">
+      
+      <div class="board-col">
+  <div class="board-col-head mid">중간 (3점) <span>1</span></div>
+  <article class="opp-card mid">
+  <div class="opp-head">
+    <span class="score-badge" style="background:#d97706">3/5</span>
+    <h3><a href="#2342-자동차-매연-소아에-최악암-위험-최대-68">&quot;자동차 매연, 소아에 최악&quot;…암 위험 최대 68%↑</a></h3>
+  </div>
+  <p class="opp-issue">이화여자대학교와 국립암센터 등이 교통 관련 대기오염 물질에 노출될 경우 소아암 위험이 증가할 수 있다는 연구 결과를 발표했음</p>
+  <dl class="opp-meta">
+    <div><dt>고객 타겟</dt><dd>이화여자대학교, 국립암센터, 미국 미네소타대학교 등</dd></div>
+    <div><dt>R&D 연계</dt><dd>대기오염 물질 감시 및 저감 기술 개발</dd></div>
+    <div><dt>팩트 체크</dt><dd>교통 관련 대기오염 물질에 노출될 경우 소아암 위험이 증가할 수 있다는 사실을 대규모 메타분석을 통해 확인</dd></div>
+  </dl>
+  <a class="ext-link" href="https://www.newsis.com/view/NISX20260706_0003696624" target="_blank" rel="noopener">원문 ↗</a>
+</article>
+</div>
+      <div class="board-col">
+  <div class="board-col-head low">참고 (2점) <span>2</span></div>
+  <article class="opp-card low">
+  <div class="opp-head">
+    <span class="score-badge" style="background:#6b7280">2/5</span>
+    <h3><a href="#1530-skt-2035년까지-최대-15gw-규모-ai-데이터센터-조성">SKT “2035년까지 최대 15GW 규모 AI 데이터센터 조성”</a></h3>
+  </div>
+  <p class="opp-issue">SK텔레콤, 2035년까지 최대 15GW 규모 AI 데이터센터 조성 계획을 발표하고 2029년부터 5GW 규모의 AI 데이터센터 구축을 시작할 예정임.</p>
+  <dl class="opp-meta">
+    <div><dt>고객 타겟</dt><dd>SK텔레콤</dd></div>
+    <div><dt>R&D 연계</dt><dd>안정적인 전력망 구축을 위한 스마트그리드 기술 개발</dd></div>
+    <div><dt>팩트 체크</dt><dd>SK텔레콤의 15GW 규모 데이터센터 조성 계획, 2029년부터 5GW 규모의 AI 데이터센터 구축</dd></div>
+  </dl>
+  <a class="ext-link" href="https://www.donga.com/news/Economy/article/all/20260705/134239698/2" target="_blank" rel="noopener">원문 ↗</a>
+</article><article class="opp-card low">
+  <div class="opp-head">
+    <span class="score-badge" style="background:#6b7280">2/5</span>
+    <h3><a href="#0851-두산에너빌리티-발전기-모니터링-시스템-사업-확대">두산에너빌리티, 발전기 모니터링 시스템 사업 확대</a></h3>
+  </div>
+  <p class="opp-issue">두산에너빌리티와 크리에이텍이 MOU를 체결하고, 무인 자동화 모니터링 시스템을 통해 글로벌 발전 시장 공략에 속도를 내 중임.</p>
+  <dl class="opp-meta">
+    <div><dt>고객 타겟</dt><dd>두산에너빌리티와 크리에이텍</dd></div>
+    <div><dt>R&D 연계</dt><dd>전력계통 및 스마트그리드 기술을 위한 무인 자동화 모니터링 시스템 개발</dd></div>
+    <div><dt>팩트 체크</dt><dd>두산에너빌리티와 크리에이텍의 MOU 체결, 체코 원전 공급을 시작으로 국내외 원전·화력발전소 전반으로 진단 및 서비스 솔루션 영토 확장</dd></div>
+  </dl>
+  <a class="ext-link" href="https://www.fnnews.com/news/202607060848574388" target="_blank" rel="noopener">원문 ↗</a>
+</article>
+</div>
+    </div>
+    <p class="muted" style="margin-top:.75rem">이하 27건은 R&D 적합 1점 또는 국내 투자 신호 미약으로 보드에서 생략</p>
+  </section>
+
+  <section class="section" id="insights">
+    <h2>국내 R&D 타겟 시사점</h2>
+    <div class="insights"><div class="insight-card">
+  <span class="score-badge sm" style="background:#6b7280">2/5</span>
+  <div>
+    <strong>SK텔레콤</strong>
+    <p>목적: AI 인프라 구축 및 한국을 아시아 데이터센터 허브로 키우기 위함 | 니즈: 안정적인 전력망 구축을 위한 고난도 기술 개발 | 접근: 정부의 AI 전략과 지역 균형 발전 기조에 맞춘 대규모 투자</p>
+    <a href="https://www.donga.com/news/Economy/article/all/20260705/134239698/2" target="_blank" rel="noopener">SKT “2035년까지 최대 15GW 규모 AI 데이터센터 조성” ↗</a>
+  </div>
+</div><div class="insight-card">
+  <span class="score-badge sm" style="background:#9ca3af">1/5</span>
+  <div>
+    <strong>삼성</strong>
+    <p>목적: 충청권 첨단산업 발전 | 니즈: 스마트그리드 및 전력계통 기술 개발 필요성 | 접근: 충청권 첨단산업 발전 비전과 연계한 기술 개발</p>
+    <a href="https://www.yna.co.kr/view/AKR20260706023100063" target="_blank" rel="noopener">&#x27;삼성 67조 투자&#x27; 아산시, 배후 주거 수요 대비 서두른다 ↗</a>
+  </div>
+</div><div class="insight-card">
+  <span class="score-badge sm" style="background:#9ca3af">1/5</span>
+  <div>
+    <strong>산업통상부, 농식품부</strong>
+    <p>목적: 우리 기업의 수출시장 다변화와 신흥시장 진출 지원 | 접근: 정부의 정책 정합성에 따라 수출 마케팅 사업과 연계 가능</p>
+    <a href="https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769604" target="_blank" rel="noopener">K-컬처와 소비재를 연계한 한-베 협력의 장 열려 ↗</a>
+  </div>
+</div><div class="insight-card">
+  <span class="score-badge sm" style="background:#9ca3af">1/5</span>
+  <div>
+    <strong>KAIST 연구생</strong>
+    <p>목적: 자동 주식매매 | 니즈: AI 에이전트를 이용한 자동 주식매매 시스템의 개발 | 접근: KAIST와의 협력을 통해 AI 에이전트를 이용한 자동 주식매매 시스템의 개발을 지원할 수 있음.</p>
+    <a href="https://zdnet.co.kr/view/?no=20260705190503" target="_blank" rel="noopener">KAIST 석사과정 AI에이전트로 주식 자동매매…수익률은 ↗</a>
+  </div>
+</div><div class="insight-card">
+  <span class="score-badge sm" style="background:#9ca3af">1/5</span>
+  <div>
+    <strong>산업통상부와 KOTRA</strong>
+    <p>목적: 해외진출 지원 | 접근: 정부의 정책 정합성</p>
+    <a href="https://www.newsis.com/view/NISX20260706_0003696653" target="_blank" rel="noopener">W컨셉, 베트남 하노이 팝업 성료…&quot;글로벌 사업 확장 속도&quot; ↗</a>
+  </div>
+</div></div>
+  </section>
+
+  <section class="section" id="items">
+    <h2>항목 기록</h2>
+    <div class="filter-bar">
+      <button class="filter-btn active" data-filter="all">전체 (30)</button>
+      <button class="filter-btn" data-filter="high">R&D 4점+ (0)</button>
+      <button class="filter-btn" data-filter="cred-a">신뢰도 A (16)</button>
+    </div>
+    <div class="items-grid" id="itemsGrid">
+      <article class="item-card" id="2342-자동차-매연-소아에-최악암-위험-최대-68" data-score="3" data-cred="A">
+  <header class="item-head">
+    <div class="item-badges"><span class="badge cred-a">A</span>
+<span class="badge" style="background:#d97706">R&D 3/5</span><span class="badge rel">직접</span></div>
+    <h3><a href="https://www.newsis.com/view/NISX20260706_0003696624" target="_blank" rel="noopener">&quot;자동차 매연, 소아에 최악&quot;…암 위험 최대 68%↑</a></h3>
+    <div class="item-meta">
+      <span>기사</span>
+      <span>뉴시스 속보</span>
+      <span>2026-07-05</span>
+    </div>
+  </header>
+  <ul class="summary-list"><li class="">자동차 매연, 소아에 최악암 위험 최대 68%↑ - 교통 관련 대기오염이 소아암 위험을 증가시킨다는 연구 결과가 나왔다.</li><li class="">교통 관련 대기오염이 소아암 위험을 증가시킨다는 연구 결과가 나왔음</li><li class="interp">(해석) 전력계통, 스마트그리드, 파워그리드와 관련하여 대기오염 물질의 감시 및 저감 기술 개발이 필요함</li></ul>
+  <dl class="rd-block"><div><dt>제안 R&D 영역</dt><dd>대기오염 물질 감시 및 저감 기술 개발</dd></div><div><dt>팩트 근거</dt><dd>교통 관련 대기오염 물질에 노출될 경우 소아암 위험이 증가할 수 있다는 사실을 대규모 메타분석을 통해 확인</dd></div><div><dt>투자 주체</dt><dd>이화여자대학교, 국립암센터, 미국 미네소타대학교 등</dd></div><div><dt>투자 목적</dt><dd>교통 관련 대기오염 물질의 감시 및 저감</dd></div><div><dt>위탁 연구 니즈</dt><dd>대기오염 물질의 감시 및 저감 기술 개발</dd></div><div><dt>접근 전략</dt><dd>정부의 대기오염 정책과 연계하여 연구 개발</dd></div></dl>
+  <footer class="item-foot">
+    <div class="tags"><span class="tag">#기술</span></div>
+    <span class="kw-note">매칭: 연구개발</span>
+  </footer>
+</article><article class="item-card" id="2100-국채투자도-손실볼-수-있어장기채권은-중도매도-가능성-유념" data-score="1" data-cred="A">
+  <header class="item-head">
+    <div class="item-badges"><span class="badge cred-a">A</span>
+<span class="badge" style="background:#9ca3af">R&D 1/5</span></div>
+    <h3><a href="https://www.yna.co.kr/view/AKR20260705028600002" target="_blank" rel="noopener">&quot;국채투자도 손실볼 수 있어…장기채권은 중도매도 가능성 유념&quot;</a></h3>
+    <div class="item-meta">
+      <span>기사</span>
+      <span>연합뉴스 경제</span>
+      <span>2026-07-05</span>
+    </div>
+  </header>
+  <ul class="summary-list"><li class="">국채 투자도 손실볼 수 있어장기채권은 중도매도 가능성 유념.</li><li class="">국채 등 낮은 위험등급의 채권은 안전한 투자상품으로 분류되나 시세 하락으로 손실을 볼 수 있다는 점을 유의해야 함.</li><li class="interp">(해석) 국채 투자 흐름과 연결되는 시장 신호로 보임</li></ul>
+  <dl class="rd-block"><div><dt>제안 R&D 영역</dt><dd>해당 없음</dd></div><div><dt>팩트 근거</dt><dd>명시 없음</dd></div><div><dt>투자 주체</dt><dd>명시 없음</dd></div><div><dt>투자 목적</dt><dd>해당 없음</dd></div><div><dt>위탁 연구 니즈</dt><dd>팩트 부족으로 판단 보류</dd></div><div><dt>접근 전략</dt><dd>정부=정책 정합</dd></div></dl>
+  <footer class="item-foot">
+    <div class="tags"><span class="tag">#투자</span></div>
+    <span class="kw-note">매칭: 투자</span>
+  </footer>
+</article><article class="item-card" id="0000-대학의-요청으로-버스주차장-조성했는데-뒤늦은-국유지-사용료-부과는-위법부당" data-score="1" data-cred="A">
+  <header class="item-head">
+    <div class="item-badges"><span class="badge cred-a">A</span>
+<span class="badge" style="background:#9ca3af">R&D 1/5</span></div>
+    <h3><a href="https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769599" target="_blank" rel="noopener">&quot;대학의 요청으로 버스주차장 조성했는데&quot;… 뒤늦은 국유지 사용료 부과는 &#x27;위법·부당&#x27;</a></h3>
+    <div class="item-meta">
+      <span>공식발표(IR·정책)</span>
+      <span>정책브리핑 국민권익위원회</span>
+      <span>2026-07-06</span>
+    </div>
+  </header>
+  <ul class="summary-list"><li class="">국립대학이 지방정부의 국유지 사용료 부과를 취소한 사례가 있어, 신뢰보호원칙의 중요성이 확인됨.</li><li class="">국립대학이 지방정부의 국유지 사용료 부과를 취소한 사례</li><li class="interp">(해석) 국유지 사용료 흐름과 연결되는 시장 신호로 보임</li></ul>
+  <dl class="rd-block"><div><dt>제안 R&D 영역</dt><dd>국유지 사용료 부과와 관련된 행정처분 및 신뢰보호원칙에 대한 연구</dd></div><div><dt>팩트 근거</dt><dd>국립대학이 지방정부에 1,779만 원의 사용료를 부과한 사실</dd></div><div><dt>투자 주체</dt><dd>국립대학, 지방정부</dd></div><div><dt>투자 목적</dt><dd>공익 목적의 시설 조성</dd></div><div><dt>위탁 연구 니즈</dt><dd>행정처분 및 신뢰보호원칙에 대한 연구</dd></div><div><dt>접근 전략</dt><dd>행정의 신뢰성과 예측 가능성을 높이는 방안 연구</dd></div></dl>
+  <footer class="item-foot">
+    <div class="tags"><span class="tag">#제품출시</span></div>
+    <span class="kw-note">매칭: 예산</span>
+  </footer>
+</article><article class="item-card" id="2347-삼성-67조-투자-아산시-배후-주거-수요-대비-서두른다" data-score="1" data-cred="A">
+  <header class="item-head">
+    <div class="item-badges"><span class="badge cred-a">A</span>
+<span class="badge" style="background:#9ca3af">R&D 1/5</span></div>
+    <h3><a href="https://www.yna.co.kr/view/AKR20260706023100063" target="_blank" rel="noopener">&#x27;삼성 67조 투자&#x27; 아산시, 배후 주거 수요 대비 서두른다</a></h3>
+    <div class="item-meta">
+      <span>기사</span>
+      <span>연합뉴스 산업</span>
+      <span>2026-07-05</span>
+    </div>
+  </header>
+  <ul class="summary-list"><li class="">삼성 67조 투자에 따른 아산시 주거 수요 대비 서두름.</li><li class="">아산시가 삼성 67조 투자에 따른 주거 수요 대비를 서두르 중임</li><li class="interp">(해석) 삼성 투자 흐름과 연결되는 시장 신호로 보임</li></ul>
+  <dl class="rd-block"><div><dt>제안 R&D 영역</dt><dd>스마트그리드 및 전력계통 기술 개발</dd></div><div><dt>팩트 근거</dt><dd>삼성 67조 투자</dd></div><div><dt>투자 주체</dt><dd>삼성</dd></div><div><dt>투자 목적</dt><dd>충청권 첨단산업 발전</dd></div><div><dt>위탁 연구 니즈</dt><dd>스마트그리드 및 전력계통 기술 개발 필요성</dd></div><div><dt>접근 전략</dt><dd>충청권 첨단산업 발전 비전과 연계한 기술 개발</dd></div></dl>
+  <footer class="item-foot">
+    <div class="tags"><span class="tag">#투자</span></div>
+    <span class="kw-note">매칭: 투자</span>
+  </footer>
+</article><article class="item-card" id="0000-2026년-경찰청-인권영화-공모전-개최" data-score="1" data-cred="A">
+  <header class="item-head">
+    <div class="item-badges"><span class="badge cred-a">A</span>
+<span class="badge" style="background:#9ca3af">R&D 1/5</span></div>
+    <h3><a href="https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769607" target="_blank" rel="noopener">2026년 경찰청 인권영화 공모전 개최</a></h3>
+    <div class="item-meta">
+      <span>공식발표(IR·정책)</span>
+      <span>정책브리핑 경찰청</span>
+      <span>2026-07-06</span>
+    </div>
+  </header>
+  <ul class="summary-list"><li class="">경찰청, 2026년 인권영화 공모전 개최.</li><li class="">경찰청이 2026년 인권영화 공모전을 개최함.</li><li class="interp">(해석) 인권영화 흐름과 연결되는 시장 신호로 보임</li></ul>
+  <dl class="rd-block"><div><dt>제안 R&D 영역</dt><dd>해당 없음</dd></div><div><dt>팩트 근거</dt><dd>명시 없음</dd></div><div><dt>투자 주체</dt><dd>명시 없음</dd></div><div><dt>투자 목적</dt><dd>해당 없음</dd></div><div><dt>위탁 연구 니즈</dt><dd>팩트 부족으로 판단 보류</dd></div><div><dt>접근 전략</dt><dd>정부 정책 정합성 없음</dd></div></dl>
+  <footer class="item-foot">
+    <div class="tags"><span class="tag">#제품출시</span><span class="tag">#기술</span></div>
+    <span class="kw-note">매칭: 정부·R&amp;D 타깃, 공모</span>
+  </footer>
+</article><article class="item-card" id="2311-외신-에스프레소-영상-관세-폭탄-터뜨리고-우량주-싹쓸이트럼프-주식-투자-의혹" data-score="1" data-cred="B">
+  <header class="item-head">
+    <div class="item-badges"><span class="badge cred-b">B</span>
+<span class="badge" style="background:#9ca3af">R&D 1/5</span></div>
+    <h3><a href="https://www.hankyung.com/article/202607066754i" target="_blank" rel="noopener">[외신 에스프레소 영상] 관세 폭탄 터뜨리고 우량주 싹쓸이?…트럼프 주식 투자 의혹</a></h3>
+    <div class="item-meta">
+      <span>기사</span>
+      <span>한국경제</span>
+      <span>2026-07-05</span>
+    </div>
+  </header>
+  <ul class="summary-list"><li class="">트럼프 주식 투자 의혹 관련 뉴스.</li><li class="">트럼프 주식 투자 의혹 관련 외신 뉴스임</li><li class="interp">(해석) 주식 투자 흐름과 연결되는 시장 신호로 보임</li></ul>
+  <dl class="rd-block"><div><dt>제안 R&D 영역</dt><dd>해당 없음</dd></div><div><dt>팩트 근거</dt><dd>명시 없음</dd></div><div><dt>투자 주체</dt><dd>명시 없음</dd></div><div><dt>투자 목적</dt><dd>해당 없음</dd></div><div><dt>위탁 연구 니즈</dt><dd>팩트 부족으로 판단 보류</dd></div><div><dt>접근 전략</dt><dd>해당 없음</dd></div></dl>
+  <footer class="item-foot">
+    <div class="tags"><span class="tag">#투자</span></div>
+    <span class="kw-note">매칭: 투자</span>
+  </footer>
+</article><article class="item-card" id="2233-dgfez-메디엑스포에서-2026-dgfez-메디엑스포-네트워킹의-밤-개최" data-score="1" data-cred="B">
+  <header class="item-head">
+    <div class="item-badges"><span class="badge cred-b">B</span>
+<span class="badge" style="background:#9ca3af">R&D 1/5</span></div>
+    <h3><a href="https://www.etnews.com/20260706000003" target="_blank" rel="noopener">DGFEZ, 메디엑스포에서 &#x27;2026 DGFEZ-메디엑스포 네트워킹의 밤&#x27; 개최</a></h3>
+    <div class="item-meta">
+      <span>기사</span>
+      <span>전자신문 통신/방송</span>
+      <span>2026-07-05</span>
+    </div>
+  </header>
+  <ul class="summary-list"><li class="">DGFEZ, 메디엑스포에서 &#x27;2026 DGFEZ-메디엑스포 네트워킹의 밤&#x27; 개최.</li><li class="">DGFEZ와 메디엑스포가 네트워킹의 밤을 개최하여 의료·바이오 산업 관계자 간 교류와 협력 기반을 확대함.</li><li class="interp">(해석) 의료·바이오 산업 흐름과 연결되는 시장 신호로 보임</li></ul>
+  <dl class="rd-block"><div><dt>제안 R&D 영역</dt><dd>의료·바이오 산업의 연구개발 격차 해소를 위한 기술 개발</dd></div><div><dt>팩트 근거</dt><dd>의료·바이오 산업은 연구개발, 임상, 인허가, 사업화</dd></div><div><dt>투자 주체</dt><dd>DGFEZ</dd></div><div><dt>투자 목적</dt><dd>의료·바이오 산업의 연구개발 및 협력 기반 확대</dd></div><div><dt>위탁 연구 니즈</dt><dd>의료·바이오 산업의 연구개발 격차 해소를 위한 기술 개발</dd></div><div><dt>접근 전략</dt><dd>의료·바이오 산업의 연구개발 및 협력 기반 확대를 위한 정책 정합성</dd></div></dl>
+  <footer class="item-foot">
+    <div class="tags"><span class="tag">#기술</span></div>
+    <span class="kw-note">매칭: 연구개발</span>
+  </footer>
+</article><article class="item-card" id="0000-k-컬처와-소비재를-연계한-한-베-협력의-장-열려" data-score="1" data-cred="A">
+  <header class="item-head">
+    <div class="item-badges"><span class="badge cred-a">A</span>
+<span class="badge" style="background:#9ca3af">R&D 1/5</span></div>
+    <h3><a href="https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769604" target="_blank" rel="noopener">K-컬처와 소비재를 연계한 한-베 협력의 장 열려</a></h3>
+    <div class="item-meta">
+      <span>공식발표(IR·정책)</span>
+      <span>정책브리핑 산업통상부</span>
+      <span>2026-07-06</span>
+    </div>
+  </header>
+  <ul class="summary-list"><li class="">산업통상부, 한-베 협력의 장 열려.</li><li class="">산업통상부와 농식품부가 한류와 소비재를 연계한 수출 마케팅 사업을 지속 확대함</li><li class="interp">(해석) MOU 흐름과 연결되는 시장 신호로 보임</li></ul>
+  <dl class="rd-block"><div><dt>제안 R&D 영역</dt><dd>해당 없음</dd></div><div><dt>팩트 근거</dt><dd>2026 하노이 한류박람회 및 아세안 K-푸드페어, 33백만불의 MOU 체결·계약</dd></div><div><dt>투자 주체</dt><dd>산업통상부, 농식품부</dd></div><div><dt>투자 목적</dt><dd>우리 기업의 수출시장 다변화와 신흥시장 진출 지원</dd></div><div><dt>위탁 연구 니즈</dt><dd>팩트 부족으로 판단 보류</dd></div><div><dt>접근 전략</dt><dd>정부의 정책 정합성에 따라 수출 마케팅 사업과 연계 가능</dd></div></dl>
+  <footer class="item-foot">
+    <div class="tags"><span class="tag">#투자</span><span class="tag">#제품출시</span><span class="tag">#기술</span></div>
+    <span class="kw-note">매칭: 정부·R&amp;D 타깃, mou, 투자, 산업통상부</span>
+  </footer>
+</article><article class="item-card" id="2100-kaist-석사과정-ai에이전트로-주식-자동매매수익률은" data-score="1" data-cred="B">
+  <header class="item-head">
+    <div class="item-badges"><span class="badge cred-b">B</span>
+<span class="badge" style="background:#9ca3af">R&D 1/5</span></div>
+    <h3><a href="https://zdnet.co.kr/view/?no=20260705190503" target="_blank" rel="noopener">KAIST 석사과정 AI에이전트로 주식 자동매매…수익률은</a></h3>
+    <div class="item-meta">
+      <span>기사</span>
+      <span>ZDNet Korea</span>
+      <span>2026-07-05</span>
+    </div>
+  </header>
+  <ul class="summary-list"><li class="">KAIST 연구생들이 AI 에이전트 오픈클로를 이용해 자동 주식매매를 했지만 수익률은 -1.11% 손실을 입었음.</li><li class="">KAIST 연구생들이 AI 에이전트 오픈클로를 이용해 자동 주식매매를 했음. 2만5,029원 손실을 입었음.</li><li class="interp">(해석) AI 에이전트 흐름과 연결되는 시장 신호로 보임</li></ul>
+  <dl class="rd-block"><div><dt>제안 R&D 영역</dt><dd>AI 에이전트를 이용한 자동 주식매매 시스템의 개발</dd></div><div><dt>팩트 근거</dt><dd>KAIST 연구생들이 220만원을 투자해 실제 투자해봤고, 2만5,029원 손실을 입었음.</dd></div><div><dt>투자 주체</dt><dd>KAIST 연구생</dd></div><div><dt>투자 목적</dt><dd>자동 주식매매</dd></div><div><dt>위탁 연구 니즈</dt><dd>AI 에이전트를 이용한 자동 주식매매 시스템의 개발</dd></div><div><dt>접근 전략</dt><dd>KAIST와의 협력을 통해 AI 에이전트를 이용한 자동 주식매매 시스템의 개발을 지원할 수 있음.</dd></div></dl>
+  <footer class="item-foot">
+    <div class="tags"><span class="tag">#투자</span></div>
+    <span class="kw-note">매칭: 투자</span>
+  </footer>
+</article><article class="item-card" id="1530-skt-2035년까지-최대-15gw-규모-ai-데이터센터-조성" data-score="2" data-cred="B">
+  <header class="item-head">
+    <div class="item-badges"><span class="badge cred-b">B</span>
+<span class="badge" style="background:#6b7280">R&D 2/5</span></div>
+    <h3><a href="https://www.donga.com/news/Economy/article/all/20260705/134239698/2" target="_blank" rel="noopener">SKT “2035년까지 최대 15GW 규모 AI 데이터센터 조성”</a></h3>
+    <div class="item-meta">
+      <span>기사</span>
+      <span>동아일보 경제</span>
+      <span>2026-07-05</span>
+    </div>
+  </header>
+  <ul class="summary-list"><li class="">SK텔레콤, 2035년까지 최대 15GW 규모 AI 데이터센터 조성 계획임.</li><li class="">SK텔레콤은 2035년까지 최대 15GW 규모의 AI 데이터센터를 조성할 계획임. 이 사업은 정부의 &#x27;AI 3강&#x27; 전략과 지역 균형 발전 기조에 맞춤.</li><li class="interp">(해석) AI 데이터센터 흐름과 연결되는 시장 신호로 보임</li></ul>
+  <dl class="rd-block"><div><dt>제안 R&D 영역</dt><dd>안정적인 전력망 구축을 위한 스마트그리드 기술 개발</dd></div><div><dt>팩트 근거</dt><dd>SK텔레콤의 15GW 규모 데이터센터 조성 계획, 2029년부터 5GW 규모의 AI 데이터센터 구축</dd></div><div><dt>투자 주체</dt><dd>SK텔레콤</dd></div><div><dt>투자 목적</dt><dd>AI 인프라 구축 및 한국을 아시아 데이터센터 허브로 키우기 위함</dd></div><div><dt>위탁 연구 니즈</dt><dd>안정적인 전력망 구축을 위한 고난도 기술 개발</dd></div><div><dt>접근 전략</dt><dd>정부의 AI 전략과 지역 균형 발전 기조에 맞춘 대규모 투자</dd></div></dl>
+  <footer class="item-foot">
+    <div class="tags"><span class="tag">#투자</span></div>
+    <span class="kw-note">매칭: 전력망, 투자</span>
+  </footer>
+</article><article class="item-card" id="2349-w컨셉-베트남-하노이-팝업-성료글로벌-사업-확장-속도" data-score="1" data-cred="A">
+  <header class="item-head">
+    <div class="item-badges"><span class="badge cred-a">A</span>
+<span class="badge" style="background:#9ca3af">R&D 1/5</span></div>
+    <h3><a href="https://www.newsis.com/view/NISX20260706_0003696653" target="_blank" rel="noopener">W컨셉, 베트남 하노이 팝업 성료…&quot;글로벌 사업 확장 속도&quot;</a></h3>
+    <div class="item-meta">
+      <span>기사</span>
+      <span>뉴시스 속보</span>
+      <span>2026-07-05</span>
+    </div>
+  </header>
+  <ul class="summary-list"><li class="">산업통상부와 KOTRA 주관 해외진출 지원사업의 일환으로 W컨셉이 베트남 하노이에서 팝업 성료&quot;</li><li class="">W컨셉이 베트남 하노이에서 팝업을 운영했음.</li><li class="interp">(해석) 글로벌 사업 확장 흐름과 연결되는 시장 신호로 보임</li></ul>
+  <dl class="rd-block"><div><dt>제안 R&D 영역</dt><dd>해당 없음</dd></div><div><dt>팩트 근거</dt><dd>명시 없음</dd></div><div><dt>투자 주체</dt><dd>산업통상부와 KOTRA</dd></div><div><dt>투자 목적</dt><dd>해외진출 지원</dd></div><div><dt>위탁 연구 니즈</dt><dd>팩트 부족으로 판단 보류</dd></div><div><dt>접근 전략</dt><dd>정부의 정책 정합성</dd></div></dl>
+  <footer class="item-foot">
+    <div class="tags"><span class="tag">#투자</span></div>
+    <span class="kw-note">매칭: 투자, 산업통상부</span>
+  </footer>
+</article><article class="item-card" id="1530-위메이드-품은-차이나-머니-k게임-흔든다" data-score="1" data-cred="B">
+  <header class="item-head">
+    <div class="item-badges"><span class="badge cred-b">B</span>
+<span class="badge" style="background:#9ca3af">R&D 1/5</span></div>
+    <h3><a href="https://www.donga.com/news/Economy/article/all/20260705/134239727/2" target="_blank" rel="noopener">‘위메이드’ 품은 차이나 머니, K게임 흔든다</a></h3>
+    <div class="item-meta">
+      <span>기사</span>
+      <span>동아일보 경제</span>
+      <span>2026-07-05</span>
+    </div>
+  </header>
+  <ul class="summary-list"><li class="">위메이드의 최대 주주가 중국계 자본인 네오펄스로 변경됨에 따라 K게임 산업에 영향을 줄 수 있음.</li><li class="">위메이드의 최대 주주가 중국계 자본인 네오펄스로 변경됨</li><li class="interp">(해석) 중국계 자본 흐름과 연결되는 시장 신호로 보임</li></ul>
+  <dl class="rd-block"><div><dt>제안 R&D 영역</dt><dd>해당 없음</dd></div><div><dt>팩트 근거</dt><dd>거래 규모 약 9200억 원, 위메이드 지분 40.25%</dd></div><div><dt>투자 주체</dt><dd>네오펄스(홍콩계 투자사)</dd></div><div><dt>투자 목적</dt><dd>위메이드 지분 인수</dd></div><div><dt>위탁 연구 니즈</dt><dd>팩트 부족으로 판단 보류</dd></div><div><dt>접근 전략</dt><dd>게임 산업의 기술 격차 해소를 위한 협력 가능성</dd></div></dl>
+  <footer class="item-foot">
+    <div class="tags"><span class="tag">#투자</span></div>
+    <span class="kw-note">매칭: 투자</span>
+  </footer>
+</article><article class="item-card" id="2040-2주-만에-고점-대비-25-증발코인처럼-요동치는-2000조-거함-삼성전자-투자360" data-score="1" data-cred="B">
+  <header class="item-head">
+    <div class="item-badges"><span class="badge cred-b">B</span>
+<span class="badge" style="background:#9ca3af">R&D 1/5</span></div>
+    <h3><a href="https://biz.heraldcorp.com/article/10797816" target="_blank" rel="noopener">“2주 만에 고점 대비 25% 증발”…코인처럼 요동치는 2000조 거함 삼성전자 [투자360]</a></h3>
+    <div class="item-meta">
+      <span>기사</span>
+      <span>헤럴드경제</span>
+      <span>2026-07-05</span>
+    </div>
+  </header>
+  <ul class="summary-list"><li class="">삼성전자 주가가 2주 만에 고점 대비 25% 하락하며 코스피 전체가 요동치고 있음.</li><li class="">삼성전자 주가가 2주 만에 고점 대비 25% 하락</li><li class="interp">(해석) 삼성전자 주가 흐름과 연결되는 시장 신호로 보임</li></ul>
+  <dl class="rd-block"><div><dt>제안 R&D 영역</dt><dd>반도체 및 전자부품 기술 개발</dd></div><div><dt>팩트 근거</dt><dd>명시 없음</dd></div><div><dt>투자 주체</dt><dd>삼성전자</dd></div><div><dt>투자 목적</dt><dd>해당 없음</dd></div><div><dt>위탁 연구 니즈</dt><dd>팩트 부족으로 판단 보류</dd></div><div><dt>접근 전략</dt><dd>정부의 산업 정책 정합</dd></div></dl>
+  <footer class="item-foot">
+    <div class="tags"><span class="tag">#투자</span></div>
+    <span class="kw-note">매칭: 투자</span>
+  </footer>
+</article><article class="item-card" id="2300-가스안전公-김홍철-신임-기술이사-취임식임기-2년" data-score="1" data-cred="A">
+  <header class="item-head">
+    <div class="item-badges"><span class="badge cred-a">A</span>
+<span class="badge" style="background:#9ca3af">R&D 1/5</span></div>
+    <h3><a href="https://www.newsis.com/view/NISX20260705_0003696316" target="_blank" rel="noopener">가스안전公, 김홍철 신임 기술이사 취임식…임기 2년</a></h3>
+    <div class="item-meta">
+      <span>기사</span>
+      <span>뉴시스 속보</span>
+      <span>2026-07-05</span>
+    </div>
+  </header>
+  <ul class="summary-list"><li class="">한국가스안전공사, 김홍철 신임 기술이사 취임식임기 2년.</li><li class="">한국가스안전공사에서 김홍철 신임 기술이사의 취임식을 열었음. 임기는 2년임.</li><li class="interp">(해석) 에너지안전 흐름과 연결되는 시장 신호로 보임</li></ul>
+  <dl class="rd-block"><div><dt>제안 R&D 영역</dt><dd>에너지안전 실증연구 및 기술 혁신</dd></div><div><dt>팩트 근거</dt><dd>김홍철 신임 기술이사의 임기: 2027년 7월 5일까지, 에너지안전실증연구센터장 및 수소안전기술원장 역임</dd></div><div><dt>투자 주체</dt><dd>한국가스안전공사</dd></div><div><dt>투자 목적</dt><dd>기술 혁신 및 에너지안전 실증연구</dd></div><div><dt>위탁 연구 니즈</dt><dd>고난도 에너지안전 기술 개발 및 수소안전 인프라 구축</dd></div><div><dt>접근 전략</dt><dd>수소안전 및 에너지안전 기술 개발에 대한 정부 정책 정합성 및 산업 협력</dd></div></dl>
+  <footer class="item-foot">
+    <div class="tags"><span class="tag">#기술</span></div>
+    <span class="kw-note">매칭: 실증연구</span>
+  </footer>
+</article><article class="item-card" id="2300-가스안전公-신임-기술이사에-김홍철-수소안전기술원장" data-score="1" data-cred="B">
+  <header class="item-head">
+    <div class="item-badges"><span class="badge cred-b">B</span>
+<span class="badge" style="background:#9ca3af">R&D 1/5</span></div>
+    <h3><a href="https://www.etnews.com/20260705000045" target="_blank" rel="noopener">가스안전公, 신임 기술이사에 김홍철 수소안전기술원장</a></h3>
+    <div class="item-meta">
+      <span>기사</span>
+      <span>전자신문 통신/방송</span>
+      <span>2026-07-05</span>
+    </div>
+  </header>
+  <ul class="summary-list"><li class="">한국가스안전공사 신임 기술이사에 김홍철 수소안전기술원장이 취임했음.</li><li class="">한국가스안전공사 신임 기술이사에 김홍철 수소안전기술원장이 취임했음</li><li class="interp">(해석) 수소안전기술 흐름과 연결되는 시장 신호로 보임</li></ul>
+  <dl class="rd-block"><div><dt>제안 R&D 영역</dt><dd>에너지안전기술 및 수소안전기술 분야의 실증연구를 위한 협력 가능</dd></div><div><dt>팩트 근거</dt><dd>김홍철 신임 기술이사의 이력과 업무 내용</dd></div><div><dt>투자 주체</dt><dd>한국가스안전공사</dd></div><div><dt>투자 목적</dt><dd>기술 혁신과 중소기업 지원</dd></div><div><dt>위탁 연구 니즈</dt><dd>기술 혁신을 위한 실증연구와 중소기업 지원 필요</dd></div><div><dt>접근 전략</dt><dd>한국가스안전공사와의 협력을 통해 에너지안전기술과 수소안전기술 분야의 실증연구를 추진</dd></div></dl>
+  <footer class="item-foot">
+    <div class="tags"><span class="tag">#기술</span></div>
+    <span class="kw-note">매칭: 실증연구</span>
+  </footer>
+</article><article class="item-card" id="1700-강훈식-추가-세수-미래-세대에-투자재원미래-대응-기금-신설" data-score="1" data-cred="B">
+  <header class="item-head">
+    <div class="item-badges"><span class="badge cred-b">B</span>
+<span class="badge" style="background:#9ca3af">R&D 1/5</span></div>
+    <h3><a href="https://biz.heraldcorp.com/article/10798512" target="_blank" rel="noopener">강훈식 “추가 세수, 미래 세대에 투자재원…미래 대응 기금 신설”</a></h3>
+    <div class="item-meta">
+      <span>기사</span>
+      <span>헤럴드경제</span>
+      <span>2026-07-05</span>
+    </div>
+  </header>
+  <ul class="summary-list"><li class="">강훈식 대통령 비서실장이 미래 대응 기금 신설을 추진해 추가 세수를 미래 세대를 위한 투자 재원으로 활용할 계획임.</li><li class="">강훈식 대통령 비서실장이 미래 대응 기금 신설을 추진하고, 추가 세수를 미래 세대를 위한 투자 재원으로 활용할 계획임.</li><li class="interp">(해석) 미래 대응 기금 흐름과 연결되는 시장 신호로 보임</li></ul>
+  <dl class="rd-block"><div><dt>제안 R&D 영역</dt><dd>미래 대응 기금을 통해 지원할 3대 메가프로젝트의 기술 개발 및 투자</dd></div><div><dt>팩트 근거</dt><dd>추가 세수를 미래 대응 기금으로 조성해 미래 성장 동력 창출 등에 투자</dd></div><div><dt>투자 주체</dt><dd>대통령 비서실장</dd></div><div><dt>투자 목적</dt><dd>미래 성장 동력 창출, K자형 양극화 대응, 2030 청년을 위한 주거·창업·일자리 지원</dd></div><div><dt>위탁 연구 니즈</dt><dd>미래 대응 기금을 통해 지원할 3대 메가프로젝트의 기술 개발 및 투자</dd></div><div><dt>접근 전략</dt><dd>정부의 미래 대응 기금 신설 정책과 연계해 기술 개발 및 투자 협력을 추진</dd></div></dl>
+  <footer class="item-foot">
+    <div class="tags"><span class="tag">#투자</span></div>
+    <span class="kw-note">매칭: 투자</span>
+  </footer>
+</article><article class="item-card" id="0000-경찰-법무부-제2의-남양주-스토킹-살인사건-막는다" data-score="1" data-cred="A">
+  <header class="item-head">
+    <div class="item-badges"><span class="badge cred-a">A</span>
+<span class="badge" style="background:#9ca3af">R&D 1/5</span></div>
+    <h3><a href="https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769606" target="_blank" rel="noopener">경찰-법무부 &quot;제2의 남양주 스토킹 살인사건 막는다&quot;</a></h3>
+    <div class="item-meta">
+      <span>공식발표(IR·정책)</span>
+      <span>정책브리핑 경찰청</span>
+      <span>2026-07-06</span>
+    </div>
+  </header>
+  <ul class="summary-list"><li class="">경찰청과 법무부가 제2의 남양주 스토킹 살인사건을 막기 위해 성폭력 등 전자감독 대상자 정부공유 및 합동 대응을 추진함.</li><li class="">경찰청과 법무부는 제2의 남양주 스토킹 살인사건을 막기 위해 성폭력 등 전자감독 대상자 정부공유 및 합동 대응을 추진함.</li><li class="interp">(해석) 전자감독 흐름과 연결되는 시장 신호로 보임</li></ul>
+  <dl class="rd-block"><div><dt>제안 R&D 영역</dt><dd>법 집행 및 공공 안전을 위한 데이터 분석 및 인공지능 기술 개발</dd></div><div><dt>팩트 근거</dt><dd>명시 없음</dd></div><div><dt>투자 주체</dt><dd>경찰청, 법무부</dd></div><div><dt>투자 목적</dt><dd>성폭력 등 전자감독 대상자에 대한 효과적인 대응</dd></div><div><dt>위탁 연구 니즈</dt><dd>법 집행 및 공공 안전을 위한 데이터 분석 및 인공지능 기술 개발</dd></div><div><dt>접근 전략</dt><dd>정부의 정책 정합성과 법 집행 기관의 기술 격차를 고려한 접근</dd></div></dl>
+  <footer class="item-foot">
+    <div class="tags"><span class="tag">#제품출시</span></div>
+    <span class="kw-note">매칭: 공모</span>
+  </footer>
+</article><article class="item-card" id="0000-경찰청-국민과-현장-참여-제14회-과학수사-아이디어-공모전-개최" data-score="1" data-cred="A">
+  <header class="item-head">
+    <div class="item-badges"><span class="badge cred-a">A</span>
+<span class="badge" style="background:#9ca3af">R&D 1/5</span></div>
+    <h3><a href="https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769608" target="_blank" rel="noopener">경찰청, 국민과 현장 참여 『제14회 과학수사 아이디어 공모전』 개최</a></h3>
+    <div class="item-meta">
+      <span>공식발표(IR·정책)</span>
+      <span>정책브리핑 경찰청</span>
+      <span>2026-07-06</span>
+    </div>
+  </header>
+  <ul class="summary-list"><li class="">경찰청, 제14회 과학수사 아이디어 공모전 개최.</li><li class="">경찰청이 제14회 과학수사 아이디어 공모전을 개최함.</li><li class="interp">(해석) 과학수사 흐름과 연결되는 시장 신호로 보임</li></ul>
+  <dl class="rd-block"><div><dt>제안 R&D 영역</dt><dd>과학수사 기술 개발</dd></div><div><dt>팩트 근거</dt><dd>명시 없음</dd></div><div><dt>투자 주체</dt><dd>경찰청</dd></div><div><dt>투자 목적</dt><dd>과학수사 기술 개발</dd></div><div><dt>위탁 연구 니즈</dt><dd>팩트 부족으로 판단 보류</dd></div><div><dt>접근 전략</dt><dd>경찰청의 과학수사 기술 개발 사업과 연계</dd></div></dl>
+  <footer class="item-foot">
+    <div class="tags"><span class="tag">#제품출시</span></div>
+    <span class="kw-note">매칭: 공모</span>
+  </footer>
+</article><article class="item-card" id="2200-공군-ax-거점-8월-개소소요기술-3건-민군-공동개발-추진" data-score="1" data-cred="B">
+  <header class="item-head">
+    <div class="item-badges"><span class="badge cred-b">B</span>
+<span class="badge" style="background:#9ca3af">R&D 1/5</span></div>
+    <h3><a href="https://www.etnews.com/20260705000041" target="_blank" rel="noopener">공군 AX 거점 8월 개소…소요기술 3건 민군 공동개발 추진</a></h3>
+    <div class="item-meta">
+      <span>기사</span>
+      <span>전자신문 통신/방송</span>
+      <span>2026-07-05</span>
+    </div>
+  </header>
+  <ul class="summary-list"><li class="">공군 AX 거점 8월 개소소요기술 3건 민군 공동개발 추진.</li><li class="">공군은 민간 인공지능 기업과 협력을 확대하기 위해 AI 기반 연구개발 과제를 공개하고 민군 협력 생태계 구축에 나선다. 서울 AI 허브 산업 AX 혁신센터에 공군 AX 거점을 8월에 개소할 계획임.</li><li class="interp">(해석) 민군 공동개발 흐름과 연결되는 시장 신호로 보임</li></ul>
+  <dl class="rd-block"><div><dt>제안 R&D 영역</dt><dd>AI 기반 전력계통 최적화 기술 개발</dd></div><div><dt>팩트 근거</dt><dd>공군 AX 거점 8월 개소, 3건의 소요기술 민군 공동개발</dd></div><div><dt>투자 주체</dt><dd>국방부와 공군</dd></div><div><dt>투자 목적</dt><dd>공군 비전 2050 실현</dd></div><div><dt>위탁 연구 니즈</dt><dd>AI 기반 전력계통 최적화 기술 개발</dd></div><div><dt>접근 전략</dt><dd>정부의 민군 협력 정책 정합</dd></div></dl>
+  <footer class="item-foot">
+    <div class="tags"><span class="tag">#기술</span></div>
+    <span class="kw-note">매칭: 연구개발, 연구과제</span>
+  </footer>
+</article><article class="item-card" id="0000-광고대행사가-직접-소상공인-제품을-프리미엄-브랜드로-육성한다" data-score="1" data-cred="A">
+  <header class="item-head">
+    <div class="item-badges"><span class="badge cred-a">A</span>
+<span class="badge" style="background:#9ca3af">R&D 1/5</span></div>
+    <h3><a href="https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769597" target="_blank" rel="noopener">광고대행사가 직접 소상공인 제품을 프리미엄 브랜드로 육성한다.</a></h3>
+    <div class="item-meta">
+      <span>공식발표(IR·정책)</span>
+      <span>정책브리핑 중소벤처기업부</span>
+      <span>2026-07-06</span>
+    </div>
+  </header>
+  <ul class="summary-list"><li class="">중소벤처기업부와 한국중소벤처기업유통원이 &#x27;브랜드 소상공인 점프업&#x27; 지원사업을 추진함.</li><li class="">중소벤처기업부와 한국중소벤처기업유통원은 &#x27;브랜드 소상공인 점프업&#x27; 지원사업을 추진함.</li><li class="interp">(해석) 브랜드 소상공인 흐름과 연결되는 시장 신호로 보임</li></ul>
+  <dl class="rd-block"><div><dt>제안 R&D 영역</dt><dd>민간 광고대행사와의 협력을 통한 소상공인 제품의 프리미엄 브랜드화 기술 개발</dd></div><div><dt>팩트 근거</dt><dd>중소벤처기업부와 한국중소벤처기업유통원, 30개 우수 소상공인 선정, 약 6개월간 SM C&amp;C로부터 1:1 맞춤형 집중 지원</dd></div><div><dt>투자 주체</dt><dd>중소벤처기업부와 한국중소벤처기업유통원</dd></div><div><dt>투자 목적</dt><dd>우수 소상공인 제품을 프리미엄 브랜드로 육성하기 위해 민간 종합 광고대행사의 전문 역량과 인프라를 활용</dd></div><div><dt>위탁 연구 니즈</dt><dd>소상공인 제품의 프리미엄 브랜드화, 브랜드 홍보 확산, 글로벌 진출을 위한 기술 개발</dd></div><div><dt>접근 전략</dt><dd>중소벤처기업부와 한국중소벤처기업유통원과의 협력을 통한 소상공인 제품의 프리미엄 브랜드화 기술 개발</dd></div></dl>
+  <footer class="item-foot">
+    <div class="tags"><span class="tag">#제품출시</span><span class="tag">#기술</span></div>
+    <span class="kw-note">매칭: 정부·R&amp;D 타깃</span>
+  </footer>
+</article><article class="item-card" id="0846-글로벌-제약사와-협력바이오헬스-오픈이노베이션-위크-참가기업-모집" data-score="1" data-cred="B">
+  <header class="item-head">
+    <div class="item-badges"><span class="badge cred-b">B</span>
+<span class="badge" style="background:#9ca3af">R&D 1/5</span></div>
+    <h3><a href="https://www.fnnews.com/news/202607060818553984" target="_blank" rel="noopener">글로벌 제약사와 협력...&#x27;바이오헬스 오픈이노베이션 위크&#x27; 참가기업 모집</a></h3>
+    <div class="item-meta">
+      <span>기사</span>
+      <span>파이낸셜뉴스</span>
+      <span>2026-07-06</span>
+    </div>
+  </header>
+  <ul class="summary-list"><li class="">보건복지부와 한국보건산업진흥원이 9월 &#x27;2026 글로벌 오픈이노베이션 위크-바이오헬스&#x27;를 개최하고, 투자기관 및 글로벌 제약사와의 협력을 위한 1대1 파트너링 프로그램에 참가할 국내 바이오헬스 기업을 모집함.</li><li class="">보건복지부와 한국보건산업진흥원이 공동 주최하는 &#x27;2026 글로벌 오픈이노베이션 위크-바이오헬스&#x27;에서 국내 바이오헬스 기업과 글로벌 제약사 간 1대1 파트너링 프로그램을 진행함</li><li class="interp">(해석) 바이오헬스 흐름과 연결되는 시장 신호로 보임</li></ul>
+  <dl class="rd-block"><div><dt>제안 R&D 영역</dt><dd>의료기기 및 제약 기술 개발</dd></div><div><dt>팩트 근거</dt><dd>2026년 9월 9일부터 11일까지 서울 포시즌스 호텔과 대한상공회의소에서 열림</dd></div><div><dt>투자 주체</dt><dd>보건복지부, 한국보건산업진흥원, 한국제약바이오협회, 한국의료기기산업협회</dd></div><div><dt>투자 목적</dt><dd>기술 협력과 사업화 기회를 모색함</dd></div><div><dt>위탁 연구 니즈</dt><dd>기술 개발 및 사업화에 대한 고난도 연구 필요함</dd></div><div><dt>접근 전략</dt><dd>정부의 오픈이노베이션 정책과 연계하여 국내 바이오헬스 기업의 기술 개발과 글로벌 제약사와의 협력을 지원함</dd></div></dl>
+  <footer class="item-foot">
+    <div class="tags"><span class="tag">#투자</span></div>
+    <span class="kw-note">매칭: 투자</span>
+  </footer>
+</article><article class="item-card" id="0851-두산에너빌리티-발전기-모니터링-시스템-사업-확대" data-score="2" data-cred="B">
+  <header class="item-head">
+    <div class="item-badges"><span class="badge cred-b">B</span>
+<span class="badge" style="background:#6b7280">R&D 2/5</span></div>
+    <h3><a href="https://www.fnnews.com/news/202607060848574388" target="_blank" rel="noopener">두산에너빌리티, 발전기 모니터링 시스템 사업 확대</a></h3>
+    <div class="item-meta">
+      <span>기사</span>
+      <span>파이낸셜뉴스</span>
+      <span>2026-07-06</span>
+    </div>
+  </header>
+  <ul class="summary-list"><li class="">두산에너빌리티, 무인 자동화 모니터링 시스템으로 글로벌 발전 시장 공략</li><li class="">두산에너빌리티가 무인 자동화 모니터링 시스템을 통해 글로벌 발전 시장 공략에 속도를 내고 있음. 체코 원전 공급을 시작으로 국내외 원전·화력발전소 전반으로 진단 및 서비스 솔루션 영토를 확장할 계획임.</li><li class="interp">(해석) 무인 자동화 모니터링 시스템 흐름과 연결되는 시장 신호로 보임</li></ul>
+  <dl class="rd-block"><div><dt>제안 R&D 영역</dt><dd>전력계통 및 스마트그리드 기술을 위한 무인 자동화 모니터링 시스템 개발</dd></div><div><dt>팩트 근거</dt><dd>두산에너빌리티와 크리에이텍의 MOU 체결, 체코 원전 공급을 시작으로 국내외 원전·화력발전소 전반으로 진단 및 서비스 솔루션 영토 확장</dd></div><div><dt>투자 주체</dt><dd>두산에너빌리티와 크리에이텍</dd></div><div><dt>투자 목적</dt><dd>무인 자동화 모니터링 시스템을 통해 설비 대형 사고를 사전 차단하고, 실시간 진단 기술로 기존 수동 점검 방식을 대체하는 것임.</dd></div><div><dt>위탁 연구 니즈</dt><dd>전력계통 및 스마트그리드 기술을 위한 무인 자동화 모니터링 시스템 개발이 필요함. 특히, 실시간 진단 기술과 무인화·자동화 기술이 요구됨.</dd></div><div><dt>접근 전략</dt><dd>두산에너빌리티와 크리에이텍의 MOU 체결을 통해 협력을 강화하고, 체코 원전 공급을 시작으로 국내외 원전·화력발전소 전반으로 진단 및 서비스 솔루션 영토를 확장할 수 있음.</dd></div></dl>
+  <footer class="item-foot">
+    <div class="tags"><span class="tag">#기술</span></div>
+    <span class="kw-note">매칭: mou</span>
+  </footer>
+</article><article class="item-card" id="2055-사이버-위협-증가에-은행권-투자-2천744억원2년새-12" data-score="1" data-cred="A">
+  <header class="item-head">
+    <div class="item-badges"><span class="badge cred-a">A</span>
+<span class="badge" style="background:#9ca3af">R&D 1/5</span></div>
+    <h3><a href="https://www.yna.co.kr/view/AKR20260705023000002" target="_blank" rel="noopener">사이버 위협 증가에 은행권 투자 2천744억원…2년새 12%↑</a></h3>
+    <div class="item-meta">
+      <span>기사</span>
+      <span>연합뉴스 산업</span>
+      <span>2026-07-05</span>
+    </div>
+  </header>
+  <ul class="summary-list"><li class="">은행권이 사이버 위협 증가에 대비해 정보보호 예산을 2천744억원 투입할 계획임.</li><li class="">은행권이 사이버 위협 증가에 대비해 정보보호 예산을 확대함</li><li class="interp">(해석) サイバー セキュリティ 흐름과 연결되는 시장 신호로 보임</li></ul>
+  <dl class="rd-block"><div><dt>제안 R&D 영역</dt><dd>기술 개발</dd></div><div><dt>팩트 근거</dt><dd>은행권 정보보호 예산 2천744억원, 2년새 12% 증가</dd></div><div><dt>투자 주체</dt><dd>은행권</dd></div><div><dt>투자 목적</dt><dd>사이버 위협 대비</dd></div><div><dt>위탁 연구 니즈</dt><dd>사이  기술 개발</dd></div><div><dt>접근 전략</dt><dd>금융권 정보보호 기술 개발 사업과 연계</dd></div></dl>
+  <footer class="item-foot">
+    <div class="tags"><span class="tag">#투자</span></div>
+    <span class="kw-note">매칭: 예산, 투자</span>
+  </footer>
+</article><article class="item-card" id="2352-세종대-한국유통경영학회와-교육-및-연구-협력-mou" data-score="1" data-cred="A">
+  <header class="item-head">
+    <div class="item-badges"><span class="badge cred-a">A</span>
+<span class="badge" style="background:#9ca3af">R&D 1/5</span></div>
+    <h3><a href="https://www.newsis.com/view/NISX20260706_0003696668" target="_blank" rel="noopener">세종대, 한국유통경영학회와 교육 및 연구 협력 MOU</a></h3>
+    <div class="item-meta">
+      <span>기사</span>
+      <span>뉴시스 속보</span>
+      <span>2026-07-05</span>
+    </div>
+  </header>
+  <ul class="summary-list"><li class="">세종대, 한국유통경영학회와 교육 및 연구 협력 MOU 체결함.</li><li class="">세종대학교 산업대학원과 한국유통경영학회가 교육 및 연구 협력 MOU를 체결함.</li><li class="interp">(해석) 교육 및 연구 협력 흐름과 연결되는 시장 신호로 보임</li></ul>
+  <dl class="rd-block"><div><dt>제안 R&D 영역</dt><dd>유통물류 산업의 효율성 향상을 위한 스마트그리드 및 파워그리드 기술 적용 연구</dd></div><div><dt>팩트 근거</dt><dd>MOU 체결, 공동 연구 추진, 연구시설 공동 활용, 장학 및 교육 지원, 학술 교류 활성화</dd></div><div><dt>투자 주체</dt><dd>세종대학교 산업대학원, 한국유통경영학회</dd></div><div><dt>투자 목적</dt><dd>인재 양성 및 교육 경쟁력 강화, 미래 유통산업 발전을 위한 정책 수립</dd></div><div><dt>위탁 연구 니즈</dt><dd>유통물류 산업의 효율성 향상을 위한 스마트그리드 및 파워그리드 기술 적용 연구 필요</dd></div><div><dt>접근 전략</dt><dd>교육 및 연구 협력을 통해 유통물류 산업의 기술 격차를 해소하고, 스마트그리드 및 파워그리드 기술을 적용함</dd></div></dl>
+  <footer class="item-foot">
+    <div class="tags"><span class="tag">#기술</span></div>
+    <span class="kw-note">매칭: mou</span>
+  </footer>
+</article><article class="item-card" id="2317-엠디에스코리아-코스닥-상장-예비심사청구서-제출" data-score="1" data-cred="A">
+  <header class="item-head">
+    <div class="item-badges"><span class="badge cred-a">A</span>
+<span class="badge" style="background:#9ca3af">R&D 1/5</span></div>
+    <h3><a href="https://www.newsis.com/view/NISX20260706_0003696562" target="_blank" rel="noopener">엠디에스코리아, 코스닥 상장 예비심사청구서 제출</a></h3>
+    <div class="item-meta">
+      <span>기사</span>
+      <span>뉴시스 속보</span>
+      <span>2026-07-05</span>
+    </div>
+  </header>
+  <ul class="summary-list"><li class="">엠디에스코리아, 연구개발 강화와 생산 경쟁력 확보를 위한 코스닥 상장 예비심사청구서 제출.</li><li class="">엠디에스코리아는 코스닥 상장을 위해 상장예비심사청구서를 제출했음. 회사는 국내 처음으로 저온살균 장기보관 샐러드를 개발했음.</li><li class="interp">(해석) 식품 제조 기술 흐름과 연결되는 시장 신호로 보임</li></ul>
+  <dl class="rd-block"><div><dt>제안 R&D 영역</dt><dd>식품 제조 공정 최적화 및 품질 관리 기술 개발</dd></div><div><dt>팩트 근거</dt><dd>매출액 980억원, 영업이익 76억원, 순이익 65억원</dd></div><div><dt>투자 주체</dt><dd>엠디에스코리아</dd></div><div><dt>투자 목적</dt><dd>연구개발과 생산 경쟁력 강화</dd></div><div><dt>위탁 연구 니즈</dt><dd>식품 제조 공정 최적화 및 품질 관리 기술 개발</dd></div><div><dt>접근 전략</dt><dd>국내 시장에서 축적한 제조 역량과 품질 경쟁력을 바탕으로 해외 시장 공략 가속화</dd></div></dl>
+  <footer class="item-foot">
+    <div class="tags"><span class="tag">#투자</span><span class="tag">#경쟁</span><span class="tag">#기술</span></div>
+    <span class="kw-note">매칭: 연구개발</span>
+  </footer>
+</article><article class="item-card" id="0000-외환시장-24시간-개장-원화의-글로벌-도약의-시작" data-score="1" data-cred="A">
+  <header class="item-head">
+    <div class="item-badges"><span class="badge cred-a">A</span>
+<span class="badge" style="background:#9ca3af">R&D 1/5</span></div>
+    <h3><a href="https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769601" target="_blank" rel="noopener">외환시장 24시간 개장, 원화의 글로벌 도약의 시작</a></h3>
+    <div class="item-meta">
+      <span>공식발표(IR·정책)</span>
+      <span>정책브리핑 재정경제부</span>
+      <span>2026-07-06</span>
+    </div>
+  </header>
+  <ul class="summary-list"><li class="">재정경제부, 외환시장 24시간 개장 첫 날을 맞아 서울 하나은행 본점 외환 딜링룸을 방문하여 시장참여자의 의견을 청취함.</li><li class="">재정경제부는 외환시장 24시간 개장을 위해 국내은행, 해외지점, 수출업체 등 시장참여자의 의견을 청취함.</li><li class="interp">(해석) 외환시장 흐름과 연결되는 시장 신호로 보임</li></ul>
+  <dl class="rd-block"><div><dt>제안 R&D 영역</dt><dd>해당 없음</dd></div><div><dt>팩트 근거</dt><dd>명시 없음</dd></div><div><dt>투자 주체</dt><dd>재정경제부</dd></div><div><dt>투자 목적</dt><dd>외환시장 24시간 개장을 위한 시장참여자 의견 청취</dd></div><div><dt>위탁 연구 니즈</dt><dd>팩트 부족으로 판단 보류</dd></div><div><dt>접근 전략</dt><dd>정부의 정책 정합성에 따라 시장참여자와의 협력을 강화할 수 있음</dd></div></dl>
+  <footer class="item-foot">
+    <div class="tags"><span class="tag">#투자</span><span class="tag">#제품출시</span></div>
+    <span class="kw-note">매칭: 투자</span>
+  </footer>
+</article><article class="item-card" id="0830-제주-단체관광-줄고-기름값은-뛰었다-전세버스-1850명-고용안정-지원" data-score="1" data-cred="B">
+  <header class="item-head">
+    <div class="item-badges"><span class="badge cred-b">B</span>
+<span class="badge" style="background:#9ca3af">R&D 1/5</span></div>
+    <h3><a href="https://www.fnnews.com/news/202607060826538507" target="_blank" rel="noopener">제주, 단체관광 줄고 기름값은 뛰었다… 전세버스 1850명 고용안정 지원</a></h3>
+    <div class="item-meta">
+      <span>기사</span>
+      <span>파이낸셜뉴스</span>
+      <span>2026-07-06</span>
+    </div>
+  </header>
+  <ul class="summary-list"><li class="">제주도, 단체관광 감소와 유가 상승에 따른 전세버스 종사자 1850명 고용안정 지원.</li><li class="">제주도는 단체관광 감소와 유가 상승에 따른 전세버스 종사자 1850명 고용안정 지원을 실시함.</li><li class="interp">(해석) 고용안정 지원 흐름과 연결되는 시장 신호로 보임</li></ul>
+  <dl class="rd-block"><div><dt>제안 R&D 영역</dt><dd>해당 없음</dd></div><div><dt>팩트 근거</dt><dd>명시 없음</dd></div><div><dt>투자 주체</dt><dd>제주특별자치도와 고용노동부</dd></div><div><dt>투자 목적</dt><dd>전세버스업의 인력 이탈을 막고 숙련 운전인력을 지키기 위한 지원책</dd></div><div><dt>위탁 연구 니즈</dt><dd>팩트 부족으로 판단 보류</dd></div><div><dt>접근 전략</dt><dd>정부의 정책 정합성</dd></div></dl>
+  <footer class="item-foot">
+    <div class="tags"><span class="tag">#기술</span></div>
+    <span class="kw-note">매칭: 공모</span>
+  </footer>
+</article><article class="item-card" id="1514-증시-달리자-빌려서도-투자했다빚투-62조-증권사는-이자로-14조-벌어투자360" data-score="1" data-cred="B">
+  <header class="item-head">
+    <div class="item-badges"><span class="badge cred-b">B</span>
+<span class="badge" style="background:#9ca3af">R&D 1/5</span></div>
+    <h3><a href="https://biz.heraldcorp.com/article/10798467" target="_blank" rel="noopener">증시 달리자 빌려서도 투자했다…‘빚투’ 62조, 증권사는 이자로 1.4조 벌어[투자360]</a></h3>
+    <div class="item-meta">
+      <span>기사</span>
+      <span>헤럴드경제</span>
+      <span>2026-07-05</span>
+    </div>
+  </header>
+  <ul class="summary-list"><li class="">한국 개인 투자자들의 &#x27;빚투&#x27; 자금이 하루 평균 62조원에 육박하고, 국내 증권사들이 이들 대출에서 거둔 이자수익도 1조4000억원에 달함.</li><li class="">원문 기준 핵심 사실을 추가 확인 필요</li><li class="interp">(해석) 빚투 흐름과 연결되는 시장 신호로 보임</li></ul>
+  <dl class="rd-block"><div><dt>제안 R&D 영역</dt><dd>해당 없음</dd></div><div><dt>팩트 근거</dt><dd>빚투 자금 하루 평균 62조원, 증권사 이자수익 1조4000억원</dd></div><div><dt>투자 주체</dt><dd>개인 투자자와 국내 증권사</dd></div><div><dt>투자 목적</dt><dd>주식 투자</dd></div><div><dt>위탁 연구 니즈</dt><dd>팩트 부족으로 판단 보류</dd></div><div><dt>접근 전략</dt><dd>정부의 금융 정책 정합성</dd></div></dl>
+  <footer class="item-foot">
+    <div class="tags"><span class="tag">#투자</span></div>
+    <span class="kw-note">매칭: 투자</span>
+  </footer>
+</article><article class="item-card" id="2306-케이메디허브-상급종합병원-5곳-포함-14개-기관과-의료데이터-활용-활성화-업무협약" data-score="1" data-cred="B">
+  <header class="item-head">
+    <div class="item-badges"><span class="badge cred-b">B</span>
+<span class="badge" style="background:#9ca3af">R&D 1/5</span></div>
+    <h3><a href="https://www.etnews.com/20260706000009" target="_blank" rel="noopener">케이메디허브, 상급종합병원 5곳 포함 14개 기관과 의료데이터 활용 활성화 업무협약</a></h3>
+    <div class="item-meta">
+      <span>기사</span>
+      <span>전자신문 통신/방송</span>
+      <span>2026-07-05</span>
+    </div>
+  </header>
+  <ul class="summary-list"><li class="">대구경북첨단의료산업진흥재단이 대구광역시와 14개 기관과 의료데이터 활용 활성화 업무협약을 체결함.</li><li class="">대구경북첨단의료산업진흥재단이 의료데이터 활용 활성화 협의체를 운영함.</li><li class="interp">(해석) 의료데이터 흐름과 연결되는 시장 신호로 보임</li></ul>
+  <dl class="rd-block"><div><dt>제안 R&D 영역</dt><dd>의료데이터 분석 및 활용 기술 개발</dd></div><div><dt>팩트 근거</dt><dd>대구광역시와 14개 기관이 업무협약을 체결</dd></div><div><dt>투자 주체</dt><dd>대구광역시와 대구경북첨단의료산업진흥재단 등 14개 기관</dd></div><div><dt>투자 목적</dt><dd>의료데이터의 활용을 활성화하고 첨단의료산업을 진흥함.</dd></div><div><dt>위탁 연구 니즈</dt><dd>의료데이터 분석 및 활용 기술 개발의 필요성</dd></div><div><dt>접근 전략</dt><dd>정부의 의료데이터 활용 정책과 연계하여 협의체 운영에 참여함.</dd></div></dl>
+  <footer class="item-foot">
+    <div class="tags"><span class="tag">#M&amp;A</span></div>
+    <span class="kw-note">매칭: mou</span>
+  </footer>
+</article><article class="item-card" id="2344-한투운용-방산-핵심기업-투자-ace-k방산top5-etf-7일-상장" data-score="1" data-cred="A">
+  <header class="item-head">
+    <div class="item-badges"><span class="badge cred-a">A</span>
+<span class="badge" style="background:#9ca3af">R&D 1/5</span></div>
+    <h3><a href="https://www.yna.co.kr/view/AKR20260706022900008" target="_blank" rel="noopener">한투운용, 방산 핵심기업 투자 &#x27;ACE K방산TOP5+ ETF&#x27; 7일 상장</a></h3>
+    <div class="item-meta">
+      <span>기사</span>
+      <span>연합뉴스 산업</span>
+      <span>2026-07-05</span>
+    </div>
+  </header>
+  <ul class="summary-list"><li class="">한국투자신탁운용, 7일 &#x27;ACE K방산TOP5+ ETF&#x27; 상장.</li><li class="">한국투자신탁운용이 7일 &#x27;ACE K방산TOP5+ ETF&#x27;를 상장할 예정임.</li><li class="interp">(해석) 방산 산업 투자 흐름과 연결되는 시장 신호로 보임</li></ul>
+  <dl class="rd-block"><div><dt>제안 R&D 영역</dt><dd>방위 산업 핵심 기술 개발</dd></div><div><dt>팩트 근거</dt><dd>상장 예정일: 7일, 투자 대상: 국내 방위산업 핵심 기업</dd></div><div><dt>투자 주체</dt><dd>한국투자신탁운용</dd></div><div><dt>투자 목적</dt><dd>국내 방위산업 핵심 기업에 투자함.</dd></div><div><dt>위탁 연구 니즈</dt><dd>팩트 부족으로 판단 보류</dd></div><div><dt>접근 전략</dt><dd>정부의 방위 산업 육성 정책 정합</dd></div></dl>
+  <footer class="item-foot">
+    <div class="tags"><span class="tag">#투자</span></div>
+    <span class="kw-note">매칭: 투자</span>
+  </footer>
+</article>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <h3>신뢰도 등급 기준</h3>
+    <ul>
+      <li><strong>A:</strong> 정부·공공기관 원문, 연합뉴스·뉴시스 1차 보도, 공공 R&D·정책기관, 국내 학술지</li>
+      <li><strong>B:</strong> 국내 경제·IT 전문매체, 2차 인용, 기업·공기업 IR/보도자료</li>
+      <li><strong>C:</strong> 익명 소스·미검증 콘텐츠 (자동 생성 시 미사용)</li>
+    </ul>
+  </footer>
+</div>
+
+<script>
+const CHARTS = {"credibility": {"labels": ["A", "B", "C"], "values": [16, 14, 0], "colors": ["#059669", "#2563eb", "#d97706"]}, "rd_scores": {"labels": ["1점", "2점", "3점", "4점", "5점"], "values": [27, 2, 1, 0, 0], "colors": ["#9ca3af", "#6b7280", "#d97706", "#2563eb", "#059669"]}, "sources": {"labels": ["뉴시스 속보", "전자신문 통신/방송", "정책브리핑 경찰청", "파이낸셜뉴스", "연합뉴스 산업", "헤럴드경제", "동아일보 경제", "정책브리핑 산업통상부"], "values": [5, 4, 3, 3, 3, 3, 2, 1]}, "materials": {"labels": ["공식발표(IR·정책)", "기사"], "values": [7, 23]}};
+
+function doughnut(id, data, colors) {
+  new Chart(document.getElementById(id), {
+    type: 'doughnut',
+    data: { labels: data.labels, datasets: [{ data: data.values, backgroundColor: colors || ['#059669','#2563eb','#d97706','#94a3b8'] }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } } }
+  });
+}
+
+function barH(id, labels, values, color) {
+  new Chart(document.getElementById(id), {
+    type: 'bar',
+    data: { labels, datasets: [{ data: values, backgroundColor: color || '#2563eb', borderRadius: 4 }] },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } }, y: { ticks: { font: { size: 10 } } } }
+    }
+  });
+}
+
+function barV(id, labels, values, colors) {
+  new Chart(document.getElementById(id), {
+    type: 'bar',
+    data: { labels, datasets: [{ data: values, backgroundColor: colors, borderRadius: 4 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } }, x: { ticks: { font: { size: 10 } } } }
+    }
+  });
+}
+
+doughnut('credChart', CHARTS.credibility, CHARTS.credibility.colors);
+barV('rdChart', CHARTS.rd_scores.labels, CHARTS.rd_scores.values, CHARTS.rd_scores.colors);
+barH('srcChart', CHARTS.sources.labels, CHARTS.sources.values, '#3b82f6');
+doughnut('matChart', CHARTS.materials);
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const f = btn.dataset.filter;
+    document.querySelectorAll('.item-card').forEach(card => {
+      const score = parseInt(card.dataset.score, 10);
+      const cred = card.dataset.cred;
+      let show = true;
+      if (f === 'high') show = score >= 4;
+      else if (f === 'cred-a') show = cred === 'A';
+      card.style.display = show ? '' : 'none';
+    });
+  });
+});
+</script>
+</body>
+</html>

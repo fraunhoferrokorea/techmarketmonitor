@@ -104,6 +104,32 @@ def daily_refresh_cmd() -> None:
     )
 
 
+@cli.command("daily-html")
+@click.option("--date", "run_date", type=click.DateTime(formats=["%Y-%m-%d"]), default=None)
+@click.option("--all", "regen_all", is_flag=True, default=False, help="Regenerate HTML for every date in DB.")
+def daily_html_cmd(run_date: datetime | None, regen_all: bool) -> None:
+    """Regenerate daily HTML dashboards from stored DB entries (no LLM)."""
+    from src.daily_sync import rebuild_markdown_from_db
+
+    settings = load_settings()
+    _configure_logging(settings.log_level)
+    store = DailyLogStore(settings.database_path)
+
+    if regen_all:
+        dates = store.get_log_dates()
+    elif run_date:
+        dates = [run_date.date()]
+    else:
+        dates = [store.get_log_dates()[-1]] if store.get_log_dates() else []
+
+    results = []
+    for log_date in dates:
+        result = rebuild_markdown_from_db(log_date, store, settings, repolish_db=False)
+        results.append(result)
+
+    click.echo(json.dumps({"dates": len(dates), "results": results}, indent=2, ensure_ascii=False))
+
+
 @cli.command("daily-repair")
 def daily_repair_cmd() -> None:
     """Fix md/DB mismatches (no re-fetch unless markdown exists without DB rows)."""

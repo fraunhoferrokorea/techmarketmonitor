@@ -141,12 +141,20 @@ def save_daily_report(
     out_dir = output_dir or _OUTPUT_BASE
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    report_path = out_dir / f"daily_{log_date.isoformat()}.md"
+    iso = log_date.isoformat()
+    report_path = out_dir / f"daily_{iso}.md"
     report_path.write_text(
         _build_markdown(log_date, articles, top_keywords, recorder),
         encoding="utf-8",
     )
-    logger.info("Daily research log saved → %s", report_path)
+    html_path = out_dir / f"daily_{iso}.html"
+    from src.daily_html_report import build_daily_html
+
+    html_path.write_text(
+        build_daily_html(log_date, articles, top_keywords, recorder),
+        encoding="utf-8",
+    )
+    logger.info("Daily research log saved → %s (dashboard: %s)", report_path, html_path)
     return report_path
 
 
@@ -1361,10 +1369,13 @@ def _build_markdown(
     cred_counts = Counter(_credibility_grade(_credibility(a)) for a in articles)
     author = recorder or os.getenv("DAILY_LOG_RECORDER", "Tech Market Monitor (auto)")
 
+    iso = log_date.isoformat()
     lines: list[str] = [
         "# 국내 R&D 인텔리전스 데일리 로그",
         "",
-        f"날짜: {log_date.isoformat()}",
+        f"📊 **[대시보드 보기](daily_{iso}.html)** · Markdown 원문",
+        "",
+        f"날짜: {iso}",
         f"기록자: {author}",
         f"총 항목 수: {len(articles)}건 (기사 {article_count} / 논문 {paper_count})",
         f"신뢰도 분포: A {cred_counts.get('A', 0)}건 / B {cred_counts.get('B', 0)}건 / C {cred_counts.get('C', 0)}건",

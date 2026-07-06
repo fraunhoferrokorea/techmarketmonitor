@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>국내 R&D 인텔리전스 · 2026-07-02</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #f4f6f9;
+  --surface: #ffffff;
+  --text: #1e293b;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --accent: #1d4ed8;
+  --accent-soft: #dbeafe;
+  --shadow: 0 1px 3px rgba(15,23,42,.08), 0 4px 12px rgba(15,23,42,.04);
+  --radius: 12px;
+  --font: "Pretendard", "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.6; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.page { max-width: 1280px; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; }
+
+.hero {
+  background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 55%, #3b82f6 100%);
+  color: #fff; border-radius: var(--radius); padding: 1.75rem 2rem;
+  box-shadow: var(--shadow); margin-bottom: 1.5rem;
+}
+.hero h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: .35rem; }
+.hero .sub { opacity: .9; font-size: .95rem; }
+.hero .meta { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem; font-size: .85rem; opacity: .85; }
+.hero a { color: #bfdbfe; }
+
+.kpi-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: .75rem; margin-bottom: 1.5rem;
+}
+.kpi {
+  background: var(--surface); border-radius: var(--radius); padding: 1rem 1.1rem;
+  box-shadow: var(--shadow); border: 1px solid var(--border);
+}
+.kpi .val { font-size: 1.75rem; font-weight: 700; color: var(--accent); line-height: 1.2; }
+.kpi .lbl { font-size: .78rem; color: var(--muted); margin-top: .2rem; }
+
+.charts-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem; margin-bottom: 1.5rem;
+}
+.chart-card {
+  background: var(--surface); border-radius: var(--radius); padding: 1rem 1.1rem;
+  box-shadow: var(--shadow); border: 1px solid var(--border);
+}
+.chart-card h2 { font-size: .85rem; color: var(--muted); margin-bottom: .75rem; font-weight: 600; }
+.chart-wrap { position: relative; height: 200px; }
+
+.theme-banner {
+  background: var(--accent-soft); border: 1px solid #93c5fd; border-radius: var(--radius);
+  padding: 1rem 1.25rem; margin-bottom: 1.5rem;
+}
+.theme-banner .kw { font-weight: 600; color: var(--accent); margin-bottom: .35rem; }
+.theme-banner .flow { font-size: 1.05rem; font-weight: 600; }
+
+.section { margin-bottom: 2rem; }
+.section > h2 {
+  font-size: 1.1rem; margin-bottom: 1rem; padding-bottom: .4rem;
+  border-bottom: 2px solid var(--accent); display: inline-block;
+}
+
+.board {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem; align-items: start;
+}
+.board-col-head {
+  font-weight: 700; font-size: .9rem; padding: .5rem .75rem; border-radius: 8px;
+  margin-bottom: .75rem; display: flex; justify-content: space-between;
+}
+.board-col-head.high { background: #d1fae5; color: #065f46; }
+.board-col-head.mid { background: #dbeafe; color: #1e40af; }
+.board-col-head.low { background: #f1f5f9; color: #475569; }
+
+.opp-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 1rem; margin-bottom: .75rem; box-shadow: var(--shadow);
+}
+.opp-head { display: flex; gap: .6rem; align-items: flex-start; margin-bottom: .5rem; }
+.opp-head h3 { font-size: .92rem; line-height: 1.4; }
+.opp-issue { font-size: .85rem; color: var(--muted); margin-bottom: .6rem; }
+.opp-meta { font-size: .8rem; }
+.opp-meta div { margin-bottom: .35rem; }
+.opp-meta dt { font-weight: 600; color: var(--text); display: inline; }
+.opp-meta dt::after { content: ": "; }
+.opp-meta dd { display: inline; color: var(--muted); }
+.ext-link { font-size: .78rem; display: inline-block; margin-top: .5rem; }
+
+.score-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 2.4rem; height: 1.5rem; padding: 0 .4rem;
+  border-radius: 6px; color: #fff; font-size: .75rem; font-weight: 700; flex-shrink: 0;
+}
+.score-badge.sm { min-width: 2rem; height: 1.3rem; font-size: .7rem; }
+
+.insights { display: flex; flex-direction: column; gap: .6rem; }
+.insight-card {
+  display: flex; gap: .75rem; background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: .85rem 1rem; box-shadow: var(--shadow);
+}
+.insight-card p { font-size: .85rem; color: var(--muted); margin: .2rem 0; }
+.insight-card a { font-size: .8rem; }
+
+.filter-bar { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1rem; }
+.filter-btn {
+  border: 1px solid var(--border); background: var(--surface); border-radius: 999px;
+  padding: .35rem .85rem; font-size: .8rem; cursor: pointer; color: var(--text);
+}
+.filter-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+.items-grid { display: grid; gap: 1rem; }
+.item-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 1.1rem 1.25rem; box-shadow: var(--shadow);
+}
+.item-badges { display: flex; flex-wrap: wrap; gap: .35rem; margin-bottom: .5rem; }
+.badge {
+  font-size: .7rem; font-weight: 600; padding: .15rem .5rem; border-radius: 4px;
+  background: #e2e8f0; color: #334155;
+}
+.badge.cred-a { background: #d1fae5; color: #065f46; }
+.badge.cred-b { background: #dbeafe; color: #1e40af; }
+.badge.rel { background: #fef3c7; color: #92400e; }
+.badge.gov { background: #ede9fe; color: #5b21b6; }
+.item-head h3 { font-size: 1rem; margin-bottom: .4rem; line-height: 1.45; }
+.item-meta { display: flex; flex-wrap: wrap; gap: .75rem; font-size: .78rem; color: var(--muted); }
+.item-meta span::before { content: "·"; margin-right: .75rem; color: var(--border); }
+.item-meta span:first-child::before { content: none; margin: 0; }
+
+.summary-list { margin: .75rem 0; padding-left: 1.2rem; font-size: .88rem; }
+.summary-list li { margin-bottom: .3rem; }
+.summary-list li.interp { color: var(--muted); font-style: italic; }
+
+.rd-block { font-size: .82rem; margin: .5rem 0; }
+.rd-block div { margin-bottom: .25rem; }
+.rd-block dt { font-weight: 600; display: inline; }
+.rd-block dt::after { content: ": "; }
+.rd-block dd { display: inline; color: var(--muted); }
+
+.item-foot { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
+  gap: .5rem; margin-top: .75rem; padding-top: .6rem; border-top: 1px solid var(--border); }
+.tags { display: flex; flex-wrap: wrap; gap: .3rem; }
+.tag { font-size: .72rem; background: #f1f5f9; color: #475569; padding: .1rem .45rem; border-radius: 4px; }
+.kw-note { font-size: .75rem; color: var(--muted); }
+
+.muted { color: var(--muted); font-size: .9rem; }
+.footer { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border);
+  font-size: .78rem; color: var(--muted); }
+.footer h3 { font-size: .85rem; color: var(--text); margin-bottom: .5rem; }
+.footer ul { padding-left: 1.2rem; }
+.footer li { margin-bottom: .25rem; }
+
+@media (max-width: 640px) {
+  .hero { padding: 1.25rem; }
+  .hero h1 { font-size: 1.25rem; }
+  .chart-wrap { height: 180px; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="hero">
+    <h1>국내 R&D 인텔리전스 데일리 로그</h1>
+    <p class="sub">프라운호퍼 한국 · 국내 투자·R&D 타겟 모니터링</p>
+    <div class="meta">
+      <span>📅 2026-07-02</span>
+      <span>✍️ Tech Market Monitor (auto)</span>
+      <span>📄 <a href="daily_2026-07-02.md">Markdown 보기</a></span>
+    </div>
+  </header>
+
+  <div class="kpi-grid">
+    <div class="kpi"><div class="val">7</div><div class="lbl">총 수집 항목</div></div>
+    <div class="kpi"><div class="val">7</div><div class="lbl">기사</div></div>
+    <div class="kpi"><div class="val">0</div><div class="lbl">논문</div></div>
+    <div class="kpi"><div class="val">1</div><div class="lbl">R&D 적합 4점+</div></div>
+    <div class="kpi"><div class="val">7</div><div class="lbl">신뢰도 A</div></div>
+    <div class="kpi"><div class="val">0</div><div class="lbl">신뢰도 B</div></div>
+  </div>
+
+  <div class="charts-grid">
+    <div class="chart-card"><h2>신뢰도 분포</h2><div class="chart-wrap"><canvas id="credChart"></canvas></div></div>
+    <div class="chart-card"><h2>R&D 적합도 분포</h2><div class="chart-wrap"><canvas id="rdChart"></canvas></div></div>
+    <div class="chart-card"><h2>출처별 항목</h2><div class="chart-wrap"><canvas id="srcChart"></canvas></div></div>
+    <div class="chart-card"><h2>자료유형</h2><div class="chart-wrap"><canvas id="matChart"></canvas></div></div>
+  </div>
+
+  <div class="theme-banner">
+    <div class="kw">모니터링 키워드: 전력계통 · 스마트그리드 · 파워그리드</div>
+    <div class="flow">국내 R&amp;D 위탁·협력 가능성이 있는 투자·정책 이슈가 부각된 날</div>
+    <p class="muted" style="margin-top:.4rem;font-size:.85rem">
+      오늘 수집 7건 (R&D 적합 4점 이상 1건)
+    </p>
+  </div>
+
+  <section class="section" id="board">
+    <h2>R&D 기회 스캔 보드</h2>
+    <div class="board">
+      <div class="board-col">
+  <div class="board-col-head high">높음 (4–5점) <span>1</span></div>
+  <article class="opp-card high">
+  <div class="opp-head">
+    <span class="score-badge" style="background:#059669">5/5</span>
+    <h3><a href="#0000-직류dc-실증을-넘어-산업으로-정부와-산업계-직류-산업-확산-추진">직류(DC), 실증을 넘어 산업으로… 정부와 산업계, 직류 산업 확산 추진</a></h3>
+  </div>
+  <p class="opp-issue">기후에너지환경부와 한국전력공사가 직류 산업 확산을 추진하고, 관련 기업과 연구기관이 참여한 &#x27;케이-디씨(K-DC) 산업 확산 2026&#x27;을 개최했음.</p>
+  <dl class="opp-meta">
+    <div><dt>고객 타겟</dt><dd>기후에너지환경부, 한국전력공사, 엘에스(LS)일렉트릭, 엘에스(LS)전선, 효성중공업, 에이치디(HD)현대일렉트릭, 엘지(LG)전자 등</dd></div>
+    <div><dt>R&D 연계</dt><dd>직류 배전 기술개발과 실증 성과를 산업현장과 수요처 중심의 사업화 단계로 확산하는 연구개발</dd></div>
+    <div><dt>팩트 체크</dt><dd>기후에너지환경부와 한국전력공사, &#x27;케이-디씨(K-DC) 산업 확산 2026&#x27; 개최, 표준·인증 체계 마련, 제도개선, 사업유형 발굴 등을 추진</dd></div>
+  </dl>
+  <a class="ext-link" href="https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769266" target="_blank" rel="noopener">원문 ↗</a>
+</article>
+</div>
+      
+      <div class="board-col">
+  <div class="board-col-head low">참고 (2점) <span>1</span></div>
+  <article class="opp-card low">
+  <div class="opp-head">
+    <span class="score-badge" style="background:#6b7280">2/5</span>
+    <h3><a href="#0000-과기정통부-향후-5년간-기술주도-성장을-뒷받침할-투자전략-제시">과기정통부, 향후 5년간 &quot;기술주도 성장&quot;을 뒷받침할 투자전략 제시</a></h3>
+  </div>
+  <p class="opp-issue">과기정통부, 5년간 기술주도 성장 뒷받침할 연구개발 투자전략 제시하고, 전력계통 및 스마트그리드 기술 개발을 위한 투자 계획 수립함.</p>
+  <dl class="opp-meta">
+    <div><dt>고객 타겟</dt><dd>과기정통부</dd></div>
+    <div><dt>R&D 연계</dt><dd>전력계통 및 스마트그리드 기술 개발을 위한 연구개발 투자전략 수립</dd></div>
+    <div><dt>팩트 체크</dt><dd>제2차 국가연구개발 중장기 투자전략(안) 공청회 개최, 5년간 연구개발 4대 전략 8대 과제 발표</dd></div>
+  </dl>
+  <a class="ext-link" href="https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769318" target="_blank" rel="noopener">원문 ↗</a>
+</article>
+</div>
+    </div>
+    <p class="muted" style="margin-top:.75rem">이하 5건은 R&D 적합 1점 또는 국내 투자 신호 미약으로 보드에서 생략</p>
+  </section>
+
+  <section class="section" id="insights">
+    <h2>국내 R&D 타겟 시사점</h2>
+    <div class="insights"><div class="insight-card">
+  <span class="score-badge sm" style="background:#059669">5/5</span>
+  <div>
+    <strong>기후에너지환경부, 한국전력공사, 엘에스(LS)일렉트릭, 엘에스(LS)전선, 효성중공업, 에이치디(HD)현대일렉트릭, 엘지(LG)전자 등</strong>
+    <p>목적: 직류 산업의 수출산업화를 지원하고, 국가 전력망의 효율적인 운영과 전력산업 고도화를 관점에서 전략적으로 육성함. | 니즈: 직류 배전 기술개발과 실증 성과를 산업현장과 수요처 중심의 사업화 단계로 확산하는 연구개발이 필요함. | 접근: 정부와 산업계의 수요와 경제성 등을 고려해 직류망의 실계통 적용을 추진하고, 표준·인증 체계 마련, 제도개선, 사업유형 발굴 등을 추진함.</p>
+    <a href="https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769266" target="_blank" rel="noopener">직류(DC), 실증을 넘어 산업으로… 정부와 산업계, 직류 산업 확산 추진 ↗</a>
+  </div>
+</div><div class="insight-card">
+  <span class="score-badge sm" style="background:#6b7280">2/5</span>
+  <div>
+    <strong>과기정통부</strong>
+    <p>목적: 저성장 위기 돌파를 위한 기술주도 성장 | 니즈: 전력계통 및 스마트그리드 기술 개발을 위한 고난도 연구개발 | 접근: 정부의 정책 정합성을 고려한 연구개발 투자전략 수립</p>
+    <a href="https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769318" target="_blank" rel="noopener">과기정통부, 향후 5년간 &quot;기술주도 성장&quot;을 뒷받침할 투자전략 제시 ↗</a>
+  </div>
+</div><div class="insight-card">
+  <span class="score-badge sm" style="background:#9ca3af">1/5</span>
+  <div>
+    <strong>산림청 국립산림과학원</strong>
+    <p>목적: 산림바이오자원을 활용한 원천기술의 실질적인 혜택을 국민에게 제공하기 위함 | 니즈: 산림바이오자원 활용 기술 개발의 고난도 연구 개발 격차 | 접근: 기술 이전 및 사후 관리를 통한 산림바이오자원 활용 기술 개발의 협력 가능성</p>
+    <a href="https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769281" target="_blank" rel="noopener">&#x27;보리밥나무 탈모 예방&#x27; 원천기술 제품 품질 관리 나선다 - 국립산림과학원, 보리밥나무 특 ↗</a>
+  </div>
+</div><div class="insight-card">
+  <span class="score-badge sm" style="background:#9ca3af">1/5</span>
+  <div>
+    <strong>산업통상부</strong>
+    <p>목적: 로봇 인재 양성 및 연구 기반 확충 | 니즈: 로봇 기술 개발 및 실증과제에 대한 기술 격차 해소 | 접근: 산업부의 로봇 분야 국책 R&amp;D 및 실증과제에 대한 기술 지원 및 협력</p>
+    <a href="https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769327" target="_blank" rel="noopener">M.AX를 이끌어갈 미래인재, 로보컵에서 실력을 겨룬다! ↗</a>
+  </div>
+</div><div class="insight-card">
+  <span class="score-badge sm" style="background:#9ca3af">1/5</span>
+  <div>
+    <strong>산림청 국립산림과학원</strong>
+    <p>목적: 기후위기에 대응하고 국제사회 탄소중립에 기여 | 니즈: 이탄지 복원 모델 개발과 탄소저장량 평가 기술 개발 | 접근: 국제 공동 연구를 통해 선행 기술을 가진 국가와 현지 연구자와 노하우를 공유</p>
+    <a href="https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769247" target="_blank" rel="noopener">한·인니 5년 공동 연구 결실...이탄지 복원 통한 탄소저장량 평가서 발간 - 국립산림과학 ↗</a>
+  </div>
+</div></div>
+  </section>
+
+  <section class="section" id="items">
+    <h2>항목 기록</h2>
+    <div class="filter-bar">
+      <button class="filter-btn active" data-filter="all">전체 (7)</button>
+      <button class="filter-btn" data-filter="high">R&D 4점+ (1)</button>
+      <button class="filter-btn" data-filter="cred-a">신뢰도 A (7)</button>
+    </div>
+    <div class="items-grid" id="itemsGrid">
+      <article class="item-card" id="0000-직류dc-실증을-넘어-산업으로-정부와-산업계-직류-산업-확산-추진" data-score="5" data-cred="A">
+  <header class="item-head">
+    <div class="item-badges"><span class="badge cred-a">A</span>
+<span class="badge" style="background:#059669">R&D 5/5</span><span class="badge rel">직접</span></div>
+    <h3><a href="https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769266" target="_blank" rel="noopener">직류(DC), 실증을 넘어 산업으로… 정부와 산업계, 직류 산업 확산 추진</a></h3>
+    <div class="item-meta">
+      <span>공식발표(IR·정책)</span>
+      <span>정책브리핑 기후에너지환경부</span>
+      <span>2026-07-02</span>
+    </div>
+  </header>
+  <ul class="summary-list"><li class="">기후에너지환경부와 한국전력공사가 직류 산업 확산을 추진하고, 관련 기업과 연구기관이 참여한 &#x27;케이-디씨(K-DC) 산업 확산 2026&#x27;을 개최했음.</li><li class="">기후에너지환경부와 한국전력공사가 직류 산업 확산을 추진하고, 관련 기업과 연구기관이 참여한 &#x27;케이-디씨(K-DC) 산업 확산 2026&#x27;을 개최함.</li><li class="interp">(해석) 직류 산업은 인공지능 데이터센터, 재생에너지 확대 등으로 성장잠재력이 높은 산업이며, 국가 전력망의 효율적인 운영과 전력산업 고도화 관점에서도 전략적으로 육성할 필요가 있음</li></ul>
+  <dl class="rd-block"><div><dt>제안 R&D 영역</dt><dd>직류 배전 기술개발과 실증 성과를 산업현장과 수요처 중심의 사업화 단계로 확산하는 연구개발</dd></div><div><dt>팩트 근거</dt><dd>기후에너지환경부와 한국전력공사, &#x27;케이-디씨(K-DC) 산업 확산 2026&#x27; 개최, 표준·인증 체계 마련, 제도개선, 사업유형 발굴 등을 추진</dd></div><div><dt>투자 주체</dt><dd>기후에너지환경부, 한국전력공사, 엘에스(LS)일렉트릭, 엘에스(LS)전선, 효성중공업, 에이치디(HD)현대일렉트릭, 엘지(LG)전자 등</dd></div><div><dt>투자 목적</dt><dd>직류 산업의 수출산업화를 지원하고, 국가 전력망의 효율적인 운영과 전력산업 고도화를 관점에서 전략적으로 육성함.</dd></div><div><dt>위탁 연구 니즈</dt><dd>직류 배전 기술개발과 실증 성과를 산업현장과 수요처 중심의 사업화 단계로 확산하는 연구개발이 필요함.</dd></div><div><dt>접근 전략</dt><dd>정부와 산업계의 수요와 경제성 등을 고려해 직류망의 실계통 적용을 추진하고, 표준·인증 체계 마련, 제도개선, 사업유형 발굴 등을 추진함.</dd></div></dl>
+  <footer class="item-foot">
+    <div class="tags"><span class="tag">#제품출시</span><span class="tag">#기술</span></div>
+    <span class="kw-note">매칭: 정부·R&amp;D 타깃, 에너지저장, 전력망, 연구개발</span>
+  </footer>
+</article><article class="item-card" id="0000-보리밥나무-탈모-예방-원천기술-제품-품질-관리-나선다-국립산림과학원-보리밥나무-특허-제품-효과-유지-위해-사후관리-강화" data-score="1" data-cred="A">
+  <header class="item-head">
+    <div class="item-badges"><span class="badge cred-a">A</span>
+<span class="badge" style="background:#9ca3af">R&D 1/5</span><span class="badge gov">정부·R&D 타깃</span></div>
+    <h3><a href="https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769281" target="_blank" rel="noopener">&#x27;보리밥나무 탈모 예방&#x27; 원천기술 제품 품질 관리 나선다 - 국립산림과학원, 보리밥나무 특허 제품 효과 유지 위해 사후관리 강화-</a></h3>
+    <div class="item-meta">
+      <span>공식발표(IR·정책)</span>
+      <span>정책브리핑 산림청</span>
+      <span>2026-07-02</span>
+    </div>
+  </header>
+  <ul class="summary-list"><li class="">산림청 국립산림과학원이 보리밥나무 탈모 예방 원천기술 제품의 품질 관리를 강화할 계획임.</li><li class="">산림청 국립산림과학원이 보리밥나무 탈모 예방 원천기술 제품의 품질 관리를 강화할 계획임</li><li class="interp">(해석) 산림바이오자원 흐름과 연결되는 시장 신호로 보임</li></ul>
+  <dl class="rd-block"><div><dt>제안 R&D 영역</dt><dd>산림바이오자원 활용 기술 개발</dd></div><div><dt>팩트 근거</dt><dd>국립산림과학원은 보리밥나무 추출물 탈모 예방 기능성 특허기술을 생활소재 생산업체에 이전함</dd></div><div><dt>투자 주체</dt><dd>산림청 국립산림과학원</dd></div><div><dt>투자 목적</dt><dd>산림바이오자원을 활용한 원천기술의 실질적인 혜택을 국민에게 제공하기 위함</dd></div><div><dt>위탁 연구 니즈</dt><dd>산림바이오자원 활용 기술 개발의 고난도 연구 개발 격차</dd></div><div><dt>접근 전략</dt><dd>기술 이전 및 사후 관리를 통한 산림바이오자원 활용 기술 개발의 협력 가능성</dd></div></dl>
+  <footer class="item-foot">
+    <div class="tags"><span class="tag">#정부계획</span><span class="tag">#협력</span><span class="tag">#제품출시</span><span class="tag">#기술</span></div>
+    <span class="kw-note">매칭: 연구개발, 기술이전</span>
+  </footer>
+</article><article class="item-card" id="0000-max를-이끌어갈-미래인재-로보컵에서-실력을-겨룬다" data-score="1" data-cred="A">
+  <header class="item-head">
+    <div class="item-badges"><span class="badge cred-a">A</span>
+<span class="badge" style="background:#9ca3af">R&D 1/5</span><span class="badge gov">정부·R&D 타깃</span></div>
+    <h3><a href="https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769327" target="_blank" rel="noopener">M.AX를 이끌어갈 미래인재, 로보컵에서 실력을 겨룬다!</a></h3>
+    <div class="item-meta">
+      <span>공식발표(IR·정책)</span>
+      <span>정책브리핑 산업통상부</span>
+      <span>2026-07-02</span>
+    </div>
+  </header>
+  <ul class="summary-list"><li class="">산업통상부, 2026년 하반기 &#x27;휴머노이드 특성화 대학원&#x27; 신설 및 로봇 분야 국책 R&amp;D 지원 계획.</li><li class="">산업통상부는 2026년 하반기 &#x27;휴머노이드 특성화 대학원&#x27;을 신설하여 석·박사급 전문인력을 양성할 예정임.</li><li class="interp">(해석) 로봇 기술 흐름과 연결되는 시장 신호로 보임</li></ul>
+  <dl class="rd-block"><div><dt>제안 R&D 영역</dt><dd>로봇 분야 국책 R&amp;D 및 실증과제에 대한 기술 개발 및 지원</dd></div><div><dt>팩트 근거</dt><dd>산업통상부의 2026년 하반기 &#x27;휴머노이드 특성화 대학원&#x27; 신설 및 로봇 분야 국책 R&amp;D 지원 계획</dd></div><div><dt>투자 주체</dt><dd>산업통상부</dd></div><div><dt>투자 목적</dt><dd>로봇 인재 양성 및 연구 기반 확충</dd></div><div><dt>위탁 연구 니즈</dt><dd>로봇 기술 개발 및 실증과제에 대한 기술 격차 해소</dd></div><div><dt>접근 전략</dt><dd>산업부의 로봇 분야 국책 R&amp;D 및 실증과제에 대한 기술 지원 및 협력</dd></div></dl>
+  <footer class="item-foot">
+    <div class="tags"><span class="tag">#정부계획</span><span class="tag">#협력</span><span class="tag">#제품출시</span><span class="tag">#기술</span></div>
+    <span class="kw-note">매칭: 정부·R&amp;D 타깃, r&amp;d, 산업통상부</span>
+  </footer>
+</article><article class="item-card" id="0000-과기정통부-향후-5년간-기술주도-성장을-뒷받침할-투자전략-제시" data-score="2" data-cred="A">
+  <header class="item-head">
+    <div class="item-badges"><span class="badge cred-a">A</span>
+<span class="badge" style="background:#6b7280">R&D 2/5</span></div>
+    <h3><a href="https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769318" target="_blank" rel="noopener">과기정통부, 향후 5년간 &quot;기술주도 성장&quot;을 뒷받침할 투자전략 제시</a></h3>
+    <div class="item-meta">
+      <span>공식발표(IR·정책)</span>
+      <span>정책브리핑 과학기술정보통신부</span>
+      <span>2026-07-02</span>
+    </div>
+  </header>
+  <ul class="summary-list"><li class="">과기정통부, 향후 5년간 기술주도 성장 뒷받침할 투자전략 제시함.</li><li class="">과기정통부는 제2차 국가연구개발 중장기 투자전략(안) 공청회를 개최하고, 향후 5년간 연구개발 4대 전략 8대 과제를 발표함.</li><li class="interp">(해석) 연구개발 흐름과 연결되는 시장 신호로 보임</li></ul>
+  <dl class="rd-block"><div><dt>제안 R&D 영역</dt><dd>전력계통 및 스마트그리드 기술 개발을 위한 연구개발 투자전략 수립</dd></div><div><dt>팩트 근거</dt><dd>제2차 국가연구개발 중장기 투자전략(안) 공청회 개최, 5년간 연구개발 4대 전략 8대 과제 발표</dd></div><div><dt>투자 주체</dt><dd>과기정통부</dd></div><div><dt>투자 목적</dt><dd>저성장 위기 돌파를 위한 기술주도 성장</dd></div><div><dt>위탁 연구 니즈</dt><dd>전력계통 및 스마트그리드 기술 개발을 위한 고난도 연구개발</dd></div><div><dt>접근 전략</dt><dd>정부의 정책 정합성을 고려한 연구개발 투자전략 수립</dd></div></dl>
+  <footer class="item-foot">
+    <div class="tags"><span class="tag">#투자</span><span class="tag">#제품출시</span><span class="tag">#기술</span><span class="tag">#기업동향</span></div>
+    <span class="kw-note">매칭: 연구개발, 투자, 과기정통부</span>
+  </footer>
+</article><article class="item-card" id="0000-선박-길잡이-국제표준-차세대-전자해도s-101-전-해역에-제공" data-score="1" data-cred="A">
+  <header class="item-head">
+    <div class="item-badges"><span class="badge cred-a">A</span>
+<span class="badge" style="background:#9ca3af">R&D 1/5</span><span class="badge gov">정부·R&D 타깃</span></div>
+    <h3><a href="https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769272" target="_blank" rel="noopener">선박 길잡이 &#x27;국제표준 차세대 전자해도(S-101)&#x27; 전 해역에 제공</a></h3>
+    <div class="item-meta">
+      <span>공식발표(IR·정책)</span>
+      <span>정책브리핑 해양수산부</span>
+      <span>2026-07-02</span>
+    </div>
+  </header>
+  <ul class="summary-list"><li class="">해양수산부 국립해양조사원이 7월 3일부터 우리나라 연안 전 해역에 차세대 국제표준 전자해도인 &#x27;S-101 전자해도&#x27;를 공식 간행함.</li><li class="">해양수산부 국립해양조사원이 차세대 국제표준 전자해도인 &#x27;S-101 전자해도&#x27;를 공식 간행함</li><li class="interp">(해석) 전자해도 흐름과 연결되는 시장 신호로 보임</li></ul>
+  <dl class="rd-block"><div><dt>제안 R&D 영역</dt><dd>해양정보 연계 기술 개발</dd></div><div><dt>팩트 근거</dt><dd>국립해양조사원이 S-101 전자해도 서비스를 위해 2026년 5월과 6월 두 차례에 걸쳐 실제 선박을 이용한 검증을 마침</dd></div><div><dt>투자 주체</dt><dd>해양수산부 국립해양조사원</dd></div><div><dt>투자 목적</dt><dd>해양 안전과 디지털 항해환경변화에 대응</dd></div><div><dt>위탁 연구 니즈</dt><dd>디지털 기반 해양정보 연계 기술 개발</dd></div><div><dt>접근 전략</dt><dd>해양수산부의 디지털 항해환경 구축 정책과 연계</dd></div></dl>
+  <footer class="item-foot">
+    <div class="tags"><span class="tag">#정부계획</span><span class="tag">#협력</span><span class="tag">#제품출시</span><span class="tag">#규제</span></div>
+    <span class="kw-note">매칭: 정부·R&amp;D 타깃</span>
+  </footer>
+</article><article class="item-card" id="0000-한인니-5년-공동-연구-결실이탄지-복원-통한-탄소저장량-평가서-발간-국립산림과학원-인도네시아-이탄지-복원으로-탄소중립기후위기-대응-선도" data-score="1" data-cred="A">
+  <header class="item-head">
+    <div class="item-badges"><span class="badge cred-a">A</span>
+<span class="badge" style="background:#9ca3af">R&D 1/5</span><span class="badge gov">정부·R&D 타깃</span></div>
+    <h3><a href="https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769247" target="_blank" rel="noopener">한·인니 5년 공동 연구 결실...이탄지 복원 통한 탄소저장량 평가서 발간 - 국립산림과학원, 인도네시아 이탄지 복원으로 탄소중립·기후위기 대응 선도 -</a></h3>
+    <div class="item-meta">
+      <span>공식발표(IR·정책)</span>
+      <span>정책브리핑 산림청</span>
+      <span>2026-07-02</span>
+    </div>
+  </header>
+  <ul class="summary-list"><li class="">산림청 국립산림과학원이 인도네시아와 5년간 공동 연구한 이탄지 복원 연구 성과를 담은 보고서를 발간했음.</li><li class="">산림청 국립산림과학원은 인도네시아와 5년간 공동 연구한 이탄지 복원 연구 성과를 담은 보고서를 발간했음</li><li class="interp">(해석) 산림 복원 흐름과 연결되는 시장 신호로 보임</li></ul>
+  <dl class="rd-block"><div><dt>제안 R&D 영역</dt><dd>탄소저장량 평가 기술 개발</dd></div><div><dt>팩트 근거</dt><dd>2021년부터 5년간 인도네시아 남수마트라주에서 연구 수행</dd></div><div><dt>투자 주체</dt><dd>산림청 국립산림과학원</dd></div><div><dt>투자 목적</dt><dd>기후위기에 대응하고 국제사회 탄소중립에 기여</dd></div><div><dt>위탁 연구 니즈</dt><dd>이탄지 복원 모델 개발과 탄소저장량 평가 기술 개발</dd></div><div><dt>접근 전략</dt><dd>국제 공동 연구를 통해 선행 기술을 가진 국가와 현지 연구자와 노하우를 공유</dd></div></dl>
+  <footer class="item-foot">
+    <div class="tags"><span class="tag">#정부계획</span><span class="tag">#협력</span><span class="tag">#제품출시</span><span class="tag">#기술</span></div>
+    <span class="kw-note">매칭: 정부·R&amp;D 타깃</span>
+  </footer>
+</article><article class="item-card" id="0000-허장-재정경제부-2차관-해외-파견-재경관들과-영상회의-개최" data-score="1" data-cred="A">
+  <header class="item-head">
+    <div class="item-badges"><span class="badge cred-a">A</span>
+<span class="badge" style="background:#9ca3af">R&D 1/5</span></div>
+    <h3><a href="https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769278" target="_blank" rel="noopener">허장 재정경제부 2차관, 해외 파견 재경관들과 영상회의 개최</a></h3>
+    <div class="item-meta">
+      <span>공식발표(IR·정책)</span>
+      <span>정책브리핑 재정경제부</span>
+      <span>2026-07-02</span>
+    </div>
+  </header>
+  <ul class="summary-list"><li class="">허장 재정경제부 2차관, 해외 파견 재경관들과 영상회의 개최 - 재정경제부는 해외 파견 재경관들과 영상회의를 개최하여 경제협력 및 투자 확대를 논의함.</li><li class="">허장 재정경제부 2차관은 7.2일(목) 10:00 정부서울청사에서 재경관 영상회의를 주재하였음</li><li class="interp">(해석) 재정경제부 흐름과 연결되는 시장 신호로 보임</li></ul>
+  <dl class="rd-block"><div><dt>제안 R&D 영역</dt><dd>국제 경제협력 및 투자 확대와 관련한 R&amp;D 협력</dd></div><div><dt>팩트 근거</dt><dd>명시 없음</dd></div><div><dt>투자 주체</dt><dd>재정경제부</dd></div><div><dt>투자 목적</dt><dd>경제협력 및 투자 확대</dd></div><div><dt>위탁 연구 니즈</dt><dd>팩트 부족으로 판단 보류</dd></div><div><dt>접근 전략</dt><dd>정부의 정책 정합성과 연계</dd></div></dl>
+  <footer class="item-foot">
+    <div class="tags"><span class="tag">#투자</span><span class="tag">#제품출시</span><span class="tag">#기술</span></div>
+    <span class="kw-note">매칭: 정부·R&amp;D 타깃</span>
+  </footer>
+</article>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <h3>신뢰도 등급 기준</h3>
+    <ul>
+      <li><strong>A:</strong> 정부·공공기관 원문, 연합뉴스·뉴시스 1차 보도, 공공 R&D·정책기관, 국내 학술지</li>
+      <li><strong>B:</strong> 국내 경제·IT 전문매체, 2차 인용, 기업·공기업 IR/보도자료</li>
+      <li><strong>C:</strong> 익명 소스·미검증 콘텐츠 (자동 생성 시 미사용)</li>
+    </ul>
+  </footer>
+</div>
+
+<script>
+const CHARTS = {"credibility": {"labels": ["A", "B", "C"], "values": [7, 0, 0], "colors": ["#059669", "#2563eb", "#d97706"]}, "rd_scores": {"labels": ["1점", "2점", "3점", "4점", "5점"], "values": [5, 1, 0, 0, 1], "colors": ["#9ca3af", "#6b7280", "#d97706", "#2563eb", "#059669"]}, "sources": {"labels": ["정책브리핑 산림청", "정책브리핑 재정경제부", "정책브리핑 산업통상부", "정책브리핑 해양수산부", "정책브리핑 과학기술정보통신부", "정책브리핑 기후에너지환경부"], "values": [2, 1, 1, 1, 1, 1]}, "materials": {"labels": ["공식발표(IR·정책)"], "values": [7]}};
+
+function doughnut(id, data, colors) {
+  new Chart(document.getElementById(id), {
+    type: 'doughnut',
+    data: { labels: data.labels, datasets: [{ data: data.values, backgroundColor: colors || ['#059669','#2563eb','#d97706','#94a3b8'] }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } } }
+  });
+}
+
+function barH(id, labels, values, color) {
+  new Chart(document.getElementById(id), {
+    type: 'bar',
+    data: { labels, datasets: [{ data: values, backgroundColor: color || '#2563eb', borderRadius: 4 }] },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } }, y: { ticks: { font: { size: 10 } } } }
+    }
+  });
+}
+
+function barV(id, labels, values, colors) {
+  new Chart(document.getElementById(id), {
+    type: 'bar',
+    data: { labels, datasets: [{ data: values, backgroundColor: colors, borderRadius: 4 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } }, x: { ticks: { font: { size: 10 } } } }
+    }
+  });
+}
+
+doughnut('credChart', CHARTS.credibility, CHARTS.credibility.colors);
+barV('rdChart', CHARTS.rd_scores.labels, CHARTS.rd_scores.values, CHARTS.rd_scores.colors);
+barH('srcChart', CHARTS.sources.labels, CHARTS.sources.values, '#3b82f6');
+doughnut('matChart', CHARTS.materials);
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const f = btn.dataset.filter;
+    document.querySelectorAll('.item-card').forEach(card => {
+      const score = parseInt(card.dataset.score, 10);
+      const cred = card.dataset.cred;
+      let show = true;
+      if (f === 'high') show = score >= 4;
+      else if (f === 'cred-a') show = cred === 'A';
+      card.style.display = show ? '' : 'none';
+    });
+  });
+});
+</script>
+</body>
+</html>
