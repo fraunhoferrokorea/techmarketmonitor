@@ -7,7 +7,10 @@ from collections import Counter
 from datetime import date
 from typing import Any
 
+from pathlib import Path
+
 from src.daily_report import (
+    _DEFAULT_DASHBOARD_BASE,
     _build_item_slugs,
     _build_rd_daily_theme,
     _build_summary_lines,
@@ -221,6 +224,47 @@ def _item_records(
     return records
 
 
+def refresh_daily_index_html(output_dir: Path) -> Path:
+    """Write index.html listing all daily dashboard pages (GitHub Pages entry)."""
+    files = sorted(output_dir.glob("daily_*.html"), reverse=True)
+    rows = []
+    for path in files:
+        if path.name == "index.html":
+            continue
+        date_part = path.stem.replace("daily_", "")
+        rows.append(f'<li><a href="{_esc(path.name)}">{_esc(date_part)}</a></li>')
+    body = "\n".join(rows) if rows else '<li class="muted">아직 생성된 데일리 대시보드가 없습니다.</li>'
+    index_path = output_dir / "index.html"
+    index_path.write_text(
+        f"""<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>국내 R&D 인텔리전스 데일리 대시보드</title>
+<style>
+body {{ font-family: "Pretendard", "Noto Sans KR", sans-serif; max-width: 640px; margin: 2rem auto; padding: 0 1rem; color: #1e293b; }}
+h1 {{ font-size: 1.25rem; color: #1d4ed8; }}
+p {{ color: #64748b; font-size: .9rem; }}
+ul {{ line-height: 2; padding-left: 1.2rem; }}
+a {{ color: #1d4ed8; text-decoration: none; font-weight: 600; }}
+a:hover {{ text-decoration: underline; }}
+.muted {{ color: #94a3b8; }}
+</style>
+</head>
+<body>
+<h1>국내 R&D 인텔리전스 · 데일리 대시보드</h1>
+<p>프라운호퍼 한국 · GitHub Pages에서 인포그래픽으로 열람</p>
+<ul>
+{body}
+</ul>
+</body>
+</html>""",
+        encoding="utf-8",
+    )
+    return index_path
+
+
 def build_daily_html(
     log_date: date,
     articles: list[SummarizedArticle],
@@ -246,7 +290,10 @@ def build_daily_html(
     items = _item_records(sorted_articles, log_date, kws, slugs)
 
     date_str = log_date.isoformat()
-    md_link = f"daily_{date_str}.md"
+    from src.daily_report import daily_markdown_github_url
+
+    md_link = daily_markdown_github_url(log_date)
+    pages_index = f"{_DEFAULT_DASHBOARD_BASE.rstrip('/')}/"
 
     opp_high = [c for c in opportunities if c["tier"] == "high"]
     opp_mid = [c for c in opportunities if c["tier"] == "mid"]
@@ -620,6 +667,7 @@ a:hover {{ text-decoration: underline; }}
       <span>📅 {date_str}</span>
       <span>✍️ {_esc(author)}</span>
       <span>📄 <a href="{_esc(md_link)}">상세 원문 (Markdown)</a></span>
+      <span>📋 <a href="{_esc(pages_index)}">전체 목록</a></span>
     </div>
   </header>
 

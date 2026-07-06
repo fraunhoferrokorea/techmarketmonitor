@@ -125,6 +125,25 @@ _CATEGORY_MATERIAL_TYPE = {
     "korean": "기사",
 }
 
+# GitHub renders .md but shows .html as source — link md files to Pages for live dashboard.
+_DEFAULT_DASHBOARD_BASE = "https://yenaalisonhong.github.io/techmarketmonitor"
+
+
+def daily_dashboard_public_url(log_date: date, base: str | None = None) -> str:
+    """Public URL where the HTML dashboard renders (GitHub Pages)."""
+    root = (base if base is not None else os.getenv("DAILY_DASHBOARD_BASE_URL", _DEFAULT_DASHBOARD_BASE)).strip()
+    iso = log_date.isoformat()
+    if root.lower() in ("", "relative", "local"):
+        return f"daily_{iso}.html"
+    return f"{root.rstrip('/')}/daily_{iso}.html"
+
+
+def daily_markdown_github_url(log_date: date) -> str:
+    """GitHub blob URL for the daily markdown (renders on github.com)."""
+    repo = os.getenv("GITHUB_REPO_URL", "https://github.com/yenaalisonhong/techmarketmonitor").strip()
+    iso = log_date.isoformat()
+    return f"{repo.rstrip('/')}/blob/main/output/daily/daily_{iso}.md"
+
 
 def save_daily_report(
     log_date: date,
@@ -154,6 +173,9 @@ def save_daily_report(
         build_daily_html(log_date, articles, top_keywords, recorder),
         encoding="utf-8",
     )
+    from src.daily_html_report import refresh_daily_index_html
+
+    refresh_daily_index_html(out_dir)
     logger.info("Daily research log saved → %s (dashboard: %s)", report_path, html_path)
     return report_path
 
@@ -1370,10 +1392,13 @@ def _build_markdown(
     author = recorder or os.getenv("DAILY_LOG_RECORDER", "Tech Market Monitor (auto)")
 
     iso = log_date.isoformat()
+    dashboard_url = daily_dashboard_public_url(log_date)
     lines: list[str] = [
         "# 국내 R&D 인텔리전스 데일리 로그",
         "",
-        f"📊 **인포그래픽 대시보드 (권장):** [daily_{iso}.html](daily_{iso}.html) · [Markdown 상세 원문](daily_{iso}.md)",
+        f"📊 **인포그래픽 대시보드 (권장):** [열기]({dashboard_url}) · [Markdown 상세 원문](daily_{iso}.md)",
+        "",
+        f"> GitHub에서 `.html` 파일은 코드만 보입니다. 위 **열기** 링크(GitHub Pages)로 인포그래픽을 확인하세요.",
         "",
         f"날짜: {iso}",
         f"기록자: {author}",

@@ -39,6 +39,13 @@ def _article(**overrides) -> SummarizedArticle:
     return SummarizedArticle(**base)
 
 
+def test_daily_dashboard_public_url() -> None:
+    from src.daily_report import daily_dashboard_public_url
+
+    url = daily_dashboard_public_url(date(2026, 7, 6))
+    assert url == "https://yenaalisonhong.github.io/techmarketmonitor/daily_2026-07-06.html"
+
+
 def test_build_daily_html_contains_dashboard_sections() -> None:
     log_date = date(2026, 7, 2)
     articles = [_article()]
@@ -64,6 +71,8 @@ def test_save_daily_report_writes_html(tmp_path: Path) -> None:
     )
     assert path is not None
     assert path.suffix == ".md"
+    md_text = path.read_text(encoding="utf-8")
+    assert "yenaalisonhong.github.io/techmarketmonitor/daily_2026-07-02.html" in md_text
     html_path = tmp_path / "daily_2026-07-02.html"
     assert html_path.exists()
-    assert "daily_2026-07-02.html" in path.read_text(encoding="utf-8")
+    assert (tmp_path / "index.html").exists()
