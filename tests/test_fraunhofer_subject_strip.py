@@ -1,8 +1,3 @@
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-
 from src.rd_targeting import format_rd_link_point
 from src.summarizer import strip_implicit_fraunhofer_subject
 
@@ -44,12 +39,3 @@ def test_format_rd_link_point_prefers_proposable_area() -> None:
     )
     assert "Fraunhofer" not in result
     assert "스마트그리드" in result
-
-
-if __name__ == "__main__":
-    test_strip_leading_fraunhofer_subject()
-    test_strip_fraunhofer_possessive_mid_sentence()
-    test_strip_preserves_fraunhofer_as_modifier_without_particle()
-    test_strip_skips_placeholder_values()
-    test_format_rd_link_point_prefers_proposable_area()
-    print("ok")

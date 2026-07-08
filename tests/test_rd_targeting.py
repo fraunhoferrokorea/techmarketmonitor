@@ -1,10 +1,6 @@
 from __future__ import annotations
 
-import sys
 from datetime import datetime, timezone
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.models import SummarizedArticle
 from src.rd_targeting import (
@@ -177,12 +173,3 @@ def test_research_outcome_with_budget_not_excluded() -> None:
     )
     assert not is_research_outcome_without_investment_signal(article)
     assert not is_excluded_rd_news(article)
-
-
-if __name__ == "__main__":
-    test_has_investment_signal_detects_budget_keywords()
-    test_parse_rd_fields_from_ko_steps()
-    test_is_domestic_rd_target()
-    test_build_rd_targeting_block_renders_markdown()
-    test_compute_rd_match_score_heuristic()
-    print("ok")

@@ -1,8 +1,4 @@
-import sys
 from datetime import datetime, timezone
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.filter import filter_articles
 from src.models import RawArticle
@@ -151,15 +147,3 @@ def test_filter_excludes_student_field_trip_program() -> None:
         required_keywords=["전력계통"],
     )
     assert result == []
-
-
-if __name__ == "__main__":
-    test_gov_target_detects_national_standard_plan()
-    test_gov_target_detects_fraunhofer_mou()
-    test_gov_target_detects_rd_program()
-    test_filter_passes_gov_target_with_core_keyword()
-    test_filter_passes_gov_target_without_core_keyword()
-    test_filter_passes_mou_from_official_source_without_core_keyword()
-    test_filter_excludes_rd_only_match_without_core_top5()
-    test_filter_still_requires_keywords_for_general_news()
-    print("ok")

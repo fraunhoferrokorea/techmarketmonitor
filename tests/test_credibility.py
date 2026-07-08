@@ -1,10 +1,6 @@
 from __future__ import annotations
 
-import sys
 from datetime import datetime, timezone
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.daily_report import _credibility, credibility_legend_lines
 from src.models import SummarizedArticle
@@ -56,11 +52,3 @@ def test_credibility_legend_mentions_korea_sources() -> None:
     assert "korea.kr" in legend
     assert "Reuters" not in legend
     assert "arXiv" not in legend
-
-
-if __name__ == "__main__":
-    test_credibility_government_press_release_is_a()
-    test_credibility_yonhap_is_a()
-    test_credibility_domestic_media_is_b()
-    test_credibility_legend_mentions_korea_sources()
-    print("ok")

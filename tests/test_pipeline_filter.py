@@ -42,9 +42,3 @@ def test_june29_does_not_include_june28() -> None:
     matched = _within_log_date(articles, log_date, window_end=window_end)
     assert len(matched) == 1
     assert matched[0].title == "Today only"
-
-
-if __name__ == "__main__":
-    test_june28_articles_only_on_june28()
-    test_june29_does_not_include_june28()
-    print("OK")

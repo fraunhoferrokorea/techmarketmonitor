@@ -1,9 +1,5 @@
-import sys
 from datetime import datetime, timezone
-from pathlib import Path
 from unittest.mock import patch
-
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.attachment_extractor import discover_pdf_urls, extract_hwpx_text, extract_pdf_text
 from src.article_enrichment import enrich_raw_article
@@ -63,10 +59,3 @@ def test_enrich_includes_pdf_marker(monkeypatch=None) -> None:
 
     assert "[첨부 문서 원문 1]" in enriched.summary
     assert "PDF 본문 텍스트" in enriched.summary
-
-
-if __name__ == "__main__":
-    test_discover_korea_kr_pdf_links()
-    test_discover_msit_pdf_only()
-    test_enrich_includes_pdf_marker()
-    print("ok")

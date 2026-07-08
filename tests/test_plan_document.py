@@ -1,7 +1,4 @@
-import sys
 from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.attachment_extractor import extract_pdf_from_path
 from src.text_chunking import chunk_plan_text, normalize_plan_text, select_relevant_chunks
@@ -29,9 +26,3 @@ def test_extract_user_sample_pdf_if_present() -> None:
     assert len(chunks) >= 3
     selected = select_relevant_chunks(chunks, ["전력계통", "스마트그리드", "파워그리드"])
     assert len(selected) >= 2
-
-
-if __name__ == "__main__":
-    test_select_relevant_chunks_prefers_keyword_sections()
-    test_extract_user_sample_pdf_if_present()
-    print("ok")

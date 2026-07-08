@@ -1,8 +1,4 @@
-import sys
 from datetime import date
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.fetchers.korea_kr_archive import _parse_expdoc_page
 
@@ -24,8 +20,3 @@ def test_parse_expdoc_page_extracts_rows() -> None:
     assert articles[0].title.startswith("AI 기반")
     assert "expDocView.do?docId=41741" in articles[0].url
     assert articles[0].source_name == "정책브리핑 전문자료 산림청"
-
-
-if __name__ == "__main__":
-    test_parse_expdoc_page_extracts_rows()
-    print("ok")

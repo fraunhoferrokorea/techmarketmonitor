@@ -1,11 +1,7 @@
 """Tests for Korea-only article scope filter."""
 from __future__ import annotations
 
-import sys
 from datetime import datetime, timezone
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.filter import filter_articles
 from src.korea_scope import is_domestic_news, is_foreign_url, is_korea_scoped
@@ -127,17 +123,3 @@ def test_filter_articles_drops_foreign_only() -> None:
     matched = filter_articles(articles, ["스마트그리드", "전력계통"])
     assert len(matched) == 1
     assert "한국" in matched[0].title
-
-
-if __name__ == "__main__":
-    test_foreign_url_blocked()
-    test_electrek_story_excluded()
-    test_bloomberg_story_excluded()
-    test_us_only_story_excluded()
-    test_korean_domestic_story_included()
-    test_korean_company_domestic_plan_included()
-    test_newsis_domestic_included()
-    test_korean_source_foreign_topic_excluded()
-    test_korean_actor_foreign_ops_included()
-    test_filter_articles_drops_foreign_only()
-    print("ok")

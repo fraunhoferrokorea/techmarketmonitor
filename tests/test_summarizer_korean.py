@@ -1,8 +1,3 @@
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-
 from src.summarizer import polish_korean
 
 
@@ -38,8 +33,3 @@ def test_polish_korean_converts_formal_endings_to_noun_style() -> None:
     }
     for raw, expected in cases.items():
         assert polish_korean(raw) == expected, f"{raw!r} -> {polish_korean(raw)!r}, expected {expected!r}"
-
-
-if __name__ == "__main__":
-    test_polish_korean_converts_formal_endings_to_noun_style()
-    print("ok")

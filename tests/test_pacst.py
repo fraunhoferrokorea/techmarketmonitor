@@ -1,8 +1,4 @@
-import sys
 from datetime import date
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.fetchers.pacst import _parse_board_page
 
@@ -76,9 +72,3 @@ def test_parse_thumb_board_extracts_item() -> None:
     assert "심의회의" in articles[0].title
     assert "advboardView.jsp" in articles[0].url
     assert all_before is False
-
-
-if __name__ == "__main__":
-    test_parse_list_board_filters_by_date()
-    test_parse_thumb_board_extracts_item()
-    print("ok")
