@@ -1,0 +1,14 @@
+[07/07/2026 Tue 14:05:24.81] git pull 
+From https://github.com/yenaalisonhong/techmarketmonitor
+ * branch            main       -> FETCH_HEAD
+   1d14506..a7be5b3  main       -> origin/main
+error: cannot pull with rebase: You have unstaged changes.
+error: Please commit or stash them.
+[07/07/2026 Tue 14:05:30.28] pull failed 
+[07/08/2026 Wed  9:56:28.50] git pull 
+From https://github.com/yenaalisonhong/techmarketmonitor
+ * branch            main       -> FETCH_HEAD
+   a7be5b3..8209b10  main       -> origin/main
+error: cannot pull with rebase: You have unstaged changes.
+error: Please commit or stash them.
+[07/08/2026 Wed  9:56:30.43] pull failed 

@@ -140,3 +140,527 @@ To https://github.com/yenaalisonhong/techmarketmonitor.git
   }
 ]
 [07/06/2026 Mon 10:39:14.65] daily-catchup done 
+[07/07/2026 Tue 14:05:24.86] daily-catchup start 
+2026-07-07 14:05:39,947 | INFO | src.catchup | Catch-up run for report 2026-07-07 (window ends 2026-07-07T14:05:39.841462+09:00 KST)
+2026-07-07 14:05:40,163 | WARNING | src.fetchers.rss | Malformed feed 정책브리핑 정책뉴스: <unknown>:27:2: mismatched tag
+2026-07-07 14:05:40,245 | WARNING | src.fetchers.rss | Malformed feed 정책브리핑 전문자료: <unknown>:27:2: mismatched tag
+2026-07-07 14:05:40,303 | WARNING | src.fetchers.rss | Malformed feed 정책브리핑 K-공감: <unknown>:27:2: mismatched tag
+2026-07-07 14:05:49,212 | WARNING | src.fetchers.rss | Malformed feed 정책브리핑 과기정통부: <unknown>:27:2: mismatched tag
+2026-07-07 14:05:49,298 | WARNING | src.fetchers.rss | Malformed feed 정책브리핑 산업통상부: <unknown>:27:2: mismatched tag
+2026-07-07 14:05:49,383 | WARNING | src.fetchers.rss | Malformed feed 정책브리핑 중소벤처기업부: <unknown>:27:2: mismatched tag
+2026-07-07 14:05:49,461 | WARNING | src.fetchers.rss | Malformed feed 정책브리핑 국토교통부: <unknown>:27:2: mismatched tag
+2026-07-07 14:05:49,545 | WARNING | src.fetchers.rss | Malformed feed 정책브리핑 기후에너지환경부: <unknown>:27:2: mismatched tag
+2026-07-07 14:05:49,627 | WARNING | src.fetchers.rss | Malformed feed 정책브리핑 교육부: <unknown>:27:2: mismatched tag
+2026-07-07 14:05:49,715 | WARNING | src.fetchers.rss | Malformed feed 정책브리핑 보건복지부: <unknown>:27:2: mismatched tag
+2026-07-07 14:05:49,810 | WARNING | src.fetchers.rss | Malformed feed 정책브리핑 국방부: <unknown>:27:2: mismatched tag
+2026-07-07 14:05:49,905 | WARNING | src.fetchers.rss | Malformed feed 정책브리핑 우주항공청: <unknown>:27:2: mismatched tag
+2026-07-07 14:05:56,459 | WARNING | src.fetchers.rss | Malformed feed KETEP 알림마당: <unknown>:48:2: mismatched tag
+2026-07-07 14:05:56,993 | WARNING | src.fetchers.rss | Malformed feed 한국전력 보도자료: <unknown>:157:15: not well-formed (invalid token)
+2026-07-07 14:05:57,301 | INFO | src.korea_scope | Domestic news filter (연합뉴스 경제): 119 kept, 1 foreign/non-domestic excluded
+2026-07-07 14:05:57,301 | INFO | src.fetchers.rss | RSS 연합뉴스 경제: excluded 1 foreign/non-domestic entry at fetch time
+2026-07-07 14:05:57,957 | INFO | src.korea_scope | Domestic news filter (동아일보 경제): 47 kept, 3 foreign/non-domestic excluded
+2026-07-07 14:05:57,957 | INFO | src.fetchers.rss | RSS 동아일보 경제: excluded 3 foreign/non-domestic entries at fetch time
+2026-07-07 14:05:58,078 | INFO | src.korea_scope | Domestic news filter (경향신문 경제): 49 kept, 1 foreign/non-domestic excluded
+2026-07-07 14:05:58,078 | INFO | src.fetchers.rss | RSS 경향신문 경제: excluded 1 foreign/non-domestic entry at fetch time
+2026-07-07 14:05:58,434 | INFO | src.korea_scope | Domestic news filter (파이낸셜뉴스): 274 kept, 23 foreign/non-domestic excluded
+2026-07-07 14:05:58,434 | INFO | src.fetchers.rss | RSS 파이낸셜뉴스: excluded 23 foreign/non-domestic entries at fetch time
+2026-07-07 14:05:58,741 | INFO | src.korea_scope | Domestic news filter (헤럴드경제): 277 kept, 23 foreign/non-domestic excluded
+2026-07-07 14:05:58,741 | INFO | src.fetchers.rss | RSS 헤럴드경제: excluded 23 foreign/non-domestic entries at fetch time
+2026-07-07 14:05:58,840 | INFO | src.korea_scope | Domestic news filter (전자신문 IT): 22 kept, 8 foreign/non-domestic excluded
+2026-07-07 14:05:58,840 | INFO | src.fetchers.rss | RSS 전자신문 IT: excluded 8 foreign/non-domestic entries at fetch time
+2026-07-07 14:05:58,915 | INFO | src.korea_scope | Domestic news filter (전자신문 통신/방송): 28 kept, 2 foreign/non-domestic excluded
+2026-07-07 14:05:58,915 | INFO | src.fetchers.rss | RSS 전자신문 통신/방송: excluded 2 foreign/non-domestic entries at fetch time
+2026-07-07 14:05:59,994 | INFO | src.korea_scope | Domestic news filter (한겨레 과학): 29 kept, 1 foreign/non-domestic excluded
+2026-07-07 14:05:59,994 | INFO | src.fetchers.rss | RSS 한겨레 과학: excluded 1 foreign/non-domestic entry at fetch time
+2026-07-07 14:06:00,081 | INFO | src.korea_scope | Domestic news filter (동아일보 과학): 47 kept, 3 foreign/non-domestic excluded
+2026-07-07 14:06:00,082 | INFO | src.fetchers.rss | RSS 동아일보 과학: excluded 3 foreign/non-domestic entries at fetch time
+2026-07-07 14:06:00,536 | INFO | httpx | HTTP Request: GET https://www.korea.kr/news/policyNewsList.do?pageIndex=1&startDate=2026-07-07&endDate=2026-07-07 "HTTP/1.1 200 OK"
+2026-07-07 14:06:00,817 | INFO | httpx | HTTP Request: GET https://www.korea.kr/news/policyNewsList.do?pageIndex=2&startDate=2026-07-07&endDate=2026-07-07 "HTTP/1.1 200 OK"
+2026-07-07 14:06:01,020 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseList.do?pageIndex=1&startDate=2026-07-07&endDate=2026-07-07 "HTTP/1.1 200 OK"
+2026-07-07 14:06:01,265 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseList.do?pageIndex=2&startDate=2026-07-07&endDate=2026-07-07 "HTTP/1.1 200 OK"
+2026-07-07 14:06:01,476 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseList.do?pageIndex=3&startDate=2026-07-07&endDate=2026-07-07 "HTTP/1.1 200 OK"
+2026-07-07 14:06:01,687 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseList.do?pageIndex=4&startDate=2026-07-07&endDate=2026-07-07 "HTTP/1.1 200 OK"
+2026-07-07 14:06:01,841 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseList.do?pageIndex=5&startDate=2026-07-07&endDate=2026-07-07 "HTTP/1.1 200 OK"
+2026-07-07 14:06:02,011 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/actuallyList.do?pageIndex=1&startDate=2026-07-07&endDate=2026-07-07 "HTTP/1.1 200 OK"
+2026-07-07 14:06:02,218 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/actuallyList.do?pageIndex=2&startDate=2026-07-07&endDate=2026-07-07 "HTTP/1.1 200 OK"
+2026-07-07 14:06:02,403 | INFO | httpx | HTTP Request: GET https://www.korea.kr/archive/expDocList.do?pageIndex=1&startDate=2026-07-07&endDate=2026-07-07&group=T "HTTP/1.1 200 OK"
+2026-07-07 14:06:02,615 | INFO | httpx | HTTP Request: GET https://www.korea.kr/archive/expDocList.do?pageIndex=2&startDate=2026-07-07&endDate=2026-07-07&group=T "HTTP/1.1 200 OK"
+2026-07-07 14:06:02,690 | INFO | src.fetchers.korea_kr_archive | korea.kr archive (log_date=2026-07-07): fetched 58 article(s)
+2026-07-07 14:06:02,690 | INFO | src.pipeline | Merged 58 korea.kr archive article(s) for 2026-07-07
+2026-07-07 14:06:03,011 | INFO | httpx | HTTP Request: GET https://www.pacst.go.kr/jsp/board/boardList.jsp?board_id=4&cpage=1 "HTTP/1.1 200 OK"
+2026-07-07 14:06:03,340 | INFO | httpx | HTTP Request: GET https://www.pacst.go.kr/jsp/board/boardList.jsp?board_id=3&cpage=1 "HTTP/1.1 200 OK"
+2026-07-07 14:06:03,644 | INFO | httpx | HTTP Request: GET https://www.pacst.go.kr/jsp/board/boardList.jsp?board_id=2&cpage=1 "HTTP/1.1 200 OK"
+2026-07-07 14:06:03,963 | INFO | httpx | HTTP Request: GET https://www.pacst.go.kr/jsp/adv/advboardList.jsp?board_id=2&cpage=1 "HTTP/1.1 200 OK"
+2026-07-07 14:06:04,112 | INFO | httpx | HTTP Request: GET https://www.pacst.go.kr/jsp/adv/advboardList.jsp?board_id=1&cpage=1 "HTTP/1.1 200 OK"
+2026-07-07 14:06:04,123 | INFO | src.fetchers.pacst | PACST archive (log_date=2026-07-07): fetched 0 article(s)
+2026-07-07 14:06:04,126 | INFO | src.pipeline | Calendar-day filter (log_date=2026-07-07, window_end=2026-07-07T14:05:39.841462+09:00): 2468 → 890 articles
+2026-07-07 14:06:05,683 | INFO | httpx | HTTP Request: GET https://www.mss.go.kr/site/smba/ex/bbs/View.do?cbIdx=86&bcIdx=1069658 "HTTP/1.1 200 OK"
+2026-07-07 14:06:05,835 | INFO | httpx | HTTP Request: GET https://www.mss.go.kr/common/board/Download.do?bcIdx=1069658&cbIdx=86&streFileNm=39abee3f-94ae-4484-adef-cf8fe42655e2.hwpx "HTTP/1.1 200 OK"
+2026-07-07 14:06:05,989 | INFO | httpx | HTTP Request: GET https://www.mss.go.kr/common/board/Download.do?bcIdx=1069658&cbIdx=86&streFileNm=4e9cf017-e2a0-48c5-88c2-995f6303ca27.pdf "HTTP/1.1 200 OK"
+2026-07-07 14:06:06,321 | INFO | src.attachment_extractor | Extracted attachment text (3919 chars): https://www.mss.go.kr/common/board/Download.do?bcIdx=1069658&cbIdx=86&streFileNm
+2026-07-07 14:06:06,321 | INFO | src.article_enrichment | Enriched article (0 → 4147 chars, attachments=1, plan=False): 중기부, 고환율 피해 수출기업을 위한 수출바우처 3차 모집 실시
+2026-07-07 14:06:06,772 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769825 "HTTP/1.1 200 OK"
+2026-07-07 14:06:07,166 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503777&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:07,512 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503778&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:07,557 | INFO | src.article_enrichment | Enriched article (129 → 1648 chars, attachments=0, plan=False): 국산 인공지능 반도체, 도입부터 활용, 기술 지원까지 밀착 지원합니다
+2026-07-07 14:06:08,095 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769828 "HTTP/1.1 200 OK"
+2026-07-07 14:06:08,406 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503787&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:08,475 | INFO | src.attachment_extractor | Extracted attachment text (619 chars): https://www.korea.kr/common/download.do?fileId=198503787&tblKey=GMN
+2026-07-07 14:06:08,720 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503788&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:08,775 | INFO | src.article_enrichment | Enriched article (511 → 2636 chars, attachments=1, plan=False): (동정) 해수부 장관, 흥아해운 본사 이전계획 발표식 참석
+2026-07-07 14:06:09,231 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769827 "HTTP/1.1 200 OK"
+2026-07-07 14:06:09,522 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503783&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:09,867 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503784&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:10,183 | INFO | src.attachment_extractor | Extracted attachment text (3427 chars): https://www.korea.kr/common/download.do?fileId=198503784&tblKey=GMN
+2026-07-07 14:06:10,183 | INFO | src.article_enrichment | Enriched article (2305 → 7280 chars, attachments=1, plan=False): 해외 에볼라바이러스병 확산, 국내 유입 대비 범부처 총력 대응(7.7.화)
+2026-07-07 14:06:10,694 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769826 "HTTP/1.1 200 OK"
+2026-07-07 14:06:11,034 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503779&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:11,380 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503780&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:11,523 | INFO | src.attachment_extractor | Extracted attachment text (1355 chars): https://www.korea.kr/common/download.do?fileId=198503780&tblKey=GMN
+2026-07-07 14:06:11,523 | INFO | src.article_enrichment | Enriched article (1244 → 2614 chars, attachments=1, plan=False): [보도자료] 2026 기후시민회의 시민참여단 선정 의제 발표
+2026-07-07 14:06:12,029 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769822 "HTTP/1.1 200 OK"
+2026-07-07 14:06:14,085 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503755&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:14,880 | INFO | src.attachment_extractor | Extracted attachment text (5998 chars): https://www.korea.kr/common/download.do?fileId=198503755&tblKey=GMN
+2026-07-07 14:06:15,131 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503754&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:15,513 | INFO | src.article_enrichment | Enriched article (88 → 7667 chars, attachments=1, plan=False): 국민 일상 속 불편은 덜고, 안전과 편의는 높이는 경찰청 '국민 체감 과제' 본격 추진
+2026-07-07 14:06:16,000 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769823 "HTTP/1.1 200 OK"
+2026-07-07 14:06:16,403 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503759&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:16,510 | INFO | src.attachment_extractor | Extracted attachment text (1558 chars): https://www.korea.kr/common/download.do?fileId=198503759&tblKey=GMN
+2026-07-07 14:06:16,756 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503760&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:16,878 | INFO | src.article_enrichment | Enriched article (125 → 3217 chars, attachments=1, plan=False): 광화문 현판 '한글 병기' 국민에게 묻는다, 26일 '모두의 토론회' 개최
+2026-07-07 14:06:17,389 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769821 "HTTP/1.1 200 OK"
+2026-07-07 14:06:17,711 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503774&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:18,059 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503775&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:18,274 | INFO | src.attachment_extractor | Extracted attachment text (3048 chars): https://www.korea.kr/common/download.do?fileId=198503775&tblKey=GMN
+2026-07-07 14:06:18,274 | INFO | src.article_enrichment | Enriched article (986 → 4049 chars, attachments=1, plan=False): 자연자본공시 대응 전략, 국내외 전문가들에게 듣는다
+2026-07-07 14:06:18,760 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769818 "HTTP/1.1 200 OK"
+2026-07-07 14:06:19,121 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503743&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:19,403 | INFO | src.attachment_extractor | Extracted attachment text (3919 chars): https://www.korea.kr/common/download.do?fileId=198503743&tblKey=GMN
+2026-07-07 14:06:19,663 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503742&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:19,709 | INFO | src.article_enrichment | Enriched article (1102 → 6576 chars, attachments=1, plan=False): 중기부, 고환율 피해 수출기업을 위한 수출바우처 3차 모집 실시
+2026-07-07 14:06:20,203 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769817 "HTTP/1.1 200 OK"
+2026-07-07 14:06:20,529 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503767&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:21,183 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503768&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:21,640 | INFO | src.article_enrichment | Enriched article (51 → 1689 chars, attachments=0, plan=False): 초고가 아파트 등 부동산 탈세 조사로 731억 원 탈루금액 드러나
+2026-07-07 14:06:22,184 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769816 "HTTP/1.1 200 OK"
+2026-07-07 14:06:22,510 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503741&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:22,571 | INFO | src.article_enrichment | Enriched article (2823 → 4433 chars, attachments=0, plan=False): [보도자료] 구직 청년들"경력직 중심 채용이 취업의 걸림돌" "AI전환 시대를 맞아 활용역량 강화 교육도 필
+2026-07-07 14:06:23,023 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769807 "HTTP/1.1 200 OK"
+2026-07-07 14:06:23,416 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503700&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:23,562 | INFO | src.article_enrichment | Enriched article (33 → 1591 chars, attachments=0, plan=False): [보도참고자료]「학원 설립.운영 및 과외교습에 관한 법률 시행령」 입법예고
+2026-07-07 14:06:24,038 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769800 "HTTP/1.1 200 OK"
+2026-07-07 14:06:24,363 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503765&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:26,204 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503766&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:27,050 | INFO | src.attachment_extractor | Extracted attachment text (5991 chars): https://www.korea.kr/common/download.do?fileId=198503766&tblKey=GMN
+2026-07-07 14:06:27,050 | INFO | src.article_enrichment | Enriched article (5915 → 13502 chars, attachments=1, plan=False): '치매 어르신 재산 안전하게' 치매안심재산관리서비스 첫 계약 체결
+2026-07-07 14:06:27,517 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769799 "HTTP/1.1 200 OK"
+2026-07-07 14:06:27,850 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503682&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:28,117 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503681&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:28,196 | INFO | src.article_enrichment | Enriched article (219 → 1764 chars, attachments=0, plan=False): 과기정통부, '경남·전북 AX 연구개발사업' 공모 개시
+2026-07-07 14:06:28,613 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769813 "HTTP/1.1 200 OK"
+2026-07-07 14:06:29,056 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503711&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:29,429 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503712&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:29,531 | INFO | src.attachment_extractor | Extracted attachment text (1556 chars): https://www.korea.kr/common/download.do?fileId=198503712&tblKey=GMN
+2026-07-07 14:06:29,531 | INFO | src.article_enrichment | Enriched article (1345 → 2916 chars, attachments=1, plan=False): 광화문 현판 '한글 병기' 국민에게 묻는다 26일 '모두의 토론회' 개최
+2026-07-07 14:06:30,009 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769811 "HTTP/1.1 200 OK"
+2026-07-07 14:06:30,379 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503707&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:30,745 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503708&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:30,841 | INFO | src.attachment_extractor | Extracted attachment text (1134 chars): https://www.korea.kr/common/download.do?fileId=198503708&tblKey=GMN
+2026-07-07 14:06:30,841 | INFO | src.article_enrichment | Enriched article (990 → 2139 chars, attachments=1, plan=False): 자연사회재난 성금 격차 없앤다 재난국민성금제도 일원화 세미나 개최
+2026-07-07 14:06:31,366 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769809 "HTTP/1.1 200 OK"
+2026-07-07 14:06:31,748 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503703&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:32,651 | INFO | src.attachment_extractor | Extracted attachment text (1378 chars): https://www.korea.kr/common/download.do?fileId=198503703&tblKey=GMN
+2026-07-07 14:06:32,892 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503704&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:33,174 | INFO | src.article_enrichment | Enriched article (1095 → 2488 chars, attachments=1, plan=False): "재난안전정보, 더 가까이 더 쉽게!" 생활밀착형 홍보로 국민 안전의식 높인다
+2026-07-07 14:06:33,649 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769815 "HTTP/1.1 200 OK"
+2026-07-07 14:06:33,971 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503715&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:34,298 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503716&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:34,433 | INFO | src.attachment_extractor | Extracted attachment text (2374 chars): https://www.korea.kr/common/download.do?fileId=198503716&tblKey=GMN
+2026-07-07 14:06:34,433 | INFO | src.article_enrichment | Enriched article (2213 → 6247 chars, attachments=1, plan=False): 국제사회와 'AI 민주정국제사회와 'AI 민주정부' 비전 공유 및 주요 거점국가와 AI 협력 확대부' 비전 
+2026-07-07 14:06:34,979 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769806 "HTTP/1.1 200 OK"
+2026-07-07 14:06:35,314 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503699&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:35,530 | INFO | src.article_enrichment | Enriched article (26 → 1455 chars, attachments=0, plan=False): 준비된 기술인재, 직업공통능력 인증으로 증명한다
+2026-07-07 14:06:36,051 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769805 "HTTP/1.1 200 OK"
+2026-07-07 14:06:36,390 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503732&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:40,815 | INFO | src.attachment_extractor | Extracted attachment text (5999 chars): https://www.korea.kr/common/download.do?fileId=198503732&tblKey=GMN
+2026-07-07 14:06:41,139 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503733&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:41,284 | INFO | src.article_enrichment | Enriched article (1180 → 7194 chars, attachments=1, plan=False): 2025년 소비자물가지수 개편 실시
+2026-07-07 14:06:41,762 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769804 "HTTP/1.1 200 OK"
+2026-07-07 14:06:42,081 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503735&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:45,222 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503736&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:45,405 | INFO | src.attachment_extractor | Extracted attachment text (2381 chars): https://www.korea.kr/common/download.do?fileId=198503736&tblKey=GMN
+2026-07-07 14:06:45,405 | INFO | src.article_enrichment | Enriched article (1323 → 3719 chars, attachments=1, plan=False): 섬·바닷가에서 생물다양성 조사 5년,신종·미기록종 세균 310종 발굴
+2026-07-07 14:06:45,892 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769803 "HTTP/1.1 200 OK"
+2026-07-07 14:06:46,205 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503728&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:46,642 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503729&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:46,856 | INFO | src.attachment_extractor | Extracted attachment text (3077 chars): https://www.korea.kr/common/download.do?fileId=198503729&tblKey=GMN
+2026-07-07 14:06:46,856 | INFO | src.article_enrichment | Enriched article (1317 → 4409 chars, attachments=1, plan=False): 인공지능으로 일하는 방식 바꾼다… 기후부, 인공지능 활용 업무혁신 본격 추진
+2026-07-07 14:06:47,316 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769798 "HTTP/1.1 200 OK"
+2026-07-07 14:06:47,634 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503678&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:48,017 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503679&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:48,667 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769797 "HTTP/1.1 200 OK"
+2026-07-07 14:06:49,140 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503675&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:50,196 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503676&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:51,207 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769795 "HTTP/1.1 200 OK"
+2026-07-07 14:06:51,571 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503650&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:52,816 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503651&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:53,122 | INFO | src.attachment_extractor | Extracted attachment text (3214 chars): https://www.korea.kr/common/download.do?fileId=198503651&tblKey=GMN
+2026-07-07 14:06:53,122 | INFO | src.article_enrichment | Enriched article (61 → 4804 chars, attachments=1, plan=False): 경기 5개 광역버스 노선 새로 달린다
+2026-07-07 14:06:53,619 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769794 "HTTP/1.1 200 OK"
+2026-07-07 14:06:53,958 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503648&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:54,250 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503649&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:54,522 | INFO | src.attachment_extractor | Extracted attachment text (2877 chars): https://www.korea.kr/common/download.do?fileId=198503649&tblKey=GMN
+2026-07-07 14:06:54,522 | INFO | src.article_enrichment | Enriched article (87 → 4577 chars, attachments=1, plan=False): 더 안전한 무인 자율주행차 시대 열린다... 정부, 가이드라인 마련으로 상용화 속도
+2026-07-07 14:06:54,980 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769793 "HTTP/1.1 200 OK"
+2026-07-07 14:06:55,348 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503646&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:55,646 | INFO | src.attachment_extractor | Extracted attachment text (1768 chars): https://www.korea.kr/common/download.do?fileId=198503646&tblKey=GMN
+2026-07-07 14:06:55,915 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503647&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:56,506 | INFO | src.article_enrichment | Enriched article (899 → 2682 chars, attachments=1, plan=False): 국가 공인 '스마트 해상물류 관리사' 7월 8일부터 응시 접수
+2026-07-07 14:06:57,054 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769791 "HTTP/1.1 200 OK"
+2026-07-07 14:06:57,426 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503640&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:57,738 | INFO | src.attachment_extractor | Extracted attachment text (2771 chars): https://www.korea.kr/common/download.do?fileId=198503640&tblKey=GMN
+2026-07-07 14:06:58,014 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503641&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:58,133 | INFO | src.article_enrichment | Enriched article (1546 → 4332 chars, attachments=1, plan=False): 구제역 SAT1형 백신, 접경지역 접종 완료
+2026-07-07 14:06:58,566 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769790 "HTTP/1.1 200 OK"
+2026-07-07 14:06:58,887 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503637&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:59,146 | INFO | src.attachment_extractor | Extracted attachment text (2870 chars): https://www.korea.kr/common/download.do?fileId=198503637&tblKey=GMN
+2026-07-07 14:06:59,426 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503638&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:06:59,584 | INFO | src.article_enrichment | Enriched article (1933 → 6438 chars, attachments=1, plan=False): 철도 타고 전국으로...전통주, 일상 속으로 달린다.
+2026-07-07 14:07:00,221 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769789 "HTTP/1.1 200 OK"
+2026-07-07 14:07:00,711 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503634&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:00,900 | INFO | src.attachment_extractor | Extracted attachment text (1538 chars): https://www.korea.kr/common/download.do?fileId=198503634&tblKey=GMN
+2026-07-07 14:07:01,438 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503635&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:01,863 | INFO | src.article_enrichment | Enriched article (1170 → 4380 chars, attachments=1, plan=False): 농산물 검역, 전자식물검역증명서(ePhyto)로 더 믿을 수 있고, 빠르고 편리하게!
+2026-07-07 14:07:02,396 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769788 "HTTP/1.1 200 OK"
+2026-07-07 14:07:02,818 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503630&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:03,032 | INFO | src.attachment_extractor | Extracted attachment text (2467 chars): https://www.korea.kr/common/download.do?fileId=198503630&tblKey=GMN
+2026-07-07 14:07:03,294 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503631&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:03,383 | INFO | src.article_enrichment | Enriched article (2078 → 6271 chars, attachments=1, plan=False): 농식품부, 베트남 거점 삼아 아세안 'K-식자재·신선농산물' 영토 넓힌다
+2026-07-07 14:07:03,872 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769785 "HTTP/1.1 200 OK"
+2026-07-07 14:07:04,204 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503622&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:04,716 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503623&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:04,861 | INFO | src.attachment_extractor | Extracted attachment text (1195 chars): https://www.korea.kr/common/download.do?fileId=198503623&tblKey=GMN
+2026-07-07 14:07:04,861 | INFO | src.article_enrichment | Enriched article (927 → 2137 chars, attachments=1, plan=False): '달리는 국민신문고', 함평·정읍·완주 찾아 주민 목소리 듣는다
+2026-07-07 14:07:05,353 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769786 "HTTP/1.1 200 OK"
+2026-07-07 14:07:05,712 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503665&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:06,078 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503666&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:06,515 | INFO | src.attachment_extractor | Extracted attachment text (4922 chars): https://www.korea.kr/common/download.do?fileId=198503666&tblKey=GMN
+2026-07-07 14:07:06,516 | INFO | src.article_enrichment | Enriched article (2626 → 9125 chars, attachments=1, plan=False): 불법·허위조작정보 유통 방지 시행령, 국무회의 통과
+2026-07-07 14:07:06,955 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769784 "HTTP/1.1 200 OK"
+2026-07-07 14:07:07,260 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503763&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:07,668 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503764&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:08,439 | INFO | src.attachment_extractor | Extracted attachment text (5999 chars): https://www.korea.kr/common/download.do?fileId=198503764&tblKey=GMN
+2026-07-07 14:07:08,439 | INFO | src.article_enrichment | Enriched article (1199 → 7213 chars, attachments=1, plan=False): 장애인 건강관리 서비스와 함께 만든 나의 건강이야기
+2026-07-07 14:07:08,899 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769783 "HTTP/1.1 200 OK"
+2026-07-07 14:07:09,288 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503761&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:09,689 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503762&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:09,886 | INFO | src.attachment_extractor | Extracted attachment text (2496 chars): https://www.korea.kr/common/download.do?fileId=198503762&tblKey=GMN
+2026-07-07 14:07:09,886 | INFO | src.article_enrichment | Enriched article (2310 → 4821 chars, attachments=1, plan=False): 도수치료 관리급여, 국민 궁금증에 대해 설명드립니다
+2026-07-07 14:07:10,372 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769781 "HTTP/1.1 200 OK"
+2026-07-07 14:07:10,694 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503604&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:11,255 | INFO | src.attachment_extractor | Extracted attachment text (191 chars): https://www.korea.kr/common/download.do?fileId=198503604&tblKey=GMN
+2026-07-07 14:07:11,579 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503605&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:11,662 | INFO | src.article_enrichment | Enriched article (1754 → 3568 chars, attachments=1, plan=False): 세계유산위원회 개최 기념해 고흥·여수·통영·부산 바다에 뜨는 '조선통신사선'
+2026-07-07 14:07:12,108 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769779 "HTTP/1.1 200 OK"
+2026-07-07 14:07:12,425 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503600&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:12,619 | INFO | src.attachment_extractor | Extracted attachment text (16 chars): https://www.korea.kr/common/download.do?fileId=198503600&tblKey=GMN
+2026-07-07 14:07:12,948 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503601&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:13,026 | INFO | src.article_enrichment | Enriched article (988 → 1019 chars, attachments=1, plan=False): 가야 건국 신화부터 가야 괴물 이야기까지, 5인의 작가들과 가야사 펼쳐보기
+2026-07-07 14:07:14,325 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769776 "HTTP/1.1 200 OK"
+2026-07-07 14:07:14,752 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503581&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:14,963 | INFO | src.attachment_extractor | Extracted attachment text (154 chars): https://www.korea.kr/common/download.do?fileId=198503581&tblKey=GMN
+2026-07-07 14:07:15,318 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503582&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:15,391 | INFO | src.article_enrichment | Enriched article (5760 → 5929 chars, attachments=1, plan=False): 「가평 현등사 극락전」 등 부불전 6건 · 「금산 영천암 무량수각」 등 요사채 4건 보물 지정
+2026-07-07 14:07:15,835 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769774 "HTTP/1.1 200 OK"
+2026-07-07 14:07:16,170 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503577&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:16,383 | INFO | src.attachment_extractor | Extracted attachment text (107 chars): https://www.korea.kr/common/download.do?fileId=198503577&tblKey=GMN
+2026-07-07 14:07:16,633 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503578&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:16,685 | INFO | src.article_enrichment | Enriched article (1466 → 1588 chars, attachments=1, plan=False): 세계유산위원회 안전 개최 위한 대테러·안전관리 협업체계 구축 완료
+2026-07-07 14:07:16,969 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769772 "HTTP/1.1 200 OK"
+2026-07-07 14:07:17,319 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503575&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:18,233 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769769 "HTTP/1.1 200 OK"
+2026-07-07 14:07:18,539 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503569&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:18,617 | INFO | src.attachment_extractor | Extracted attachment text (488 chars): https://www.korea.kr/common/download.do?fileId=198503569&tblKey=GMN
+2026-07-07 14:07:18,839 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503570&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:18,906 | INFO | src.article_enrichment | Enriched article (500 → 2532 chars, attachments=1, plan=False): 조달청, 신뢰받는 조달서비스 제공을 위한 민원응대 스킬 업(UP) 교육 실시
+2026-07-07 14:07:19,342 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769778 "HTTP/1.1 200 OK"
+2026-07-07 14:07:19,629 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503588&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:19,793 | INFO | src.attachment_extractor | Extracted attachment text (1384 chars): https://www.korea.kr/common/download.do?fileId=198503588&tblKey=GMN
+2026-07-07 14:07:20,040 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503589&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:20,106 | INFO | src.article_enrichment | Enriched article (1253 → 2652 chars, attachments=1, plan=False): 시민이 직접 정한 2026년 기후시민회의 3대 의제 선정
+2026-07-07 14:07:20,714 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769768 "HTTP/1.1 200 OK"
+2026-07-07 14:07:21,028 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503652&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:21,432 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503653&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:21,630 | INFO | src.attachment_extractor | Extracted attachment text (2254 chars): https://www.korea.kr/common/download.do?fileId=198503653&tblKey=GMN
+2026-07-07 14:07:21,630 | INFO | src.article_enrichment | Enriched article (1339 → 5115 chars, attachments=1, plan=False): 지식재산처, 향토자원 권리화로 원산지 오인행위 예방한다
+2026-07-07 14:07:22,106 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769767 "HTTP/1.1 200 OK"
+2026-07-07 14:07:22,440 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503585&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:22,636 | INFO | src.attachment_extractor | Extracted attachment text (1410 chars): https://www.korea.kr/common/download.do?fileId=198503585&tblKey=GMN
+2026-07-07 14:07:22,887 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503586&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:22,970 | INFO | src.article_enrichment | Enriched article (275 → 3316 chars, attachments=1, plan=False): 국민 88% "동물, 물건과 구별해야"… 법무부, 민법 개정 논의 재점화
+2026-07-07 14:07:23,451 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769765 "HTTP/1.1 200 OK"
+2026-07-07 14:07:23,810 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503543&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:24,166 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503544&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:24,429 | INFO | src.attachment_extractor | Extracted attachment text (3293 chars): https://www.korea.kr/common/download.do?fileId=198503544&tblKey=GMN
+2026-07-07 14:07:24,429 | INFO | src.article_enrichment | Enriched article (1542 → 6464 chars, attachments=1, plan=False): 미래 팬데믹 대비 인공지능 기반 백신 연구개발 위한 '한국형 팬데믹 대비 엔진 워크숍' 개최(7.7.화)
+2026-07-07 14:07:24,850 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769764 "HTTP/1.1 200 OK"
+2026-07-07 14:07:25,184 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503549&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:25,296 | INFO | src.attachment_extractor | Extracted attachment text (1532 chars): https://www.korea.kr/common/download.do?fileId=198503549&tblKey=GMN
+2026-07-07 14:07:25,608 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503550&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:25,758 | INFO | src.article_enrichment | Enriched article (50 → 3240 chars, attachments=1, plan=False): 행복청, 집현동 캠퍼스공원구역 '청년 친화형 복합공간'으로 특화 착수
+2026-07-07 14:07:26,279 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769766 "HTTP/1.1 200 OK"
+2026-07-07 14:07:26,573 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503545&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:27,063 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503546&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:27,321 | INFO | src.attachment_extractor | Extracted attachment text (1199 chars): https://www.korea.kr/common/download.do?fileId=198503546&tblKey=GMN
+2026-07-07 14:07:27,321 | INFO | src.article_enrichment | Enriched article (34 → 2781 chars, attachments=1, plan=False): 식약처, 마약류 성분 내세운 식품 온라인 부당광고 60건 적발
+2026-07-07 14:07:27,781 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769763 "HTTP/1.1 200 OK"
+2026-07-07 14:07:28,139 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503528&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:28,210 | INFO | src.attachment_extractor | Extracted attachment text (767 chars): https://www.korea.kr/common/download.do?fileId=198503528&tblKey=GMN
+2026-07-07 14:07:28,508 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503529&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:28,566 | INFO | src.article_enrichment | Enriched article (639 → 1421 chars, attachments=1, plan=False): 한-싱가포르 자유무역협정 제2차 개선협상 개최
+2026-07-07 14:07:29,082 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769762 "HTTP/1.1 200 OK"
+2026-07-07 14:07:29,417 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503520&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:29,475 | INFO | src.attachment_extractor | Extracted attachment text (495 chars): https://www.korea.kr/common/download.do?fileId=198503520&tblKey=GMN
+2026-07-07 14:07:29,774 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503521&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:29,829 | INFO | src.article_enrichment | Enriched article (142 → 2206 chars, attachments=1, plan=False): 법무부 '검찰인권존중미래위원회', 진상조사단 면담 및 국민제안사건 접수기간 연장 결정
+2026-07-07 14:07:30,276 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769761 "HTTP/1.1 200 OK"
+2026-07-07 14:07:30,620 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503535&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:31,153 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503536&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:31,786 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769759 "HTTP/1.1 200 OK"
+2026-07-07 14:07:32,091 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503508&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:32,377 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503509&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:32,406 | INFO | src.article_enrichment | Enriched article (575 → 2081 chars, attachments=0, plan=False): 정읍국유림관리소, 여름철 우기 전 사방사업 전격 완료!
+2026-07-07 14:07:32,935 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769757 "HTTP/1.1 200 OK"
+2026-07-07 14:07:33,216 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503499&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:33,465 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503500&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:34,011 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769755 "HTTP/1.1 200 OK"
+2026-07-07 14:07:34,296 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503484&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:34,464 | INFO | src.attachment_extractor | Extracted attachment text (1191 chars): https://www.korea.kr/common/download.do?fileId=198503484&tblKey=GMN
+2026-07-07 14:07:34,763 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503485&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:34,914 | INFO | src.article_enrichment | Enriched article (109 → 2848 chars, attachments=1, plan=False): 여름철 폭염 대비 프로야구장 안전 점검 실시
+2026-07-07 14:07:35,335 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769753 "HTTP/1.1 200 OK"
+2026-07-07 14:07:35,816 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503481&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:35,913 | INFO | src.attachment_extractor | Extracted attachment text (1087 chars): https://www.korea.kr/common/download.do?fileId=198503481&tblKey=GMN
+2026-07-07 14:07:36,139 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503482&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:36,212 | INFO | src.article_enrichment | Enriched article (960 → 3577 chars, attachments=1, plan=False): 방위사업청, 캐나다 잠수함사업 우선협상대상자 선정결과 존중
+2026-07-07 14:07:36,658 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769754 "HTTP/1.1 200 OK"
+2026-07-07 14:07:36,968 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503483&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:37,043 | INFO | src.article_enrichment | Enriched article (1724 → 3213 chars, attachments=0, plan=False): 소방청, 국내 최대 제어로봇학시스템학회와 손잡고 학술대회에 「소방재난 분과(세션)」 운영
+2026-07-07 14:07:37,497 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769751 "HTTP/1.1 200 OK"
+2026-07-07 14:07:37,800 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503475&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:38,320 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503476&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:38,681 | INFO | src.attachment_extractor | Extracted attachment text (2559 chars): https://www.korea.kr/common/download.do?fileId=198503476&tblKey=GMN
+2026-07-07 14:07:38,682 | INFO | src.article_enrichment | Enriched article (87 → 4270 chars, attachments=1, plan=False): 「2026 도로의 날 기념식」 AI·디지털 전환, 안전하고 지속가능한 K-Road!
+2026-07-07 14:07:39,145 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769752 "HTTP/1.1 200 OK"
+2026-07-07 14:07:39,461 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503477&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:39,622 | INFO | src.article_enrichment | Enriched article (31 → 1514 chars, attachments=0, plan=False): 시민이 자라나는 학교를 위해 한-일 교사가 함께 협력한다
+2026-07-07 14:07:40,105 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769801 "HTTP/1.1 200 OK"
+2026-07-07 14:07:40,540 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503689&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:40,739 | INFO | src.attachment_extractor | Extracted attachment text (1967 chars): https://www.korea.kr/common/download.do?fileId=198503689&tblKey=GMN
+2026-07-07 14:07:41,209 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503690&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:41,328 | INFO | src.article_enrichment | Enriched article (1281 → 3263 chars, attachments=1, plan=False): 성평등가족부, 대학 내 성희롱·성폭력 예방 및 대응 강화를 위한 간담회 개최
+2026-07-07 14:07:41,759 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769770 "HTTP/1.1 200 OK"
+2026-07-07 14:07:42,062 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503571&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:42,385 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198503572&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-07 14:07:42,881 | INFO | src.attachment_extractor | Extracted attachment text (4020 chars): https://www.korea.kr/common/download.do?fileId=198503572&tblKey=GMN
+2026-07-07 14:07:42,881 | INFO | src.article_enrichment | Enriched article (3170 → 7205 chars, attachments=1, plan=False): 「포용금융 전략 추진단」 금융산업분과 kick-off 회의 개최
+2026-07-07 14:07:43,120 | INFO | src.filter | Keyword filter: excluded 848 domestic article(s) with no top-5 keyword match
+2026-07-07 14:07:43,120 | INFO | src.pipeline | Filtered to 42 keyword-matching domestic (Korea-scoped) articles
+2026-07-07 14:07:43,133 | INFO | src.pipeline | Gov/Fraunhofer-target articles (정부·R&D 타깃): 42
+2026-07-07 14:07:43,133 | INFO | src.pipeline | Capping summarization to top 30 articles (dropped 12 lower-relevance)
+2026-07-07 14:07:43,227 | INFO | src.pipeline | Summarizing 1/30: 제주·경남 대학생 45명 에너지 산업현장으로… 수소·풍력·전력계통 배웠다
+2026-07-07 14:07:48,543 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-07 14:07:48,634 | INFO | src.daily_report | Daily research log saved → C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.md (dashboard: C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.html)
+2026-07-07 14:07:48,634 | INFO | src.pipeline | Summarizing 2/30: 과기정통부, '경남·전북 AX 연구개발사업' 공모 개시
+2026-07-07 14:07:50,686 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-07 14:07:50,728 | INFO | src.daily_report | Daily research log saved → C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.md (dashboard: C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.html)
+2026-07-07 14:07:50,728 | INFO | src.pipeline | Summarizing 3/30: 미래 팬데믹 대비 인공지능 기반 백신 연구개발 위한 '한국형 팬데믹 대비 엔진 워크숍' 개최(7.7.화)
+2026-07-07 14:07:50,728 | INFO | src.focused_summarize | Long gov original (6464 chars) \u2014 focused map-reduce: 미래 팬데믹 대비 인공지능 기반 백신 연구개발 위한 '한국형 팬데믹 대비 엔진 워크숍' 개최(7.7.화)
+2026-07-07 14:07:50,741 | INFO | src.focused_summarize | Focused map 1/1 (6462 chars): 미래 팬데믹 대비 인공지능 기반 백신 연구개발 위한 '한국형 팬데믹 대비 엔진 워크숍' 개
+2026-07-07 14:07:52,555 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-07 14:07:53,720 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-07-07 14:07:53,721 | INFO | openai._base_client | Retrying request to /chat/completions in 1.000000 seconds
+2026-07-07 14:07:56,138 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-07 14:07:56,181 | INFO | src.daily_report | Daily research log saved → C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.md (dashboard: C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.html)
+2026-07-07 14:07:56,181 | INFO | src.pipeline | Summarizing 4/30: 준비된 기술인재, 직업공통능력 인증으로 증명한다
+2026-07-07 14:07:56,386 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-07-07 14:07:56,386 | INFO | openai._base_client | Retrying request to /chat/completions in 11.000000 seconds
+2026-07-07 14:08:09,015 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-07 14:08:09,051 | INFO | src.daily_report | Daily research log saved → C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.md (dashboard: C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.html)
+2026-07-07 14:08:09,051 | INFO | src.pipeline | Summarizing 5/30: 국민 일상 속 불편은 덜고, 안전과 편의는 높이는 경찰청 '국민 체감 과제' 본격 추진
+2026-07-07 14:08:09,052 | INFO | src.focused_summarize | Long gov original (7667 chars) \u2014 focused map-reduce: 국민 일상 속 불편은 덜고, 안전과 편의는 높이는 경찰청 '국민 체감 과제' 본격 추진
+2026-07-07 14:08:09,061 | INFO | src.focused_summarize | Focused map 1/1 (7665 chars): 국민 일상 속 불편은 덜고, 안전과 편의는 높이는 경찰청 '국민 체감 과제' 본격 추진
+2026-07-07 14:08:09,236 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-07-07 14:08:09,236 | INFO | openai._base_client | Retrying request to /chat/completions in 27.000000 seconds
+2026-07-07 14:08:37,582 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-07 14:08:38,738 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-07-07 14:08:38,739 | INFO | openai._base_client | Retrying request to /chat/completions in 6.000000 seconds
+2026-07-07 14:08:46,147 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-07 14:08:46,216 | INFO | src.daily_report | Daily research log saved → C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.md (dashboard: C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.html)
+2026-07-07 14:08:46,216 | INFO | src.pipeline | Summarizing 6/30: 국제사회와 'AI 민주정국제사회와 'AI 민주정부' 비전 공유 및 주요 거점국가와 AI 협력 확대부' 비전 공유 및 주요 거점국가와 AI 협력 확대
+2026-07-07 14:08:46,217 | INFO | src.focused_summarize | Long gov original (6247 chars) \u2014 focused map-reduce: 국제사회와 'AI 민주정국제사회와 'AI 민주정부' 비전 공유 및 주요 거점국가와 AI 협력 확대부' 비전 
+2026-07-07 14:08:46,225 | INFO | src.focused_summarize | Focused map 1/1 (6245 chars): 국제사회와 'AI 민주정국제사회와 'AI 민주정부' 비전 공유 및 주요 거점국가와 AI 협
+2026-07-07 14:08:46,417 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-07-07 14:08:46,417 | INFO | openai._base_client | Retrying request to /chat/completions in 21.000000 seconds
+2026-07-07 14:09:08,889 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-07 14:09:10,040 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-07-07 14:09:10,041 | INFO | openai._base_client | Retrying request to /chat/completions in 7.000000 seconds
+2026-07-07 14:09:18,681 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-07 14:09:18,722 | INFO | src.daily_report | Daily research log saved → C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.md (dashboard: C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.html)
+2026-07-07 14:09:18,722 | INFO | src.pipeline | Summarizing 7/30: 시민이 자라나는 학교를 위해 한-일 교사가 함께 협력한다
+2026-07-07 14:09:18,887 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-07-07 14:09:18,887 | INFO | openai._base_client | Retrying request to /chat/completions in 11.000000 seconds
+2026-07-07 14:09:31,212 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-07 14:09:31,275 | INFO | src.daily_report | Daily research log saved → C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.md (dashboard: C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.html)
+2026-07-07 14:09:31,275 | INFO | src.pipeline | Summarizing 8/30: 더 안전한 무인 자율주행차 시대 열린다... 정부, 가이드라인 마련으로 상용화 속도
+2026-07-07 14:09:31,275 | INFO | src.focused_summarize | Long gov original (4577 chars) \u2014 focused map-reduce: 더 안전한 무인 자율주행차 시대 열린다... 정부, 가이드라인 마련으로 상용화 속도
+2026-07-07 14:09:31,288 | INFO | src.focused_summarize | Focused map 1/1 (4575 chars): 더 안전한 무인 자율주행차 시대 열린다... 정부, 가이드라인 마련으로 상용화 속도
+2026-07-07 14:09:31,456 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-07-07 14:09:31,457 | INFO | openai._base_client | Retrying request to /chat/completions in 16.000000 seconds
+2026-07-07 14:09:48,427 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-07 14:09:49,582 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-07-07 14:09:49,583 | INFO | openai._base_client | Retrying request to /chat/completions in 6.000000 seconds
+2026-07-07 14:09:56,849 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-07 14:09:56,919 | INFO | src.daily_report | Daily research log saved → C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.md (dashboard: C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.html)
+2026-07-07 14:09:56,919 | INFO | src.pipeline | Summarizing 9/30: 자연자본공시 대응 전략, 국내외 전문가들에게 듣는다
+2026-07-07 14:09:56,919 | INFO | src.focused_summarize | Long gov original (4049 chars) \u2014 focused map-reduce: 자연자본공시 대응 전략, 국내외 전문가들에게 듣는다
+2026-07-07 14:09:56,927 | INFO | src.focused_summarize | Focused map 1/1 (4048 chars): 자연자본공시 대응 전략, 국내외 전문가들에게 듣는다
+2026-07-07 14:09:57,110 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-07-07 14:09:57,111 | INFO | openai._base_client | Retrying request to /chat/completions in 13.000000 seconds
+2026-07-07 14:10:11,321 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-07 14:10:12,468 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-07-07 14:10:12,469 | INFO | openai._base_client | Retrying request to /chat/completions in 7.000000 seconds
+2026-07-07 14:10:19,654 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-07-07 14:10:19,654 | INFO | openai._base_client | Retrying request to /chat/completions in 2.000000 seconds
+2026-07-07 14:10:23,148 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-07 14:10:23,214 | INFO | src.daily_report | Daily research log saved → C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.md (dashboard: C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.html)
+2026-07-07 14:10:23,214 | INFO | src.pipeline | Summarizing 10/30: 해외 에볼라바이러스병 확산, 국내 유입 대비 범부처 총력 대응(7.7.화)
+2026-07-07 14:10:23,216 | INFO | src.focused_summarize | Long gov original (7280 chars) \u2014 focused map-reduce: 해외 에볼라바이러스병 확산, 국내 유입 대비 범부처 총력 대응(7.7.화)
+2026-07-07 14:10:23,227 | INFO | src.focused_summarize | Focused map 1/1 (7278 chars): 해외 에볼라바이러스병 확산, 국내 유입 대비 범부처 총력 대응(7.7.화)
+2026-07-07 14:10:23,391 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-07-07 14:10:23,392 | INFO | openai._base_client | Retrying request to /chat/completions in 26.000000 seconds
+2026-07-07 14:10:50,622 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-07 14:10:51,779 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-07-07 14:10:51,780 | INFO | openai._base_client | Retrying request to /chat/completions in 7.000000 seconds
+2026-07-07 14:11:00,036 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-07 14:11:00,102 | INFO | src.daily_report | Daily research log saved → C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.md (dashboard: C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.html)
+2026-07-07 14:11:00,102 | INFO | src.pipeline | Summarizing 11/30: '치매 어르신 재산 안전하게' 치매안심재산관리서비스 첫 계약 체결
+2026-07-07 14:11:00,104 | INFO | src.focused_summarize | Long gov original (13502 chars) \u2014 focused map-reduce: '치매 어르신 재산 안전하게' 치매안심재산관리서비스 첫 계약 체결
+2026-07-07 14:11:00,117 | INFO | src.focused_summarize | Focused map 1/2 (8997 chars): '치매 어르신 재산 안전하게' 치매안심재산관리서비스 첫 계약 체결
+2026-07-07 14:11:00,295 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-07-07 14:11:00,295 | INFO | openai._base_client | Retrying request to /chat/completions in 29.000000 seconds
+2026-07-07 14:11:29,521 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-07-07 14:11:29,521 | INFO | openai._base_client | Retrying request to /chat/completions in 2.000000 seconds
+2026-07-07 14:11:33,100 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-07 14:11:34,101 | INFO | src.focused_summarize | Focused map 2/2 (4502 chars): '치매 어르신 재산 안전하게' 치매안심재산관리서비스 첫 계약 체결
+2026-07-07 14:11:34,257 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-07-07 14:11:34,257 | INFO | openai._base_client | Retrying request to /chat/completions in 16.000000 seconds
+2026-07-07 14:11:51,323 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-07 14:11:52,475 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-07-07 14:11:52,475 | INFO | openai._base_client | Retrying request to /chat/completions in 8.000000 seconds
+2026-07-07 14:12:02,263 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-07 14:12:02,332 | INFO | src.daily_report | Daily research log saved → C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.md (dashboard: C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.html)
+2026-07-07 14:12:02,332 | INFO | src.pipeline | Summarizing 12/30: [보도자료] 구직 청년들"경력직 중심 채용이 취업의 걸림돌" "AI전환 시대를 맞아 활용역량 강화 교육도 필요" 경사노위 「청년일자리 희망 위원회」첫 '청년 라운드 테이블' 청년의 현장 목소리를 듣다
+2026-07-07 14:12:02,503 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-07-07 14:12:02,503 | INFO | openai._base_client | Retrying request to /chat/completions in 12.000000 seconds
+2026-07-07 14:12:16,193 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-07 14:12:16,247 | INFO | src.daily_report | Daily research log saved → C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.md (dashboard: C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.html)
+2026-07-07 14:12:16,248 | INFO | src.pipeline | Summarizing 13/30: 「2026 도로의 날 기념식」 AI·디지털 전환, 안전하고 지속가능한 K-Road!
+2026-07-07 14:12:16,248 | INFO | src.focused_summarize | Long gov original (4270 chars) \u2014 focused map-reduce: 「2026 도로의 날 기념식」 AI·디지털 전환, 안전하고 지속가능한 K-Road!
+2026-07-07 14:12:16,257 | INFO | src.focused_summarize | Focused map 1/1 (4268 chars): 「2026 도로의 날 기념식」 AI·디지털 전환, 안전하고 지속가능한 K-Road!
+2026-07-07 14:12:16,455 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-07-07 14:12:16,456 | INFO | openai._base_client | Retrying request to /chat/completions in 15.000000 seconds
+2026-07-07 14:12:32,623 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-07 14:12:33,774 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-07-07 14:12:33,774 | INFO | openai._base_client | Retrying request to /chat/completions in 6.000000 seconds
+2026-07-07 14:12:40,998 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-07 14:12:41,080 | INFO | src.daily_report | Daily research log saved → C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.md (dashboard: C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.html)
+2026-07-07 14:12:41,080 | INFO | src.pipeline | Summarizing 14/30: 경기 5개 광역버스 노선 새로 달린다
+2026-07-07 14:12:41,081 | INFO | src.focused_summarize | Long gov original (4804 chars) \u2014 focused map-reduce: 경기 5개 광역버스 노선 새로 달린다
+2026-07-07 14:12:41,094 | INFO | src.focused_summarize | Focused map 1/1 (4802 chars): 경기 5개 광역버스 노선 새로 달린다
+2026-07-07 14:12:41,397 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-07-07 14:12:41,398 | INFO | openai._base_client | Retrying request to /chat/completions in 19.000000 seconds
+2026-07-07 14:13:01,390 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-07 14:13:02,555 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-07-07 14:13:02,556 | INFO | openai._base_client | Retrying request to /chat/completions in 6.000000 seconds
+2026-07-07 14:13:09,914 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-07 14:13:10,000 | INFO | src.daily_report | Daily research log saved → C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.md (dashboard: C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.html)
+2026-07-07 14:13:10,000 | INFO | src.pipeline | Summarizing 15/30: 광화문 현판 '한글 병기' 국민에게 묻는다, 26일 '모두의 토론회' 개최
+2026-07-07 14:13:10,000 | INFO | src.focused_summarize | Long gov original (3217 chars) \u2014 focused map-reduce: 광화문 현판 '한글 병기' 국민에게 묻는다, 26일 '모두의 토론회' 개최
+2026-07-07 14:13:10,014 | INFO | src.focused_summarize | Focused map 1/1 (3215 chars): 광화문 현판 '한글 병기' 국민에게 묻는다, 26일 '모두의 토론회' 개최
+2026-07-07 14:13:10,173 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-07-07 14:13:10,174 | INFO | openai._base_client | Retrying request to /chat/completions in 11.000000 seconds
+2026-07-07 14:13:22,031 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-07 14:13:23,179 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-07-07 14:13:23,179 | INFO | openai._base_client | Retrying request to /chat/completions in 6.000000 seconds
+2026-07-07 14:13:30,798 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-07 14:13:30,876 | INFO | src.daily_report | Daily research log saved → C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.md (dashboard: C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.html)
+2026-07-07 14:13:30,876 | INFO | src.pipeline | Summarizing 16/30: 국민 88% "동물, 물건과 구별해야"… 법무부, 민법 개정 논의 재점화
+2026-07-07 14:13:30,876 | INFO | src.focused_summarize | Long gov original (3316 chars) \u2014 focused map-reduce: 국민 88% "동물, 물건과 구별해야"… 법무부, 민법 개정 논의 재점화
+2026-07-07 14:13:30,887 | INFO | src.focused_summarize | Focused map 1/1 (3314 chars): 국민 88% "동물, 물건과 구별해야"… 법무부, 민법 개정 논의 재점화
+2026-07-07 14:13:31,058 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-07-07 14:13:31,059 | INFO | openai._base_client | Retrying request to /chat/completions in 13.000000 seconds
+2026-07-07 14:13:45,353 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-07 14:13:46,523 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-07-07 14:13:46,524 | INFO | openai._base_client | Retrying request to /chat/completions in 5.000000 seconds
+2026-07-07 14:13:52,860 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-07 14:13:52,942 | INFO | src.daily_report | Daily research log saved → C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.md (dashboard: C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.html)
+2026-07-07 14:13:52,942 | INFO | src.pipeline | Summarizing 17/30: 농식품부, 베트남 거점 삼아 아세안 'K-식자재·신선농산물' 영토 넓힌다
+2026-07-07 14:13:52,943 | INFO | src.focused_summarize | Long gov original (6271 chars) \u2014 focused map-reduce: 농식품부, 베트남 거점 삼아 아세안 'K-식자재·신선농산물' 영토 넓힌다
+2026-07-07 14:13:52,959 | INFO | src.focused_summarize | Focused map 1/1 (6269 chars): 농식품부, 베트남 거점 삼아 아세안 'K-식자재·신선농산물' 영토 넓힌다
+2026-07-07 14:13:53,134 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-07-07 14:13:53,134 | INFO | openai._base_client | Retrying request to /chat/completions in 22.000000 seconds
+2026-07-07 14:14:16,199 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-07 14:14:17,354 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-07-07 14:14:17,355 | WARNING | src.llm_utils | Groq TPD limit \u2014 waiting 1245s before retry
+2026-07-07 19:35:16,334 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-07 19:35:16,464 | INFO | src.daily_report | Daily research log saved → C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.md (dashboard: C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.html)
+2026-07-07 19:35:16,464 | INFO | src.pipeline | Summarizing 18/30: 방위사업청, 캐나다 잠수함사업 우선협상대상자 선정결과 존중
+2026-07-07 19:35:16,465 | INFO | src.focused_summarize | Long gov original (3577 chars) \u2014 focused map-reduce: 방위사업청, 캐나다 잠수함사업 우선협상대상자 선정결과 존중
+2026-07-07 19:35:16,480 | INFO | src.focused_summarize | Focused map 1/1 (3575 chars): 방위사업청, 캐나다 잠수함사업 우선협상대상자 선정결과 존중
+2026-07-07 19:35:17,424 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-07 19:35:19,787 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-07 19:35:19,942 | INFO | src.daily_report | Daily research log saved → C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.md (dashboard: C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.html)
+2026-07-07 19:35:19,942 | INFO | src.pipeline | Summarizing 19/30: 법무부 '검찰인권존중미래위원회', 진상조사단 면담 및 국민제안사건 접수기간 연장 결정
+2026-07-07 19:35:21,304 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-07 19:35:22,975 | INFO | src.daily_report | Daily research log saved → C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.md (dashboard: C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.html)
+2026-07-07 19:35:22,975 | INFO | src.pipeline | Summarizing 20/30: 불법·허위조작정보 유통 방지 시행령, 국무회의 통과
+2026-07-07 19:35:22,977 | INFO | src.focused_summarize | Long gov original (9125 chars) \u2014 focused map-reduce: 불법·허위조작정보 유통 방지 시행령, 국무회의 통과
+2026-07-07 19:35:22,989 | INFO | src.focused_summarize | Focused map 1/2 (8998 chars): 불법·허위조작정보 유통 방지 시행령, 국무회의 통과
+2026-07-07 19:35:23,190 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-07-07 19:35:23,191 | INFO | openai._base_client | Retrying request to /chat/completions in 11.000000 seconds
+2026-07-07 19:35:34,371 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-07-07 19:35:34,372 | INFO | openai._base_client | Retrying request to /chat/completions in 1.000000 seconds
+2026-07-07 19:35:37,135 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-07 19:35:38,136 | INFO | src.focused_summarize | Focused map 2/2 (124 chars): 불법·허위조작정보 유통 방지 시행령, 국무회의 통과
+2026-07-07 19:35:38,290 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-07-07 19:35:38,291 | INFO | openai._base_client | Retrying request to /chat/completions in 2.000000 seconds
+2026-07-07 19:35:40,938 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-07 19:35:42,089 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-07-07 19:35:42,090 | INFO | openai._base_client | Retrying request to /chat/completions in 6.000000 seconds
+2026-07-07 19:35:49,569 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-07 19:35:49,660 | INFO | src.daily_report | Daily research log saved → C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.md (dashboard: C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.html)
+2026-07-07 19:35:49,660 | INFO | src.pipeline | Summarizing 21/30: 소방청, 국내 최대 제어로봇학시스템학회와 손잡고 학술대회에 「소방재난 분과(세션)」 운영
+2026-07-07 19:35:49,831 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-07-07 19:35:49,831 | INFO | openai._base_client | Retrying request to /chat/completions in 15.000000 seconds
+2026-07-08 09:56:24,496 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-08 09:56:25,156 | INFO | src.daily_report | Daily research log saved → C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.md (dashboard: C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.html)
+2026-07-08 09:56:25,156 | INFO | src.pipeline | Summarizing 22/30: 여름철 폭염 대비 프로야구장 안전 점검 실시
+2026-07-08 10:08:35,021 | INFO | openai._base_client | Retrying request to /chat/completions in 0.382685 seconds
+2026-07-08 10:08:36,501 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-08 10:08:36,918 | INFO | src.daily_report | Daily research log saved → C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.md (dashboard: C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.html)
+2026-07-08 10:08:36,919 | INFO | src.pipeline | Summarizing 23/30: 인공지능으로 일하는 방식 바꾼다… 기후부, 인공지능 활용 업무혁신 본격 추진
+2026-07-08 10:08:36,922 | INFO | src.focused_summarize | Long gov original (4409 chars) \u2014 focused map-reduce: 인공지능으로 일하는 방식 바꾼다… 기후부, 인공지능 활용 업무혁신 본격 추진
+2026-07-08 10:08:36,945 | INFO | src.focused_summarize | Focused map 1/1 (4408 chars): 인공지능으로 일하는 방식 바꾼다… 기후부, 인공지능 활용 업무혁신 본격 추진
+2026-07-08 10:08:37,974 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-08 10:08:40,173 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-08 10:08:40,285 | INFO | src.daily_report | Daily research log saved → C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.md (dashboard: C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.html)
+2026-07-08 10:08:40,285 | INFO | src.pipeline | Summarizing 24/30: 정읍국유림관리소, 여름철 우기 전 사방사업 전격 완료!
+2026-07-08 10:08:41,581 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-08 10:08:41,686 | INFO | src.daily_report | Daily research log saved → C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.md (dashboard: C:\Users\Admin\Documents\python-project\output\daily\daily_2026-07-07.html)
+2026-07-08 10:08:41,686 | INFO | src.pipeline | Summarizing 25/30: 철도 타고 전국으로...전통주, 일상 속으로 달린다.
+2026-07-08 10:08:41,687 | INFO | src.focused_summarize | Long gov original (6438 chars) \u2014 focused map-reduce: 철도 타고 전국으로...전통주, 일상 속으로 달린다.
+2026-07-08 10:08:41,700 | INFO | src.focused_summarize | Focused map 1/1 (6436 chars): 철도 타고 전국으로...전통주, 일상 속으로 달린다.
+2026-07-08 10:08:41,889 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-07-08 10:08:41,889 | INFO | openai._base_client | Retrying request to /chat/completions in 18.000000 seconds
+^C

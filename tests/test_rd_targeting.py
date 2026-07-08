@@ -118,7 +118,7 @@ def test_non_rd_student_field_trip_excluded() -> None:
     grid_kws = ["전력계통", "스마트그리드", "파워그리드"]
 
     assert is_non_rd_program_news(article)
-    assert compute_rd_match_score(article, grid_kws) == 1
+    assert compute_rd_match_score(article, grid_kws) == 0
     assert build_rd_targeting_block(article, grid_kws) == []
 
 
@@ -159,7 +159,7 @@ def test_epidemiology_meta_analysis_excluded_from_rd_scoring() -> None:
 
     assert is_research_outcome_without_investment_signal(article)
     assert is_excluded_rd_news(article)
-    assert compute_rd_match_score(article, grid_kws) == 1
+    assert compute_rd_match_score(article, grid_kws) == 0
     assert build_rd_targeting_block(article, grid_kws) == []
 
 

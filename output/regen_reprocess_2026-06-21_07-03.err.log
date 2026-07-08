@@ -1,0 +1,138 @@
+2026-07-03 10:41:38,122 | INFO | src.daily_sync | Resuming partial reprocess for 2026-06-21 (1 rows in DB)
+2026-07-03 10:41:38,134 | INFO | src.daily_sync | Reprocessing 2026-06-21 (window ends 2026-06-22T08:00:00+09:00)
+2026-07-03 10:41:38,247 | WARNING | src.fetchers.rss | Malformed feed 정책브리핑 정책뉴스: <unknown>:27:2: mismatched tag
+2026-07-03 10:41:38,334 | WARNING | src.fetchers.rss | Malformed feed 정책브리핑 전문자료: <unknown>:27:2: mismatched tag
+2026-07-03 10:41:38,435 | WARNING | src.fetchers.rss | Malformed feed 정책브리핑 K-공감: <unknown>:27:2: mismatched tag
+2026-07-03 10:41:46,914 | WARNING | src.fetchers.rss | Malformed feed 정책브리핑 과기정통부: <unknown>:27:2: mismatched tag
+2026-07-03 10:41:47,112 | WARNING | src.fetchers.rss | Malformed feed 정책브리핑 산업통상부: <unknown>:27:2: mismatched tag
+2026-07-03 10:41:47,177 | WARNING | src.fetchers.rss | Malformed feed 정책브리핑 중소벤처기업부: <unknown>:27:2: mismatched tag
+2026-07-03 10:41:47,243 | WARNING | src.fetchers.rss | Malformed feed 정책브리핑 국토교통부: <unknown>:27:2: mismatched tag
+2026-07-03 10:41:47,322 | WARNING | src.fetchers.rss | Malformed feed 정책브리핑 기후에너지환경부: <unknown>:27:2: mismatched tag
+2026-07-03 10:41:47,389 | WARNING | src.fetchers.rss | Malformed feed 정책브리핑 교육부: <unknown>:27:2: mismatched tag
+2026-07-03 10:41:47,452 | WARNING | src.fetchers.rss | Malformed feed 정책브리핑 보건복지부: <unknown>:27:2: mismatched tag
+2026-07-03 10:41:47,534 | WARNING | src.fetchers.rss | Malformed feed 정책브리핑 국방부: <unknown>:27:2: mismatched tag
+2026-07-03 10:41:47,601 | WARNING | src.fetchers.rss | Malformed feed 정책브리핑 우주항공청: <unknown>:27:2: mismatched tag
+2026-07-03 10:41:50,151 | WARNING | src.fetchers.rss | Malformed feed KETEP 알림마당: <unknown>:48:2: mismatched tag
+2026-07-03 10:41:50,734 | WARNING | src.fetchers.rss | Malformed feed 한국전력 보도자료: <unknown>:157:15: not well-formed (invalid token)
+2026-07-03 10:41:50,967 | INFO | src.korea_scope | Domestic news filter (연합뉴스 경제): 119 kept, 1 foreign/non-domestic excluded
+2026-07-03 10:41:50,977 | INFO | src.fetchers.rss | RSS 연합뉴스 경제: excluded 1 foreign/non-domestic entry at fetch time
+2026-07-03 10:41:51,371 | INFO | src.korea_scope | Domestic news filter (동아일보 경제): 49 kept, 1 foreign/non-domestic excluded
+2026-07-03 10:41:51,382 | INFO | src.fetchers.rss | RSS 동아일보 경제: excluded 1 foreign/non-domestic entry at fetch time
+2026-07-03 10:41:51,451 | INFO | src.korea_scope | Domestic news filter (경향신문 경제): 46 kept, 4 foreign/non-domestic excluded
+2026-07-03 10:41:51,461 | INFO | src.fetchers.rss | RSS 경향신문 경제: excluded 4 foreign/non-domestic entries at fetch time
+2026-07-03 10:41:51,618 | INFO | src.korea_scope | Domestic news filter (파이낸셜뉴스): 114 kept, 13 foreign/non-domestic excluded
+2026-07-03 10:41:51,619 | INFO | src.fetchers.rss | RSS 파이낸셜뉴스: excluded 13 foreign/non-domestic entries at fetch time
+2026-07-03 10:41:51,880 | INFO | src.korea_scope | Domestic news filter (헤럴드경제): 275 kept, 25 foreign/non-domestic excluded
+2026-07-03 10:41:51,891 | INFO | src.fetchers.rss | RSS 헤럴드경제: excluded 25 foreign/non-domestic entries at fetch time
+2026-07-03 10:41:51,954 | INFO | src.korea_scope | Domestic news filter (전자신문 IT): 20 kept, 10 foreign/non-domestic excluded
+2026-07-03 10:41:51,963 | INFO | src.fetchers.rss | RSS 전자신문 IT: excluded 10 foreign/non-domestic entries at fetch time
+2026-07-03 10:41:52,024 | INFO | src.korea_scope | Domestic news filter (전자신문 통신/방송): 28 kept, 2 foreign/non-domestic excluded
+2026-07-03 10:41:52,025 | INFO | src.fetchers.rss | RSS 전자신문 통신/방송: excluded 2 foreign/non-domestic entries at fetch time
+2026-07-03 10:41:52,927 | INFO | src.korea_scope | Domestic news filter (한겨레 과학): 29 kept, 1 foreign/non-domestic excluded
+2026-07-03 10:41:52,937 | INFO | src.fetchers.rss | RSS 한겨레 과학: excluded 1 foreign/non-domestic entry at fetch time
+2026-07-03 10:41:53,017 | INFO | src.korea_scope | Domestic news filter (동아일보 과학): 43 kept, 7 foreign/non-domestic excluded
+2026-07-03 10:41:53,028 | INFO | src.fetchers.rss | RSS 동아일보 과학: excluded 7 foreign/non-domestic entries at fetch time
+2026-07-03 10:41:53,356 | INFO | httpx | HTTP Request: GET https://www.korea.kr/news/policyNewsList.do?pageIndex=1&startDate=2026-06-21&endDate=2026-06-21 "HTTP/1.1 200 OK"
+2026-07-03 10:41:53,584 | INFO | httpx | HTTP Request: GET https://www.korea.kr/news/policyNewsList.do?pageIndex=2&startDate=2026-06-21&endDate=2026-06-21 "HTTP/1.1 200 OK"
+2026-07-03 10:41:53,792 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseList.do?pageIndex=1&startDate=2026-06-21&endDate=2026-06-21 "HTTP/1.1 200 OK"
+2026-07-03 10:41:53,965 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseList.do?pageIndex=2&startDate=2026-06-21&endDate=2026-06-21 "HTTP/1.1 200 OK"
+2026-07-03 10:41:54,127 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseList.do?pageIndex=3&startDate=2026-06-21&endDate=2026-06-21 "HTTP/1.1 200 OK"
+2026-07-03 10:41:54,277 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/actuallyList.do?pageIndex=1&startDate=2026-06-21&endDate=2026-06-21 "HTTP/1.1 200 OK"
+2026-07-03 10:41:54,462 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/actuallyList.do?pageIndex=2&startDate=2026-06-21&endDate=2026-06-21 "HTTP/1.1 200 OK"
+2026-07-03 10:41:54,610 | INFO | httpx | HTTP Request: GET https://www.korea.kr/archive/expDocList.do?pageIndex=1&startDate=2026-06-21&endDate=2026-06-21&group=T "HTTP/1.1 200 OK"
+2026-07-03 10:41:54,741 | INFO | httpx | HTTP Request: GET https://www.korea.kr/archive/expDocList.do?pageIndex=2&startDate=2026-06-21&endDate=2026-06-21&group=T "HTTP/1.1 200 OK"
+2026-07-03 10:41:54,772 | INFO | src.fetchers.korea_kr_archive | korea.kr archive (log_date=2026-06-21): fetched 16 article(s)
+2026-07-03 10:41:54,774 | INFO | src.pipeline | Merged 16 korea.kr archive article(s) for 2026-06-21
+2026-07-03 10:41:54,990 | INFO | httpx | HTTP Request: GET https://www.pacst.go.kr/jsp/board/boardList.jsp?board_id=4&cpage=1 "HTTP/1.1 200 OK"
+2026-07-03 10:41:55,192 | INFO | httpx | HTTP Request: GET https://www.pacst.go.kr/jsp/board/boardList.jsp?board_id=4&cpage=2 "HTTP/1.1 200 OK"
+2026-07-03 10:41:55,502 | INFO | httpx | HTTP Request: GET https://www.pacst.go.kr/jsp/board/boardList.jsp?board_id=3&cpage=1 "HTTP/1.1 200 OK"
+2026-07-03 10:41:55,820 | INFO | httpx | HTTP Request: GET https://www.pacst.go.kr/jsp/board/boardList.jsp?board_id=3&cpage=2 "HTTP/1.1 200 OK"
+2026-07-03 10:41:56,123 | INFO | httpx | HTTP Request: GET https://www.pacst.go.kr/jsp/board/boardList.jsp?board_id=2&cpage=1 "HTTP/1.1 200 OK"
+2026-07-03 10:41:56,404 | INFO | httpx | HTTP Request: GET https://www.pacst.go.kr/jsp/board/boardList.jsp?board_id=2&cpage=2 "HTTP/1.1 200 OK"
+2026-07-03 10:41:56,663 | INFO | httpx | HTTP Request: GET https://www.pacst.go.kr/jsp/adv/advboardList.jsp?board_id=2&cpage=1 "HTTP/1.1 200 OK"
+2026-07-03 10:41:56,951 | INFO | httpx | HTTP Request: GET https://www.pacst.go.kr/jsp/adv/advboardList.jsp?board_id=2&cpage=2 "HTTP/1.1 200 OK"
+2026-07-03 10:41:57,102 | INFO | httpx | HTTP Request: GET https://www.pacst.go.kr/jsp/adv/advboardList.jsp?board_id=1&cpage=1 "HTTP/1.1 200 OK"
+2026-07-03 10:41:57,113 | INFO | src.fetchers.pacst | PACST archive (log_date=2026-06-21): fetched 0 article(s)
+2026-07-03 10:41:57,115 | INFO | src.pipeline | Calendar-day filter (log_date=2026-06-21, window_end=2026-06-22T08:00:00+09:00): 2255 → 16 articles
+2026-07-03 10:41:57,561 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156767427 "HTTP/1.1 200 OK"
+2026-07-03 10:41:57,847 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198493488&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-03 10:41:58,212 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198493489&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-03 10:41:58,380 | INFO | src.attachment_extractor | Extracted attachment text (2272 chars): https://www.korea.kr/common/download.do?fileId=198493489&tblKey=GMN
+2026-07-03 10:41:58,390 | INFO | src.article_enrichment | Enriched article (2137 → 4424 chars, attachments=1, plan=False): [보도자료] 김민석 국무총리 주재 선관위 개혁 관련 시민 토론회
+2026-07-03 10:41:58,872 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156767393 "HTTP/1.1 200 OK"
+2026-07-03 10:41:59,145 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198497094&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-03 10:42:00,441 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198497095&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-03 10:42:00,795 | INFO | src.attachment_extractor | Extracted attachment text (4809 chars): https://www.korea.kr/common/download.do?fileId=198497095&tblKey=GMN
+2026-07-03 10:42:00,806 | INFO | src.article_enrichment | Enriched article (1888 → 6712 chars, attachments=1, plan=False): 담뱃갑 경고그림·문구 교체로 흡연 위험성 경고 강화
+2026-07-03 10:42:01,290 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156767392 "HTTP/1.1 200 OK"
+2026-07-03 10:42:01,622 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198493813&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-03 10:42:01,936 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198493814&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-03 10:42:02,353 | INFO | src.attachment_extractor | Extracted attachment text (5997 chars): https://www.korea.kr/common/download.do?fileId=198493814&tblKey=GMN
+2026-07-03 10:42:02,363 | INFO | src.article_enrichment | Enriched article (4548 → 12069 chars, attachments=1, plan=False): 응급환자 이송체계 혁신 시범사업, 3개월간 응급실 미수용 '0건'
+2026-07-03 10:42:02,869 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156767399 "HTTP/1.1 200 OK"
+2026-07-03 10:42:03,130 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198493418&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-03 10:42:03,996 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198493419&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-03 10:42:04,228 | INFO | src.attachment_extractor | Extracted attachment text (1896 chars): https://www.korea.kr/common/download.do?fileId=198493419&tblKey=GMN
+2026-07-03 10:42:04,231 | INFO | src.article_enrichment | Enriched article (1174 → 3085 chars, attachments=1, plan=False): 올여름 가장 시원한 여행… 주왕산 절골계곡과 한려해상 섬으로 오세요
+2026-07-03 10:42:04,776 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156767398 "HTTP/1.1 200 OK"
+2026-07-03 10:42:05,088 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198493416&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-03 10:42:05,886 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198493417&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-03 10:42:06,120 | INFO | src.attachment_extractor | Extracted attachment text (3986 chars): https://www.korea.kr/common/download.do?fileId=198493417&tblKey=GMN
+2026-07-03 10:42:06,130 | INFO | src.article_enrichment | Enriched article (1938 → 5939 chars, attachments=1, plan=False): 주거·교육 공간 중심으로 생활폐기물 수집·운반 안전기준 개선한다
+2026-07-03 10:42:06,600 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156767397 "HTTP/1.1 200 OK"
+2026-07-03 10:42:06,898 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198493410&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-03 10:42:07,728 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198493411&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-03 10:42:07,965 | INFO | src.attachment_extractor | Extracted attachment text (1823 chars): https://www.korea.kr/common/download.do?fileId=198493411&tblKey=GMN
+2026-07-03 10:42:07,976 | INFO | src.article_enrichment | Enriched article (1342 → 4718 chars, attachments=1, plan=False): 환경영향평가 대행비용 자동산정시스템, 6월 22일부터 전면 확대 운영
+2026-07-03 10:42:08,445 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156767396 "HTTP/1.1 200 OK"
+2026-07-03 10:42:08,748 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198493409&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-03 10:42:08,936 | INFO | src.attachment_extractor | Extracted attachment text (3042 chars): https://www.korea.kr/common/download.do?fileId=198493409&tblKey=GMN
+2026-07-03 10:42:09,175 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198493408&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-03 10:42:09,429 | INFO | src.article_enrichment | Enriched article (2099 → 6750 chars, attachments=1, plan=False): '차세대 냉매' 도입 앞당기고, '재생냉매' 다시 쓴다… 냉매 전주기 기술개발 본격 착수
+2026-07-03 10:42:09,873 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156767395 "HTTP/1.1 200 OK"
+2026-07-03 10:42:10,285 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198493376&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-03 10:42:10,560 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198493377&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-03 10:42:10,601 | INFO | src.article_enrichment | Enriched article (1447 → 2953 chars, attachments=0, plan=False): 우주환경시험 부담을 완화하여 기업·대학의 우주기기 개발을 뒷받침한다
+2026-07-03 10:42:11,072 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156767394 "HTTP/1.1 200 OK"
+2026-07-03 10:42:11,339 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198493374&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-03 10:42:11,793 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198493375&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-03 10:42:12,055 | INFO | src.article_enrichment | Enriched article (929 → 2352 chars, attachments=0, plan=False): 제2우주센터 건립 후보지 공모 실시
+2026-07-03 10:42:12,567 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156767391 "HTTP/1.1 200 OK"
+2026-07-03 10:42:12,875 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198493367&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-03 10:42:13,259 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198493368&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-03 10:42:13,808 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156767390 "HTTP/1.1 200 OK"
+2026-07-03 10:42:14,107 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198493366&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-03 10:42:14,160 | INFO | src.article_enrichment | Enriched article (4681 → 6099 chars, attachments=0, plan=False): 응급환자 이송체계 혁신 시범사업, 3개월간 응급실 미수용 '0건'
+2026-07-03 10:42:14,646 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156767389 "HTTP/1.1 200 OK"
+2026-07-03 10:42:14,938 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198493362&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-03 10:42:15,575 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198493363&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-03 10:42:16,008 | INFO | src.attachment_extractor | Extracted attachment text (2063 chars): https://www.korea.kr/common/download.do?fileId=198493363&tblKey=GMN
+2026-07-03 10:42:16,019 | INFO | src.article_enrichment | Enriched article (82 → 3754 chars, attachments=1, plan=False): 국가 철도관제센터 첨단 모의관제시설 개방 … 6월 22일부터 참여기관 모집
+2026-07-03 10:42:16,543 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156767388 "HTTP/1.1 200 OK"
+2026-07-03 10:42:16,848 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198493596&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-03 10:42:17,154 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198493597&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-03 10:42:17,316 | INFO | src.attachment_extractor | Extracted attachment text (1403 chars): https://www.korea.kr/common/download.do?fileId=198493597&tblKey=GMN
+2026-07-03 10:42:17,318 | INFO | src.article_enrichment | Enriched article (1528 → 4519 chars, attachments=1, plan=False): 해수부, 제11차 아워오션콘퍼런스(OOC) 참석… UN해양총회 개최국으로서 해양리더십 강화
+2026-07-03 10:42:17,794 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156767387 "HTTP/1.1 200 OK"
+2026-07-03 10:42:18,123 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198493358&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-03 10:42:18,310 | INFO | src.attachment_extractor | Extracted attachment text (1806 chars): https://www.korea.kr/common/download.do?fileId=198493358&tblKey=GMN
+2026-07-03 10:42:18,573 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198493359&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-03 10:42:18,750 | INFO | src.article_enrichment | Enriched article (852 → 2673 chars, attachments=1, plan=False): 어촌 청소년·수산계 대학생, 뉴질랜드에서 꿈 키운다
+2026-07-03 10:42:19,231 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156767386 "HTTP/1.1 200 OK"
+2026-07-03 10:42:19,562 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198493356&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-03 10:42:19,672 | INFO | src.attachment_extractor | Extracted attachment text (936 chars): https://www.korea.kr/common/download.do?fileId=198493356&tblKey=GMN
+2026-07-03 10:42:20,009 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198493357&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-03 10:42:20,058 | INFO | src.article_enrichment | Enriched article (992 → 1943 chars, attachments=1, plan=False): "청년이 여는 새로운 어촌의 미래" 해수부, 청년어업인 간담회 개최
+2026-07-03 10:42:20,525 | INFO | httpx | HTTP Request: GET https://www.korea.kr/briefing/pressReleaseView.do?newsId=156767431 "HTTP/1.1 200 OK"
+2026-07-03 10:42:20,841 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198493535&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-03 10:42:21,041 | INFO | src.attachment_extractor | Extracted attachment text (1316 chars): https://www.korea.kr/common/download.do?fileId=198493535&tblKey=GMN
+2026-07-03 10:42:21,384 | INFO | httpx | HTTP Request: GET https://www.korea.kr/common/download.do?fileId=198493536&tblKey=GMN "HTTP/1.1 200 OK"
+2026-07-03 10:42:21,514 | INFO | src.article_enrichment | Enriched article (1036 → 2367 chars, attachments=1, plan=False): 양육비 채무 불이행자 166명 대상 운전면허정지, 출국금지 등 184건 의결
+2026-07-03 10:42:21,537 | INFO | src.pipeline | Filtered to 9 keyword-matching domestic (Korea-scoped) articles
+2026-07-03 10:42:21,543 | INFO | src.pipeline | Gov/Fraunhofer-target articles (정부·R&D 타깃): 9
+2026-07-03 10:42:21,567 | INFO | src.pipeline | Purged 51 non-domestic (foreign) row(s) from monitor DB
+2026-07-03 10:42:21,582 | INFO | src.pipeline | Summarizing 1/9: 응급환자 이송체계 혁신 시범사업, 3개월간 응급실 미수용 '0건'
+2026-07-03 10:42:21,585 | INFO | src.focused_summarize | Long gov original (12069 chars) \u2014 focused map-reduce: 응급환자 이송체계 혁신 시범사업, 3개월간 응급실 미수용 '0건'
+2026-07-03 10:42:21,596 | INFO | src.focused_summarize | Focused map 1/2 (8999 chars): 응급환자 이송체계 혁신 시범사업, 3개월간 응급실 미수용 '0건'
+2026-07-03 10:42:23,498 | INFO | httpx | HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-07-03 10:42:23,510 | WARNING | src.llm_utils | Groq TPD limit \u2014 waiting 2815s before retry

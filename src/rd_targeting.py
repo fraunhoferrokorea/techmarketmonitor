@@ -254,16 +254,16 @@ def is_domestic_rd_target(investment_actor: str) -> bool:
 def _fraunhofer_base_rd_score(article: SummarizedArticle) -> int:
     """Cooperation/R&D-commission angle only (LLM or heuristic)."""
     if is_excluded_rd_news(article):
-        return 1
+        return 0
 
     stored = getattr(article, "rd_match_score", 0) or 0
     if stored:
-        return max(1, min(5, int(stored)))
+        return max(0, min(5, int(stored)))
 
     fields = parse_rd_fields(article.ko_summary_steps)
     actor = fields.get("investment_actor", "")
     pain = fields.get("pain_point", "")
-    score = 1
+    score = 0
 
     if has_investment_signal(article):
         score += 1
@@ -274,7 +274,7 @@ def _fraunhofer_base_rd_score(article: SummarizedArticle) -> int:
     if article.rd_proposable_area and article.rd_proposable_area not in ("해당 없음", ""):
         score += 1
 
-    return max(1, min(5, score))
+    return max(0, min(5, score))
 
 
 def compute_rd_match_score(
@@ -283,7 +283,7 @@ def compute_rd_match_score(
     *,
     monthly: bool = False,
 ) -> int:
-    """Return R&D suitability 1–5: Fraunhofer cooperation + top-3 keyword relevance."""
+    """Return R&D suitability 0–5: Fraunhofer cooperation + top-3 keyword relevance."""
     base = _fraunhofer_base_rd_score(article)
     if not top_keywords:
         return base
@@ -296,7 +296,7 @@ def compute_rd_match_score(
         relevance = classify_keyword_relevance(article, top_keywords)
     adjusted = base + _KEYWORD_RD_DELTA.get(relevance, -1)
     cap = _KEYWORD_RD_CAP.get(relevance, 3)
-    return max(1, min(5, min(adjusted, cap)))
+    return max(0, min(5, min(adjusted, cap)))
 
 
 def build_rd_targeting_block(
