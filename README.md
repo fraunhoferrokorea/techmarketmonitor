@@ -387,7 +387,7 @@ python rebuild_daily_markdown.py
 python rebuild_daily_markdown.py 2026-06-23
 
 # 캘린더일 필터 단위 테스트
-python tests/test_pipeline_filter.py
+python tests/filtering/test_pipeline_filter.py
 ```
 
 ### SQLite 스키마 (`daily_logs`)
@@ -752,10 +752,28 @@ python-project/
 │   ├── post_reprocess_status.py       # 재처리 후 DB/md 상태 점검
 │   └── run_recent5_filter_reprocess.ps1
 ├── tests/
-│   ├── test_pipeline_filter.py   # KST 캘린더일 필터 테스트
-│   ├── test_rd_targeting.py      # R&D 적합도·키워드 보정
-│   ├── test_config_keywords.py   # top-3 / top-5 키워드 로드
-│   └── test_credibility.py       # 국내 소스 신뢰도 등급
+│   ├── conftest.py
+│   ├── config/
+│   │   └── test_config_keywords.py
+│   ├── documents/
+│   │   └── test_plan_document.py
+│   ├── fetchers/
+│   │   ├── test_attachment_extractor.py
+│   │   ├── test_korea_kr_archive.py
+│   │   └── test_pacst.py
+│   ├── filtering/
+│   │   ├── test_keyword_signals.py
+│   │   ├── test_korea_scope.py
+│   │   ├── test_pipeline_filter.py
+│   │   └── test_policy_priority.py
+│   ├── rd_targeting/
+│   │   ├── test_fraunhofer_subject_strip.py
+│   │   └── test_rd_targeting.py
+│   └── summarization/
+│       ├── test_credibility.py
+│       ├── test_daily_one_liner.py
+│       ├── test_fact_grounding.py
+│       └── test_summarizer_korean.py
 ├── templates/
 │   └── daily_research_log_template.md
 ├── src/
@@ -826,7 +844,7 @@ python regen_daily_report.py 2026-06-21
 python generate_ko_offline.py
 
 # 캘린더일 필터 단위 테스트
-python tests/test_pipeline_filter.py
+python tests/filtering/test_pipeline_filter.py
 ```
 
 ---
