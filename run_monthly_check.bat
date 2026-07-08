@@ -13,7 +13,7 @@ if errorlevel 1 (
   exit /b 1
 )
 
-git add reports/*.md reports/*.docx 2>nul
+git add output/monthly/*.md output/monthly/*.docx 2>nul
 git diff --staged --quiet
 if errorlevel 1 (
   git -c user.name="yenaalisonhong" -c user.email="yenaalisonhong@users.noreply.github.com" commit -m "report: monthly local sync" >> "%LOG%" 2>&1
