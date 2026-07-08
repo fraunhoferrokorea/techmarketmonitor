@@ -6,6 +6,7 @@ import re
 from src.korea_scope import is_domestic_news
 from src.models import FilteredArticle, RawArticle
 from src.policy_priority import gov_target_pass_label, is_gov_target
+from src.rd_targeting import is_excluded_rd_news
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +29,9 @@ def passes_collection_filter(
     required_keywords: list[str] | None = None,
 ) -> bool:
     """True when article would pass fetch-time keyword + top-N core filter."""
+    if is_excluded_rd_news(article):
+        return False
+
     searchable = " ".join([article.title, article.summary, article.source_name])
     core = required_keywords or []
     gov_target = is_gov_target(article)
@@ -47,6 +51,7 @@ def filter_articles(
     seen_urls: set[str] = set()
     target_label = gov_target_pass_label()
     dropped_foreign = 0
+    dropped_non_rd = 0
     dropped_core = 0
     dropped_keywords = 0
     core = required_keywords or []
@@ -57,6 +62,10 @@ def filter_articles(
 
         if not is_domestic_news(article):
             dropped_foreign += 1
+            continue
+
+        if is_excluded_rd_news(article):
+            dropped_non_rd += 1
             continue
 
         searchable = " ".join([article.title, article.summary, article.source_name])
@@ -88,6 +97,11 @@ def filter_articles(
         logger.info(
             "Keyword filter: excluded %d non-domestic (foreign) article(s)",
             dropped_foreign,
+        )
+    if dropped_non_rd:
+        logger.info(
+            "Keyword filter: excluded %d non-R&D article(s) (education/career or research-outcome only)",
+            dropped_non_rd,
         )
     if dropped_core:
         logger.info(

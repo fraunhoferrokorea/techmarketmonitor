@@ -4,7 +4,7 @@ import os
 import re
 
 from src.models import FilteredArticle, RawArticle, SummarizedArticle
-from src.policy_priority import gov_target_score
+from src.policy_priority import gov_target_score, is_gov_target
 from src.summarizer import polish_rd_field, strip_implicit_fraunhofer_subject
 
 _RELEVANCE_RANK = {"direct": 0, "indirect": 1, "weak": 2, "none": 3}
@@ -54,6 +54,65 @@ MONTHLY_RD_MIN_SCORE = int(os.getenv("MONTHLY_RD_MIN_SCORE", "4"))
 _KEYWORD_RD_DELTA = {"direct": 1, "indirect": 0, "weak": -1, "none": -2}
 _KEYWORD_RD_CAP = {"direct": 5, "indirect": 5, "weak": 4, "none": 3}
 
+# Field trips, extracurricular programs, and career events — not R&D news even if
+# "research" or industry keywords appear in the title.
+_NON_RD_EDUCATION_EVENT = re.compile(
+    r"비교과\s*프로그램"
+    r"|협력형\s*비교과"
+    r"|현장\s*체험|현장체험"
+    r"|현장\s*교육|현장교육"
+    r"|현장\s*견학|산업\s*견학|견학\s*프로그램"
+    r"|(?:(?:대학|대학교|대학원)(?:생|\s*생)?|학생\s*\d+\s*명).*?(?:산업\s*현장|산업체\s*방문|현장\s*탐방)"
+    r"|(?:산업\s*현장|산업체\s*방문).*?(?:대학생|대학원생|학생\s*\d+\s*명)"
+    r"|산업체\s*방문\s*형?\s*교육"
+    r"|채용\s*연계\s*인턴십|인턴십.*?채용\s*연계"
+    r"|진로\s*교육|진로\s*탐색|취업\s*연계\s*교육",
+    re.I,
+)
+
+_NON_RD_EDUCATION_RD_OVERRIDE = re.compile(
+    r"연구\s*개발|R\s*&\s*D"
+    r"|(?:연구|개발)\s*(?:과제|성과|결과|수행)"
+    r"|특허|(?:동료\s*)?심사\s*논문"
+    r"|실증\s*(?:사업|과제|연구|프로젝트|단지|시험)"
+    r"|기술\s*개발|신기술\s*개발"
+    r"|(?:예산|투자|공모).*?(?:연구|개발|R&D|과제)"
+    r"|정책\s*발표|로드\s*맵|로드맵"
+    r"|산업\s*현장\s*실증",
+    re.I,
+)
+
+# Academic / epidemiological findings without a funder or commissioning signal.
+_RESEARCH_OUTCOME_ONLY = re.compile(
+    r"메타\s*분석|meta\s*-?\s*analysis"
+    r"|상관관계|correlation"
+    r"|역학\s*연구|epidemiol"
+    r"|cohort\s*study|임상\s*(?:시험|연구)\s*결과"
+    r"|동료\s*심사|peer\s*-?\s*review|학술\s*논문"
+    r"|(?:연구|분석|조사).*?(?:결과|발견|규명|밝혀|확인)"
+    r"|(?:연구|개발)\s*(?:결과|성과)\s*(?:발표|공개)"
+    r"|(?:결과|성과|발견)\s*(?:발표|공개|발표됨)"
+    r"|위험.*?(?:%|퍼센트|배\s*↑|배\s*증가|증가|상승)"
+    r"|암\s*위험|질병\s*위험|건강\s*위험"
+    r"|(?:대학|연구원|병원).*?(?:연구|분석).*?(?:발표|규명|밝혀)",
+    re.I,
+)
+
+# Budget / program / commissioning signals — stricter than _INVESTMENT_SIGNAL
+# (which also matches bare "연구개발" in outcome-only headlines).
+_RD_FUNDING_SIGNAL = re.compile(
+    r"투자|예산|편성|협력|로드\s*맵|로드맵|기술\s*확보|"
+    r"invest(?:ment|ing)?|budget|funding|road\s*map|collaborat|"
+    r"M\s*&\s*A|인수|합병|위탁|사업\s*기간|"
+    r"국산화|내재화|고도화|공모|과제|실증|MOU|양해각서|"
+    r"지원\s*사업|연구\s*개발\s*(?:지원|사업|과제|공모|투자|예산)|"
+    r"R\s*&\s*D\s*(?:지원|사업|과제|공모|투자|budget|funding)|"
+    r"(?:예산|투자|공모|지원).*?(?:연구|개발|R&D|과제)|"
+    r"정책\s*발표|(?:추진|시행)\s*(?:계획|사업)|"
+    r"실증\s*(?:사업|과제|프로젝트|단지)",
+    re.I,
+)
+
 
 def format_rd_link_point(*candidates: str) -> str:
     """Pick the best R&D linkage sentence and drop redundant Fraunhofer subject."""
@@ -76,6 +135,56 @@ def _display_rd_field(value: str) -> str:
     if not cleaned:
         return ""
     return strip_implicit_fraunhofer_subject(cleaned)
+
+
+def _exclusion_source_text(
+    article: RawArticle | FilteredArticle | SummarizedArticle,
+) -> str:
+    """Source-facing text only — ignore LLM R&D fields that can false-trigger overrides."""
+    parts = [article.title, article.source_name]
+    summary = getattr(article, "summary", None)
+    if summary:
+        parts.append(summary)
+    else:
+        llm_summary = getattr(article, "llm_summary", None)
+        if llm_summary:
+            parts.append(llm_summary)
+    return " ".join(parts)
+
+
+def is_non_rd_program_news(
+    article: RawArticle | FilteredArticle | SummarizedArticle,
+) -> bool:
+    """True for student field trips, tours, and career programs without R&D substance."""
+    text = _exclusion_source_text(article)
+    if not _NON_RD_EDUCATION_EVENT.search(text):
+        return False
+    if _NON_RD_EDUCATION_RD_OVERRIDE.search(text):
+        return False
+    return True
+
+
+def is_research_outcome_without_investment_signal(
+    article: RawArticle | FilteredArticle | SummarizedArticle,
+) -> bool:
+    """True for academic/epidemiological findings with no funder or commissioning signal."""
+    if is_gov_target(article):
+        return False
+    text = _exclusion_source_text(article)
+    if not _RESEARCH_OUTCOME_ONLY.search(text):
+        return False
+    if _RD_FUNDING_SIGNAL.search(text):
+        return False
+    return True
+
+
+def is_excluded_rd_news(
+    article: RawArticle | FilteredArticle | SummarizedArticle,
+) -> bool:
+    """True when article should be dropped from R&D news collection and scoring."""
+    return is_non_rd_program_news(article) or is_research_outcome_without_investment_signal(
+        article
+    )
 
 
 def _combined_text(article: RawArticle | FilteredArticle | SummarizedArticle) -> str:
@@ -144,6 +253,9 @@ def is_domestic_rd_target(investment_actor: str) -> bool:
 
 def _fraunhofer_base_rd_score(article: SummarizedArticle) -> int:
     """Cooperation/R&D-commission angle only (LLM or heuristic)."""
+    if is_excluded_rd_news(article):
+        return 1
+
     stored = getattr(article, "rd_match_score", 0) or 0
     if stored:
         return max(1, min(5, int(stored)))
@@ -191,6 +303,9 @@ def build_rd_targeting_block(
     article: SummarizedArticle,
     top_keywords: list[str] | None = None,
 ) -> list[str]:
+    if is_excluded_rd_news(article):
+        return []
+
     fields = parse_rd_fields(article.ko_summary_steps)
     if not fields:
         return []

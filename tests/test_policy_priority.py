@@ -78,6 +78,43 @@ def test_filter_excludes_rd_only_match_without_core_top5() -> None:
     assert result == []
 
 
+def test_filter_excludes_epidemiology_meta_analysis_without_funder() -> None:
+    article = RawArticle(
+        title='"자동차 매연, 소아암 최악" 암 위험 최대 68%↑',
+        url="https://example.com/childhood-cancer-meta",
+        summary=(
+            "이화여대·국립암센터·미네소타대 공동 연구팀이 교통 대기오염과 소아암 "
+            "상관관계를 규명한 메타분석 결과를 발표함."
+        ),
+        source_name="연합뉴스",
+        category="korean",
+        published_at=datetime.now(tz=timezone.utc),
+    )
+    result = filter_articles(
+        [article],
+        keywords=["전력계통", "연구개발", "대기오염"],
+        required_keywords=["전력계통"],
+    )
+    assert result == []
+
+
+def test_filter_keeps_research_topic_with_budget_program() -> None:
+    article = RawArticle(
+        title="환경부, 국내 대기오염 저감 R&D 500억 예산 편성",
+        url="https://www.korea.kr/briefing/pressReleaseView.do?newsId=99",
+        summary="환경부가 국내 미세먼지·대기오염 저감 기술 개발 지원 사업에 예산을 편성함.",
+        source_name="환경부 보도자료",
+        category="korean",
+        published_at=datetime.now(tz=timezone.utc),
+    )
+    result = filter_articles(
+        [article],
+        keywords=["전력계통", "대기오염"],
+        required_keywords=["전력계통"],
+    )
+    assert len(result) == 1
+
+
 def test_is_plan_document_expdoc_url() -> None:
     article = RawArticle(
         title="2026 디지털정부 전망",
@@ -93,6 +130,26 @@ def test_is_plan_document_expdoc_url() -> None:
 def test_filter_still_requires_keywords_for_general_news() -> None:
     article = _article("유통업체 매출 동향 발표", source="연합뉴스 경제")
     result = filter_articles([article], keywords=["전력계통"])
+    assert result == []
+
+
+def test_filter_excludes_student_field_trip_program() -> None:
+    article = RawArticle(
+        title="제주·경남 대학생 45명 에너지 산업현장으로",
+        url="https://example.com/jeju-field-trip",
+        summary=(
+            "제주대·경상국립대·창원대 학생 45명이 2026 제주-경남 협력형 "
+            "비교과 프로그램에 참여해 산업체 방문 현장교육을 받았음."
+        ),
+        source_name="연합뉴스",
+        category="korean",
+        published_at=datetime.now(tz=timezone.utc),
+    )
+    result = filter_articles(
+        [article],
+        keywords=["전력계통", "스마트그리드", "에너지"],
+        required_keywords=["전력계통"],
+    )
     assert result == []
 
 

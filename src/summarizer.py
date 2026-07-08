@@ -191,6 +191,18 @@ R&D suitability scoring (rd_match_score 1–5) — weigh BOTH:
 - 2: Tangential tech news, weak investment signal, or monitoring keywords barely related
 - 1: No Korean R&D commission relevance OR foreign-only / no keyword connection
 
+ALWAYS score 1 (non-R&D) for these even if industry keywords appear:
+- University/graduate student field trips, factory tours, or extracurricular (비교과) programs
+- Industry-visit education with no research output, patents, or R&D program announcement
+- Recruitment-linked internships or career guidance events without an R&D project or budget
+- Pure research findings (epidemiology, meta-analyses, academic paper results, correlation studies) with NO Korean funder, budget, R&D program, MOU, commissioning, or follow-on policy/business signal in the article — set rd_proposable_area to "해당 없음" and investment_actor to "명시 없음"
+- Exception: official government ministry press releases (policy direction) may score higher even without explicit budget IF a domestic commissioning actor and program intent are stated
+
+Inclusion requires explicit facts only (no speculation):
+- WHO pays: ministry, agency, company budget/program/MOU must be named in the article
+- Domestic Korean R&D actor only (foreign-only studies → score 1)
+- Research outcome reports are excluded UNLESS the same article also states follow-on budget, roadmap, tender, or program launch
+
 Return valid JSON with this exact schema:
 {
   "summary": "1문장 한국어 R&D·투자 헤드라인. 반드시 '출처: <url>'로 끝남",
