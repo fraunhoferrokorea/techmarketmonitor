@@ -1,0 +1,52 @@
+name: Deploy Daily Reports (GitHub Pages)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "output/daily/**"
+      - ".github/workflows/deploy-daily-pages.yml"
+      - "scripts/build_daily_pages.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Build static site from daily markdown
+        run: |
+          pip install markdown
+          python scripts/build_daily_pages.py
+
+      - name: Set up Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: output/daily
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
