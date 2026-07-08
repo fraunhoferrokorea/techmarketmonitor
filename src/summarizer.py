@@ -429,8 +429,10 @@ class Summarizer:
 
     def summarize(self, article: FilteredArticle) -> SummarizedArticle:
         from src.focused_summarize import summarize_with_focus_if_needed
+        from src.fact_grounding import sanitize_summarized_article
 
-        return summarize_with_focus_if_needed(article, self._settings, self._summarize_standard)
+        result = summarize_with_focus_if_needed(article, self._settings, self._summarize_standard)
+        return sanitize_summarized_article(article, result)
 
     def _summarize_standard(self, article: FilteredArticle) -> SummarizedArticle:
         preview_len = 1500 if is_gov_target(article) else 1200
