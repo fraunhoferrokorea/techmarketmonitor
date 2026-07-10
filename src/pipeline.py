@@ -10,7 +10,7 @@ from zoneinfo import ZoneInfo
 from src.article_enrichment import enrich_raw_articles
 from src.config import Settings, load_settings, load_sources
 from src.daily_report import log_to_summarized_article, save_daily_report
-from src.fetchers.korea_kr_archive import fetch_korea_kr_for_date
+from src.fetchers.html_boards import fetch_html_boards_for_date, fetch_html_boards_recent
 from src.fetchers.pacst import fetch_pacst_for_date
 from src.fetchers.registry import build_fetchers
 from src.filter import filter_articles
@@ -209,38 +209,24 @@ def run_daily_monitor(
         except Exception as exc:
             logger.error("Fetcher failed (%s): %s", fetcher.__class__.__name__, exc)
 
-    if window_end is not None:
-        archive_articles = fetch_korea_kr_for_date(log_date)
-        if archive_articles:
-            seen_archive_urls = {a.url for a in raw_articles}
-            added = 0
-            for article in archive_articles:
-                if article.url not in seen_archive_urls:
-                    raw_articles.append(article)
-                    seen_archive_urls.add(article.url)
-                    added += 1
-            if added:
-                logger.info(
-                    "Merged %d korea.kr archive article(s) for %s",
-                    added,
-                    log_date.isoformat(),
-                )
+    def _merge_extra(extra: list[RawArticle], label: str) -> None:
+        if not extra:
+            return
+        seen = {a.url for a in raw_articles}
+        added = 0
+        for article in extra:
+            if article.url not in seen:
+                raw_articles.append(article)
+                seen.add(article.url)
+                added += 1
+        if added:
+            logger.info("Merged %d %s article(s) for %s", added, label, log_date.isoformat())
 
-        pacst_articles = fetch_pacst_for_date(log_date)
-        if pacst_articles:
-            seen_archive_urls = {a.url for a in raw_articles}
-            added = 0
-            for article in pacst_articles:
-                if article.url not in seen_archive_urls:
-                    raw_articles.append(article)
-                    seen_archive_urls.add(article.url)
-                    added += 1
-            if added:
-                logger.info(
-                    "Merged %d PACST article(s) for %s",
-                    added,
-                    log_date.isoformat(),
-                )
+    if window_end is not None:
+        _merge_extra(fetch_html_boards_for_date(log_date), "ministry/agency HTML")
+        _merge_extra(fetch_pacst_for_date(log_date), "PACST")
+    else:
+        _merge_extra(fetch_html_boards_recent(), "ministry/agency HTML")
 
     if window_end is not None:
         recent_articles = _within_log_date(

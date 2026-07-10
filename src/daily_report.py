@@ -29,19 +29,36 @@ logger = logging.getLogger(__name__)
 _OUTPUT_BASE = Path(__file__).resolve().parent.parent / "output" / "daily"
 
 _TIER1_NEWS = {"연합뉴스", "yna", "뉴시스", "newsis"}
-_TIER1_RESEARCH = {"kistep", "kiet", "iitp", "kipo", "ketep", "kepco", "koita", "kisdi"}
+_TIER1_RESEARCH = {
+    "kistep",
+    "kiet",
+    "iitp",
+    "kipo",
+    "ketep",
+    "keit",
+    "kiat",
+    "tipa",
+    "nrf",
+    "kaia",
+    "krit",
+    "kepco",
+    "koita",
+    "kisdi",
+    "pacst",
+}
 _PEER_REVIEW_HINTS = {"kci", "dbpia", "ieee", "springer", "elsevier", "wiley", "nature", "science", "kisti", "etri"}
 _PREPRINT_HINTS = {"arxiv", "biorxiv", "medrxiv", "ssrn", "preprint", "프리프린트"}
 _GOVERNMENT_HINTS = {
-    "korea.kr",
-    "정책브리핑",
     "motie",
+    "motir",
     "msit",
     "mss",
     "mw",
     "moe",
     "molit",
     "mcee",
+    "mofe",
+    "moef",
     "mnd",
     "kasa",
     "과기정통",
@@ -50,8 +67,18 @@ _GOVERNMENT_HINTS = {
     "보건복지",
     "국토교통",
     "기후에너지",
+    "재정경제",
     "우주항공",
+    "국방부",
     "kipo",
+    "ketep",
+    "keit",
+    "kiat",
+    "tipa",
+    "kaia",
+    "krit",
+    "nrf",
+    "pacst",
     ".go.kr",
 }
 _KOREAN_MAJOR_MEDIA = {
@@ -72,16 +99,25 @@ _KOREAN_MAJOR_MEDIA = {
     "hankyung",
     "매일경제",
     "mk.co.kr",
+    "전기신문",
+    "electimes",
+    "에너지경제",
+    "ekn.kr",
+    "에너지타임즈",
+    "energytimes",
+    "인더스트리뉴스",
+    "industrynews",
 }
 
 CREDIBILITY_LEGEND_A = (
-    "정부·공공기관 원문(korea.kr·부처 .go.kr 보도자료), "
+    "정부·공공기관 원문(부처·전담기관 .go.kr/.re.kr/.or.kr 보도자료), "
     "연합뉴스·뉴시스 1차 보도, "
-    "공공 R&D·정책기관(KISTEP·KIET·KIPO·KETEP·한국전력 등), "
+    "공공 R&D·정책기관(KISTEP·KIET·KIPO·KETEP·KEIT·한국전력 등), "
     "국내 학술지·국책연구원 동료심사 논문"
 )
 CREDIBILITY_LEGEND_B = (
-    "국내 경제·IT 전문매체(헤럴드경제·동아일보·전자신문·ZDNet Korea 등), "
+    "국내 경제·IT·에너지 전문매체(헤럴드경제·동아일보·매일경제·전자신문·"
+    "전기신문·에너지경제신문·에너지타임즈·인더스트리뉴스·ZDNet Korea 등), "
     "2차 인용·전문자료 요약, 기업·공기업 IR/보도자료"
 )
 CREDIBILITY_LEGEND_C = (

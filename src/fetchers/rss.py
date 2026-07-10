@@ -1,17 +1,21 @@
 from __future__ import annotations
 
 import logging
+import re
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
+from urllib.parse import urljoin, urlparse
 
 import feedparser
+import httpx
 
 from src.models import RawArticle
-from src.korea_scope import filter_domestic_articles, is_foreign_url
+from src.korea_scope import filter_domestic_articles
 
 logger = logging.getLogger(__name__)
 
-_TIMEOUT = 15  # seconds
+_TIMEOUT = 20.0
+_USER_AGENT = "TechMarketMonitor/1.0"
 
 
 def _parse_date(entry: feedparser.FeedParserDict) -> datetime | None:
@@ -38,15 +42,47 @@ def _clean(text: str | None) -> str:
     return (text or "").strip()
 
 
+def _absolute_url(link: str, base_url: str) -> str:
+    link = link.strip()
+    if not link:
+        return link
+    if link.startswith("//"):
+        link = "https:" + link
+    parsed = urlparse(link)
+    if not (parsed.scheme and parsed.netloc):
+        link = urljoin(base_url, link)
+    # Drop servlet session tokens that break sharing / dedup.
+    return re.sub(r";jsessionid=[^?]*", "", link, flags=re.I)
+
+
 class RSSFetcher:
-    def __init__(self, name: str, url: str, category: str) -> None:
+    def __init__(
+        self,
+        name: str,
+        url: str,
+        category: str,
+        *,
+        method: str = "GET",
+    ) -> None:
         self.name = name
         self.url = url
         self.category = category
+        self.method = (method or "GET").upper()
 
     def fetch(self) -> list[RawArticle]:
         try:
-            feed = feedparser.parse(self.url, request_headers={"User-Agent": "TechMarketMonitor/1.0"})
+            headers = {"User-Agent": _USER_AGENT}
+            if self.method == "POST":
+                response = httpx.post(
+                    self.url,
+                    timeout=_TIMEOUT,
+                    follow_redirects=True,
+                    headers=headers,
+                )
+                response.raise_for_status()
+                feed = feedparser.parse(response.content)
+            else:
+                feed = feedparser.parse(self.url, request_headers=headers)
         except Exception as exc:
             logger.error("Failed to fetch %s (%s): %s", self.name, self.url, exc)
             return []
@@ -58,7 +94,7 @@ class RSSFetcher:
         articles: list[RawArticle] = []
         for entry in feed.entries:
             title = _clean(getattr(entry, "title", None))
-            link = _clean(getattr(entry, "link", None))
+            link = _absolute_url(_clean(getattr(entry, "link", None)), self.url)
             if not title or not link:
                 continue
 

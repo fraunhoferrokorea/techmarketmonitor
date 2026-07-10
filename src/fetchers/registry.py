@@ -10,6 +10,9 @@ def build_fetchers(sources: list[dict], keywords: list[str]) -> list[RSSFetcher]
         name = source.get("name", "Unknown")
         url = source.get("url", "")
         category = source.get("category", "general")
+        method = source.get("method", "GET")
         if url:
-            fetchers.append(RSSFetcher(name=name, url=url, category=category))
+            fetchers.append(
+                RSSFetcher(name=name, url=url, category=category, method=method)
+            )
     return fetchers

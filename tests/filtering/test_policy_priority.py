@@ -12,10 +12,10 @@ from src.policy_priority import (
 )
 
 
-def _article(title: str, source: str = "정책브리핑 산업통상부", summary: str = "") -> RawArticle:
+def _article(title: str, source: str = "산업통상부 보도자료", summary: str = "") -> RawArticle:
     return RawArticle(
         title=title,
-        url="https://www.korea.kr/briefing/pressReleaseView.do?newsId=1",
+        url="https://www.motir.go.kr/kor/article/ATCL3f49a5a8c/1/view",
         summary=summary,
         source_name=source,
         category="korean",

@@ -25,8 +25,8 @@ def _article(**overrides) -> SummarizedArticle:
 
 def test_credibility_government_press_release_is_a() -> None:
     article = _article(
-        source_name="정책브리핑 과기정통부",
-        url="https://www.korea.kr/briefing/pressReleaseView.do?newsId=1",
+        source_name="과기정통부 보도자료",
+        url="https://www.msit.go.kr/bbs/view.do?sCode=user&mId=113&mPid=112&pageIndex=&bbsSeqNo=94&nttSeqNo=1",
     )
     assert _credibility(article) == "A"
 
@@ -49,6 +49,7 @@ def test_credibility_domestic_media_is_b() -> None:
 
 def test_credibility_legend_mentions_korea_sources() -> None:
     legend = "\n".join(credibility_legend_lines())
-    assert "korea.kr" in legend
+    assert ".go.kr" in legend
+    assert "전기신문" in legend or "매일경제" in legend
     assert "Reuters" not in legend
     assert "arXiv" not in legend

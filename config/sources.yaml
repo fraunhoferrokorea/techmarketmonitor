@@ -3,20 +3,13 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # 국내 시장·정책·ICT 소스만 수집합니다.
 # 새 소스를 추가할 때는 name / url / category 세 필드가 필수입니다.
+# method: post 는 POST RSS만 허용하는 부처(산업통상부 등)에 사용합니다.
 # RSSFetcher가 feedparser로 가져오므로 표준 RSS 2.0 / Atom 1.0 URL이면 됩니다.
+# 국토부·국방부·우주항공청·TIPA·KETEP·에너지경제신문·PACST 는 HTML 스크래퍼로 보강합니다.
 # ─────────────────────────────────────────────────────────────────────────────
 
 # ── 국내 ICT / 정책 / 공공 R&D ─────────────────────────────────────────
 korean:
-  - name: 정책브리핑 정책뉴스
-    url: https://www.korea.kr/rss/policy.xml
-    category: korean
-  - name: 정책브리핑 전문자료
-    url: https://www.korea.kr/rss/expdoc.xml
-    category: korean
-  - name: 정책브리핑 K-공감
-    url: https://www.korea.kr/rss/archive.xml
-    category: korean
   - name: 과기정통부 보도자료
     url: https://www.msit.go.kr/user/rss/rss.do?bbsSeqNo=94
     category: korean
@@ -29,35 +22,18 @@ korean:
   - name: 과기정통부 연구성과
     url: https://www.msit.go.kr/user/rss/rss.do?bbsSeqNo=89
     category: korean
-  - name: 정책브리핑 과기정통부
-    url: https://www.korea.kr/rss/dept_msit.xml
+  - name: 산업통상부 보도자료
+    url: https://www.motir.go.kr/kor/article/ATCL3f49a5a8c/rss
     category: korean
-  - name: 정책브리핑 산업통상부
-    url: https://www.korea.kr/rss/dept_motir.xml
-    category: korean
-  - name: 정책브리핑 중소벤처기업부
-    url: https://www.korea.kr/rss/dept_mss.xml
-    category: korean
-  - name: 정책브리핑 국토교통부
-    url: https://www.korea.kr/rss/dept_molit.xml
-    category: korean
-  - name: 정책브리핑 기후에너지환경부
-    url: https://www.korea.kr/rss/dept_mcee.xml
-    category: korean
-  - name: 정책브리핑 교육부
-    url: https://www.korea.kr/rss/dept_moe.xml
-    category: korean
-  - name: 정책브리핑 보건복지부
-    url: https://www.korea.kr/rss/dept_mw.xml
-    category: korean
-  - name: 정책브리핑 국방부
-    url: https://www.korea.kr/rss/dept_mnd.xml
-    category: korean
-  - name: 정책브리핑 우주항공청
-    url: https://www.korea.kr/rss/dept_kasa.xml
+    method: POST
+  - name: 기후에너지환경부 보도자료
+    url: https://www.mcee.go.kr/home/web/board/rss.do?menuId=286&boardMasterId=1
     category: korean
   - name: 중소벤처기업부 보도자료
     url: https://www.mss.go.kr/rss/smba/board/86.do
+    category: korean
+  - name: 재정경제부 보도자료
+    url: https://www.mofe.go.kr/com/detailRssTagService.do?bbsId=MOSFBBS_000000000028
     category: korean
   - name: KISTEP
     url: https://www.kistep.re.kr/rss/board.es?bid=0051
@@ -65,8 +41,8 @@ korean:
   - name: KIPO 보도자료
     url: https://www.kipo.go.kr/ko/report/UXmlRssApp.do?menuCd=SCD0200618
     category: korean
-  - name: KETEP 알림마당
-    url: https://www.ketep.re.kr/board/rss/boardRss.es?mid=a10101000000&bid=0001
+  - name: KEIT 알림
+    url: https://www.keit.re.kr/rss/board.es?bid=0031
     category: korean
   - name: 한국전력 보도자료
     url: https://www.kepco.co.kr/home/customer/publicity/press/rss.do
@@ -82,6 +58,9 @@ korean:
     category: korean
   - name: 한국경제
     url: https://www.hankyung.com/feed/all-news
+    category: korean
+  - name: 매일경제 경제
+    url: https://www.mk.co.kr/rss/30100041/
     category: korean
   - name: 동아일보 경제
     url: https://rss.donga.com/economy.xml
@@ -104,10 +83,18 @@ korean:
   - name: ZDNet Korea
     url: http://feeds.feedburner.com/zdkorea
     category: korean
-  # 조선일보 IT/과학 — RSS 0 entries (2026-06)
   - name: 한겨레 과학
     url: https://www.hani.co.kr/rss/science
     category: korean
   - name: 동아일보 과학
     url: https://rss.donga.com/science.xml
+    category: korean
+  - name: 전기신문
+    url: https://www.electimes.com/rss/allArticle.xml
+    category: korean
+  - name: 에너지타임즈
+    url: https://www.energytimes.kr/rss/allArticle.xml
+    category: korean
+  - name: 인더스트리뉴스
+    url: https://www.industrynews.co.kr/rss/allArticle.xml
     category: korean

@@ -64,8 +64,8 @@ Avoid vague filler in summary cells: no deictic subjects ("이 기술은"), no g
 
 ## Credibility (Korea-only sources)
 
-- **A:** korea.kr / `.go.kr` press releases, Yonhap·Newsis primary wire, public R&D agencies (KISTEP·KIET·KIPO·KETEP·KEPCO), domestic peer-reviewed journals
-- **B:** domestic economy/IT media (Herald·Donga·ETNews·ZDNet Korea), secondary reporting, corporate IR/press releases
+- **A:** ministry/agency `.go.kr`/`.re.kr`/`.or.kr` press releases, Yonhap·Newsis primary wire, public R&D agencies (KISTEP·KIET·KIPO·KETEP·KEIT·KEPCO), domestic peer-reviewed journals
+- **B:** domestic economy/IT/energy media (Herald·Donga·Maeil·ETNews·Electimes·EKN·EnergyTimes·IndustryNews·ZDNet Korea), secondary reporting, corporate IR/press releases
 - **C:** anonymous sources, speculation, repackaged/unverified content — **manual entries only**
 
 Full template: `templates/daily_research_log_template.md`

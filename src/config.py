@@ -140,8 +140,12 @@ def _load_sources_txt(path: Path) -> list[dict]:
             continue
         name, url = parts[0], parts[1]
         category = parts[2] if len(parts) > 2 else "general"
+        method = parts[3] if len(parts) > 3 else "GET"
         if url:
-            sources.append({"name": name, "url": url, "category": category})
+            entry = {"name": name, "url": url, "category": category}
+            if method and method.upper() != "GET":
+                entry["method"] = method.upper()
+            sources.append(entry)
     return sources
 
 

@@ -25,12 +25,14 @@ _USER_AGENT = "TechMarketMonitor/1.0"
 
 _GOV_URL_TOKENS = (
     ".go.kr",
-    "korea.kr",
     "msit.go.kr",
     "motie.go.kr",
+    "motir.go.kr",
     "mss.go.kr",
     "molit.go.kr",
+    "mcee.go.kr",
     "me.go.kr",
+    "mofe.go.kr",
     "moe.go.kr",
     "mohw.go.kr",
     "mnd.go.kr",
@@ -38,6 +40,13 @@ _GOV_URL_TOKENS = (
     "pacst.go.kr",
     "kats.go.kr",
     "kistep.re.kr",
+    "ketep.re.kr",
+    "keit.re.kr",
+    "kiat.or.kr",
+    "tipa.or.kr",
+    "nrf.re.kr",
+    "kaia.re.kr",
+    "krit.re.kr",
     "kipo.go.kr",
 )
 
