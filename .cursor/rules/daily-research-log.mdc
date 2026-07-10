@@ -31,7 +31,9 @@ Structure (auto-generated):
 - **분석 기준 키워드 (상위 3개)**
 - **오늘의 공통 흐름** (one-line theme)
 - Table: `| 관련도 | 항목 | 한 줄 요약 |` with **직접/간접** relevance
+- Item links `[title](#slug) · [원문](url)` — `#slug` jumps in-doc; `원문` opens the source
 - Item links `[title](#slug)` must match `<a id="slug"></a>` before `### N. Title`
+- Item **출처** / **링크/DOI** use markdown `[label](url)` so sources open in one click
 - **눈여겨볼 신호 (키워드 관점)** — up to 3 signals; explain **why** 직접/간접 (match trigger + keyword implication), **not** a repeat of the table one-liner
 - **상충되는 정보**
 
@@ -44,10 +46,10 @@ Avoid vague filler in summary cells: no deictic subjects ("이 기술은"), no g
 ### 1. Title
 
 - **자료유형:** 기사 / 논문 / 보고서(시장조사) / 공식발표(IR·정책) / 기타
-- **출처:**
+- **출처:** [outlet](https://article-url)
 - **저자/발행기관:**
 - **발행일:** YYYY-MM-DD
-- **링크/DOI:**
+- **링크/DOI:** [원문](https://article-url)
 - **요약:**
   - Fact bullets; noun-style endings. Past: -었음/-았음/-했음. Present: -함/-임/-됨. Never -습니다/-합니다/-ㅂ니다/-다
   - Last line: `(해석) ...`

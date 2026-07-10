@@ -8,7 +8,7 @@ from datetime import date, datetime
 from pathlib import Path
 
 from src.models import SummarizedArticle
-from src.policy_priority import is_gov_target, gov_target_score
+from src.policy_priority import gov_target_pass_label, gov_target_score, is_gov_target
 from src.rd_targeting import (
     build_rd_targeting_block,
     compute_rd_match_score,
@@ -318,6 +318,92 @@ def _strip_heading(text: str) -> str:
     return text
 
 
+_MARK_TAG_RE = re.compile(r"</?mark>", re.IGNORECASE)
+_PROTECTED_SPAN_RE = re.compile(
+    r"\[[^\]]*\]\([^)]+\)|<mark>.*?</mark>|https?://\S+",
+    re.IGNORECASE | re.DOTALL,
+)
+
+
+def strip_keyword_marks(text: str) -> str:
+    """Remove <mark> wrappers (e.g. when re-parsing daily markdown)."""
+    return _MARK_TAG_RE.sub("", text)
+
+
+def _keywords_for_highlight(
+    article: SummarizedArticle,
+    top_keywords: list[str] | None = None,
+) -> list[str]:
+    """Matched + analysis keywords, longest-first; skip meta pass labels."""
+    skip = {gov_target_pass_label().lower()}
+    seen: set[str] = set()
+    ordered: list[str] = []
+    for raw in list(article.matched_keywords or []) + list(top_keywords or []):
+        kw = (raw or "").strip()
+        if not kw or kw.lower() in skip:
+            continue
+        key = kw.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        ordered.append(kw)
+    ordered.sort(key=len, reverse=True)
+    return ordered
+
+
+def _span_overlaps(start: int, end: int, spans: list[tuple[int, int]]) -> bool:
+    return any(not (end <= s or start >= e) for s, e in spans)
+
+
+def _highlight_keywords(text: str, keywords: list[str]) -> str:
+    """Wrap keyword occurrences in <mark>…</mark> (case-insensitive)."""
+    if not text or not keywords:
+        return text
+
+    ordered = sorted(
+        {kw.strip() for kw in keywords if kw and kw.strip()},
+        key=len,
+        reverse=True,
+    )
+    if not ordered:
+        return text
+
+    protected = [(m.start(), m.end()) for m in _PROTECTED_SPAN_RE.finditer(text)]
+    lower = text.lower()
+    hits: list[tuple[int, int]] = []
+
+    for kw in ordered:
+        needle = kw.lower()
+        start = 0
+        while True:
+            idx = lower.find(needle, start)
+            if idx < 0:
+                break
+            end = idx + len(kw)
+            if not _span_overlaps(idx, end, protected) and not _span_overlaps(
+                idx, end, hits
+            ):
+                hits.append((idx, end))
+            start = idx + 1
+
+    if not hits:
+        return text
+
+    hits.sort(key=lambda span: span[0], reverse=True)
+    result = text
+    for start, end in hits:
+        result = f"{result[:start]}<mark>{result[start:end]}</mark>{result[end:]}"
+    return result
+
+
+def _highlight_after_md_label(line: str, keywords: list[str]) -> str:
+    """Highlight only the value after a `- **Label:**` markdown field."""
+    match = re.match(r"^(.*?:\*\*\s*)(.*)$", line)
+    if match:
+        return match.group(1) + _highlight_keywords(match.group(2), keywords)
+    return _highlight_keywords(line, keywords)
+
+
 def _build_summary_lines(
     article: SummarizedArticle,
     top_keywords: list[str] | None = None,
@@ -416,10 +502,34 @@ def _truncate_text(text: str, hard_limit: int) -> str:
     return text[:hard_limit].rstrip(",.;:")
 
 
-def _item_summary_link(article: SummarizedArticle, slug: str, max_len: int = 45) -> str:
+def _md_link(label: str, url: str) -> str:
+    """Markdown hyperlink safe for daily tables and item fields."""
+    safe_label = (
+        (label or "원문")
+        .replace("[", "［")
+        .replace("]", "］")
+        .replace("|", "\\|")
+        .strip()
+        or "원문"
+    )
+    return f"[{safe_label}]({url.strip()})"
+
+
+def _item_summary_link(
+    article: SummarizedArticle,
+    slug: str,
+    max_len: int = 45,
+    highlight_keywords: list[str] | None = None,
+) -> str:
     title = article.title.replace("…", "").replace("...", "").strip()
     short = _truncate_text(title, max_len)
-    return f"[{short}](#{slug})"
+    if highlight_keywords:
+        short = _highlight_keywords(short, highlight_keywords)
+    internal = f"[{short}](#{slug})"
+    url = (article.url or "").strip()
+    if url.startswith(("http://", "https://")):
+        return f"{internal} · {_md_link('원문', url)}"
+    return internal
 
 
 def _published_date(article: SummarizedArticle, fallback: date) -> str:
@@ -458,7 +568,24 @@ def _kw_score(text: str, keywords: list[str]) -> int:
 
 
 _POWER_DIRECT_MATCHES = frozenset(
-    {"power system", "power grid", "smart grid", "microgrid", "grid"}
+    {
+        "power system",
+        "power grid",
+        "smart grid",
+        "microgrid",
+        "grid",
+        "전력계통",
+        "스마트그리드",
+        "파워그리드",
+        "전력망",
+        "마이크로그리드",
+        "송배전",
+        "계통안정",
+        "전력품질",
+        "수요반응",
+        "가상발전소",
+        "vpp",
+    }
 )
 _POWER_INDIRECT_MATCHES = frozenset(
     {
@@ -468,9 +595,14 @@ _POWER_INDIRECT_MATCHES = frozenset(
         "renewable energy",
         "energy storage",
         "renewable",
+        "에너지저장",
+        "에너지 저장",
+        "재생에너지",
+        "신재생",
+        "에너지전환",
     }
 )
-_TANGENTIAL_MATCHES = frozenset({"ai infrastructure", "supply chain"})
+_TANGENTIAL_MATCHES = frozenset({"ai infrastructure", "supply chain", "투자", "예산", "공모", "mou", "연구개발", "r&d"})
 
 _NON_POWER_TITLE = re.compile(
     r"(?:"
@@ -540,6 +672,7 @@ def _keyword_relevance_is_valid(article: SummarizedArticle, text: str) -> bool:
 
 
 def _article_text_blob(article: SummarizedArticle) -> str:
+    """LLM-derived text used for display helpers — not for upgrading relevance alone."""
     kr = (
         article.keyword_relevance
         if _keyword_relevance_is_valid(article, article.keyword_relevance)
@@ -554,6 +687,11 @@ def _article_text_blob(article: SummarizedArticle) -> str:
     )
 
 
+def _source_relevance_blob(article: SummarizedArticle) -> str:
+    """Title + matched keywords only — avoids LLM-invented grid linkage."""
+    return " ".join([article.title, " ".join(article.matched_keywords)])
+
+
 def _text_mentions_power(text: str, top_keywords: list[str]) -> bool:
     if _POWER_TEXT_HINT.search(text):
         return True
@@ -561,9 +699,13 @@ def _text_mentions_power(text: str, top_keywords: list[str]) -> bool:
 
 
 def _classify_relevance(article: SummarizedArticle, top_keywords: list[str]) -> str:
-    """Classify how strongly an article relates to the top-3 tracking keywords."""
+    """Classify how strongly an article relates to the top-3 tracking keywords.
+
+    Uses title + matched_keywords for direct/indirect decisions so speculative
+    LLM mentions of 스마트그리드/전력계통 cannot inflate relevance.
+    """
     matched = {k.lower() for k in article.matched_keywords}
-    blob = _article_text_blob(article)
+    source = _source_relevance_blob(article)
     non_power_topic = bool(_NON_POWER_TITLE.search(article.title))
 
     if non_power_topic:
@@ -575,17 +717,17 @@ def _classify_relevance(article: SummarizedArticle, top_keywords: list[str]) -> 
 
     if matched & _POWER_DIRECT_MATCHES:
         return "direct"
-    if _text_mentions_power(blob, top_keywords):
+    if _text_mentions_power(source, top_keywords):
         return "direct"
-    if _POWER_SUPPLY_HINT.search(blob):
+    if _POWER_SUPPLY_HINT.search(source):
         return "direct"
     if matched & _POWER_INDIRECT_MATCHES:
         return "indirect"
     if matched & _TANGENTIAL_MATCHES:
-        if _text_mentions_power(blob, top_keywords):
+        if _text_mentions_power(source, top_keywords):
             return "indirect"
         return "weak"
-    if _text_mentions_power(blob, top_keywords):
+    if _text_mentions_power(source, top_keywords):
         return "indirect"
     return "none"
 
@@ -1249,7 +1391,9 @@ def _build_executive_summary(
     or Fraunhofer targeting bullets. Interpretation stays in per-item blocks.
     """
     kws = top_keywords or []
-    kw_header = " · ".join(kws[:3]) if kws else "(미설정)"
+    kw_header = (
+        " · ".join(f"<mark>{kw}</mark>" for kw in kws[:3]) if kws else "(미설정)"
+    )
     stats = _build_rd_daily_stats(articles, kws)
 
     sources = ", ".join(dict.fromkeys(a.source_name for a in articles[:3]))
@@ -1302,9 +1446,22 @@ def _build_executive_summary(
             fields.get("pain_point", ""),
             fields.get("investment_purpose", ""),
         ).replace("|", "\\|")
-        fact = (article.rd_fact_basis or article.url).replace("|", "\\|")
         slug = slugs[article.url]
-        link = _item_summary_link(article, slug, max_len=30)
+        hl_kws = _keywords_for_highlight(article, kws)
+        link = _item_summary_link(article, slug, max_len=30, highlight_keywords=hl_kws)
+        issue = _highlight_keywords(issue, hl_kws)
+        target = _highlight_keywords(target, hl_kws)
+        link_point = _highlight_keywords(link_point, hl_kws)
+        url = (article.url or "").strip()
+        basis = (article.rd_fact_basis or "").strip()
+        if basis and basis not in ("명시 없음",) and not basis.startswith("http"):
+            fact = _highlight_keywords(basis.replace("|", "\\|"), hl_kws)
+            if url.startswith(("http://", "https://")):
+                fact = f"{fact} · {_md_link('원문', url)}"
+        elif url.startswith(("http://", "https://")):
+            fact = _md_link("원문", url)
+        else:
+            fact = (basis or url).replace("|", "\\|")
         lines.append(
             f"| **{score}/5** | {link} {issue} | {target} | {link_point} | {fact} |"
         )
@@ -1371,29 +1528,51 @@ def _build_item_block(
     material = _material_type(article)
     credibility = _credibility(article)
     tags = _infer_tags(article)
-    summary_lines = _build_summary_lines(article, top_keywords)
+    hl_kws = _keywords_for_highlight(article, top_keywords)
+    summary_lines = [
+        _highlight_keywords(line, hl_kws)
+        for line in _build_summary_lines(article, top_keywords)
+    ]
 
     note_parts: list[str] = []
     if is_gov_target(article):
         note_parts.append("우선: 정부·R&D 타깃 (프라운호퍼 협력 관점)")
     if top_keywords:
-        note_parts.append(f"분석 키워드: {', '.join(top_keywords[:3])}")
+        marked = ", ".join(f"<mark>{kw}</mark>" for kw in top_keywords[:3])
+        note_parts.append(f"분석 키워드: {marked}")
     level = _classify_relevance(article, top_keywords or [])
     if level != "none":
         note_parts.append(f"키워드 관련도: {_RELEVANCE_LABEL[level]}")
     if article.matched_keywords:
-        note_parts.append(f"매칭: {', '.join(article.matched_keywords[:3])}")
+        marked_matches: list[str] = []
+        skip = gov_target_pass_label()
+        for kw in article.matched_keywords[:3]:
+            if kw == skip:
+                marked_matches.append(kw)
+            else:
+                marked_matches.append(f"<mark>{kw}</mark>")
+        note_parts.append(f"매칭: {', '.join(marked_matches)}")
     note = " · ".join(note_parts) if note_parts else ""
 
+    heading_title = article.title.replace("…", "").replace("...", "").strip()
+    heading_title = _highlight_keywords(heading_title, hl_kws)
+    source_name = (article.source_name or "").strip() or "출처"
+    url = (article.url or "").strip()
+    if url.startswith(("http://", "https://")):
+        source_field = _md_link(source_name, url)
+        link_field = _md_link("원문", url)
+    else:
+        source_field = source_name
+        link_field = url
     lines = [
         _item_anchor_tag(slug),
-        _item_heading_md(article, index),
+        f"### {_time_label(article, index)} {heading_title}",
         "",
         f"- **자료유형:** {material}",
-        f"- **출처:** {article.source_name}",
-        f"- **저자/발행기관:** {article.source_name}",
+        f"- **출처:** {source_field}",
+        f"- **저자/발행기관:** {source_name}",
         f"- **발행일:** {_published_date(article, log_date)}",
-        f"- **링크/DOI:** {article.url}",
+        f"- **링크/DOI:** {link_field}",
     ]
 
     lines.append("- **요약:**")
@@ -1403,7 +1582,7 @@ def _build_item_block(
     rd_lines = build_rd_targeting_block(article, top_keywords)
     if rd_lines:
         lines.append("")
-        lines.extend(rd_lines)
+        lines.extend(_highlight_after_md_label(line, hl_kws) for line in rd_lines)
 
     lines += [
         f"- **신뢰도:** {credibility}",
@@ -1415,43 +1594,105 @@ def _build_item_block(
     return lines
 
 
+def _build_low_relevance_section(
+    articles: list[SummarizedArticle],
+    top_keywords: list[str] | None,
+    start_index: int,
+) -> list[str]:
+    """Compact appendix for weak/none items — title + source + link only."""
+    if not articles:
+        return []
+    kws = top_keywords or []
+    lines = [
+        "## 관련도 낮음 (참고)",
+        "",
+        "모니터링 키워드(전력계통·스마트그리드·파워그리드)와 직접·간접 연관이 약해 "
+        "본문에서 제외한 항목임. 필요 시 원문만 확인.",
+        "",
+    ]
+    for offset, article in enumerate(articles):
+        index = start_index + offset
+        level = _classify_relevance(article, kws)
+        level_ko = RELEVANCE_LABEL_KO.get(level, level)
+        title = article.title.replace("…", "").replace("...", "").strip()
+        url = (article.url or "").strip()
+        link = _md_link("원문", url) if url.startswith(("http://", "https://")) else ""
+        tail = f" · {link}" if link else ""
+        lines.append(
+            f"{index}. [{level_ko}] {title} — {article.source_name}{tail}"
+        )
+    lines.append("")
+    return lines
+
+
 def _build_markdown(
     log_date: date,
     articles: list[SummarizedArticle],
     top_keywords: list[str] | None,
     recorder: str | None,
 ) -> str:
-    paper_count = sum(1 for a in articles if _material_type(a) == "논문")
-    article_count = len(articles) - paper_count
+    kws = top_keywords or []
+    sorted_all = _sort_articles_by_relevance(articles, kws) if articles else []
+    primary = [
+        a for a in sorted_all if _classify_relevance(a, kws) in ("direct", "indirect")
+    ]
+    low = [
+        a for a in sorted_all if _classify_relevance(a, kws) in ("weak", "none")
+    ]
 
-    cred_counts = Counter(_credibility_grade(_credibility(a)) for a in articles)
+    paper_count = sum(1 for a in primary if _material_type(a) == "논문")
+    article_count = len(primary) - paper_count
+
+    cred_counts = Counter(_credibility_grade(_credibility(a)) for a in primary)
     author = recorder or os.getenv("DAILY_LOG_RECORDER", "Tech Market Monitor (auto)")
 
     iso = log_date.isoformat()
+    header_total = (
+        f"총 항목 수: {len(primary)}건 (기사 {article_count} / 논문 {paper_count})"
+    )
+    if low:
+        header_total += f" · 관련도 낮음 {len(low)}건은 참고 섹션"
+
     lines: list[str] = [
         "# 국내 R&D 인텔리전스 데일리 로그",
         "",
         f"날짜: {iso}",
         f"기록자: {author}",
-        f"총 항목 수: {len(articles)}건 (기사 {article_count} / 논문 {paper_count})",
+        header_total,
         f"신뢰도 분포: A {cred_counts.get('A', 0)}건 / B {cred_counts.get('B', 0)}건 / C {cred_counts.get('C', 0)}건",
         "",
     ]
 
-    sorted_articles = _sort_articles_by_relevance(articles, top_keywords) if articles else []
-
-    if sorted_articles:
-        article_slugs = _build_item_slugs(sorted_articles)
-        lines += _build_executive_summary(sorted_articles, top_keywords, article_slugs)
+    if primary:
+        article_slugs = _build_item_slugs(primary)
+        lines += _build_executive_summary(primary, top_keywords, article_slugs)
     else:
         article_slugs = {}
+        if kws:
+            kw_header = " · ".join(f"<mark>{kw}</mark>" for kw in kws[:3])
+            lines += [
+                "## 오늘의 R&D 인텔리전스 요약",
+                "",
+                f"**모니터링 키워드 (상위 3개):** {kw_header}",
+                "",
+                "오늘 직접·간접 관련 수집 항목 없음"
+                + (f" (관련도 낮은 {len(low)}건은 아래 참고 섹션)." if low else "."),
+                "",
+            ]
+        elif not low:
+            lines += ["(해당일 수집·관련 항목 없음)", ""]
 
     lines += ["## 항목 기록", ""]
 
-    for index, article in enumerate(sorted_articles, start=1):
-        lines += _build_item_block(
-            article, index, log_date, top_keywords, article_slugs[article.url]
-        )
+    if primary:
+        for index, article in enumerate(primary, start=1):
+            lines += _build_item_block(
+                article, index, log_date, top_keywords, article_slugs[article.url]
+            )
+    else:
+        lines += ["(직접·간접 관련 항목 없음)", ""]
+
+    lines += _build_low_relevance_section(low, top_keywords, start_index=len(primary) + 1)
 
     lines += [
         "---",

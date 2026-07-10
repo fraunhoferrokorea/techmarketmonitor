@@ -72,6 +72,28 @@ _GOV_TARGET_PASS_LABEL = "정부·R&D 타깃"
 # Backward-compatible alias used in older entries/tests.
 _POLICY_PASS_LABEL = _GOV_TARGET_PASS_LABEL
 
+# Domain gate for gov-target collection bypass: power / smart-grid / energy storage.
+# Without these, official MOU·R&D·예산 releases (보건·고용·교육 등) are excluded.
+_ENERGY_GRID_DOMAIN_PATTERNS: list[re.Pattern[str]] = [
+    re.compile(
+        r"전력\s*계통|파워\s*그리드|스마트\s*그리드|전력망|송배전|배전\s*계통|"
+        r"계통\s*안정|전력\s*품질|수요\s*반응|가상\s*발전|마이크로그리드",
+        re.I,
+    ),
+    re.compile(
+        r"\bBESS\b|\bESS\b|\bVPP\b|에너지|전력\s*저장|재생\s*에너지|신재생|"
+        r"기후\s*에너지|전력\s*수급|전력\s*인프라|"
+        r"한국전력|\bKEPCO\b|한전|전력\s*시장|전력\s*거래",
+        re.I,
+    ),
+    re.compile(
+        r"power\s*grid|smart\s*grid|microgrid|energy\s*storage|"
+        r"power\s*system|grid\s*stability|transmission\s*grid|"
+        r"distribution\s*grid|demand\s*response",
+        re.I,
+    ),
+]
+
 
 def _combined_text(article: RawArticle | FilteredArticle | SummarizedArticle) -> str:
     parts = [article.title, article.source_name]
@@ -79,6 +101,23 @@ def _combined_text(article: RawArticle | FilteredArticle | SummarizedArticle) ->
     if summary:
         parts.append(summary)
     return " ".join(parts)
+
+
+def has_energy_grid_domain(
+    article: RawArticle | FilteredArticle | SummarizedArticle,
+) -> bool:
+    """True when title/summary/source mentions power-grid / energy-storage domain."""
+    return _matches_any(_ENERGY_GRID_DOMAIN_PATTERNS, _combined_text(article))
+
+
+def passes_gov_collection_exception(
+    article: RawArticle | FilteredArticle | SummarizedArticle,
+) -> bool:
+    """Gov-target may skip top-N core keywords only with energy/grid domain (or Fraunhofer)."""
+    text = _combined_text(article)
+    if re.search(r"프라운호퍼|fraunhofer", text, re.I):
+        return True
+    return is_gov_target(article) and has_energy_grid_domain(article)
 
 
 def _is_official_source(article: RawArticle | FilteredArticle | SummarizedArticle) -> bool:

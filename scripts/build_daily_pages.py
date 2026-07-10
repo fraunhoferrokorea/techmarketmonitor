@@ -23,6 +23,7 @@ th, td {{ border: 1px solid #d0d7de; padding: 0.5rem 0.75rem; text-align: left; 
 th {{ background: #f6f8fa; }}
 h1 {{ border-bottom: 1px solid #d0d7de; padding-bottom: 0.3rem; }}
 .nav {{ margin-bottom: 1.5rem; font-size: 0.95rem; }}
+mark {{ background: #fff3bf; color: inherit; padding: 0 0.15em; border-radius: 2px; }}
 </style>
 </head>
 <body>

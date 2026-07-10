@@ -18,6 +18,30 @@ _MATERIAL_TO_CATEGORY = {
     "보고서(시장조사)": "enterprise",
     "공식발표(IR·정책)": "enterprise",
 }
+_MARK_TAG_RE = re.compile(r"</?mark>", re.IGNORECASE)
+_MD_LINK_RE = re.compile(r"\[([^\]]*)\]\((https?://[^)\s]+)\)")
+
+
+def _strip_mark_tags(text: str) -> str:
+    return _MARK_TAG_RE.sub("", text)
+
+
+def _extract_md_href(value: str) -> str:
+    """Prefer href from `[label](url)`; keep bare URLs for older daily logs."""
+    value = (value or "").strip()
+    match = _MD_LINK_RE.search(value)
+    if match:
+        return match.group(2).strip()
+    return value
+
+
+def _extract_md_label(value: str) -> str:
+    """Prefer link label from `[label](url)`; keep plain text otherwise."""
+    value = (value or "").strip()
+    match = re.fullmatch(r"\[([^\]]*)\]\((https?://[^)\s]+)\)", value)
+    if match:
+        return match.group(1).strip() or match.group(2).strip()
+    return value
 
 
 def load_logs_from_daily_markdown(
@@ -120,7 +144,7 @@ def _parse_item_block(block: str, log_date: date) -> dict | None:
     if not header_match:
         return None
 
-    title = header_match.group(2).strip()
+    title = _strip_mark_tags(header_match.group(2).strip())
     fields: dict[str, str] = {}
     summary_lines: list[str] = []
     in_summary = False
@@ -129,7 +153,7 @@ def _parse_item_block(block: str, log_date: date) -> dict | None:
         if in_summary:
             bullet = _SUMMARY_BULLET.match(line)
             if bullet:
-                summary_lines.append(bullet.group(1).strip())
+                summary_lines.append(_strip_mark_tags(bullet.group(1).strip()))
                 continue
             if line.strip() == "":
                 continue
@@ -148,13 +172,15 @@ def _parse_item_block(block: str, log_date: date) -> dict | None:
             continue
         fields[label] = value
 
-    url = fields.get("링크/DOI", "").strip()
+    url = _extract_md_href(fields.get("링크/DOI", ""))
     if not url or not title:
         return None
 
     material = fields.get("자료유형", "기사")
     category = _MATERIAL_TO_CATEGORY.get(material, "tech_news")
-    source_name = fields.get("출처", fields.get("저자/발행기관", ""))
+    source_name = _extract_md_label(
+        fields.get("출처", fields.get("저자/발행기관", ""))
+    )
     credibility = fields.get("신뢰도", "B")
     published_at = _parse_published_at(fields.get("발행일", ""), log_date)
 
@@ -211,7 +237,11 @@ def _parse_matched_keywords(note: str) -> list[str]:
     match = re.search(r"매칭:\s*(.+?)(?:\s*·|$)", note)
     if not match:
         return []
-    return [part.strip() for part in match.group(1).split(",") if part.strip()]
+    return [
+        _strip_mark_tags(part.strip())
+        for part in match.group(1).split(",")
+        if part.strip()
+    ]
 
 
 def _credibility_grade(raw: str) -> str:

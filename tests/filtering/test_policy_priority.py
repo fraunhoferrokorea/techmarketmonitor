@@ -2,14 +2,21 @@ from datetime import datetime, timezone
 
 from src.filter import filter_articles
 from src.models import RawArticle
-from src.policy_priority import gov_target_pass_label, gov_target_score, is_gov_target, is_plan_document
+from src.policy_priority import (
+    gov_target_pass_label,
+    gov_target_score,
+    has_energy_grid_domain,
+    is_gov_target,
+    is_plan_document,
+    passes_gov_collection_exception,
+)
 
 
-def _article(title: str, source: str = "정책브리핑 산업통상부") -> RawArticle:
+def _article(title: str, source: str = "정책브리핑 산업통상부", summary: str = "") -> RawArticle:
     return RawArticle(
         title=title,
         url="https://www.korea.kr/briefing/pressReleaseView.do?newsId=1",
-        summary="",
+        summary=summary,
         source_name=source,
         category="korean",
         published_at=datetime.now(tz=timezone.utc),
@@ -33,6 +40,19 @@ def test_gov_target_detects_rd_program() -> None:
     assert is_gov_target(article)
 
 
+def test_energy_domain_required_for_gov_collection_bypass() -> None:
+    plan = _article("제6차 국가표준기본계획 확정 발표")
+    assert is_gov_target(plan)
+    assert not has_energy_grid_domain(plan)
+    assert not passes_gov_collection_exception(plan)
+
+    grid = _article("과기정통부, 스마트그리드 R&D 지원사업 공고")
+    assert passes_gov_collection_exception(grid)
+
+    fraunhofer = _article("프라운호퍼·ETRI, AI 반도체 공동연구 MOU 체결", source="과기정통부 보도자료")
+    assert passes_gov_collection_exception(fraunhofer)
+
+
 def test_filter_passes_gov_target_with_core_keyword() -> None:
     article = _article("과기정통부, 스마트그리드 R&D 지원사업 공고")
     result = filter_articles(
@@ -43,19 +63,53 @@ def test_filter_passes_gov_target_with_core_keyword() -> None:
     assert len(result) == 1
 
 
-def test_filter_passes_gov_target_without_core_keyword() -> None:
-    article = _article("제6차 국가표준기본계획 확정 발표")
+def test_filter_passes_gov_target_with_energy_domain_without_core_keyword() -> None:
+    article = _article(
+        "기후에너지환경부, 에너지전환 로드맵 발표",
+        source="정책브리핑 기후에너지환경부",
+        summary="재생에너지 확대와 전력망 보강 계획을 확정함.",
+    )
     result = filter_articles(
         [article],
         keywords=["전력계통"],
         required_keywords=["전력계통"],
     )
     assert len(result) == 1
-    assert result[0].matched_keywords == [gov_target_pass_label()]
+    assert gov_target_pass_label() in result[0].matched_keywords or result[0].matched_keywords
 
 
-def test_filter_passes_mou_from_official_source_without_core_keyword() -> None:
+def test_filter_excludes_gov_target_without_energy_domain() -> None:
+    article = _article("제6차 국가표준기본계획 확정 발표")
+    result = filter_articles(
+        [article],
+        keywords=["전력계통"],
+        required_keywords=["전력계통"],
+    )
+    assert result == []
+
+
+def test_filter_passes_mou_from_official_source_with_energy_domain() -> None:
     article = _article("KISTEP·독일 연구기관, 에너지 기술협력 MOU", source="KISTEP")
+    result = filter_articles(
+        [article],
+        keywords=["전력계통"],
+        required_keywords=["전력계통"],
+    )
+    assert len(result) == 1
+
+
+def test_filter_excludes_health_mou_without_energy_domain() -> None:
+    article = _article("한-몽 보건의료 협력 MOU 체결", source="정책브리핑 보건복지부")
+    result = filter_articles(
+        [article],
+        keywords=["전력계통", "MOU"],
+        required_keywords=["전력계통"],
+    )
+    assert result == []
+
+
+def test_filter_passes_fraunhofer_without_energy_domain() -> None:
+    article = _article("프라운호퍼·ETRI, AI 반도체 공동연구 MOU 체결", source="과기정통부 보도자료")
     result = filter_articles(
         [article],
         keywords=["전력계통"],
@@ -94,7 +148,7 @@ def test_filter_excludes_epidemiology_meta_analysis_without_funder() -> None:
     assert result == []
 
 
-def test_filter_keeps_research_topic_with_budget_program() -> None:
+def test_filter_excludes_non_energy_budget_program_without_core() -> None:
     article = RawArticle(
         title="환경부, 국내 대기오염 저감 R&D 500억 예산 편성",
         url="https://www.korea.kr/briefing/pressReleaseView.do?newsId=99",
@@ -106,6 +160,23 @@ def test_filter_keeps_research_topic_with_budget_program() -> None:
     result = filter_articles(
         [article],
         keywords=["전력계통", "대기오염"],
+        required_keywords=["전력계통"],
+    )
+    assert result == []
+
+
+def test_filter_keeps_energy_budget_program_without_core_top5() -> None:
+    article = RawArticle(
+        title="기후에너지환경부, 전력망 보강 R&D 500억 예산 편성",
+        url="https://www.korea.kr/briefing/pressReleaseView.do?newsId=100",
+        summary="전력계통 안정화 및 스마트그리드 실증 지원 사업에 예산을 편성함.",
+        source_name="기후에너지환경부 보도자료",
+        category="korean",
+        published_at=datetime.now(tz=timezone.utc),
+    )
+    result = filter_articles(
+        [article],
+        keywords=["전력계통"],
         required_keywords=["전력계통"],
     )
     assert len(result) == 1

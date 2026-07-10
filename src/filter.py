@@ -5,7 +5,11 @@ import re
 
 from src.korea_scope import is_domestic_news
 from src.models import FilteredArticle, RawArticle
-from src.policy_priority import gov_target_pass_label, is_gov_target
+from src.policy_priority import (
+    gov_target_pass_label,
+    is_gov_target,
+    passes_gov_collection_exception,
+)
 from src.rd_targeting import is_excluded_rd_news
 
 logger = logging.getLogger(__name__)
@@ -28,16 +32,20 @@ def passes_collection_filter(
     keywords: list[str],
     required_keywords: list[str] | None = None,
 ) -> bool:
-    """True when article would pass fetch-time keyword + top-N core filter."""
+    """True when article would pass fetch-time keyword + top-N core filter.
+
+    Core (top-N) keywords are required unless the item is a gov/R&D target that
+    also has an energy·grid domain hint (or explicit Fraunhofer mention).
+    """
     if is_excluded_rd_news(article):
         return False
 
     searchable = " ".join([article.title, article.summary, article.source_name])
     core = required_keywords or []
-    gov_target = is_gov_target(article)
-    if core and not match_keywords(searchable, core) and not gov_target:
+    gov_exception = passes_gov_collection_exception(article)
+    if core and not match_keywords(searchable, core) and not gov_exception:
         return False
-    if match_keywords(searchable, keywords) or gov_target:
+    if match_keywords(searchable, keywords) or gov_exception:
         return True
     return False
 

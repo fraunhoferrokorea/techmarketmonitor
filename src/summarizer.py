@@ -198,6 +198,11 @@ ALWAYS score 1 (non-R&D) for these even if industry keywords appear:
 - Pure research findings (epidemiology, meta-analyses, academic paper results, correlation studies) with NO Korean funder, budget, R&D program, MOU, commissioning, or follow-on policy/business signal in the article — set rd_proposable_area to "해당 없음" and investment_actor to "명시 없음"
 - Exception: official government ministry press releases (policy direction) may score higher even without explicit budget IF a domestic commissioning actor and program intent are stated
 
+Monitoring-keyword honesty (CRITICAL):
+- If the source text has NO factual link to the analysis baseline keywords (top 3), set keyword_relevance to "모니터링 키워드와 직접·간접 관련 없음." and do NOT invent 전력계통/스마트그리드/파워그리드 R&D proposals.
+- NEVER insert 전력계통, 스마트그리드, 파워그리드, 전력망, or English grid synonyms into 위탁 연구 니즈 / 접근 전략 / rd_proposable_area unless those terms (or clear synonyms) appear in the source text.
+- Speculative "could support smart grid" links → score ≤2 and rd_proposable_area "해당 없음".
+
 Inclusion requires explicit facts only (no speculation):
 - WHO pays: ministry, agency, company budget/program/MOU must be named in the article
 - Domestic Korean R&D actor only (foreign-only studies → score 1)
@@ -450,7 +455,8 @@ class Summarizer:
             f"Source: {article.source_name} ({article.category})\n"
             f"Matched keywords (all): {', '.join(article.matched_keywords)}\n"
             f"Analysis baseline keywords (keywords.txt top 3 — keyword_relevance MUST explain "
-            f"how THIS article relates to these, not generic keyword definitions): "
+            f"how THIS article relates to these, not generic keyword definitions; "
+            f"if no factual link, write '모니터링 키워드와 직접·간접 관련 없음.' and do not invent grid R&D): "
             f"{', '.join(self._top_keywords)}\n"
             f"Content preview: {article.summary[:preview_len]}"
         )

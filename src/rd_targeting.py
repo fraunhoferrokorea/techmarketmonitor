@@ -284,6 +284,9 @@ def compute_rd_match_score(
     monthly: bool = False,
 ) -> int:
     """Return R&D suitability 0–5: Fraunhofer cooperation + top-3 keyword relevance."""
+    if is_excluded_rd_news(article):
+        return 0
+
     base = _fraunhofer_base_rd_score(article)
     if not top_keywords:
         return base
