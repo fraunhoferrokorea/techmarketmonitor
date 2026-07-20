@@ -333,8 +333,9 @@ _INDEX_HTML = """\
           <button type="button" class="btn ghost" id="btn-clear-token">토큰 지우기</button>
         </div>
         <p id="token-status">토큰 상태: 없음</p>
-        <p>1) 위에서 내용을 수정한 뒤 2) 토큰을 넣고 3) 「토큰으로 GitHub에 저장」또는 위쪽 「GitHub에 저장」을 누르세요.
-          토큰은 이 브라우저 탭 세션에만 보관되며, GitHub <code>main</code>의 해당 파일을 커밋합니다.</p>
+        <p id="token-feedback" class="config-status" role="status" aria-live="polite"></p>
+        <p>1) 에디터에서 내용을 수정 → 2) 토큰 입력 → 3) 「토큰으로 GitHub에 저장」클릭.
+          수정 없이 누르면 아래에서 안내가 보입니다. 토큰은 이 탭 세션에만 보관됩니다.</p>
       </details>
     </div>
   </main>
@@ -372,8 +373,16 @@ function activeLines(text) {{
 
 function setStatus(msg, cls) {{
   const el = qs("config-status");
-  el.textContent = msg || "";
-  el.className = "config-status" + (cls ? " " + cls : "");
+  if (el) {{
+    el.textContent = msg || "";
+    el.className = "config-status" + (cls ? " " + cls : "");
+  }}
+  const fb = qs("token-feedback");
+  if (fb) {{
+    fb.textContent = msg || "";
+    fb.className = "config-status" + (cls ? " " + cls : "");
+    if (msg) fb.scrollIntoView({{ block: "nearest", behavior: "smooth" }});
+  }}
 }}
 
 function resolveToken() {{
@@ -399,17 +408,20 @@ function syncTokenUi() {{
 
 function updateDirty() {{
   const ed = qs("config-editor");
+  if (!ed) return;
   const dirty = ed.value !== loadedText;
-  // Never silently disable — click handlers explain what is missing.
-  if (!qs("btn-commit").dataset.saving) qs("btn-commit").disabled = false;
-  if (!qs("btn-token-commit").dataset.saving) qs("btn-token-commit").disabled = false;
-  if (!qs("config-status").classList.contains("ok") && !qs("config-status").classList.contains("err")) {{
-    setStatus(dirty ? "수정됨 (미저장) — GitHub에 저장을 누르세요" : "", dirty ? "dirty" : "");
+  const btnCommit = qs("btn-commit");
+  const btnToken = qs("btn-token-commit");
+  if (btnCommit && !btnCommit.dataset.saving) btnCommit.disabled = false;
+  if (btnToken && !btnToken.dataset.saving) btnToken.disabled = false;
+  if (!qs("config-status") || (!qs("config-status").classList.contains("ok") && !qs("config-status").classList.contains("err"))) {{
+    setStatus(dirty ? "수정됨 (미저장) — 저장 버튼을 누르세요" : "", dirty ? "dirty" : "");
   }}
   const meta = activeLines(ed.value);
   const file = CONFIG_FILES.find(f => f.id === currentConfigId);
   const unit = file && file.id === "sources" ? "소스" : "키워드";
-  qs("config-meta").textContent = meta + "개 " + unit + " (주석 제외)";
+  const metaEl = qs("config-meta");
+  if (metaEl) metaEl.textContent = meta + "개 " + unit + " (주석 제외)";
   syncTokenUi();
 }}
 
@@ -578,38 +590,47 @@ function utf8ToBase64(str) {{
   return btoa(bin);
 }}
 
-async function commitCurrent() {{
+async function commitCurrent(ev) {{
+  if (ev && ev.preventDefault) ev.preventDefault();
+  const panel = qs("token-panel");
+  if (panel) panel.open = true;
+
   const file = CONFIG_FILES.find(f => f.id === currentConfigId);
-  if (!file) return;
+  if (!file) {{
+    setStatus("저장 대상 파일이 없습니다. 왼쪽에서 sources.txt / keywords.txt를 다시 선택하세요", "err");
+    return;
+  }}
   const content = qs("config-editor").value;
   if (content === loadedText) {{
-    setStatus("변경 사항 없음 — 에디터에서 한 글자라도 수정한 뒤 다시 누르세요", "err");
+    setStatus("변경 사항 없음 — 에디터에서 내용을 수정한 뒤에만 GitHub에 저장됩니다", "err");
     return;
   }}
   const token = resolveToken();
   if (!token) {{
-    const panel = qs("token-panel");
-    if (panel) panel.open = true;
     qs("gh-token").focus();
-    setStatus("토큰이 필요합니다 — 아래 칸에 PAT를 입력한 뒤 「토큰으로 GitHub에 저장」을 누르세요", "err");
+    setStatus("토큰이 비어 있습니다 — PAT를 입력한 뒤 다시 누르세요 (Contents: Write)", "err");
     syncTokenUi();
     return;
   }}
-  qs("btn-commit").dataset.saving = "1";
-  qs("btn-token-commit").dataset.saving = "1";
-  qs("btn-commit").disabled = true;
-  qs("btn-token-commit").disabled = true;
-  setStatus("GitHub에 저장 중…", "");
+
+  const btnCommit = qs("btn-commit");
+  const btnToken = qs("btn-token-commit");
+  if (btnCommit) {{ btnCommit.dataset.saving = "1"; btnCommit.disabled = true; }}
+  if (btnToken) {{ btnToken.dataset.saving = "1"; btnToken.disabled = true; }}
+  setStatus("GitHub API로 저장 중…", "");
   try {{
-    if (!fileSha) {{
-      const meta = await fetch(
-        `https://api.github.com/repos/${{GH_REPO}}/contents/${{file.path}}?ref=${{GH_BRANCH}}`,
-        {{ headers: {{ Authorization: "Bearer " + token, Accept: "application/vnd.github+json" }} }}
-      );
-      if (meta.ok) {{
-        const j = await meta.json();
-        fileSha = j.sha;
-      }}
+    const meta = await fetch(
+      `https://api.github.com/repos/${{GH_REPO}}/contents/${{file.path}}?ref=${{GH_BRANCH}}`,
+      {{ headers: {{ Authorization: "Bearer " + token, Accept: "application/vnd.github+json" }} }}
+    );
+    if (meta.ok) {{
+      const j = await meta.json();
+      fileSha = j.sha || null;
+    }} else if (meta.status !== 404) {{
+      const errBody = await meta.json().catch(() => ({{}}));
+      throw new Error(errBody.message || ("파일 조회 실패 HTTP " + meta.status));
+    }} else {{
+      fileSha = null;
     }}
     const body = {{
       message: `config: update ${{file.path}} via viewer`,
@@ -633,12 +654,12 @@ async function commitCurrent() {{
     if (!res.ok) throw new Error(data.message || ("HTTP " + res.status));
     fileSha = data.content && data.content.sha ? data.content.sha : fileSha;
     loadedText = content;
-    setStatus("GitHub에 저장됨", "ok");
+    setStatus("GitHub에 저장됨 ✓", "ok");
   }} catch (err) {{
-    setStatus("저장 실패: " + err.message, "err");
+    setStatus("저장 실패: " + (err && err.message ? err.message : String(err)), "err");
   }} finally {{
-    delete qs("btn-commit").dataset.saving;
-    delete qs("btn-token-commit").dataset.saving;
+    if (btnCommit) delete btnCommit.dataset.saving;
+    if (btnToken) delete btnToken.dataset.saving;
     updateDirty();
   }}
 }}
