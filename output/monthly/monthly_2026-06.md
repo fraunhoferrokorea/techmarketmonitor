@@ -3,7 +3,7 @@
 **기간:** 2026년 6월
 **생성일:** 2026-07-06
 **발행:** Fraunhofer Institute Korea Office · Tech Market Intelligence Monitor
-**모니터링 키워드:** 전력계통 · 스마트그리드 · 파워그리드 · 에너지고속도로 · AI 기반 전력계통 운영 · 차세대 전력변환기(HVDC/MMC/STATCOM) · 배전망 디지털화(Digital Grid) · 장주기 ESS 및 계통연계 · 전력망 사이버보안 · 그리드포밍 인버터 (Grid-forming Inverter) · DC Grid · AI 기반 송전설비 유지관리 · 재생에너지 출력예측
+**모니터링 키워드:** 전력계통 · 스마트그리드 · 파워그리드 · 에너지고속도로 · AI 기반 전력계통 운영 등
 
 **분석 항목:** 8건 (R&D 적합 4점 이상) · A 8건 / B 0건
 

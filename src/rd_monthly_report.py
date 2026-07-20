@@ -16,6 +16,7 @@ from src.config import PROJECT_ROOT, Settings
 from src.daily_report import (
     _highlight_after_md_label,
     _highlight_keywords,
+    format_monitoring_keyword_header,
     keyword_relevance_label,
     log_to_summarized_article,
     monthly_credibility_distribution,
@@ -178,9 +179,7 @@ def _build_markdown(
 ) -> str:
     today = date.today().isoformat()
     kws = top_keywords or []
-    kw_label = (
-        " · ".join(f"<mark>{kw}</mark>" for kw in kws) if kws else "(미설정)"
-    )
+    kw_label = format_monitoring_keyword_header(kws)
     exec_summary = _highlight_keywords(
         structured.get("executive_summary", "") or "", kws
     )

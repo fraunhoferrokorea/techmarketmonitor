@@ -27,6 +27,26 @@ from src.summarizer import (
 logger = logging.getLogger(__name__)
 
 _OUTPUT_BASE = Path(__file__).resolve().parent.parent / "output" / "daily"
+_MONITORING_KEYWORD_HEADER_LIMIT = 5
+
+
+def format_monitoring_keyword_header(
+    keywords: list[str] | None,
+    *,
+    mark: bool = True,
+) -> str:
+    """Report header label: first 5 keywords ·-joined, with 등 when more remain."""
+    kws = [kw for kw in (keywords or []) if (kw or "").strip()]
+    if not kws:
+        return "(미설정)"
+    shown = kws[:_MONITORING_KEYWORD_HEADER_LIMIT]
+    if mark:
+        body = " · ".join(f"<mark>{kw}</mark>" for kw in shown)
+    else:
+        body = " · ".join(shown)
+    if len(kws) > len(shown):
+        return f"{body} 등"
+    return body
 
 _TIER1_NEWS = {"연합뉴스", "yna", "뉴시스", "newsis"}
 _TIER1_RESEARCH = {
@@ -1510,9 +1530,7 @@ def _build_executive_summary(
     or Fraunhofer targeting bullets. Interpretation stays in per-item blocks.
     """
     kws = top_keywords or []
-    kw_header = (
-        " · ".join(f"<mark>{kw}</mark>" for kw in kws) if kws else "(미설정)"
-    )
+    kw_header = format_monitoring_keyword_header(kws)
     stats = _build_rd_daily_stats(articles, kws)
 
     sources = ", ".join(dict.fromkeys(a.source_name for a in articles[:3]))
@@ -1788,7 +1806,7 @@ def _build_markdown(
     else:
         article_slugs = {}
         if kws:
-            kw_header = " · ".join(f"<mark>{kw}</mark>" for kw in kws)
+            kw_header = format_monitoring_keyword_header(kws)
             lines += [
                 "## 오늘의 R&D 인텔리전스 요약",
                 "",

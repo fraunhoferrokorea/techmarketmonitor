@@ -7,6 +7,7 @@ from src.daily_report import (
     _highlight_after_md_label,
     _highlight_keywords,
     _keywords_for_highlight,
+    format_monitoring_keyword_header,
     strip_keyword_marks,
 )
 from src.models import SummarizedArticle
@@ -134,8 +135,34 @@ def test_monthly_markdown_highlights_keywords():
     }
     md = _build_markdown(2026, 7, [{"id": 1}], compact, structured, kws)
 
-    assert "**모니터링 키워드:** <mark>전력계통</mark> · <mark>스마트그리드</mark> · <mark>파워그리드</mark>" in md
+    assert (
+        "**모니터링 키워드:** <mark>전력계통</mark> · <mark>스마트그리드</mark> · <mark>파워그리드</mark>"
+        in md
+    )
     assert "<mark>스마트그리드</mark>" in md
     assert "<mark>전력계통</mark>" in md
     assert "<mark>파워그리드</mark>" in md
     assert "매칭: <mark>스마트그리드</mark>, <mark>전력계통</mark>" in md
+
+
+def test_format_monitoring_keyword_header_top5_with_deung() -> None:
+    kws = [
+        "전력계통",
+        "스마트그리드",
+        "파워그리드",
+        "에너지고속도로",
+        "AI 기반 전력계통 운영",
+        "DC Grid",
+        "재생에너지 출력예측",
+    ]
+    assert format_monitoring_keyword_header(kws) == (
+        "<mark>전력계통</mark> · <mark>스마트그리드</mark> · <mark>파워그리드</mark> · "
+        "<mark>에너지고속도로</mark> · <mark>AI 기반 전력계통 운영</mark> 등"
+    )
+    assert format_monitoring_keyword_header(kws, mark=False) == (
+        "전력계통 · 스마트그리드 · 파워그리드 · 에너지고속도로 · AI 기반 전력계통 운영 등"
+    )
+    assert format_monitoring_keyword_header(kws[:3]) == (
+        "<mark>전력계통</mark> · <mark>스마트그리드</mark> · <mark>파워그리드</mark>"
+    )
+    assert format_monitoring_keyword_header([]) == "(미설정)"

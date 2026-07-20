@@ -366,10 +366,23 @@ function setStatus(msg, cls) {{
   el.className = "config-status" + (cls ? " " + cls : "");
 }}
 
+function resolveToken() {{
+  const stored = sessionStorage.getItem(TOKEN_KEY);
+  if (stored) return stored;
+  const typed = (qs("gh-token").value || "").trim();
+  if (typed) {{
+    sessionStorage.setItem(TOKEN_KEY, typed);
+    qs("gh-token").value = "";
+    return typed;
+  }}
+  return null;
+}}
+
 function updateDirty() {{
   const ed = qs("config-editor");
   const dirty = ed.value !== loadedText;
-  qs("btn-commit").disabled = !dirty || !sessionStorage.getItem(TOKEN_KEY);
+  // Only block when there is nothing to save — missing token is handled on click.
+  qs("btn-commit").disabled = !dirty;
   if (!qs("config-status").classList.contains("ok") && !qs("config-status").classList.contains("err")) {{
     setStatus(dirty ? "수정됨 (미저장)" : "", dirty ? "dirty" : "");
   }}
@@ -545,11 +558,18 @@ function utf8ToBase64(str) {{
 
 async function commitCurrent() {{
   const file = CONFIG_FILES.find(f => f.id === currentConfigId);
-  const token = sessionStorage.getItem(TOKEN_KEY);
-  if (!file || !token) return;
+  if (!file) return;
   const content = qs("config-editor").value;
   if (content === loadedText) {{
-    setStatus("변경 사항 없음", "");
+    setStatus("변경 사항 없음 — 먼저 내용을 수정하세요", "");
+    return;
+  }}
+  const token = resolveToken();
+  if (!token) {{
+    const panel = document.querySelector(".config-token");
+    if (panel) panel.open = true;
+    qs("gh-token").focus();
+    setStatus("토큰을 입력한 뒤 다시 「GitHub에 저장」을 누르세요", "err");
     return;
   }}
   qs("btn-commit").disabled = true;
@@ -719,8 +739,20 @@ body {{ background: var(--surface); }}
 """
 
 
+def _strip_tag_taxonomy(md_text: str) -> str:
+    """Remove the tag-taxonomy appendix from daily logs (not shown on the web)."""
+    # Drop from "## 태그 분류체계 ..." through the following horizontal rule
+    # (keeps "## 신뢰도 등급 기준" and anything after).
+    return re.sub(
+        r"(?ms)^---\s*\n+## 태그 분류체계[^\n]*\n.*?(?=^---\s*$|^## )",
+        "",
+        md_text,
+        count=1,
+    )
+
+
 def _md_to_html(md_text: str) -> str:
-    return markdown.markdown(md_text, extensions=_MD_EXT)
+    return markdown.markdown(_strip_tag_taxonomy(md_text), extensions=_MD_EXT)
 
 
 def _daily_meta(md_text: str) -> str:
