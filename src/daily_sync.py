@@ -7,7 +7,7 @@ from zoneinfo import ZoneInfo
 
 from src.config import Settings, load_settings
 from src.daily_windows import window_end_for_log_date
-from src.daily_report import save_daily_report
+from src.daily_report import is_empty_daily_report, save_daily_report
 from src.korea_scope import is_domestic_news
 from src.models import RawArticle, SummarizedArticle
 from src.summarizer import repolish_summarized_article
@@ -152,6 +152,8 @@ def scan_inconsistencies(store: DailyLogStore) -> list[dict]:
         has_md = report_exists(log_date)
         db_count = store.count_for_date(log_date)
         if has_md and db_count == 0:
+            if is_empty_daily_report(log_date):
+                continue
             issues.append(
                 {
                     "log_date": log_date.isoformat(),

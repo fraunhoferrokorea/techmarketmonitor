@@ -161,7 +161,7 @@ def daily_reprocess_cmd(from_date: datetime, to_date: datetime, fresh: bool) -> 
 
 @cli.command("daily-catchup")
 def daily_catchup_cmd() -> None:
-    """Run daily pipeline for every missing report through today (KST)."""
+    """Run daily pipeline for every missing report through yesterday (KST)."""
     settings = load_settings()
     _configure_logging(settings.log_level)
 

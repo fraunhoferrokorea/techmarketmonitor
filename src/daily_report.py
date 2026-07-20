@@ -160,6 +160,10 @@ _CATEGORY_MATERIAL_TYPE = {
     "korean": "기사",
 }
 
+# Unique marker written only by save_empty_daily_report (not by low-relevance days).
+_EMPTY_REPORT_MARKER = "<!-- tmm:empty-daily -->"
+
+
 def save_daily_report(
     log_date: date,
     articles: list[SummarizedArticle],
@@ -183,6 +187,37 @@ def save_daily_report(
     )
     logger.info("Daily research log saved → %s", report_path)
     return report_path
+
+
+def save_empty_daily_report(
+    log_date: date,
+    output_dir: Path | None = None,
+    top_keywords: list[str] | None = None,
+    recorder: str | None = None,
+) -> Path:
+    """Write a placeholder daily log when the pipeline found no articles."""
+    out_dir = output_dir or _OUTPUT_BASE
+    out_dir.mkdir(parents=True, exist_ok=True)
+    report_path = out_dir / f"daily_{log_date.isoformat()}.md"
+    body = _build_markdown(log_date, [], top_keywords, recorder)
+    report_path.write_text(
+        f"{_EMPTY_REPORT_MARKER}\n{body}",
+        encoding="utf-8",
+    )
+    logger.info("Empty daily research log saved → %s", report_path)
+    return report_path
+
+
+def is_empty_daily_report(log_date: date, output_dir: Path | None = None) -> bool:
+    """True when the markdown is an intentional empty-day placeholder."""
+    path = (output_dir or _OUTPUT_BASE) / f"daily_{log_date.isoformat()}.md"
+    if not path.is_file():
+        return False
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError:
+        return False
+    return _EMPTY_REPORT_MARKER in text
 
 
 def _material_type(article: SummarizedArticle) -> str:
