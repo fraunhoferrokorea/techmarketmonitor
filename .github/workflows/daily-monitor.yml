@@ -61,12 +61,18 @@ jobs:
           echo "=== data ==="
           ls -la data/ || true
 
-      - name: Commit daily report and database to repo
+      - name: Build GitHub Pages viewer (docs/)
+        run: |
+          pip install markdown
+          python scripts/build_report_pages.py
+
+      - name: Commit daily report, database, and Pages viewer
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -A output/daily/*.md data/monitor.db data/daily_scheduler_state.json 2>/dev/null || true
           git add output/daily/ data/monitor.db data/daily_scheduler_state.json
+          git add docs/ index.html .nojekyll
           if git diff --staged --quiet; then
             echo "No new report to commit."
             exit 0

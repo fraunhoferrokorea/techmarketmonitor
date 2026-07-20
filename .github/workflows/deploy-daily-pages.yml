@@ -1,5 +1,10 @@
 name: Deploy Report Viewer (GitHub Pages)
 
+# Keep docs/ (legacy Pages: main branch, site root → docs/) in sync with OUTPUT.
+#
+# Pushes made with GITHUB_TOKEN do not trigger other *push* workflows, so
+# daily-monitor / monthly-report rebuild docs themselves. This workflow is the
+# safety net (workflow_run) plus coverage for human/local pushes to output/.
 on:
   push:
     branches: [main]
@@ -10,24 +15,35 @@ on:
       - "scripts/build_daily_pages.py"
       - "scripts/build_report_pages.py"
       - "index.html"
+  workflow_run:
+    workflows:
+      - "Daily Tech Market Monitor"
+      - "Monthly Tech Market Report"
+    types: [completed]
   workflow_dispatch:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
+  actions: read
 
 concurrency:
-  group: pages
+  # Share with daily/monthly so docs commits do not race report pushes.
+  group: repo-push
   cancel-in-progress: false
 
 jobs:
   deploy:
+    if: >-
+      github.event_name != 'workflow_run' ||
+      github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -39,7 +55,6 @@ jobs:
           pip install markdown
           python scripts/build_report_pages.py
 
-      # Legacy Pages (branch main) serves committed HTML. Keep docs/ in sync.
       - name: Commit docs/ viewer if changed
         run: |
           git config user.name "github-actions[bot]"
@@ -47,23 +62,9 @@ jobs:
           git add docs index.html .nojekyll
           if git diff --staged --quiet; then
             echo "No docs/ changes to commit"
-          else
-            git commit -m "pages: refresh daily/monthly output viewer"
-            git push
+            exit 0
           fi
-
-      # When repo Pages source is "GitHub Actions", this path also deploys.
-      - name: Set up Pages
-        continue-on-error: true
-        uses: actions/configure-pages@v6
-
-      - name: Upload Pages artifact
-        continue-on-error: true
-        uses: actions/upload-pages-artifact@v5
-        with:
-          path: output/site
-
-      - name: Deploy to GitHub Pages
-        continue-on-error: true
-        id: deployment
-        uses: actions/deploy-pages@v5
+          git commit -m "pages: refresh daily/monthly output viewer"
+          git fetch origin main
+          git rebase origin/main
+          git push origin HEAD:main
