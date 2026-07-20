@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Daily 2026-06-29</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet"/>
+<style>:root {
+  --bg: #f3f6f5;
+  --surface: #ffffff;
+  --ink: #1a2421;
+  --muted: #5a6b66;
+  --line: #d5e0dc;
+  --brand: #008878;
+  --brand-dark: #006b5e;
+  --brand-soft: #e6f5f2;
+  --mark: #fff3bf;
+  --score-high: #008878;
+  --score-mid: #c47a00;
+  --score-low: #8a9390;
+  --shadow: 0 1px 2px rgba(26, 36, 33, 0.06), 0 8px 24px rgba(26, 36, 33, 0.06);
+  --radius: 12px;
+  --font: "Pretendard", "Noto Sans KR", "Segoe UI", system-ui, sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: var(--font);
+  color: var(--ink);
+  background:
+    radial-gradient(1200px 500px at 10% -10%, #d8efe9 0%, transparent 55%),
+    radial-gradient(900px 400px at 100% 0%, #e8eef0 0%, transparent 50%),
+    var(--bg);
+  line-height: 1.65;
+  min-height: 100vh;
+}
+a { color: var(--brand-dark); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+a:hover { color: var(--brand); }
+
+.app-header {
+  position: sticky; top: 0; z-index: 20;
+  backdrop-filter: blur(10px);
+  background: rgba(243, 246, 245, 0.88);
+  border-bottom: 1px solid var(--line);
+}
+.app-header-inner {
+  max-width: 1120px; margin: 0 auto; padding: 0.85rem 1.25rem;
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+}
+.brand {
+  display: flex; align-items: center; gap: 0.75rem; min-width: 0;
+}
+.brand-mark {
+  width: 36px; height: 36px; border-radius: 9px;
+  background: linear-gradient(145deg, var(--brand), var(--brand-dark));
+  color: #fff; font-weight: 700; font-size: 0.78rem;
+  display: grid; place-items: center; flex-shrink: 0;
+  letter-spacing: -0.02em;
+}
+.brand-text { min-width: 0; }
+.brand-text strong { display: block; font-size: 0.98rem; letter-spacing: -0.02em; }
+.brand-text span { display: block; font-size: 0.78rem; color: var(--muted); }
+
+.layout {
+  max-width: 1120px; margin: 0 auto; padding: 1.25rem;
+  display: grid; grid-template-columns: 280px 1fr; gap: 1.25rem; align-items: start;
+}
+@media (max-width: 860px) {
+  .layout { grid-template-columns: 1fr; }
+}
+
+.panel {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+}
+.sidebar { padding: 1rem; position: sticky; top: 72px; }
+@media (max-width: 860px) { .sidebar { position: static; } }
+
+.seg {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0.35rem;
+  background: var(--brand-soft); padding: 0.3rem; border-radius: 10px; margin-bottom: 1rem;
+}
+.seg button {
+  appearance: none; border: 0; background: transparent; color: var(--muted);
+  font: inherit; font-weight: 600; font-size: 0.92rem; padding: 0.55rem 0.4rem;
+  border-radius: 8px; cursor: pointer; transition: 0.15s ease;
+}
+.seg button.active {
+  background: var(--surface); color: var(--brand-dark);
+  box-shadow: 0 1px 3px rgba(0, 107, 94, 0.18);
+}
+.seg button:hover:not(.active) { color: var(--ink); }
+
+.sidebar h2 {
+  margin: 0 0 0.65rem; font-size: 0.78rem; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--muted); font-weight: 700;
+}
+.date-list { list-style: none; margin: 0; padding: 0; max-height: min(70vh, 640px); overflow: auto; }
+.date-list li + li { margin-top: 0.25rem; }
+.date-list a, .date-list button {
+  width: 100%; text-align: left; appearance: none; border: 1px solid transparent;
+  background: transparent; color: inherit; font: inherit; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+  padding: 0.65rem 0.75rem; border-radius: 8px; text-decoration: none;
+}
+.date-list a:hover, .date-list button:hover { background: var(--brand-soft); }
+.date-list a.active, .date-list button.active {
+  background: var(--brand-soft); border-color: #b7ddd5; color: var(--brand-dark); font-weight: 600;
+}
+.date-list .meta { font-size: 0.75rem; color: var(--muted); white-space: nowrap; }
+.empty-hint { color: var(--muted); font-size: 0.9rem; padding: 0.5rem 0.25rem; }
+
+.main { padding: 0; min-height: 420px; overflow: hidden; }
+.main-empty {
+  padding: 3rem 1.5rem; text-align: center; color: var(--muted);
+}
+.main-empty .icon {
+  width: 56px; height: 56px; margin: 0 auto 1rem; border-radius: 14px;
+  background: var(--brand-soft); color: var(--brand); display: grid; place-items: center;
+  font-size: 1.4rem; font-weight: 700;
+}
+.report-frame { border: 0; width: 100%; min-height: 70vh; display: block; }
+.report-wrap { padding: 1.5rem 1.75rem 2.5rem; }
+
+.report h1 {
+  margin: 0 0 0.75rem; font-size: 1.55rem; letter-spacing: -0.03em; line-height: 1.3;
+}
+.report h2 {
+  margin: 2rem 0 0.75rem; font-size: 1.15rem; letter-spacing: -0.02em;
+  padding-bottom: 0.35rem; border-bottom: 2px solid var(--brand-soft);
+}
+.report h3 {
+  margin: 1.5rem 0 0.6rem; font-size: 1.05rem;
+  padding: 0.65rem 0.85rem; background: var(--brand-soft); border-radius: 8px;
+  border-left: 4px solid var(--brand);
+}
+.report p { margin: 0.55rem 0; }
+.report ul, .report ol { padding-left: 1.25rem; }
+.report li { margin: 0.25rem 0; }
+.report hr { border: 0; border-top: 1px solid var(--line); margin: 1.5rem 0; }
+
+.report table {
+  border-collapse: separate; border-spacing: 0; width: 100%;
+  margin: 1rem 0; font-size: 0.9rem; overflow: hidden;
+  border: 1px solid var(--line); border-radius: 10px; background: #fff;
+}
+.report th, .report td {
+  padding: 0.65rem 0.75rem; text-align: left; vertical-align: top;
+  border-bottom: 1px solid var(--line);
+}
+.report th { background: #eef6f4; font-weight: 650; color: var(--brand-dark); }
+.report tr:last-child td { border-bottom: 0; }
+.report tbody tr:hover td { background: #f7fbfa; }
+
+mark {
+  background: linear-gradient(180deg, transparent 8%, var(--mark) 8%, var(--mark) 92%, transparent 92%);
+  color: inherit; padding: 0 0.12em; border-radius: 2px;
+}
+
+.stats {
+  display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.85rem 0 1.25rem;
+}
+.chip {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  padding: 0.28rem 0.65rem; border-radius: 999px; font-size: 0.8rem; font-weight: 600;
+  background: var(--brand-soft); color: var(--brand-dark); border: 1px solid #c5e4dd;
+}
+.chip.neutral { background: #f0f2f1; color: var(--muted); border-color: var(--line); }
+.score {
+  display: inline-block; min-width: 2.4em; text-align: center;
+  padding: 0.1rem 0.45rem; border-radius: 6px; font-weight: 700; font-size: 0.85rem;
+  color: #fff;
+}
+.score.high { background: var(--score-high); }
+.score.mid { background: var(--score-mid); }
+.score.low { background: var(--score-low); }
+
+.footer-note {
+  max-width: 1120px; margin: 0 auto; padding: 0 1.25rem 2rem;
+  color: var(--muted); font-size: 0.8rem;
+}
+
+.back-link {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  margin-bottom: 1rem; font-size: 0.9rem; font-weight: 600;
+}
+
+body { background: var(--surface); }
+.standalone { max-width: 960px; margin: 0 auto; padding: 1.25rem 1.5rem 2.5rem; }
+</style>
+</head>
+<body>
+<div class="standalone">
+  <p class="back-link"><a href="../index.html#daily">← Daily 목록</a></p>
+  <div class="report"><h1>국내 R&amp;D 인텔리전스 데일리 로그</h1>
+<p>날짜: 2026-06-29
+기록자: Tech Market Monitor (auto)
+총 항목 수: 12건 (기사 12 / 논문 0)
+신뢰도 분포: A 12건 / B 0건 / C 0건</p>
+<h2>오늘의 R&amp;D 인텔리전스 요약</h2>
+<p><strong>모니터링 키워드 (상위 3개):</strong> 전력계통 · 스마트그리드 · 파워그리드</p>
+<p><strong>오늘의 공통 흐름:</strong> 국내 R&amp;D 위탁·협력 가능성이 있는 투자·정책 이슈가 부각된 날</p>
+<p>오늘 수집 12건 (R&amp;D 적합 4점 이상 1건) · 정책브리핑 중소벤처기업부, 정책브리핑 산업통상부, 정책브리핑 과기정통부 외 9개 출처</p>
+<p><strong>R&amp;D 기회 스캔 (누가 · 왜 · 무엇을):</strong></p>
+<table>
+<thead>
+<tr>
+<th>R&amp;D적합</th>
+<th>핵심 이슈</th>
+<th>고객 타겟</th>
+<th>R&amp;D 연계 포인트</th>
+<th>팩트 체크</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>5/5</strong></td>
+<td><a href="#0000-중기부-중소제조-ai-에이전트-실증-프로젝트-본격-착수">중기부, 중소제조 AI 에이전트 실증 프로젝트 본격</a> 중기부가 중소제조 특화 멀티 AI 에이전트 실증 프로젝트를 본격 착수하고, 12개 선정과제 수행기관과 함께 제조현장의 AI 에이전트 적용 필요성과 실증 추진 방향을 논의함</td>
+<td>중소벤처기업부, 중소기업기술정보진흥원</td>
+<td>중소제조업의 AI 에이전트 적용을 위한 기술 개발 및 실증 프로젝트에 참여할 수 있음</td>
+<td>중기부는 12개 선정과제 수행기관과 함께 제조현장의 AI 에이전트 적용 필요성과 실증 추진 방향을 논의</td>
+</tr>
+<tr>
+<td><strong>3/5</strong></td>
+<td><a href="#0021-보도참고-국민주권정부의-과학기술혁신-청사진-제6차-과학기술기본계획2630-수립">[보도참고] 국민주권정부의 과학기술혁신 청사진</a> 과기정통부가 2026~2030년 제6차 과학기술기본계획을 수립, 5년간 200조원 이상의 R&amp;D 투자하고 연구몰입 강화 및 청년인재 지원할 계획임</td>
+<td>과기정통부</td>
+<td>스마트그리드, 파워그리드, 전력계통 관련 기술 개발 및 연구 협력 분야에서 제안 가능함</td>
+<td>5년간 200조원 이상의 R&amp;D 투자, 연구몰입 강화와 청년인재 지원</td>
+</tr>
+<tr>
+<td><strong>3/5</strong></td>
+<td><a href="#0000-보도참고-인공지능이-이끄는-제조업의-대전환-2030년-청사진-나왔다">[보도참고] 인공지능이 이끄는 제조업의 대전환</a> 과학기술정보통신부가 2030년까지 민·관 합동 20조원 투자로 제조업 대전환을 추진할 계획임</td>
+<td>과학기술정보통신부, 민간 기업</td>
+<td>제조업에 특화된 AI두뇌 개발 및 지역 제조AI 확산을 위한 R&amp;D 협력을 제안할 수 있음</td>
+<td>2030년까지 민·관 합동 20조원 투자, 경제적 부가가치 100조원 이상 창출</td>
+</tr>
+<tr>
+<td><strong>3/5</strong></td>
+<td><a href="#0000-참고자료인공지능이-이끄는-제조업의-대전환-2030년-청사진-나왔다">(참고자료)인공지능이 이끄는 제조업의 대전환</a> 산업통상부, 2030년까지 민·관 합동 20조원 투자로 제조업 AI 대전환 추진할 계획임. 100조원 이상의 경제적 부가가치 창출을 목표로 함</td>
+<td>산업통상부, 과학기술정보통신부, 중소벤처기업부 등</td>
+<td>제조데이터 수집, 제조AI 모델 개발·도입 및 에이전트 확산 기반 마련, 고품질 제조데이터 수집, 경량모델부터 대규모 백본모델까지 제조AI 모델 개발</td>
+<td>https://www.korea.kr/briefing/pressReleaseView.do?newsId=156768655</td>
+</tr>
+<tr>
+<td><strong>2/5</strong></td>
+<td><a href="#0000-홍릉-한방그린바이오-연구-협력-시동-국립산림과학원-경희대-mou-후속조치-탄력-산양삼-활용-제품화-기술-이전">홍릉 한방·그린바이오 연구 협력 시동 -</a> 산림청 국립산림과학원과 경희대가 MOU 후속조치로 산양삼 활용 제품화 기술 이전을 완료하고, ㈜닥터비랩은 산양삼을 원료로 한 면역증진용 건강식품 등을 개발할 계획임</td>
+<td>산림청 국립산림과학원, 경희대, ㈜닥터비랩</td>
+<td>산림바이오 기술 및 그린바이오 산업 분야에서 산림청 국립산림과학원과 경희대와의 협력을 통해 기술 이전 및 공동 연구를 제안할 수 있음</td>
+<td>산림청 국립산림과학원과 경희대가 MOU 후속조치로 산양삼 활용 제품화 기술 이전을 완료했으며, 기술을 이전받은 ㈜닥터비랩은 산양삼을 원료로 한 면역증진용 건강식품 등을 개발할 계획임</td>
+</tr>
+<tr>
+<td><strong>2/5</strong></td>
+<td><a href="#0800-보도참고-인공지능이-이끄는-제조업의-대전환-2030년-청사진-나왔다">[보도참고] 인공지능이 이끄는 제조업의 대전환</a> 과기정통부가 2030년 제조업 대전환을 위한 AI 전략을 발표하고, 20조원 투자 및 100조원 이상의 경제적 부가가치 창출을 목표로 함</td>
+<td>과기정통부 및 민간 기업</td>
+<td>제조업에 특화된 AI 기술 개발 및 지역 제조 AI 확산을 위한 R&amp;D 협력을 제안할 수 있음</td>
+<td>2030년까지 민·관 합동 20조원 투자, 경제적 부가가치 100조원 이상 창출</td>
+</tr>
+<tr>
+<td><strong>2/5</strong></td>
+<td><a href="#0013-대드론-체계-성능시험-국가표준ks-제정">대드론 체계 성능시험 국가표준(KS) 제정</a> 산업통상부가 대드론 체계 성능시험 국가표준(KS)을 제정하고, 발전소/공항 등 국가중요시설의 미확인 드론 대응 체계를 효율적으로 구축할 계획임</td>
+<td>산업통상부 국가기술표준원</td>
+<td>대드론 체계 성능평가 방법의 기술 개발 및 표준화에 관한 연구를 제안할 수 있음</td>
+<td>산업통상부 국가기술표준원은 대드론 체계의 성능평가 방법을 국가표준(KS)로 제정함</td>
+</tr>
+<tr>
+<td><strong>2/5</strong></td>
+<td><a href="#0000-대드론-체계-성능시험-국가표준ks-제정">대드론 체계 성능시험 국가표준(KS) 제정</a> 산업통상부, 대드론 체계 성능시험 국가표준(KS) 제정-국가중요시설 드론 대응 체계 구축 뒷받침, 6월 29일부터 시행함</td>
+<td>산업통상부, 방위사업청, 국방기술품질원</td>
+<td>대드론 체계의 성능평가 및 인증제도 구축에 필요한 기술 및 전문성을 제공할 수 있음</td>
+<td>KS W 8100 &lsquo;대드론체계 구성장비 운용 성능 시험방법&rsquo; 제정, 6월 29일부터 시행</td>
+</tr>
+</tbody>
+</table>
+<p><em>(이하 4건은 R&amp;D 적합 1점 또는 국내 투자 신호 미약으로 표에서 생략)</em></p>
+<p><strong>국내 R&amp;D 타겟 시사점 (프라운호퍼 · 전력계통 · 스마트그리드 · 파워그리드):</strong></p>
+<ul>
+<li><strong>[5/5] 중소벤처기업부, 중소기업기술정보진흥원</strong> — 목적: 중소제조업의 AI 에이전트 적용을 위한 기술 개발 및 실증 | 니즈: 중소제조업의 AI 에이전트 적용을 위한 기술 개발 및 실증 프로젝트 | 접근: 중기부와의 협력을 통해 중소제조업의 AI 에이전트 적용을 위한 기술 개발 및 실증 프로젝트에 참여 (<a href="https://www.korea.kr/briefing/pressReleaseView.do?newsId=156768587">중기부, 중소제조 AI 에이전트 실증 프로젝트 본격 착수</a>)</li>
+<li><strong>[3/5] 산업통상부, 과학기술정보통신부, 중소벤처기업부 등</strong> — 목적: 제조업의 AI 대전환을 통해 중소기업의 경쟁력 강화와 경제적 부가가치 창출 | 니즈: 제조데이터 수집, 제조AI 모델 개발·도입 및 에이전트 확산 기반 마련, 고품질 제조데이터 수집, 경량모델부터 대규모 백본모델까지 제조AI 모델 개발 | 접근: 산업통상부의 제조AI 2030 전략과 중소벤처기업부의 스마트공장 지원 정책에 따라 제조데이터 라이브러리 구축, 제조AI 파운데이션 모델 개발, 풀스택 AI팩토리 기술 개발 등에 대한 R&amp;D 지원을 제안할 수 있음 (<a href="https://www.korea.kr/briefing/pressReleaseView.do?newsId=156768655">(참고자료)인공지능이 이끄는 제조업의 대전환, 2030년 청사진 나왔다</a>)</li>
+<li><strong>[3/5] 과기정통부</strong> — 목적: 기술주도 성장과 모두의 성장을 위한 과학기술혁신 | 니즈: 스마트그리드, 파워그리드, 전력계통 관련 기술 개발 및 연구 협력 | 접근: 과기정통부의 연구몰입 강화와 청년인재 지원 정책에 따라 협력 가능함 (<a href="https://www.korea.kr/briefing/pressReleaseView.do?newsId=156768490&amp;call_from=rsslink">[보도참고] 국민주권정부의 과학기술혁신 청사진, 제6차 과학기술기본계획(&lsquo;26~&lsquo;30)…</a>)</li>
+<li><strong>[3/5] 과학기술정보통신부, 민간 기업</strong> — 목적: 제조업의 대전환을 위한 인공지능 기술 개발 및 확산 | 니즈: 제조업에 특화된 AI두뇌 개발, 지역 제조AI 확산을 위한 고난도 R&amp;D 격차 해소 | 접근: 정부의 정책 정합성과 산업의 로드맵 연계를 통해 R&amp;D 협력 제안 (<a href="https://www.korea.kr/briefing/pressReleaseView.do?newsId=156768660">[보도참고] 인공지능이 이끄는 제조업의 대전환, 2030년 청사진 나왔다</a>)</li>
+<li>
+<p><strong>[2/5] 과기정통부 및 민간 기업</strong> — 목적: 제조업의 AI 기술 도입 및 지역 제조 AI 확산 | 니즈: 국가 차원의 핵심 제조데이터 관리·활용 체계 구축, 제조업에 특화된 AI 두뇌 개발 | 접근: 과기정통부 및 민간 기업과 제조업 AI 기술 개발 및 지역 제조 AI 확산을 위한 R&amp;D 협력을 추진할 수 있음 (<a href="https://www.korea.kr/briefing/pressReleaseView.do?newsId=156768660&amp;call_from=rsslink">[보도참고] 인공지능이 이끄는 제조업의 대전환, 2030년 청사진 나왔다</a>)</p>
+</li>
+<li>
+<p><strong>상충되는 정보:</strong> (해당 없음)</p>
+</li>
+</ul>
+<hr />
+<h2>항목 기록</h2>
+<p><a id="0000-중기부-중소제조-ai-에이전트-실증-프로젝트-본격-착수"></a></p>
+<h3>00:00 중기부, 중소제조 AI 에이전트 실증 프로젝트 본격 착수</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 중소벤처기업부</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 중소벤처기업부</li>
+<li><strong>발행일:</strong> 2026-06-29</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156768587</li>
+<li><strong>요약:</strong></li>
+<li>중기부, 중소제조 AI 에이전트 실증 프로젝트 본격 착수 -</li>
+<li>중기부는 중소제조 특화 멀티 AI 에이전트 실증 프로젝트 착수간담회를 개최</li>
+<li>
+<p>(해석) 중기부의 중소제조 특화 멀티 AI 에이전트 실증 프로젝트는 전력계통, 파워그리드, 스마트그리드와 관련된 기술 개발 및 실증 프로젝트와 연관성이 있음</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 5/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 중소제조업의 AI 에이전트 적용을 위한 기술 개발 및 실증 프로젝트에 참여할 수 있음</li>
+<li><strong>팩트 근거:</strong> 중기부는 12개 선정과제 수행기관과 함께 제조현장의 AI 에이전트 적용 필요성과 실증 추진 방향을 논의</li>
+<li><strong>투자 주체:</strong> 중소벤처기업부, 중소기업기술정보진흥원</li>
+<li><strong>투자 목적:</strong> 중소제조업의 AI 에이전트 적용을 위한 기술 개발 및 실증</li>
+<li><strong>위탁 연구 니즈:</strong> 중소제조업의 AI 에이전트 적용을 위한 기술 개발 및 실증 프로젝트</li>
+<li><strong>접근 전략:</strong> 중기부와의 협력을 통해 중소제조업의 AI 에이전트 적용을 위한 기술 개발 및 실증 프로젝트에 참여</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #정부계획 #협력 #제품출시 #기술</li>
+<li><strong>비고:</strong> 우선: 정부·R&amp;D 타깃 (프라운호퍼 협력 관점) · 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 키워드 관련도: 직접 · 매칭: 정부·R&amp;D 타깃</li>
+</ul>
+<p><a id="0000-참고자료인공지능이-이끄는-제조업의-대전환-2030년-청사진-나왔다"></a></p>
+<h3>00:00 (참고자료)인공지능이 이끄는 제조업의 대전환, 2030년 청사진 나왔다</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 산업통상부</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 산업통상부</li>
+<li><strong>발행일:</strong> 2026-06-29</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156768655</li>
+<li><strong>요약:</strong></li>
+<li>산업통상부, 2030년까지 민·관 합동 20조원 투자로 제조업 AI 대전환 추진할 계획임.</li>
+<li>산업통상부는 2030년까지 민·관 합동 20조원 투자로 제조업 AI 대전환을 추진할 계획임. 이에 따라 경제적 부가가치 100조원 이상 창출될 것으로 기대됨</li>
+<li>
+<p>(해석) 제조업 AI 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 3/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>투자 주체:</strong> 산업통상부, 과학기술정보통신부, 중소벤처기업부 등</li>
+<li><strong>투자 목적:</strong> 제조업의 AI 대전환을 통해 중소기업의 경쟁력 강화와 경제적 부가가치 창출</li>
+<li><strong>위탁 연구 니즈:</strong> 제조데이터 수집, 제조AI 모델 개발·도입 및 에이전트 확산 기반 마련, 고품질 제조데이터 수집, 경량모델부터 대규모 백본모델까지 제조AI 모델 개발</li>
+<li><strong>접근 전략:</strong> 산업통상부의 제조AI 2030 전략과 중소벤처기업부의 스마트공장 지원 정책에 따라 제조데이터 라이브러리 구축, 제조AI 파운데이션 모델 개발, 풀스택 AI팩토리 기술 개발 등에 대한 R&amp;D 지원을 제안할 수 있음</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #투자 #제품출시 #기술</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 정부·R&amp;D 타깃</li>
+</ul>
+<p><a id="0021-보도참고-국민주권정부의-과학기술혁신-청사진-제6차-과학기술기본계획2630-수립"></a></p>
+<h3>00:21 [보도참고] 국민주권정부의 과학기술혁신 청사진, 제6차 과학기술기본계획(&lsquo;26~&lsquo;30) 수립</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 과기정통부</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 과기정통부</li>
+<li><strong>발행일:</strong> 2026-06-29</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156768490&amp;call_from=rsslink</li>
+<li><strong>요약:</strong></li>
+<li>과기정통부가 2026~2030년 제6차 과학기술기본계획을 수립, 5년간 200조원 이상의 R&amp;D 투자 계획임.</li>
+<li>과기정통부는 2026~2030년 제6차 과학기술기본계획을 수립, 과학기술혁신과 AI 대전환으로 새로운 성장 비전을 제시함</li>
+<li>
+<p>(해석) 과학기술혁신 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 3/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 스마트그리드, 파워그리드, 전력계통 관련 기술 개발 및 연구 협력 분야에서 제안 가능함</li>
+<li><strong>팩트 근거:</strong> 5년간 200조원 이상의 R&amp;D 투자, 연구몰입 강화와 청년인재 지원</li>
+<li><strong>투자 주체:</strong> 과기정통부</li>
+<li><strong>투자 목적:</strong> 기술주도 성장과 모두의 성장을 위한 과학기술혁신</li>
+<li><strong>위탁 연구 니즈:</strong> 스마트그리드, 파워그리드, 전력계통 관련 기술 개발 및 연구 협력</li>
+<li><strong>접근 전략:</strong> 과기정통부의 연구몰입 강화와 청년인재 지원 정책에 따라 협력 가능함</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #정부계획 #협력 #투자 #제품출시</li>
+<li><strong>비고:</strong> 우선: 정부·R&amp;D 타깃 (프라운호퍼 협력 관점) · 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 정부·R&amp;D 타깃</li>
+</ul>
+<p><a id="0800-보도참고-인공지능이-이끄는-제조업의-대전환-2030년-청사진-나왔다"></a></p>
+<h3>08:00 [보도참고] 인공지능이 이끄는 제조업의 대전환, 2030년 청사진 나왔다</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 과기정통부</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 과기정통부</li>
+<li><strong>발행일:</strong> 2026-06-29</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156768660&amp;call_from=rsslink</li>
+<li><strong>요약:</strong></li>
+<li>과기정통부가 2030년 제조업 대전환을 위한 AI 전략을 발표했음.</li>
+<li>과기정통부는 2030년 제조업 대전환을 위한 AI 전략을 발표했음. 2030년까지 민·관 합동 20조원 투자, 경제적 부가가치 100조원 이상 창출할 계획임</li>
+<li>
+<p>(해석) 제조업 AI 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 2/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 제조업에 특화된 AI 기술 개발 및 지역 제조 AI 확산을 위한 R&amp;D 협력을 제안할 수 있음</li>
+<li><strong>팩트 근거:</strong> 2030년까지 민·관 합동 20조원 투자, 경제적 부가가치 100조원 이상 창출</li>
+<li><strong>투자 주체:</strong> 과기정통부 및 민간 기업</li>
+<li><strong>투자 목적:</strong> 제조업의 AI 기술 도입 및 지역 제조 AI 확산</li>
+<li><strong>위탁 연구 니즈:</strong> 국가 차원의 핵심 제조데이터 관리·활용 체계 구축, 제조업에 특화된 AI 두뇌 개발</li>
+<li><strong>접근 전략:</strong> 과기정통부 및 민간 기업과 제조업 AI 기술 개발 및 지역 제조 AI 확산을 위한 R&amp;D 협력을 추진할 수 있음</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #제품출시 #기술 #기업동향</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 정부·R&amp;D 타깃</li>
+</ul>
+<p><a id="0000-보도참고-인공지능이-이끄는-제조업의-대전환-2030년-청사진-나왔다"></a></p>
+<h3>00:00 [보도참고] 인공지능이 이끄는 제조업의 대전환, 2030년 청사진 나왔다</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 과학기술정보통신부</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 과학기술정보통신부</li>
+<li><strong>발행일:</strong> 2026-06-29</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156768660</li>
+<li><strong>요약:</strong></li>
+<li>과학기술정보통신부가 2030년까지 민·관 합동 20조원 투자로 제조업 대전환을 추진할 계획임.</li>
+<li>과학기술정보통신부는 2030년까지 민·관 합동 20조원 투자로 제조업 대전환을 추진할 계획임</li>
+<li>
+<p>(해석) 제조업 대전환 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 3/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 제조업에 특화된 AI두뇌 개발 및 지역 제조AI 확산을 위한 R&amp;D 협력을 제안할 수 있음</li>
+<li><strong>팩트 근거:</strong> 2030년까지 민·관 합동 20조원 투자, 경제적 부가가치 100조원 이상 창출</li>
+<li><strong>투자 주체:</strong> 과학기술정보통신부, 민간 기업</li>
+<li><strong>투자 목적:</strong> 제조업의 대전환을 위한 인공지능 기술 개발 및 확산</li>
+<li><strong>위탁 연구 니즈:</strong> 제조업에 특화된 AI두뇌 개발, 지역 제조AI 확산을 위한 고난도 R&amp;D 격차 해소</li>
+<li><strong>접근 전략:</strong> 정부의 정책 정합성과 산업의 로드맵 연계를 통해 R&amp;D 협력 제안</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #투자 #제품출시 #기술</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 정부·R&amp;D 타깃</li>
+</ul>
+<p><a id="0000-부처합동-식약처농식품부인증원-생산단계부터-식용곤충-안전관리-인증한다"></a></p>
+<h3>00:00 [부처합동] 식약처·농식품부·인증원, 생산단계부터 식용곤충 안전관리 인증한다</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 식품의약품안전처</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 식품의약품안전처</li>
+<li><strong>발행일:</strong> 2026-06-29</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156768495</li>
+<li><strong>요약:</strong></li>
+<li>식품의약품안전처·농식품부·인증원, 생산단계부터 식용곤충 안전관리 인증한다 -</li>
+<li>식품의약품안전처·농식품부·인증원, 식용곤충 안전관리 인증함.</li>
+<li>
+<p>(해석) 식용곤충 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 식용곤충 안전관리 기술 개발</li>
+<li><strong>투자 주체:</strong> 식품의약품안전처·농식품부·인증원</li>
+<li><strong>투자 목적:</strong> 식용곤충 안전관리 인증</li>
+<li><strong>위탁 연구 니즈:</strong> 식용곤충 안전관리 기술 개발</li>
+<li><strong>접근 전략:</strong> 정부 정책 정합</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #정부계획 #협력 #제품출시 #기술</li>
+<li><strong>비고:</strong> 우선: 정부·R&amp;D 타깃 (프라운호퍼 협력 관점) · 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 정부·R&amp;D 타깃</li>
+</ul>
+<p><a id="0000-농식품부식약처해썹인증원-농가에서부터-식용곤충-안전관리-한다"></a></p>
+<h3>00:00 농식품부·식약처·해썹인증원, 농가에서부터 식용곤충 안전관리 한다!</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 농림축산식품부</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 농림축산식품부</li>
+<li><strong>발행일:</strong> 2026-06-29</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156768528</li>
+<li><strong>요약:</strong></li>
+<li>농식품부, 식약처, 해썹인증원이 식용곤충 생산단계 안전관리인증기준 시범사업을 실시함으로써 식용곤충 산업의 품질관리 체계 고도화를 지원할 예정임.</li>
+<li>농식품부, 식약처, 해썹인증원이 식용곤충 생산단계 안전관리인증기준 시범사업을 실시</li>
+<li>
+<p>(해석) 식용곤충 산업 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 식용곤충 산업의 품질관리 체계 고도화와 안전관리인증기준 개발에 필요한 기술 및 전문성을 제공할 수 있음.</li>
+<li><strong>팩트 근거:</strong> 식용곤충 시장 전망: (&lsquo;24년) 약 13.5억 달러 → (&lsquo;30년) 약 43.8억 달러(연평균 25% 성장), 시범사업은 6월 29일부터 실시</li>
+<li><strong>투자 주체:</strong> 농식품부, 식약처, 해썹인증원</li>
+<li><strong>투자 목적:</strong> 식용곤충 산업의 품질관리 체계 고도화와 안전관리인증기준 개발</li>
+<li><strong>위탁 연구 니즈:</strong> 식용곤충 산업의 안전관리 사각지대를 해소하고, 미래 식량자원인 식용곤충의 생산부터 판매까지 전 주기 안전관리 기반을 마련</li>
+<li><strong>접근 전략:</strong> 정부의 정책 정합성과 산업의 기술 니즈를 고려하여 기술 및 전문성을 제공</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #정부계획 #협력 #제품출시 #기술</li>
+<li><strong>비고:</strong> 우선: 정부·R&amp;D 타깃 (프라운호퍼 협력 관점) · 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 정부·R&amp;D 타깃</li>
+</ul>
+<p><a id="0013-대드론-체계-성능시험-국가표준ks-제정"></a></p>
+<h3>00:13 대드론 체계 성능시험 국가표준(KS) 제정</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 산업통상부</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 산업통상부</li>
+<li><strong>발행일:</strong> 2026-06-29</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156768488&amp;call_from=rsslink</li>
+<li><strong>요약:</strong></li>
+<li>산업통상부, 대드론 체계 성능시험 국가표준(KS) 제정으로 발전소/공항 등 국가중요시설의 미확인 드론 대응 체계 효율적 구축 뒷받침함.</li>
+<li>산업통상부는 대드론 체계 성능시험 국가표준(KS)을 제정하여 국가중요시설의 미확인 드론 대응 체계를 효율적으로 구축하기 위한 뒷받침을 제공함</li>
+<li>
+<p>(해석) 대드론 체계 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 2/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 대드론 체계 성능평가 방법의 기술 개발 및 표준화에 관한 연구를 제안할 수 있음</li>
+<li><strong>팩트 근거:</strong> 산업통상부 국가기술표준원은 대드론 체계의 성능평가 방법을 국가표준(KS)로 제정함</li>
+<li><strong>투자 주체:</strong> 산업통상부 국가기술표준원</li>
+<li><strong>투자 목적:</strong> 국가중요시설의 미확인 드론 대응 체계 효율적 구축</li>
+<li><strong>위탁 연구 니즈:</strong> 대드론 체계 성능평가 방법의 기술 개발 및 표준화</li>
+<li><strong>접근 전략:</strong> 산업통상부의 정책 정합성에 따라 대드론 체계 성능평가 방법의 기술 개발 및 표준화에 관한 연구를 제안할 수 있음</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #제품출시 #규제 #기술</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 정부·R&amp;D 타깃</li>
+</ul>
+<p><a id="0000-대드론-체계-성능시험-국가표준ks-제정"></a></p>
+<h3>00:00 대드론 체계 성능시험 국가표준(KS) 제정</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 산업통상부</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 산업통상부</li>
+<li><strong>발행일:</strong> 2026-06-29</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156768488</li>
+<li><strong>요약:</strong></li>
+<li>산업통상부, 대드론 체계 성능시험 국가표준(KS) 제정-국가중요시설 드론 대응 체계 구축 뒷받침,</li>
+<li>산업통상부가 대드론 체계 성능시험 국가표준(KS) 제정, 국가중요시설 드론 대응 체계 구축 뒷받침</li>
+<li>
+<p>(해석) 대드론 체계 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 2/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 대드론 체계의 성능평가 및 인증제도 구축에 필요한 기술 및 전문성을 제공할 수 있음</li>
+<li><strong>팩트 근거:</strong> KS W 8100 &lsquo;대드론체계 구성장비 운용 성능 시험방법&rsquo; 제정, 6월 29일부터 시행</li>
+<li><strong>투자 주체:</strong> 산업통상부, 방위사업청, 국방기술품질원</li>
+<li><strong>투자 목적:</strong> 국가중요시설의 안보 공백 해소, 국내 대드론 기업 생태계 조성</li>
+<li><strong>위탁 연구 니즈:</strong> 대드론 체계의 성능평가 및 인증제도 구축, 기술 발전 및 생태계 조성</li>
+<li><strong>접근 전략:</strong> 산업통상부와의 협력을 통해 표준화 활동을 적극 지원, 대드론 체계의 기술 발전 및 생태계 조성에 기여</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #제품출시 #규제 #기술</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 정부·R&amp;D 타깃</li>
+</ul>
+<p><a id="0000-보훈부-625전쟁-전몰순직군경유족-헌정패-수여-30일-우정사업본부와-업무협약"></a></p>
+<h3>00:00 보훈부, 6.25전쟁 전몰순직군경유족 헌정패 수여 30일 우정사업본부와 업무협약</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 국가보훈부</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 국가보훈부</li>
+<li><strong>발행일:</strong> 2026-06-29</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156768630</li>
+<li><strong>요약:</strong></li>
+<li>국가보훈부와 우정사업본부가 업무협약을 체결하고, 6.25전쟁 전몰순직군경유족 헌정패 수여식이 개최됨에 따라 기술 협력 및 투자 기회가 있을 수 있음.</li>
+<li>국가보훈부와 우정사업본부가 업무협약을 체결하고, 6.25전쟁 전몰순직군경유족 헌정패 수여식이 개최됨</li>
+<li>
+<p>(해석) 정부 업무협약 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 국가보훈부와 우정사업본부의 업무협약을 통해 스마트그리드 및 전력계통 기술 개발에 관한 협력을 제안할 수 있음</li>
+<li><strong>팩트 근거:</strong> 국가보훈부와 우정사업본부의 업무협약 및 6.25전쟁 전몰순직군경유족 헌정패 수여식</li>
+<li><strong>투자 주체:</strong> 국가보훈부와 우정사업본부</li>
+<li><strong>투자 목적:</strong> 기술 협력 및 투자 기회</li>
+<li><strong>위탁 연구 니즈:</strong> 스마트그리드 및 전력계통 기술 개발에 관한 협력</li>
+<li><strong>접근 전략:</strong> 정부의 정책 정합성과 기술 협력의 필요성을 강조</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #정부계획 #협력 #투자 #제품출시</li>
+<li><strong>비고:</strong> 우선: 정부·R&amp;D 타깃 (프라운호퍼 협력 관점) · 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 정부·R&amp;D 타깃</li>
+</ul>
+<p><a id="0000-보훈부-대한법률구조공단-제대군인-법률구조사업-업무협약"></a></p>
+<h3>00:00 보훈부-대한법률구조공단, 제대군인 법률구조사업 업무협약</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 국가보훈부</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 국가보훈부</li>
+<li><strong>발행일:</strong> 2026-06-29</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156768631</li>
+<li><strong>요약:</strong></li>
+<li>국가보훈부와 대한법률구조공단이 제대군인 법률구조사업 업무협약을 체결했음.</li>
+<li>국가보훈부와 대한법률구조공단이 제대군인 법률구조사업을 위해 업무협약을 체결했음.</li>
+<li>
+<p>(해석) 제대군인 지원 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>투자 주체:</strong> 국가보훈부, 대한법률구조공단</li>
+<li><strong>투자 목적:</strong> 제대군인 법률구조사업 지원</li>
+<li><strong>위탁 연구 니즈:</strong> 팩트 부족으로 판단 보류</li>
+<li><strong>접근 전략:</strong> 정부 정책 정합</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #정부계획 #협력 #제품출시 #기술</li>
+<li><strong>비고:</strong> 우선: 정부·R&amp;D 타깃 (프라운호퍼 협력 관점) · 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 정부·R&amp;D 타깃</li>
+</ul>
+<p><a id="0000-홍릉-한방그린바이오-연구-협력-시동-국립산림과학원-경희대-mou-후속조치-탄력-산양삼-활용-제품화-기술-이전"></a></p>
+<h3>00:00 홍릉 한방·그린바이오 연구 협력 시동 - 국립산림과학원-경희대, MOU 후속조치 탄력 산양삼 활용 제품화 기술 이전 -</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 산림청</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 산림청</li>
+<li><strong>발행일:</strong> 2026-06-29</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156768471</li>
+<li><strong>요약:</strong></li>
+<li>산림청 국립산림과학원과 경희대가 MOU 후속조치로 산양삼 활용 제품화 기술 이전을 완료했음.</li>
+<li>산림청 국립산림과학원과 경희대가 MOU 후속조치로 산양삼 활용 제품화 기술 이전을 완료했음</li>
+<li>
+<p>(해석) 산림바이오 기술 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 2/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 산림바이오 기술 및 그린바이오 산업 분야에서 산림청 국립산림과학원과 경희대와의 협력을 통해 기술 이전 및 공동 연구를 제안할 수 있음</li>
+<li><strong>팩트 근거:</strong> 산림청 국립산림과학원과 경희대가 MOU 후속조치로 산양삼 활용 제품화 기술 이전을 완료했으며, 기술을 이전받은 ㈜닥터비랩은 산양삼을 원료로 한 면역증진용 건강식품 등을 개발할 계획임</li>
+<li><strong>투자 주체:</strong> 산림청 국립산림과학원, 경희대, ㈜닥터비랩</li>
+<li><strong>투자 목적:</strong> 산림바이오 기술 및 그린바이오 산업 분야의 기술 개발 및 사업화</li>
+<li><strong>위탁 연구 니즈:</strong> 산림바이오 기술 및 그린바이오 산업 분야의 기술 격차 해소</li>
+<li><strong>접근 전략:</strong> 산림청 국립산림과학원과 경희대와의 협력을 통해 기술 이전 및 공동 연구를 제안</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #정부계획 #협력 #제품출시 #기술</li>
+<li><strong>비고:</strong> 우선: 정부·R&amp;D 타깃 (프라운호퍼 협력 관점) · 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 정부·R&amp;D 타깃</li>
+</ul>
+<hr />
+<h2>태그 분류체계 (월간 보고서 챕터와 매칭)</h2>
+<table>
+<thead>
+<tr>
+<th>태그</th>
+<th>의미</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>#기술</td>
+<td>신기술, R&amp;D, 기술 발표</td>
+</tr>
+<tr>
+<td>#논문</td>
+<td>학술 연구 결과 (성능, 실험, 방법론)</td>
+</tr>
+<tr>
+<td>#투자</td>
+<td>투자 라운드, 밸류에이션, 펀딩</td>
+</tr>
+<tr>
+<td>#M&amp;A</td>
+<td>인수합병, 전략적 제휴</td>
+</tr>
+<tr>
+<td>#제품출시</td>
+<td>신제품, 서비스 런칭</td>
+</tr>
+<tr>
+<td>#기업동향</td>
+<td>조직, 인력, 실적, 전략</td>
+</tr>
+<tr>
+<td>#규제</td>
+<td>법안, 정책, 표준</td>
+</tr>
+<tr>
+<td>#경쟁</td>
+<td>경쟁사 비교, 점유율, 포지셔닝</td>
+</tr>
+<tr>
+<td>#시장수치</td>
+<td>시장규모/성장률 추정치</td>
+</tr>
+<tr>
+<td>#리스크</td>
+<td>사고, 논란, 부정적 전망</td>
+</tr>
+<tr>
+<td>#전문가전망</td>
+<td>애널리스트/전문가 예측</td>
+</tr>
+</tbody>
+</table>
+<h2>신뢰도 등급 기준</h2>
+<ul>
+<li><strong>A (높음):</strong> 정부·공공기관 원문(korea.kr·부처 .go.kr 보도자료), 연합뉴스·뉴시스 1차 보도, 공공 R&amp;D·정책기관(KISTEP·KIET·KIPO·KETEP·한국전력 등), 국내 학술지·국책연구원 동료심사 논문</li>
+<li><strong>B (중간):</strong> 국내 경제·IT 전문매체(헤럴드경제·동아일보·전자신문·ZDNet Korea 등), 2차 인용·전문자료 요약, 기업·공기업 IR/보도자료</li>
+<li><strong>C (참고):</strong> 익명 소스, 추측성 기사, 단순 재가공 콘텐츠, 미검증 블로그 — <strong>자동 생성 시에는 C가 나오지 않음. 수동 기록 시에만 사용</strong></li>
+</ul></div>
+</div>
+</body>
+</html>

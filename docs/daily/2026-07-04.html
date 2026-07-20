@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Daily 2026-07-04</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet"/>
+<style>:root {
+  --bg: #f3f6f5;
+  --surface: #ffffff;
+  --ink: #1a2421;
+  --muted: #5a6b66;
+  --line: #d5e0dc;
+  --brand: #008878;
+  --brand-dark: #006b5e;
+  --brand-soft: #e6f5f2;
+  --mark: #fff3bf;
+  --score-high: #008878;
+  --score-mid: #c47a00;
+  --score-low: #8a9390;
+  --shadow: 0 1px 2px rgba(26, 36, 33, 0.06), 0 8px 24px rgba(26, 36, 33, 0.06);
+  --radius: 12px;
+  --font: "Pretendard", "Noto Sans KR", "Segoe UI", system-ui, sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: var(--font);
+  color: var(--ink);
+  background:
+    radial-gradient(1200px 500px at 10% -10%, #d8efe9 0%, transparent 55%),
+    radial-gradient(900px 400px at 100% 0%, #e8eef0 0%, transparent 50%),
+    var(--bg);
+  line-height: 1.65;
+  min-height: 100vh;
+}
+a { color: var(--brand-dark); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+a:hover { color: var(--brand); }
+
+.app-header {
+  position: sticky; top: 0; z-index: 20;
+  backdrop-filter: blur(10px);
+  background: rgba(243, 246, 245, 0.88);
+  border-bottom: 1px solid var(--line);
+}
+.app-header-inner {
+  max-width: 1120px; margin: 0 auto; padding: 0.85rem 1.25rem;
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+}
+.brand {
+  display: flex; align-items: center; gap: 0.75rem; min-width: 0;
+}
+.brand-mark {
+  width: 36px; height: 36px; border-radius: 9px;
+  background: linear-gradient(145deg, var(--brand), var(--brand-dark));
+  color: #fff; font-weight: 700; font-size: 0.78rem;
+  display: grid; place-items: center; flex-shrink: 0;
+  letter-spacing: -0.02em;
+}
+.brand-text { min-width: 0; }
+.brand-text strong { display: block; font-size: 0.98rem; letter-spacing: -0.02em; }
+.brand-text span { display: block; font-size: 0.78rem; color: var(--muted); }
+
+.layout {
+  max-width: 1120px; margin: 0 auto; padding: 1.25rem;
+  display: grid; grid-template-columns: 280px 1fr; gap: 1.25rem; align-items: start;
+}
+@media (max-width: 860px) {
+  .layout { grid-template-columns: 1fr; }
+}
+
+.panel {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+}
+.sidebar { padding: 1rem; position: sticky; top: 72px; }
+@media (max-width: 860px) { .sidebar { position: static; } }
+
+.seg {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0.35rem;
+  background: var(--brand-soft); padding: 0.3rem; border-radius: 10px; margin-bottom: 1rem;
+}
+.seg button {
+  appearance: none; border: 0; background: transparent; color: var(--muted);
+  font: inherit; font-weight: 600; font-size: 0.92rem; padding: 0.55rem 0.4rem;
+  border-radius: 8px; cursor: pointer; transition: 0.15s ease;
+}
+.seg button.active {
+  background: var(--surface); color: var(--brand-dark);
+  box-shadow: 0 1px 3px rgba(0, 107, 94, 0.18);
+}
+.seg button:hover:not(.active) { color: var(--ink); }
+
+.sidebar h2 {
+  margin: 0 0 0.65rem; font-size: 0.78rem; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--muted); font-weight: 700;
+}
+.date-list { list-style: none; margin: 0; padding: 0; max-height: min(70vh, 640px); overflow: auto; }
+.date-list li + li { margin-top: 0.25rem; }
+.date-list a, .date-list button {
+  width: 100%; text-align: left; appearance: none; border: 1px solid transparent;
+  background: transparent; color: inherit; font: inherit; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+  padding: 0.65rem 0.75rem; border-radius: 8px; text-decoration: none;
+}
+.date-list a:hover, .date-list button:hover { background: var(--brand-soft); }
+.date-list a.active, .date-list button.active {
+  background: var(--brand-soft); border-color: #b7ddd5; color: var(--brand-dark); font-weight: 600;
+}
+.date-list .meta { font-size: 0.75rem; color: var(--muted); white-space: nowrap; }
+.empty-hint { color: var(--muted); font-size: 0.9rem; padding: 0.5rem 0.25rem; }
+
+.main { padding: 0; min-height: 420px; overflow: hidden; }
+.main-empty {
+  padding: 3rem 1.5rem; text-align: center; color: var(--muted);
+}
+.main-empty .icon {
+  width: 56px; height: 56px; margin: 0 auto 1rem; border-radius: 14px;
+  background: var(--brand-soft); color: var(--brand); display: grid; place-items: center;
+  font-size: 1.4rem; font-weight: 700;
+}
+.report-frame { border: 0; width: 100%; min-height: 70vh; display: block; }
+.report-wrap { padding: 1.5rem 1.75rem 2.5rem; }
+
+.report h1 {
+  margin: 0 0 0.75rem; font-size: 1.55rem; letter-spacing: -0.03em; line-height: 1.3;
+}
+.report h2 {
+  margin: 2rem 0 0.75rem; font-size: 1.15rem; letter-spacing: -0.02em;
+  padding-bottom: 0.35rem; border-bottom: 2px solid var(--brand-soft);
+}
+.report h3 {
+  margin: 1.5rem 0 0.6rem; font-size: 1.05rem;
+  padding: 0.65rem 0.85rem; background: var(--brand-soft); border-radius: 8px;
+  border-left: 4px solid var(--brand);
+}
+.report p { margin: 0.55rem 0; }
+.report ul, .report ol { padding-left: 1.25rem; }
+.report li { margin: 0.25rem 0; }
+.report hr { border: 0; border-top: 1px solid var(--line); margin: 1.5rem 0; }
+
+.report table {
+  border-collapse: separate; border-spacing: 0; width: 100%;
+  margin: 1rem 0; font-size: 0.9rem; overflow: hidden;
+  border: 1px solid var(--line); border-radius: 10px; background: #fff;
+}
+.report th, .report td {
+  padding: 0.65rem 0.75rem; text-align: left; vertical-align: top;
+  border-bottom: 1px solid var(--line);
+}
+.report th { background: #eef6f4; font-weight: 650; color: var(--brand-dark); }
+.report tr:last-child td { border-bottom: 0; }
+.report tbody tr:hover td { background: #f7fbfa; }
+
+mark {
+  background: linear-gradient(180deg, transparent 8%, var(--mark) 8%, var(--mark) 92%, transparent 92%);
+  color: inherit; padding: 0 0.12em; border-radius: 2px;
+}
+
+.stats {
+  display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.85rem 0 1.25rem;
+}
+.chip {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  padding: 0.28rem 0.65rem; border-radius: 999px; font-size: 0.8rem; font-weight: 600;
+  background: var(--brand-soft); color: var(--brand-dark); border: 1px solid #c5e4dd;
+}
+.chip.neutral { background: #f0f2f1; color: var(--muted); border-color: var(--line); }
+.score {
+  display: inline-block; min-width: 2.4em; text-align: center;
+  padding: 0.1rem 0.45rem; border-radius: 6px; font-weight: 700; font-size: 0.85rem;
+  color: #fff;
+}
+.score.high { background: var(--score-high); }
+.score.mid { background: var(--score-mid); }
+.score.low { background: var(--score-low); }
+
+.footer-note {
+  max-width: 1120px; margin: 0 auto; padding: 0 1.25rem 2rem;
+  color: var(--muted); font-size: 0.8rem;
+}
+
+.back-link {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  margin-bottom: 1rem; font-size: 0.9rem; font-weight: 600;
+}
+
+body { background: var(--surface); }
+.standalone { max-width: 960px; margin: 0 auto; padding: 1.25rem 1.5rem 2.5rem; }
+</style>
+</head>
+<body>
+<div class="standalone">
+  <p class="back-link"><a href="../index.html#daily">← Daily 목록</a></p>
+  <div class="report"><h1>국내 R&amp;D 인텔리전스 데일리 로그</h1>
+<p>날짜: 2026-07-04
+기록자: Tech Market Monitor (auto)
+총 항목 수: 29건 (기사 29 / 논문 0)
+신뢰도 분포: A 5건 / B 24건 / C 0건</p>
+<h2>오늘의 R&amp;D 인텔리전스 요약</h2>
+<p><strong>모니터링 키워드 (상위 3개):</strong> 전력계통 · 스마트그리드 · 파워그리드</p>
+<p><strong>오늘의 공통 흐름:</strong> 국내 정부·기업의 예산·R&amp;D 프로그램 신호가 다수 포착된 날</p>
+<p>오늘 수집 29건 (R&amp;D 적합 4점 이상 2건) · 한국경제, 헤럴드경제, 뉴시스 속보 외 26개 출처</p>
+<p><strong>R&amp;D 기회 스캔 (누가 · 왜 · 무엇을):</strong></p>
+<table>
+<thead>
+<tr>
+<th>R&amp;D적합</th>
+<th>핵심 이슈</th>
+<th>고객 타겟</th>
+<th>R&amp;D 연계 포인트</th>
+<th>팩트 체크</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>5/5</strong></td>
+<td><a href="#1716-원자력-전문가-130명-총출동원전-안전성-향상방안-모색">원자력 전문가 130명 총출동원전 안전성 향상방안 모색</a> 한국원자력안전기술원(KINS)에서 원전 전력계통 전문가 130여명이 참석한 워크숍을 개최하고 안전성 향상을 위한 기술 개발을 논의했음.</td>
+<td>한국원자력안전기술원(KINS)</td>
+<td>원전 전력계통의 신기술 적용과 기술표준 개발</td>
+<td>130여명의 전문가 참석, 2~3일 양일간 워크숍 개최</td>
+</tr>
+<tr>
+<td><strong>4/5</strong></td>
+<td><a href="#2300-삼전닉스-고점-논란-솔직히-답했다4조-굴리는-큰손의-조언-노정동의-어쩌다-투자자">&lsquo;삼전닉스 고점 논란&rsquo; 솔직히 답했다4조 굴리는</a> 삼성전자와 LG전자 등 대기업이 전력계통 기술 개발에 4조원을 투입하고 스마트그리드 구축을 추진할 계획임</td>
+<td>삼성전자, LG전자 등 대기업</td>
+<td>전력계통 기술 개발 및 스마트그리드 구축을 위한 고도화 연구</td>
+<td>4조원 투입 계획</td>
+</tr>
+<tr>
+<td><strong>3/5</strong></td>
+<td><a href="#1540-성균관대-국가연구소-선정10년간-최대-950억원-지원받는다">성균관대, 국가연구소 선정10년간 최대 950억원</a> 성균관대, 국가연구소 선정10년간 최대 950억원 지원받고 에너지저장·디지털트윈 기술 개발함</td>
+<td>과학기술정보통신부와 교육부</td>
+<td>에너지 생산·저장·활용 기술과 인공지능(AI), 디지털트윈을 융합한 차세대 지능형 에너지 플랫폼 구축</td>
+<td>10년간 최대 950억원의 연구비 지원, 연간 100억원씩</td>
+</tr>
+<tr>
+<td><strong>2/5</strong></td>
+<td><a href="#1500-k-센서-기술-패권-확보-산관학-3자-mou-체결">‘K-센서’ 기술 패권 확보, ‘산·관·학 3자</a> 지식재산처, 한국센서산업협회, 한국센서학회가 센서기술 경쟁력 강화와 고품질 특허심사 기반 구축을 위해 3자 MOU를 체결하고, 현장 중심 산·관·학 협력 모델을 구축할 예정임.</td>
+<td>지식재산처, 한국센서산업협회, 한국센서학회</td>
+<td>고품질 센서 개발 및 특허심사 기술</td>
+<td>3자 MOU 체결, 현장 중심 산·관·학 협력 모델 구축, 공동 기술 세미나와 스타트업 대상 특허 컨설팅 등 지원 프로그램</td>
+</tr>
+<tr>
+<td><strong>2/5</strong></td>
+<td><a href="#1630-sk현대차삼성sdi-울산-투자-확대한다">SK·현대차·삼성SDI, 울산 투자 확대한다</a> SK텔레콤과 삼성SDI, 현대자동차가 울산에 추진하는 투자 확대 계획을 발표했으며, 울산시도 산업 인공지능 전환과 미래 이동수단, 차세대 에너지 산업 육성을 위해 투자사업을 지원할 계획임</td>
+<td>SK텔레콤, 삼성SDI, 현대자동차</td>
+<td>전력계통 및 스마트그리드 기술 개발을 위한 연구 및 개발 사업</td>
+<td>SK텔레콤은 울산미포국가산업단지에 100㎿급 인공지능(AI) 데이터센터를 구축 중이며, 1GW 규모로 10배 확대해 구축할 계획임</td>
+</tr>
+<tr>
+<td><strong>2/5</strong></td>
+<td><a href="#1618-두산-영남에-smr-등-51조원-투자ai-시대-新전력원-거점-육성-영남권-국민보고회">두산, 영남에 SMR 등 5.1조원 투자AI 시대</a> 두산그룹이 영남 지역에 5.1조원을 투자하여 SMR 등 전력원 거점을 육성할 계획임</td>
+<td>두산그룹</td>
+<td>원전 산업 및 에너지 공급 기술 개발</td>
+<td>두산그룹이 영남 지역에 약 5조1000억원을 투자할 계획</td>
+</tr>
+<tr>
+<td><strong>2/5</strong></td>
+<td><a href="#1603-삼성sdi-울산에-16조-투자전고체lfp나트륨-배터리-양산-거점-구축">삼성SDI, 울산에 16조 투자전고체·LFP·나트륨</a> 삼성SDI가 2040년까지 울산 사업장에 약 16조원을 투자하여 전고체·LFP·나트륨 배터리 양산 거점을 구축할 계획임.</td>
+<td>삼성SDI</td>
+<td>에너지저장 및 전력계통 효율성 향상을 위한 고성능 배터리 기술 개발</td>
+<td>삼성SDI, 2040년까지 울산 사업장에 약 16조원 투자</td>
+</tr>
+<tr>
+<td><strong>2/5</strong></td>
+<td><a href="#2200-새만금-9조영남권-42조현대차-서남-동남권-잇는-첨단산업-지도-그린다">새만금 9조·영남권 42조현대차, 서남-동남권 잇는</a> 현대차그룹, 영남권에 42조 원 투자하고 새만금에 9조 원 투자하여 첨단산업 지형도를 새로 그리겠음.</td>
+<td>현대차그룹</td>
+<td>에너지 인프라 구축 및 스마트그리드 기술 개발</td>
+<td>현대차그룹, 영남권에 42조 원 투자 및 새만금에 9조 원 투자</td>
+</tr>
+</tbody>
+</table>
+<p><em>(이하 21건은 R&amp;D 적합 1점 또는 국내 투자 신호 미약으로 표에서 생략)</em></p>
+<p><strong>국내 R&amp;D 타겟 시사점 (프라운호퍼 · 전력계통 · 스마트그리드 · 파워그리드):</strong></p>
+<ul>
+<li><strong>[5/5] 한국원자력안전기술원(KINS)</strong> — 목적: 원자력 전력계통 분야의 안전성 향상 | 니즈: 원전 전력계통 신기술 적용과 기술표준 개발 | 접근: 안전성 향상을 위한 기술 개발과 규제 정합성 (<a href="https://biz.heraldcorp.com/article/10797754">원자력 전문가 130명 총출동…원전 안전성 향상방안 모색</a>)</li>
+<li><strong>[4/5] 삼성전자, LG전자 등 대기업</strong> — 목적: 전력계통 기술 개발 및 스마트그리드 구축 | 니즈: 고난도 전력계통 기술 개발 및 스마트그리드 구축을 위한 연구 개발 | 접근: 정부의 전력계통 기술 개발 정책과 연계하여 대기업의 투자 역량을 강화하는 전략 ([&lsquo;삼전닉스 고점 논란&rsquo; 솔직히 답했다…4조 굴리는 큰손의 조언 <a href="https://www.hankyung.com/article/2026070229996">노정동의 어쩌다 투자자…</a>)</li>
+<li><strong>[3/5] 과학기술정보통신부와 교육부</strong> — 목적: 인공지능(AI)과 에너지 기술을 융합한 차세대 에너지 플랫폼 구축 | 니즈: 에너지 생산·저장·활용 기술과 인공지능(AI), 디지털트윈을 융합한 차세대 지능형 에너지 플랫폼 구축 | 접근: 국가연구소(NRL 2.0) 사업과 연계한 연구 지원 (<a href="https://biz.heraldcorp.com/article/10797567">성균관대, 국가연구소 선정…10년간 최대 950억원 지원받는다</a>)</li>
+<li><strong>[2/5] SK텔레콤, 삼성SDI, 현대자동차</strong> — 목적: 산업 인공지능 전환, 미래 이동수단, 차세대 에너지 산업 육성 | 니즈: 고난도 전력계통 및 스마트그리드 기술 개발 | 접근: 산업통상부와의 협력, 울산시의 인허가 지원과 규제 개선 (<a href="https://biz.heraldcorp.com/article/10797689">SK·현대차·삼성SDI, 울산 투자 확대한다</a>)</li>
+<li>
+<p><strong>[2/5] 지식재산처, 한국센서산업협회, 한국센서학회</strong> — 목적: 센서기술 경쟁력 강화와 고품질 특허심사 기반 구축 | 니즈: 고품질 센서 개발 및 특허심사 기술 | 접근: 산·관·학 협력 모델 구축과 공동 기술 세미나, 스타트업 대상 특허 컨설팅 등 지원 프로그램을 통해 센서 기업들의 경쟁력을 뒷받침 (<a href="https://biz.heraldcorp.com/article/10796947">‘K-센서’ 기술 패권 확보, ‘산·관·학 3자 MOU’ 체결</a>)</p>
+</li>
+<li>
+<p><strong>상충되는 정보:</strong> (해당 없음)</p>
+</li>
+</ul>
+<hr />
+<h2>항목 기록</h2>
+<p><a id="2300-삼전닉스-고점-논란-솔직히-답했다4조-굴리는-큰손의-조언-노정동의-어쩌다-투자자"></a></p>
+<h3>23:00 &lsquo;삼전닉스 고점 논란&rsquo; 솔직히 답했다4조 굴리는 큰손의 조언 [노정동의 어쩌다 투자자]</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 한국경제</li>
+<li><strong>저자/발행기관:</strong> 한국경제</li>
+<li><strong>발행일:</strong> 2026-07-03</li>
+<li><strong>링크/DOI:</strong> https://www.hankyung.com/article/2026070229996</li>
+<li><strong>요약:</strong></li>
+<li>삼성전자와 LG전자 등 대기업의 투자 역량을 강화하기 위한 전력계통 기술 개발 투자에 4조원을 투입할 계획임.</li>
+<li>대기업의 투자 역량을 강화하기 위한 전력계통 기술 개발 투자 계획이 있음</li>
+<li>
+<p>(해석) 전력계통 기술 개발 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 4/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 전력계통 기술 개발 및 스마트그리드 구축을 위한 고도화 연구</li>
+<li><strong>팩트 근거:</strong> 4조원 투입 계획</li>
+<li><strong>투자 주체:</strong> 삼성전자, LG전자 등 대기업</li>
+<li><strong>투자 목적:</strong> 전력계통 기술 개발 및 스마트그리드 구축</li>
+<li><strong>위탁 연구 니즈:</strong> 고난도 전력계통 기술 개발 및 스마트그리드 구축을 위한 연구 개발</li>
+<li><strong>접근 전략:</strong> 정부의 전력계통 기술 개발 정책과 연계하여 대기업의 투자 역량을 강화하는 전략</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #투자 #리스크 #기술</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 키워드 관련도: 직접 · 매칭: 투자</li>
+</ul>
+<p><a id="1716-원자력-전문가-130명-총출동원전-안전성-향상방안-모색"></a></p>
+<h3>17:16 원자력 전문가 130명 총출동원전 안전성 향상방안 모색</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 헤럴드경제</li>
+<li><strong>저자/발행기관:</strong> 헤럴드경제</li>
+<li><strong>발행일:</strong> 2026-07-03</li>
+<li><strong>링크/DOI:</strong> https://biz.heraldcorp.com/article/10797754</li>
+<li><strong>요약:</strong></li>
+<li>한국원자력안전기술원(KINS)에서 원전 전력계통 전문가 130여명이 참석한 ‘제24회 원전 전력계통 안전성 증진 워크숍’을 개최했음.</li>
+<li>한국원자력안전기술원에서 원전 전력계통 전문가 130여명이 참석한 워크숍을 개최했음.</li>
+<li>
+<p>(해석) 원자력 전력계통 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 5/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 원전 전력계통의 신기술 적용과 기술표준 개발</li>
+<li><strong>팩트 근거:</strong> 130여명의 전문가 참석, 2~3일 양일간 워크숍 개최</li>
+<li><strong>투자 주체:</strong> 한국원자력안전기술원(KINS)</li>
+<li><strong>투자 목적:</strong> 원자력 전력계통 분야의 안전성 향상</li>
+<li><strong>위탁 연구 니즈:</strong> 원전 전력계통 신기술 적용과 기술표준 개발</li>
+<li><strong>접근 전략:</strong> 안전성 향상을 위한 기술 개발과 규제 정합성</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #기술</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 키워드 관련도: 직접 · 매칭: 전력계통</li>
+</ul>
+<p><a id="2103-그린필드-투자-줄었다외투-증가에도-제조업-경고등"></a></p>
+<h3>21:03 &ldquo;그린필드 투자 줄었다&rdquo;외투 증가에도 제조업 &lsquo;경고등&rsquo;</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 뉴시스 속보</li>
+<li><strong>저자/발행기관:</strong> 뉴시스 속보</li>
+<li><strong>발행일:</strong> 2026-07-03</li>
+<li><strong>링크/DOI:</strong> https://www.newsis.com/view/NISX20260703_0003694383</li>
+<li><strong>요약:</strong></li>
+<li>산업통상부에 따르면 올해 상반기 외국인 직접투자 신고액은 142억8000만 달러로 전년동기대비 9.1% 증가했지만, 그린필드 투자는 감소했음.</li>
+<li>원문 기준 핵심 사실을 추가 확인 필요</li>
+<li>
+<p>(해석) 외국인 직접투자 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 제조업 및 서비스업의 고도화와 산업경쟁력 강화</li>
+<li><strong>팩트 근거:</strong> 상반기 외국인 직접투자 신고액 142억8000만 달러, 그린필드 투자 신고금액 108억2000만 달러</li>
+<li><strong>투자 주체:</strong> 외국인 투자자</li>
+<li><strong>투자 목적:</strong> 서비스업 및 제조업 투자</li>
+<li><strong>위탁 연구 니즈:</strong> 산업경쟁력 강화와 고도화를 위한 기술 개발</li>
+<li><strong>접근 전략:</strong> 산업통상부의 투자 환경 개선 정책과 연계</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #투자</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 투자, 산업통상부</li>
+</ul>
+<p><a id="2300-3대-메가프로젝트에-지방-부동산-시장-꿈틀전문가들-장기전"></a></p>
+<h3>23:00 3대 메가프로젝트에 지방 부동산 시장 꿈틀전문가들 &ldquo;장기전&rdquo;</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 뉴시스 속보</li>
+<li><strong>저자/발행기관:</strong> 뉴시스 속보</li>
+<li><strong>발행일:</strong> 2026-07-03</li>
+<li><strong>링크/DOI:</strong> https://www.newsis.com/view/NISX20260703_0003695563</li>
+<li><strong>요약:</strong></li>
+<li>정부의 3대 메가프로젝트 투자 계획에 따라 지방 부동산 시장에 기대감이 커지고 있음을 보도함.</li>
+<li>정부의 3대 메가프로젝트 투자 계획에 따라 지방 부동산 시장에 기대감이 커지 중임</li>
+<li>
+<p>(해석) 메가프로젝트 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 지역 산업단지 개발을 위한 스마트그리드 및 에너지 효율화 기술 개발</li>
+<li><strong>팩트 근거:</strong> 800조원 규모의 반도체 산업 투자, 392조원 규모의 반도체 패키징 산업 투자, 312조원 규모의 산업단지 조성 투자</li>
+<li><strong>투자 주체:</strong> 정부, 삼성전자, SK하이닉스 등</li>
+<li><strong>투자 목적:</strong> 반도체 산업 및 산업단지 개발</li>
+<li><strong>위탁 연구 니즈:</strong> 산업단지 개발을 위한 에너지 효율화 및 스마트그리드 기술 개발</li>
+<li><strong>접근 전략:</strong> 산업단지 개발 사업과 연계하여 에너지 효율화 및 스마트그리드 기술 개발을 제안</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #투자</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 투자</li>
+</ul>
+<p><a id="1640-6개-기업-영남권에-피지컬-ai-우주항공-312조-투자"></a></p>
+<h3>16:40 6개 기업, 영남권에 피지컬 AI-우주항공 312조 투자</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 동아일보 경제</li>
+<li><strong>저자/발행기관:</strong> 동아일보 경제</li>
+<li><strong>발행일:</strong> 2026-07-03</li>
+<li><strong>링크/DOI:</strong> https://www.donga.com/news/Economy/article/all/20260704/134234974/2</li>
+<li><strong>요약:</strong></li>
+<li>6개 기업이 영남권에 피지컬 AI-우주항공 산업에 312조 원을 투자할 계획임.</li>
+<li>6개 기업이 영남권에 피지컬 AI와 우주항공 산업에 312조 원을 투자할 계획임.</li>
+<li>
+<p>(해석) 피지컬 AI 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 에너지 효율성 및 안정성 향상을 위한 스마트그리드 기술 개발</li>
+<li><strong>팩트 근거:</strong> 312조 원의 투자 예산과 주요 기업들의 투자 계획</li>
+<li><strong>투자 주체:</strong> 삼성, SK, 현대차, LG, 한화, 두산 등</li>
+<li><strong>투자 목적:</strong> 피지컬 AI와 우주항공 산업의 발전</li>
+<li><strong>위탁 연구 니즈:</strong> 에너지 효율성 및 안정성 향상을 위한 스마트그리드 기술 개발의 필요성</li>
+<li><strong>접근 전략:</strong> 정부의 산업 발전 정책과 연계하여 에너지 효율성 및 안정성 향상을 위한 기술 개발에 참여</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #투자</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 투자</li>
+</ul>
+<p><a id="2251-인터뷰-서정훈-태강건설산업-대표이사"></a></p>
+<h3>22:51 [인터뷰] 서정훈 태강건설산업 대표이사</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 헤럴드경제</li>
+<li><strong>저자/발행기관:</strong> 헤럴드경제</li>
+<li><strong>발행일:</strong> 2026-07-03</li>
+<li><strong>링크/DOI:</strong> https://biz.heraldcorp.com/article/10797931</li>
+<li><strong>요약:</strong></li>
+<li>태강건설산업이 기술 경쟁력 확보와 사업 영역 확대를 위한 투자를 진행하고 있으며, 최근 신규 계약 체결이 잇따라 성과를 거두고 있음을 밝혔음.</li>
+<li>태강건설산업은 기술 경쟁력 확보와 사업 영역 확대를 위한 투자를 진행하고 있으며, 최근 신규 계약 체결이 잇따라 성과를 거두 중임.</li>
+<li>
+<p>(해석) 건설산업 기술력 강화 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 건설산업의 기술 경쟁력 강화를 위한 R&amp;D 협력</li>
+<li><strong>팩트 근거:</strong> 기술 경쟁력 확보와 사업 영역 확대를 위한 투자</li>
+<li><strong>투자 주체:</strong> 태강건설산업</li>
+<li><strong>투자 목적:</strong> 기술 경쟁력 확보와 사업 영역 확대</li>
+<li><strong>위탁 연구 니즈:</strong> 기술 경쟁력 강화에 대한 니즈</li>
+<li><strong>접근 전략:</strong> 기술력과 사업 기반을 바탕으로 외형 확장</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #투자 #경쟁 #기술</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 투자</li>
+</ul>
+<p><a id="2300-인터뷰조재구-대구-남구청장-생활인구지역상권-활력에-최선"></a></p>
+<h3>23:00 [인터뷰]조재구 대구 남구청장 &ldquo;생활인구·지역상권  활력에 최선&rdquo;</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 뉴시스 속보</li>
+<li><strong>저자/발행기관:</strong> 뉴시스 속보</li>
+<li><strong>발행일:</strong> 2026-07-03</li>
+<li><strong>링크/DOI:</strong> https://www.newsis.com/view/NISX20260702_0003693986</li>
+<li><strong>요약:</strong></li>
+<li>조재구 대구 남구청장은 민선 9기 임기 동안 남구 발전의 마지막 퍼즐을 맞추고, 명품 남구의 백년대계를 단단히 다지겠다고 밝혔음.</li>
+<li>원문 기준 핵심 사실을 추가 확인 필요</li>
+<li>
+<p>(해석) 인구 감소 대응 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 도시 계획 및 지역 발전을 위한 스마트그리드 및 에너지 효율화 기술 개발</li>
+<li><strong>팩트 근거:</strong> 민선 9기 임기 동안 남구 발전의 마지막 퍼즐을 맞추고, 명품 남구의 백년대계를 단단히 다지겠다는 계획</li>
+<li><strong>투자 주체:</strong> 대구 남구청</li>
+<li><strong>투자 목적:</strong> 인구 감소 및 지방소멸 위기 대응, 남구 신청사 건립</li>
+<li><strong>위탁 연구 니즈:</strong> 인구 감소 및 지방소멸 위기 대응을 위한 스마트그리드 및 에너지 효율화 기술 개발</li>
+<li><strong>접근 전략:</strong> 대구 남구청의 도시 계획 및 지역 발전 계획에 스마트그리드 및 에너지 효율화 기술을 연계</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #기술</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 로드맵</li>
+</ul>
+<p><a id="1545-sk-영남서-140조-승부수초대형-ai데이터센터-프로젝트-시작-영남권-국민보고회"></a></p>
+<h3>15:45 SK, 영남서 140조 승부수“초대형 AI데이터센터 프로젝트 시작” [영남권 국민보고회]</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 헤럴드경제</li>
+<li><strong>저자/발행기관:</strong> 헤럴드경제</li>
+<li><strong>발행일:</strong> 2026-07-03</li>
+<li><strong>링크/DOI:</strong> https://biz.heraldcorp.com/article/10797582</li>
+<li><strong>요약:</strong></li>
+<li>SK그룹, 영남권에 140조원 투자해 2GW급 AI데이터센터 구축 계획.</li>
+<li>SK그룹은 영남권에 140조원을 투자해 2GW급 AI데이터센터를 구축할 예정임.</li>
+<li>
+<p>(해석) AI데이터센터 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 초대형 AI데이터센터 프로젝트에 필요한 전력계통 및 스마트그리드 기술 개발</li>
+<li><strong>팩트 근거:</strong> SK그룹, 140조원 투자, 2GW급 AI데이터센터 구축</li>
+<li><strong>투자 주체:</strong> SK그룹</li>
+<li><strong>투자 목적:</strong> AI데이터센터 구축</li>
+<li><strong>위탁 연구 니즈:</strong> 대규모 전력계통 및 스마트그리드 기술 개발</li>
+<li><strong>접근 전략:</strong> 정부의 산업 발전비전과 연계한 투자 계획</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #투자</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 투자</li>
+</ul>
+<p><a id="1630-sk현대차삼성sdi-울산-투자-확대한다"></a></p>
+<h3>16:30 SK·현대차·삼성SDI, 울산 투자 확대한다</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 헤럴드경제</li>
+<li><strong>저자/발행기관:</strong> 헤럴드경제</li>
+<li><strong>발행일:</strong> 2026-07-03</li>
+<li><strong>링크/DOI:</strong> https://biz.heraldcorp.com/article/10797689</li>
+<li><strong>요약:</strong></li>
+<li>SK텔레콤과 삼성SDI, 현대자동차가 울산에 추진하는 투자 확대 계획을 발표했음.</li>
+<li>SK텔레콤과 삼성SDI, 현대자동차가 울산에 추진하는 투자 확대 계획을 발표했음. 이에 따라 울산시도 산업 인공지능 전환과 미래 이동수단, 차세대 에너지 산업 육성을 위해 투자사업을 지원할 계획임</li>
+<li>
+<p>(해석) AI 데이터센터 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 2/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 전력계통 및 스마트그리드 기술 개발을 위한 연구 및 개발 사업</li>
+<li><strong>팩트 근거:</strong> SK텔레콤은 울산미포국가산업단지에 100㎿급 인공지능(AI) 데이터센터를 구축 중이며, 1GW 규모로 10배 확대해 구축할 계획임</li>
+<li><strong>투자 주체:</strong> SK텔레콤, 삼성SDI, 현대자동차</li>
+<li><strong>투자 목적:</strong> 산업 인공지능 전환, 미래 이동수단, 차세대 에너지 산업 육성</li>
+<li><strong>위탁 연구 니즈:</strong> 고난도 전력계통 및 스마트그리드 기술 개발</li>
+<li><strong>접근 전략:</strong> 산업통상부와의 협력, 울산시의 인허가 지원과 규제 개선</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #투자</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 투자, 산업통상부</li>
+</ul>
+<p><a id="1500-k-센서-기술-패권-확보-산관학-3자-mou-체결"></a></p>
+<h3>15:00 ‘K-센서’ 기술 패권 확보, ‘산·관·학 3자 MOU’ 체결</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 헤럴드경제</li>
+<li><strong>저자/발행기관:</strong> 헤럴드경제</li>
+<li><strong>발행일:</strong> 2026-07-03</li>
+<li><strong>링크/DOI:</strong> https://biz.heraldcorp.com/article/10796947</li>
+<li><strong>요약:</strong></li>
+<li>지식재산처, 한국센서산업협회, 한국센서학회가 센서기술 경쟁력 강화와 고품질 특허심사 기반 구축을 위해 3자 MOU를 체결함.</li>
+<li>원문 기준 핵심 사실을 추가 확인 필요</li>
+<li>
+<p>(해석) 센서기술 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 2/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 고품질 센서 개발 및 특허심사 기술</li>
+<li><strong>팩트 근거:</strong> 3자 MOU 체결, 현장 중심 산·관·학 협력 모델 구축, 공동 기술 세미나와 스타트업 대상 특허 컨설팅 등 지원 프로그램</li>
+<li><strong>투자 주체:</strong> 지식재산처, 한국센서산업협회, 한국센서학회</li>
+<li><strong>투자 목적:</strong> 센서기술 경쟁력 강화와 고품질 특허심사 기반 구축</li>
+<li><strong>위탁 연구 니즈:</strong> 고품질 센서 개발 및 특허심사 기술</li>
+<li><strong>접근 전략:</strong> 산·관·학 협력 모델 구축과 공동 기술 세미나, 스타트업 대상 특허 컨설팅 등 지원 프로그램을 통해 센서 기업들의 경쟁력을 뒷받침</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #경쟁 #기술</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: mou</li>
+</ul>
+<p><a id="2140-나만-무서워-1년-만에-무려-431-급증레버리지-etf-이렇게-많이-샀다니-투자360"></a></p>
+<h3>21:40 ‘나만 무서워?’ 1년 만에 무려 431% 급증‘레버리지 ETF’, 이렇게 많이 샀다니 [투자360]</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 헤럴드경제</li>
+<li><strong>저자/발행기관:</strong> 헤럴드경제</li>
+<li><strong>발행일:</strong> 2026-07-03</li>
+<li><strong>링크/DOI:</strong> https://biz.heraldcorp.com/article/10797419</li>
+<li><strong>요약:</strong></li>
+<li>레버리지 ETF가 1년 새 431% 급증하면서 시장 변동성을 키우는 현상이 나타남.</li>
+<li>레버리지 ETF의 순자산총액(AUM)이 1년 새 431% 급증하여 시장 변동성을 키우는 현상이 나타남</li>
+<li>
+<p>(해석) 레버리지 ETF 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 금융시장의 변동성 분석 및 예측 기술 개발</li>
+<li><strong>팩트 근거:</strong> 레버리지 ETF의 순자산총액(AUM)이 1년 새 431% 급증</li>
+<li><strong>투자 주체:</strong> 개인 투자자 및 기관 투자자</li>
+<li><strong>투자 목적:</strong> 높은 수익을 얻기 위한 투자</li>
+<li><strong>위탁 연구 니즈:</strong> 금융시장의 변동성 분석 및 예측 기술 개발</li>
+<li><strong>접근 전략:</strong> 금융당국 및 금융기관과 협력하여 금융시장의 안정성을 높이는 기술 개발</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #투자</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 투자</li>
+</ul>
+<p><a id="2240-코넥스를-아시나요-올해-신규-상장도-단-1곳이러다-이름만-남을-판-투자360"></a></p>
+<h3>22:40 ‘코넥스를 아시나요?’ 올해 신규 상장도 단 1곳이러다 이름만 남을 판 [투자360]</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 헤럴드경제</li>
+<li><strong>저자/발행기관:</strong> 헤럴드경제</li>
+<li><strong>발행일:</strong> 2026-07-03</li>
+<li><strong>링크/DOI:</strong> https://biz.heraldcorp.com/article/10797442</li>
+<li><strong>요약:</strong></li>
+<li>한국거래소, 코넥스 활성화 위해 기업 성장 단계별 지원 강화 계획임.</li>
+<li>한국거래소는 코넥스 활성화를 위해 기업 성장 단계별 지원을 강화하기로 했음</li>
+<li>
+<p>(해석) 코넥스 활성화 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 중소기업의 기술 개발 및 상장 지원을 위한 R&amp;D 투자 필요함</li>
+<li><strong>투자 주체:</strong> 한국거래소</li>
+<li><strong>투자 목적:</strong> 코넥스 활성화</li>
+<li><strong>위탁 연구 니즈:</strong> 팩트 부족으로 판단 보류</li>
+<li><strong>접근 전략:</strong> 정부의 정책 정합성을 고려한 중소기업 지원 방안 수립 필요함</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #투자</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 투자</li>
+</ul>
+<p><a id="1751-그래도-믿을건-삼전닉스-여전히-더-오른다2분기-합산-매출만-256조-투자360"></a></p>
+<h3>17:51 “그래도 믿을건 삼전닉스” 여전히 더 오른다“2분기 합산 매출만 256조” [투자360]</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 헤럴드경제</li>
+<li><strong>저자/발행기관:</strong> 헤럴드경제</li>
+<li><strong>발행일:</strong> 2026-07-03</li>
+<li><strong>링크/DOI:</strong> https://biz.heraldcorp.com/article/10797800</li>
+<li><strong>요약:</strong></li>
+<li>삼성전자와 SK하이닉스의 주가가 폭락했지만, 투자 전문가들은 우려가 과도하다고 판단함.</li>
+<li>삼성전자와 SK하이닉스의 주가가 각각 9%, 12%대 폭락했으며, 투자 전문가들은 우려가 과도하다고 판단함.</li>
+<li>
+<p>(해석) 반도체 업황 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 반도체 기술 개발 및 응용 분야</li>
+<li><strong>팩트 근거:</strong> 삼성전자와 SK하이닉스의 주가 폭락, 목표주가 상향 조정</li>
+<li><strong>투자 주체:</strong> 삼성전자, SK하이닉스</li>
+<li><strong>투자 목적:</strong> 반도체 기술 개발 및 응용 분야</li>
+<li><strong>위탁 연구 니즈:</strong> 고난도 반도체 기술 개발</li>
+<li><strong>접근 전략:</strong> 정부의 반도체 산업 지원 정책과 연계</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #투자 #전문가전망</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 투자</li>
+</ul>
+<p><a id="1651-하루에-758p-출렁-코스피-576-급반등에-8000선-탈환장중-변동폭은-역대-2위투자360"></a></p>
+<h3>16:51 “하루에 758P 출렁” 코스피, 5.76% 급반등에 8000선 탈환장중 변동폭은 역대 2위[투자360]</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 헤럴드경제</li>
+<li><strong>저자/발행기관:</strong> 헤럴드경제</li>
+<li><strong>발행일:</strong> 2026-07-03</li>
+<li><strong>링크/DOI:</strong> https://biz.heraldcorp.com/article/10797724</li>
+<li><strong>요약:</strong></li>
+<li>코스피가 5.76% 급반등에 8000선 탈환에 성공했음.</li>
+<li>코스피가 기관 매수세에 힘입어 하루 만에 5% 넘게 반등하며 8000선을 회복함</li>
+<li>
+<p>(해석) 코스피 반등 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>팩트 근거:</strong> 장중 변동폭은 758.18포인트까지 벌어지며 역대 두 번째 수준의 극심한 변동성을 기록</li>
+<li><strong>투자 주체:</strong> 기관</li>
+<li><strong>투자 목적:</strong> 해당 없음</li>
+<li><strong>위탁 연구 니즈:</strong> 팩트 부족으로 판단 보류</li>
+<li><strong>접근 전략:</strong> 정책 정합성</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #투자</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 투자</li>
+</ul>
+<p><a id="1800-대구시-민선9기-첫-조직개편-단행대구경제-대개조-속도"></a></p>
+<h3>18:00 대구시, 민선9기 첫 조직개편 단행‘대구경제 대개조’ 속도</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 헤럴드경제</li>
+<li><strong>저자/발행기관:</strong> 헤럴드경제</li>
+<li><strong>발행일:</strong> 2026-07-03</li>
+<li><strong>링크/DOI:</strong> https://biz.heraldcorp.com/article/10797809</li>
+<li><strong>요약:</strong></li>
+<li>대구시, 민선9기 첫 조직개편 단행‘대구경제 대개조’ 속도.</li>
+<li>대구시가 민선9기 시정 비전인 ‘변화와 성장, 더 나은 내일’ 실현을 위한 첫 조직개편을 단행함</li>
+<li>
+<p>(해석) 대구경제 대개조 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 대구시의 산업·경제 분야 조직 강화와 미래 성장동력 확보를 위한 투자 니즈</li>
+<li><strong>팩트 근거:</strong> 민선9기 시정 비전인 ‘변화와 성장, 더 나은 내일’ 실현을 위한 첫 조직개편</li>
+<li><strong>투자 주체:</strong> 대구시</li>
+<li><strong>투자 목적:</strong> 민생경제 회복과 미래 성장동력 확보</li>
+<li><strong>위탁 연구 니즈:</strong> 산업·경제 분야의 기술 격차 해소와 미래 성장동력 확보를 위한 고난도 R&amp;D 니즈</li>
+<li><strong>접근 전략:</strong> 대구시의 산업·경제 분야 조직 강화와 미래 성장동력 확보를 위한 정책 정합성</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #투자</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 투자</li>
+</ul>
+<p><a id="1618-두산-영남에-smr-등-51조원-투자ai-시대-新전력원-거점-육성-영남권-국민보고회"></a></p>
+<h3>16:18 두산, 영남에 SMR 등 5.1조원 투자AI 시대 新전력원 거점 육성 [영남권 국민보고회]</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 헤럴드경제</li>
+<li><strong>저자/발행기관:</strong> 헤럴드경제</li>
+<li><strong>발행일:</strong> 2026-07-03</li>
+<li><strong>링크/DOI:</strong> https://biz.heraldcorp.com/article/10797664</li>
+<li><strong>요약:</strong></li>
+<li>두산이 영남 지역에 SMR 등 5.1조원을 투자하여 전력원 거점을 육성할 계획임.</li>
+<li>두산이 영남 지역에 SMR 등 에너지 산업을 중심으로 약 5조원을 투자하여 전력원 거점을 육성할 계획임</li>
+<li>
+<p>(해석) 에너지 산업 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 2/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 원전 산업 및 에너지 공급 기술 개발</li>
+<li><strong>팩트 근거:</strong> 두산그룹이 영남 지역에 약 5조1000억원을 투자할 계획</li>
+<li><strong>투자 주체:</strong> 두산그룹</li>
+<li><strong>투자 목적:</strong> 차세대 에너지 공급 사업에 본격 뛰어들기</li>
+<li><strong>위탁 연구 니즈:</strong> 고난도 원전 기술 개발 및 에너지 공급 시스템 구축</li>
+<li><strong>접근 전략:</strong> 정부의 ‘대한민국 대도약 3대 메가프로젝트’와 연계하여 권역별 전략산업 육성</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #투자</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 투자</li>
+</ul>
+<p><a id="2132-미래에셋-1조3000억-규모-자금조달-추진sk하이닉스가-최종-투자"></a></p>
+<h3>21:32 미래에셋, 1조3000억 규모 자금조달 추진SK하이닉스가 최종 투자</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 헤럴드경제</li>
+<li><strong>저자/발행기관:</strong> 헤럴드경제</li>
+<li><strong>발행일:</strong> 2026-07-03</li>
+<li><strong>링크/DOI:</strong> https://biz.heraldcorp.com/article/10797919</li>
+<li><strong>요약:</strong></li>
+<li>미래에셋증권이 1조3000억원 규모의 자금조달을 추진하고 SK하이닉스가 최종 투자할 예정임.</li>
+<li>미래에셋증권이 1조3000억원 규모의 자금조달을 추진하고 있으며, SK하이닉스가 최종 투자할 예정임.</li>
+<li>
+<p>(해석) 자금조달 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 반도체 제조 공정 최적화 및 에너지 효율성 향상을 위한 기술 개발</li>
+<li><strong>팩트 근거:</strong> 1조3000억원 규모의 자금조달, 2년 이상의 만기</li>
+<li><strong>투자 주체:</strong> SK하이닉스</li>
+<li><strong>투자 목적:</strong> 자금조달</li>
+<li><strong>위탁 연구 니즈:</strong> 팩트 부족으로 판단 보류</li>
+<li><strong>접근 전략:</strong> 반도체 산업의 기술 개발 및 에너지 효율성 향상을 위한 협력</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #투자</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 투자</li>
+</ul>
+<p><a id="1515-부산시-최초-특화주택-공모-선정에코델타시티-993호-공급"></a></p>
+<h3>15:15 부산시 최초 ‘특화주택’ 공모 선정에코델타시티 993호 공급</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 헤럴드경제</li>
+<li><strong>저자/발행기관:</strong> 헤럴드경제</li>
+<li><strong>발행일:</strong> 2026-07-03</li>
+<li><strong>링크/DOI:</strong> https://biz.heraldcorp.com/article/10797521</li>
+<li><strong>요약:</strong></li>
+<li>부산시, 부산도시공사와 함께 응모한 에코델타시티 15BL 통합공공임대주택 건립사업이 국토교통부 주관 2026년 상반기 특화주택 공모사업에 선정됨.</li>
+<li>부산시는 부산도시공사와 함께 응모한 에코델타시티 15BL 통합공공임대주택 건립사업이 국토교통부 주관 2026년 상반기 특화주택 공모사업에 선정됨.</li>
+<li>
+<p>(해석) 공모 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 에코델타시티 15BL 통합공공임대주택 건립사업의 스마트그리드 및 에너지 효율화 기술 적용</li>
+<li><strong>팩트 근거:</strong> 2026년 상반기 특화주택 공모사업 선정, 총 993호 공급</li>
+<li><strong>투자 주체:</strong> 부산시, 부산도시공사</li>
+<li><strong>투자 목적:</strong> 지역제안형 특화주택 공급</li>
+<li><strong>위탁 연구 니즈:</strong> 에코델타시티 15BL 통합공공임대주택 건립사업의 스마트그리드 및 에너지 효율화 기술 적용에 대한 연구 필요</li>
+<li><strong>접근 전략:</strong> 부산시와의 협력을 통해 에코델타시티 15BL 통합공공임대주택 건립사업의 스마트그리드 및 에너지 효율화 기술 적용을 위한 연구 제안</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #기술</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 공모</li>
+</ul>
+<p><a id="1559-삼성-로봇전고체-배터리-등에-60조원-투자노태문-글로벌-피지컬-ai-혁신-클러스터-조성-영남권-국민보고회"></a></p>
+<h3>15:59 삼성, 로봇·전고체 배터리 등에 60조원 투자노태문 “글로벌 피지컬 AI 혁신 클러스터 조성” [영남권 국민보고회]</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 헤럴드경제</li>
+<li><strong>저자/발행기관:</strong> 헤럴드경제</li>
+<li><strong>발행일:</strong> 2026-07-03</li>
+<li><strong>링크/DOI:</strong> https://biz.heraldcorp.com/article/10797613</li>
+<li><strong>요약:</strong></li>
+<li>삼성이 영남권에 60조원을 투자해 로봇·전고체 배터리 등에 집중 투자할 계획임.</li>
+<li>삼성전자가 영남권에 60조원을 투자해 로봇·전고체 배터리 등에 집중 투자할 계획임.</li>
+<li>
+<p>(해석) 로봇 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 전력계통 및 스마트그리드와 관련된 로봇 및 전고체 배터리 기술 개발</li>
+<li><strong>팩트 근거:</strong> 삼성전자, 약 60조원 투자, 20만개 양질의 일자리 창출</li>
+<li><strong>투자 주체:</strong> 삼성전자</li>
+<li><strong>투자 목적:</strong> 영남권에 양질의 일자리 20만개를 창출하고 글로벌 피지컬 AI 혁신 클러스터로 조성</li>
+<li><strong>위탁 연구 니즈:</strong> 로봇 및 전고체 배터리 기술 개발</li>
+<li><strong>접근 전략:</strong> 산업 발전의 엔진 역할을 수행하는 영남권에 산업 혁신을 위한 기술 개발</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #투자</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 투자</li>
+</ul>
+<p><a id="1640-삼성-sk-현대차-한화-등-투자-영남-우주-로봇-전초기지로"></a></p>
+<h3>16:40 삼성-SK-현대차-한화 등 투자 영남 ‘우주-로봇 전초기지’로</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 동아일보 경제</li>
+<li><strong>저자/발행기관:</strong> 동아일보 경제</li>
+<li><strong>발행일:</strong> 2026-07-03</li>
+<li><strong>링크/DOI:</strong> https://www.donga.com/news/Economy/article/all/20260703/134234669/2</li>
+<li><strong>요약:</strong></li>
+<li>삼성-SK-현대차-한화 등이 투자하는 영남 ‘우주-로봇 전초기지’ 구상이 발표됨.</li>
+<li>영남권이 인공지능과 우주항공 산업의 핵심 거점으로 탈바꿈하는 구상이 발표됨.</li>
+<li>
+<p>(해석) 우주항공 산업 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 첨단 제조 기술과 우주항공 산업의 고도화를 위한 연구 개발</li>
+<li><strong>팩트 근거:</strong> 한화그룹의 55조 원 투자, 한화에어로스페이스의 23조 원 투자, 한화시스템의 20조 원 투자</li>
+<li><strong>투자 주체:</strong> 삼성, SK, 현대차, 한화 등</li>
+<li><strong>투자 목적:</strong> 첨단 제조의 고도화와 우주항공 산업 육성</li>
+<li><strong>위탁 연구 니즈:</strong> 고난도 R&amp;D 격차는 명시되지 않음.</li>
+<li><strong>접근 전략:</strong> 정부의 산업 정책과 연계하여 첨단 기술 개발을 추진할 수 있음.</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #투자 #기술</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 투자</li>
+</ul>
+<p><a id="1603-삼성sdi-울산에-16조-투자전고체lfp나트륨-배터리-양산-거점-구축"></a></p>
+<h3>16:03 삼성SDI, 울산에 16조 투자전고체·LFP·나트륨 배터리 양산 거점 구축</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 헤럴드경제</li>
+<li><strong>저자/발행기관:</strong> 헤럴드경제</li>
+<li><strong>발행일:</strong> 2026-07-03</li>
+<li><strong>링크/DOI:</strong> https://biz.heraldcorp.com/article/10797626</li>
+<li><strong>요약:</strong></li>
+<li>삼성SDI, 울산에 16조 투자전고체·LFP·나트륨 배터리 양산 거점 구축.</li>
+<li>삼성SDI가 울산에 약 16조원을 투자하여 전고체·LFP·나트륨 배터리 양산 거점을 구축할 계획임.</li>
+<li>
+<p>(해석) 에너지저장 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 2/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 에너지저장 및 전력계통 효율성 향상을 위한 고성능 배터리 기술 개발</li>
+<li><strong>팩트 근거:</strong> 삼성SDI, 2040년까지 울산 사업장에 약 16조원 투자</li>
+<li><strong>투자 주체:</strong> 삼성SDI</li>
+<li><strong>투자 목적:</strong> 전기차용 전고체 배터리와 에너지저장장치(ESS)용 리튬인산철(LFP) 배터리, 나트륨 배터리 양산 기반 마련</li>
+<li><strong>위탁 연구 니즈:</strong> 고성능 배터리 기술 개발 및 에너지저장 효율성 향상</li>
+<li><strong>접근 전략:</strong> 에너지저장 및 전력계통 효율성 향상을 위한 기술 개발과 사업 계획에 대한 협력</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #투자</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 에너지저장, 투자</li>
+</ul>
+<p><a id="2225-삼우산기-올인원-d급-소화기-개발"></a></p>
+<h3>22:25 삼우산기 ‘올인원 D급 소화기’ 개발</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 헤럴드경제</li>
+<li><strong>저자/발행기관:</strong> 헤럴드경제</li>
+<li><strong>발행일:</strong> 2026-07-03</li>
+<li><strong>링크/DOI:</strong> https://biz.heraldcorp.com/article/10797925</li>
+<li><strong>요약:</strong></li>
+<li>삼우산기가 다양한 금속화재에 대응하는 올인원 D급 소화기를 개발했음.</li>
+<li>원문 기준 핵심 사실을 추가 확인 필요</li>
+<li>
+<p>(해석) 에너지저장 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 고성능 소화약제 개발 및 관련 산업 안전관리 기술</li>
+<li><strong>팩트 근거:</strong> 세라믹 다공체 기반 소화약제 적용</li>
+<li><strong>투자 주체:</strong> 삼우산기</li>
+<li><strong>투자 목적:</strong> 산업현장의 안전관리 효율성을 높임.</li>
+<li><strong>위탁 연구 니즈:</strong> 고성능 소화약제 개발 및 관련 산업 안전관리 기술 격차</li>
+<li><strong>접근 전략:</strong> 정부 연구개발 사업을 통해 기술 확보 및 산업현장 안전관리 효율성 향상을 위한 협력</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #기술</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 에너지저장, 연구개발</li>
+</ul>
+<p><a id="2200-새만금-9조영남권-42조현대차-서남-동남권-잇는-첨단산업-지도-그린다"></a></p>
+<h3>22:00 새만금 9조·영남권 42조현대차, 서남-동남권 잇는 &lsquo;첨단산업 지도&rsquo; 그린다</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 뉴시스 속보</li>
+<li><strong>저자/발행기관:</strong> 뉴시스 속보</li>
+<li><strong>발행일:</strong> 2026-07-03</li>
+<li><strong>링크/DOI:</strong> https://www.newsis.com/view/NISX20260703_0003695306</li>
+<li><strong>요약:</strong></li>
+<li>현대차그룹, 영남권에 42조 투자서남-동남권 잇는 첨단산업 지도 그린다.</li>
+<li>현대차그룹이 영남권에 42조 원, 새만금에 9조 원을 투자하여 첨단산업 지형도를 새로 그리겠다는 계획임.</li>
+<li>
+<p>(해석) 국산화 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 2/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 에너지 인프라 구축 및 스마트그리드 기술 개발</li>
+<li><strong>팩트 근거:</strong> 현대차그룹, 영남권에 42조 원 투자 및 새만금에 9조 원 투자</li>
+<li><strong>투자 주체:</strong> 현대차그룹</li>
+<li><strong>투자 목적:</strong> 국내 첨단산업 지형도를 새로 그리기 위한 투자</li>
+<li><strong>위탁 연구 니즈:</strong> 에너지 인프라 구축 및 스마트그리드 기술 개발의 고난도 R&amp;D 격차</li>
+<li><strong>접근 전략:</strong> 정부의 정책 정합성과 산업 발전 비전을 고려한 접근 전략</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #투자</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 국산화, 투자, 공모</li>
+</ul>
+<p><a id="1543-서울시-농심-예비부부-13쌍에-스드메-비용-300만원-지원"></a></p>
+<h3>15:43 서울시-농심, 예비부부 13쌍에 스드메 비용 300만원 지원</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 헤럴드경제</li>
+<li><strong>저자/발행기관:</strong> 헤럴드경제</li>
+<li><strong>발행일:</strong> 2026-07-03</li>
+<li><strong>링크/DOI:</strong> https://biz.heraldcorp.com/article/10797577</li>
+<li><strong>요약:</strong></li>
+<li>서울시와 농심이 예비부부 13쌍에 스드메 비용 300만원을 지원하기로 MOU를 체결했음.</li>
+<li>서울시와 농심은 예비부부 13쌍에 스드메 비용을 지원하기로 협약을 체결했음.</li>
+<li>
+<p>(해석) MOU 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>투자 주체:</strong> 서울시와 농심</li>
+<li><strong>투자 목적:</strong> 예비부부들의 결혼 준비에 따른 경제적 부담을 덜고 합리적이고 특색있는 결혼문화를 확산하기 위함</li>
+<li><strong>위탁 연구 니즈:</strong> 팩트 부족으로 판단 보류</li>
+<li><strong>접근 전략:</strong> 정부의 정책 정합성</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #기술</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: mou, 공모</li>
+</ul>
+<p><a id="1540-성균관대-국가연구소-선정10년간-최대-950억원-지원받는다"></a></p>
+<h3>15:40 성균관대, 국가연구소 선정10년간 최대 950억원 지원받는다</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 헤럴드경제</li>
+<li><strong>저자/발행기관:</strong> 헤럴드경제</li>
+<li><strong>발행일:</strong> 2026-07-03</li>
+<li><strong>링크/DOI:</strong> https://biz.heraldcorp.com/article/10797567</li>
+<li><strong>요약:</strong></li>
+<li>성균관대, 국가연구소 선정10년간 최대 950억원 지원받는다.</li>
+<li>성균관대학교가 정부의 국가연구소(NRL 2.0) 사업에 선정돼 10년간 최대 950억원의 연구비를 지원받는다.</li>
+<li>
+<p>(해석) 에너지저장 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 3/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 에너지 생산·저장·활용 기술과 인공지능(AI), 디지털트윈을 융합한 차세대 지능형 에너지 플랫폼 구축</li>
+<li><strong>팩트 근거:</strong> 10년간 최대 950억원의 연구비 지원, 연간 100억원씩</li>
+<li><strong>투자 주체:</strong> 과학기술정보통신부와 교육부</li>
+<li><strong>투자 목적:</strong> 인공지능(AI)과 에너지 기술을 융합한 차세대 에너지 플랫폼 구축</li>
+<li><strong>위탁 연구 니즈:</strong> 에너지 생산·저장·활용 기술과 인공지능(AI), 디지털트윈을 융합한 차세대 지능형 에너지 플랫폼 구축</li>
+<li><strong>접근 전략:</strong> 국가연구소(NRL 2.0) 사업과 연계한 연구 지원</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #기술</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 에너지저장, 디지털트윈</li>
+</ul>
+<p><a id="1640-연-67-수익으로-월급-대체할-현금-만드는-인컴투자은퇴-레시피"></a></p>
+<h3>16:40 연 6~7% 수익으로 월급 대체할 현금 만드는 ‘인컴’투자[은퇴 레시피]</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 동아일보 경제</li>
+<li><strong>저자/발행기관:</strong> 동아일보 경제</li>
+<li><strong>발행일:</strong> 2026-07-03</li>
+<li><strong>링크/DOI:</strong> https://www.donga.com/news/Economy/article/all/20260703/134234270/2</li>
+<li><strong>요약:</strong></li>
+<li>연 6~7% 수익으로 월급 대체할 현금 만드는 ‘인컴’투자 전략이 제시되고 있으나, 관련 투자 신호는 미약함.</li>
+<li>인컴 투자 전략이 제시되고 있으나, 관련 투자 신호는 미약함.</li>
+<li>
+<p>(해석) 인컴 투자 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 전력계통 및 스마트그리드와 관련된 투자 전략 개발</li>
+<li><strong>투자 주체:</strong> GB투자자문</li>
+<li><strong>투자 목적:</strong> 월급 대체할 현금흐름을 만드는 인컴 투자</li>
+<li><strong>위탁 연구 니즈:</strong> 팩트 부족으로 판단 보류</li>
+<li><strong>접근 전략:</strong> 정부의 정책 정합성과 기업의 로드맵 연계 필요</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #투자 #기업동향</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 투자</li>
+</ul>
+<p><a id="1947-이란-협상-대표-미이스라엘-합의-안-하면-상응-조치"></a></p>
+<h3>19:47 이란 협상 대표 “미·이스라엘 합의 안 하면 상응 조치”</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 헤럴드경제</li>
+<li><strong>저자/발행기관:</strong> 헤럴드경제</li>
+<li><strong>발행일:</strong> 2026-07-03</li>
+<li><strong>링크/DOI:</strong> https://biz.heraldcorp.com/article/10797880</li>
+<li><strong>요약:</strong></li>
+<li>이란 협상 대표가 미국과 이스라엘에 MOU 합의를 촉구함.</li>
+<li>이란 협상 대표가 미국과 이스라엘에 MOU 합의를 촉구했음.</li>
+<li>
+<p>(해석) MOU 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>투자 주체:</strong> 명시 없음</li>
+<li><strong>투자 목적:</strong> 해당 없음</li>
+<li><strong>위탁 연구 니즈:</strong> 팩트 부족으로 판단 보류</li>
+<li><strong>접근 전략:</strong> 정부=정책 정합, 기업=로드맵 연계와 관련이 없음</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #기술</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: mou</li>
+</ul>
+<p><a id="2201-일양약품-中자회사-176억-투자사업재건-속도"></a></p>
+<h3>22:01 일양약품, 中자회사 176억 투자&rdquo;사업재건 속도&rdquo;</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 뉴시스 속보</li>
+<li><strong>저자/발행기관:</strong> 뉴시스 속보</li>
+<li><strong>발행일:</strong> 2026-07-03</li>
+<li><strong>링크/DOI:</strong> https://www.newsis.com/view/NISX20260703_0003694783</li>
+<li><strong>요약:</strong></li>
+<li>일양약품, 자회사 176억 투자&rdquo;사업재건 속도&rsquo;</li>
+<li>일양약품은 중국 현지 자회사에 8000만 위안(약 176억 원) 규모의 투자 계획을 본격화함.</li>
+<li>
+<p>(해석) 중국 사업 확대 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 제약 및 건강기능식품 생산 기술 개발</li>
+<li><strong>팩트 근거:</strong> 8000만 위안(약 176억 원) 규모의 투자 계획</li>
+<li><strong>투자 주체:</strong> 일양약품</li>
+<li><strong>투자 목적:</strong> 중국 사업 재건 및 확대</li>
+<li><strong>위탁 연구 니즈:</strong> 생산 기술 이전 및 현지 생산 기반 구축</li>
+<li><strong>접근 전략:</strong> 중국 현지 생산체계 구축을 위한 기술 협력</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #투자</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 연구개발, 투자</li>
+</ul>
+<p><a id="1531-현대차그룹-울산대구창원-첨단산업-벨트로10년간-42조-투자-보따리-푼다-영남권-국민보고회"></a></p>
+<h3>15:31 현대차그룹, 울산·대구·창원 ‘첨단산업 벨트’로10년간 42조 투자 보따리 푼다 [영남권 국민보고회]</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 헤럴드경제</li>
+<li><strong>저자/발행기관:</strong> 헤럴드경제</li>
+<li><strong>발행일:</strong> 2026-07-03</li>
+<li><strong>링크/DOI:</strong> https://biz.heraldcorp.com/article/10797547</li>
+<li><strong>요약:</strong></li>
+<li>현대차그룹, 10년간 42조원 투자로 영남권 첨단산업 벨트 구축 계획.</li>
+<li>현대차그룹이 영남권을 미래차와 인공지능, 항공우주, 에너지 산업을 아우르는 첨단산업 거점으로 키우기 위해 10년간 42조원을 투입할 계획임.</li>
+<li>
+<p>(해석) 미래차 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 에너지 산업 및 미래차 기술 개발</li>
+<li><strong>팩트 근거:</strong> 42조원, 10년간 투자</li>
+<li><strong>투자 주체:</strong> 현대자동차그룹</li>
+<li><strong>투자 목적:</strong> 기존 자동차 생산 기반을 미래 산업 거점으로 전환하기 위함</li>
+<li><strong>위탁 연구 니즈:</strong> 고난도 에너지 산업 및 미래차 기술 개발</li>
+<li><strong>접근 전략:</strong> 정부의 산업 발전 정책과 연계하여 첨단산업 발전을 지원</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #투자</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 투자</li>
+</ul>
+<hr />
+<h2>태그 분류체계 (월간 보고서 챕터와 매칭)</h2>
+<table>
+<thead>
+<tr>
+<th>태그</th>
+<th>의미</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>#기술</td>
+<td>신기술, R&amp;D, 기술 발표</td>
+</tr>
+<tr>
+<td>#논문</td>
+<td>학술 연구 결과 (성능, 실험, 방법론)</td>
+</tr>
+<tr>
+<td>#투자</td>
+<td>투자 라운드, 밸류에이션, 펀딩</td>
+</tr>
+<tr>
+<td>#M&amp;A</td>
+<td>인수합병, 전략적 제휴</td>
+</tr>
+<tr>
+<td>#제품출시</td>
+<td>신제품, 서비스 런칭</td>
+</tr>
+<tr>
+<td>#기업동향</td>
+<td>조직, 인력, 실적, 전략</td>
+</tr>
+<tr>
+<td>#규제</td>
+<td>법안, 정책, 표준</td>
+</tr>
+<tr>
+<td>#경쟁</td>
+<td>경쟁사 비교, 점유율, 포지셔닝</td>
+</tr>
+<tr>
+<td>#시장수치</td>
+<td>시장규모/성장률 추정치</td>
+</tr>
+<tr>
+<td>#리스크</td>
+<td>사고, 논란, 부정적 전망</td>
+</tr>
+<tr>
+<td>#전문가전망</td>
+<td>애널리스트/전문가 예측</td>
+</tr>
+</tbody>
+</table>
+<h2>신뢰도 등급 기준</h2>
+<ul>
+<li><strong>A (높음):</strong> 정부·공공기관 원문(korea.kr·부처 .go.kr 보도자료), 연합뉴스·뉴시스 1차 보도, 공공 R&amp;D·정책기관(KISTEP·KIET·KIPO·KETEP·한국전력 등), 국내 학술지·국책연구원 동료심사 논문</li>
+<li><strong>B (중간):</strong> 국내 경제·IT 전문매체(헤럴드경제·동아일보·전자신문·ZDNet Korea 등), 2차 인용·전문자료 요약, 기업·공기업 IR/보도자료</li>
+<li><strong>C (참고):</strong> 익명 소스, 추측성 기사, 단순 재가공 콘텐츠, 미검증 블로그 — <strong>자동 생성 시에는 C가 나오지 않음. 수동 기록 시에만 사용</strong></li>
+</ul></div>
+</div>
+</body>
+</html>

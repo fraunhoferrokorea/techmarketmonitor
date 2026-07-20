@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Daily 2026-07-02</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet"/>
+<style>:root {
+  --bg: #f3f6f5;
+  --surface: #ffffff;
+  --ink: #1a2421;
+  --muted: #5a6b66;
+  --line: #d5e0dc;
+  --brand: #008878;
+  --brand-dark: #006b5e;
+  --brand-soft: #e6f5f2;
+  --mark: #fff3bf;
+  --score-high: #008878;
+  --score-mid: #c47a00;
+  --score-low: #8a9390;
+  --shadow: 0 1px 2px rgba(26, 36, 33, 0.06), 0 8px 24px rgba(26, 36, 33, 0.06);
+  --radius: 12px;
+  --font: "Pretendard", "Noto Sans KR", "Segoe UI", system-ui, sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: var(--font);
+  color: var(--ink);
+  background:
+    radial-gradient(1200px 500px at 10% -10%, #d8efe9 0%, transparent 55%),
+    radial-gradient(900px 400px at 100% 0%, #e8eef0 0%, transparent 50%),
+    var(--bg);
+  line-height: 1.65;
+  min-height: 100vh;
+}
+a { color: var(--brand-dark); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+a:hover { color: var(--brand); }
+
+.app-header {
+  position: sticky; top: 0; z-index: 20;
+  backdrop-filter: blur(10px);
+  background: rgba(243, 246, 245, 0.88);
+  border-bottom: 1px solid var(--line);
+}
+.app-header-inner {
+  max-width: 1120px; margin: 0 auto; padding: 0.85rem 1.25rem;
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+}
+.brand {
+  display: flex; align-items: center; gap: 0.75rem; min-width: 0;
+}
+.brand-mark {
+  width: 36px; height: 36px; border-radius: 9px;
+  background: linear-gradient(145deg, var(--brand), var(--brand-dark));
+  color: #fff; font-weight: 700; font-size: 0.78rem;
+  display: grid; place-items: center; flex-shrink: 0;
+  letter-spacing: -0.02em;
+}
+.brand-text { min-width: 0; }
+.brand-text strong { display: block; font-size: 0.98rem; letter-spacing: -0.02em; }
+.brand-text span { display: block; font-size: 0.78rem; color: var(--muted); }
+
+.layout {
+  max-width: 1120px; margin: 0 auto; padding: 1.25rem;
+  display: grid; grid-template-columns: 280px 1fr; gap: 1.25rem; align-items: start;
+}
+@media (max-width: 860px) {
+  .layout { grid-template-columns: 1fr; }
+}
+
+.panel {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+}
+.sidebar { padding: 1rem; position: sticky; top: 72px; }
+@media (max-width: 860px) { .sidebar { position: static; } }
+
+.seg {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0.35rem;
+  background: var(--brand-soft); padding: 0.3rem; border-radius: 10px; margin-bottom: 1rem;
+}
+.seg button {
+  appearance: none; border: 0; background: transparent; color: var(--muted);
+  font: inherit; font-weight: 600; font-size: 0.92rem; padding: 0.55rem 0.4rem;
+  border-radius: 8px; cursor: pointer; transition: 0.15s ease;
+}
+.seg button.active {
+  background: var(--surface); color: var(--brand-dark);
+  box-shadow: 0 1px 3px rgba(0, 107, 94, 0.18);
+}
+.seg button:hover:not(.active) { color: var(--ink); }
+
+.sidebar h2 {
+  margin: 0 0 0.65rem; font-size: 0.78rem; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--muted); font-weight: 700;
+}
+.date-list { list-style: none; margin: 0; padding: 0; max-height: min(70vh, 640px); overflow: auto; }
+.date-list li + li { margin-top: 0.25rem; }
+.date-list a, .date-list button {
+  width: 100%; text-align: left; appearance: none; border: 1px solid transparent;
+  background: transparent; color: inherit; font: inherit; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+  padding: 0.65rem 0.75rem; border-radius: 8px; text-decoration: none;
+}
+.date-list a:hover, .date-list button:hover { background: var(--brand-soft); }
+.date-list a.active, .date-list button.active {
+  background: var(--brand-soft); border-color: #b7ddd5; color: var(--brand-dark); font-weight: 600;
+}
+.date-list .meta { font-size: 0.75rem; color: var(--muted); white-space: nowrap; }
+.empty-hint { color: var(--muted); font-size: 0.9rem; padding: 0.5rem 0.25rem; }
+
+.main { padding: 0; min-height: 420px; overflow: hidden; }
+.main-empty {
+  padding: 3rem 1.5rem; text-align: center; color: var(--muted);
+}
+.main-empty .icon {
+  width: 56px; height: 56px; margin: 0 auto 1rem; border-radius: 14px;
+  background: var(--brand-soft); color: var(--brand); display: grid; place-items: center;
+  font-size: 1.4rem; font-weight: 700;
+}
+.report-frame { border: 0; width: 100%; min-height: 70vh; display: block; }
+.report-wrap { padding: 1.5rem 1.75rem 2.5rem; }
+
+.report h1 {
+  margin: 0 0 0.75rem; font-size: 1.55rem; letter-spacing: -0.03em; line-height: 1.3;
+}
+.report h2 {
+  margin: 2rem 0 0.75rem; font-size: 1.15rem; letter-spacing: -0.02em;
+  padding-bottom: 0.35rem; border-bottom: 2px solid var(--brand-soft);
+}
+.report h3 {
+  margin: 1.5rem 0 0.6rem; font-size: 1.05rem;
+  padding: 0.65rem 0.85rem; background: var(--brand-soft); border-radius: 8px;
+  border-left: 4px solid var(--brand);
+}
+.report p { margin: 0.55rem 0; }
+.report ul, .report ol { padding-left: 1.25rem; }
+.report li { margin: 0.25rem 0; }
+.report hr { border: 0; border-top: 1px solid var(--line); margin: 1.5rem 0; }
+
+.report table {
+  border-collapse: separate; border-spacing: 0; width: 100%;
+  margin: 1rem 0; font-size: 0.9rem; overflow: hidden;
+  border: 1px solid var(--line); border-radius: 10px; background: #fff;
+}
+.report th, .report td {
+  padding: 0.65rem 0.75rem; text-align: left; vertical-align: top;
+  border-bottom: 1px solid var(--line);
+}
+.report th { background: #eef6f4; font-weight: 650; color: var(--brand-dark); }
+.report tr:last-child td { border-bottom: 0; }
+.report tbody tr:hover td { background: #f7fbfa; }
+
+mark {
+  background: linear-gradient(180deg, transparent 8%, var(--mark) 8%, var(--mark) 92%, transparent 92%);
+  color: inherit; padding: 0 0.12em; border-radius: 2px;
+}
+
+.stats {
+  display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.85rem 0 1.25rem;
+}
+.chip {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  padding: 0.28rem 0.65rem; border-radius: 999px; font-size: 0.8rem; font-weight: 600;
+  background: var(--brand-soft); color: var(--brand-dark); border: 1px solid #c5e4dd;
+}
+.chip.neutral { background: #f0f2f1; color: var(--muted); border-color: var(--line); }
+.score {
+  display: inline-block; min-width: 2.4em; text-align: center;
+  padding: 0.1rem 0.45rem; border-radius: 6px; font-weight: 700; font-size: 0.85rem;
+  color: #fff;
+}
+.score.high { background: var(--score-high); }
+.score.mid { background: var(--score-mid); }
+.score.low { background: var(--score-low); }
+
+.footer-note {
+  max-width: 1120px; margin: 0 auto; padding: 0 1.25rem 2rem;
+  color: var(--muted); font-size: 0.8rem;
+}
+
+.back-link {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  margin-bottom: 1rem; font-size: 0.9rem; font-weight: 600;
+}
+
+body { background: var(--surface); }
+.standalone { max-width: 960px; margin: 0 auto; padding: 1.25rem 1.5rem 2.5rem; }
+</style>
+</head>
+<body>
+<div class="standalone">
+  <p class="back-link"><a href="../index.html#daily">← Daily 목록</a></p>
+  <div class="report"><h1>국내 R&amp;D 인텔리전스 데일리 로그</h1>
+<p>날짜: 2026-07-02
+기록자: Tech Market Monitor (auto)
+총 항목 수: 7건 (기사 7 / 논문 0)
+신뢰도 분포: A 7건 / B 0건 / C 0건</p>
+<h2>오늘의 R&amp;D 인텔리전스 요약</h2>
+<p><strong>모니터링 키워드 (상위 3개):</strong> 전력계통 · 스마트그리드 · 파워그리드</p>
+<p><strong>오늘의 공통 흐름:</strong> 국내 R&amp;D 위탁·협력 가능성이 있는 투자·정책 이슈가 부각된 날</p>
+<p>오늘 수집 7건 (R&amp;D 적합 4점 이상 1건) · 정책브리핑 기후에너지환경부, 정책브리핑 산림청, 정책브리핑 산업통상부 외 4개 출처</p>
+<p><strong>R&amp;D 기회 스캔 (누가 · 왜 · 무엇을):</strong></p>
+<table>
+<thead>
+<tr>
+<th>R&amp;D적합</th>
+<th>핵심 이슈</th>
+<th>고객 타겟</th>
+<th>R&amp;D 연계 포인트</th>
+<th>팩트 체크</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>5/5</strong></td>
+<td><a href="#0000-직류dc-실증을-넘어-산업으로-정부와-산업계-직류-산업-확산-추진">직류(DC), 실증을 넘어 산업으로 정부와 산업계</a> 기후에너지환경부와 한국전력공사가 직류 산업 확산을 추진하고, 관련 기업과 연구기관이 참여한 &lsquo;케이-디씨(K-DC) 산업 확산 2026&rsquo;을 개최했음.</td>
+<td>기후에너지환경부, 한국전력공사, 엘에스(LS)일렉트릭, 엘에스(LS)전선, 효성중공업, 에이치디(HD)현대일렉트릭, 엘지(LG)전자 등</td>
+<td>직류 배전 기술개발과 실증 성과를 산업현장과 수요처 중심의 사업화 단계로 확산하는 연구개발</td>
+<td>기후에너지환경부와 한국전력공사, &lsquo;케이-디씨(K-DC) 산업 확산 2026&rsquo; 개최, 표준·인증 체계 마련, 제도개선, 사업유형 발굴 등을 추진</td>
+</tr>
+<tr>
+<td><strong>2/5</strong></td>
+<td><a href="#0000-과기정통부-향후-5년간-기술주도-성장을-뒷받침할-투자전략-제시">과기정통부, 향후 5년간 &ldquo;기술주도 성장&rdquo;을 뒷받침할</a> 과기정통부, 5년간 기술주도 성장 뒷받침할 연구개발 투자전략 제시하고, 전력계통 및 스마트그리드 기술 개발을 위한 투자 계획 수립함.</td>
+<td>과기정통부</td>
+<td>전력계통 및 스마트그리드 기술 개발을 위한 연구개발 투자전략 수립</td>
+<td>제2차 국가연구개발 중장기 투자전략(안) 공청회 개최, 5년간 연구개발 4대 전략 8대 과제 발표</td>
+</tr>
+</tbody>
+</table>
+<p><em>(이하 5건은 R&amp;D 적합 1점 또는 국내 투자 신호 미약으로 표에서 생략)</em></p>
+<p><strong>국내 R&amp;D 타겟 시사점 (프라운호퍼 · 전력계통 · 스마트그리드 · 파워그리드):</strong></p>
+<ul>
+<li><strong>[5/5] 기후에너지환경부, 한국전력공사, 엘에스(LS)일렉트릭, 엘에스(LS)전선, 효성중공업, 에이치디(HD)현대일렉트릭, 엘지(LG)전자 등</strong> — 목적: 직류 산업의 수출산업화를 지원하고, 국가 전력망의 효율적인 운영과 전력산업 고도화를 관점에서 전략적으로 육성함. | 니즈: 직류 배전 기술개발과 실증 성과를 산업현장과 수요처 중심의 사업화 단계로 확산하는 연구개발이 필요함. | 접근: 정부와 산업계의 수요와 경제성 등을 고려해 직류망의 실계통 적용을 추진하고, 표준·인증 체계 마련, 제도개선, 사업유형 발굴 등을 추진함. (<a href="https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769266">직류(DC), 실증을 넘어 산업으로… 정부와 산업계, 직류 산업 확산 추진</a>)</li>
+<li><strong>[2/5] 과기정통부</strong> — 목적: 저성장 위기 돌파를 위한 기술주도 성장 | 니즈: 전력계통 및 스마트그리드 기술 개발을 위한 고난도 연구개발 | 접근: 정부의 정책 정합성을 고려한 연구개발 투자전략 수립 (<a href="https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769318">과기정통부, 향후 5년간 &ldquo;기술주도 성장&rdquo;을 뒷받침할 투자전략 제시</a>)</li>
+<li><strong>[1/5] 산림청 국립산림과학원</strong> — 목적: 산림바이오자원을 활용한 원천기술의 실질적인 혜택을 국민에게 제공하기 위함 | 니즈: 산림바이오자원 활용 기술 개발의 고난도 연구 개발 격차 | 접근: 기술 이전 및 사후 관리를 통한 산림바이오자원 활용 기술 개발의 협력 가능성 (<a href="https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769281">&lsquo;보리밥나무 탈모 예방&rsquo; 원천기술 제품 품질 관리 나선다 - 국립산림과학원, 보리밥나무…</a>)</li>
+<li><strong>[1/5] 산업통상부</strong> — 목적: 로봇 인재 양성 및 연구 기반 확충 | 니즈: 로봇 기술 개발 및 실증과제에 대한 기술 격차 해소 | 접근: 산업부의 로봇 분야 국책 R&amp;D 및 실증과제에 대한 기술 지원 및 협력 (<a href="https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769327">M.AX를 이끌어갈 미래인재, 로보컵에서 실력을 겨룬다!</a>)</li>
+<li>
+<p><strong>[1/5] 산림청 국립산림과학원</strong> — 목적: 기후위기에 대응하고 국제사회 탄소중립에 기여 | 니즈: 이탄지 복원 모델 개발과 탄소저장량 평가 기술 개발 | 접근: 국제 공동 연구를 통해 선행 기술을 가진 국가와 현지 연구자와 노하우를 공유 (<a href="https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769247">한·인니 5년 공동 연구 결실&hellip;이탄지 복원 통한 탄소저장량 평가서 발간 - 국립산림…</a>)</p>
+</li>
+<li>
+<p><strong>상충되는 정보:</strong> (해당 없음)</p>
+</li>
+</ul>
+<hr />
+<h2>항목 기록</h2>
+<p><a id="0000-직류dc-실증을-넘어-산업으로-정부와-산업계-직류-산업-확산-추진"></a></p>
+<h3>00:00 직류(DC), 실증을 넘어 산업으로 정부와 산업계, 직류 산업 확산 추진</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 기후에너지환경부</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 기후에너지환경부</li>
+<li><strong>발행일:</strong> 2026-07-02</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769266</li>
+<li><strong>요약:</strong></li>
+<li>기후에너지환경부와 한국전력공사가 직류 산업 확산을 추진하고, 관련 기업과 연구기관이 참여한 &lsquo;케이-디씨(K-DC) 산업 확산 2026&rsquo;을 개최했음.</li>
+<li>기후에너지환경부와 한국전력공사가 직류 산업 확산을 추진하고, 관련 기업과 연구기관이 참여한 &lsquo;케이-디씨(K-DC) 산업 확산 2026&rsquo;을 개최함.</li>
+<li>
+<p>(해석) 직류 산업은 인공지능 데이터센터, 재생에너지 확대 등으로 성장잠재력이 높은 산업이며, 국가 전력망의 효율적인 운영과 전력산업 고도화 관점에서도 전략적으로 육성할 필요가 있음</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 5/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 직류 배전 기술개발과 실증 성과를 산업현장과 수요처 중심의 사업화 단계로 확산하는 연구개발</li>
+<li><strong>팩트 근거:</strong> 기후에너지환경부와 한국전력공사, &lsquo;케이-디씨(K-DC) 산업 확산 2026&rsquo; 개최, 표준·인증 체계 마련, 제도개선, 사업유형 발굴 등을 추진</li>
+<li><strong>투자 주체:</strong> 기후에너지환경부, 한국전력공사, 엘에스(LS)일렉트릭, 엘에스(LS)전선, 효성중공업, 에이치디(HD)현대일렉트릭, 엘지(LG)전자 등</li>
+<li><strong>투자 목적:</strong> 직류 산업의 수출산업화를 지원하고, 국가 전력망의 효율적인 운영과 전력산업 고도화를 관점에서 전략적으로 육성함.</li>
+<li><strong>위탁 연구 니즈:</strong> 직류 배전 기술개발과 실증 성과를 산업현장과 수요처 중심의 사업화 단계로 확산하는 연구개발이 필요함.</li>
+<li><strong>접근 전략:</strong> 정부와 산업계의 수요와 경제성 등을 고려해 직류망의 실계통 적용을 추진하고, 표준·인증 체계 마련, 제도개선, 사업유형 발굴 등을 추진함.</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #제품출시 #기술</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 키워드 관련도: 직접 · 매칭: 정부·R&amp;D 타깃, 에너지저장, 전력망</li>
+</ul>
+<p><a id="0000-보리밥나무-탈모-예방-원천기술-제품-품질-관리-나선다-국립산림과학원-보리밥나무-특허-제품-효과-유지-위해-사후관리-강화"></a></p>
+<h3>00:00 &lsquo;보리밥나무 탈모 예방&rsquo; 원천기술 제품 품질 관리 나선다 - 국립산림과학원, 보리밥나무 특허 제품 효과 유지 위해 사후관리 강화-</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 산림청</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 산림청</li>
+<li><strong>발행일:</strong> 2026-07-02</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769281</li>
+<li><strong>요약:</strong></li>
+<li>산림청 국립산림과학원이 보리밥나무 탈모 예방 원천기술 제품의 품질 관리를 강화할 계획임.</li>
+<li>산림청 국립산림과학원이 보리밥나무 탈모 예방 원천기술 제품의 품질 관리를 강화할 계획임</li>
+<li>
+<p>(해석) 산림바이오자원 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 산림바이오자원 활용 기술 개발</li>
+<li><strong>팩트 근거:</strong> 국립산림과학원은 보리밥나무 추출물 탈모 예방 기능성 특허기술을 생활소재 생산업체에 이전함</li>
+<li><strong>투자 주체:</strong> 산림청 국립산림과학원</li>
+<li><strong>투자 목적:</strong> 산림바이오자원을 활용한 원천기술의 실질적인 혜택을 국민에게 제공하기 위함</li>
+<li><strong>위탁 연구 니즈:</strong> 산림바이오자원 활용 기술 개발의 고난도 연구 개발 격차</li>
+<li><strong>접근 전략:</strong> 기술 이전 및 사후 관리를 통한 산림바이오자원 활용 기술 개발의 협력 가능성</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #정부계획 #협력 #제품출시 #기술</li>
+<li><strong>비고:</strong> 우선: 정부·R&amp;D 타깃 (프라운호퍼 협력 관점) · 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 연구개발, 기술이전</li>
+</ul>
+<p><a id="0000-max를-이끌어갈-미래인재-로보컵에서-실력을-겨룬다"></a></p>
+<h3>00:00 M.AX를 이끌어갈 미래인재, 로보컵에서 실력을 겨룬다!</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 산업통상부</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 산업통상부</li>
+<li><strong>발행일:</strong> 2026-07-02</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769327</li>
+<li><strong>요약:</strong></li>
+<li>산업통상부, 2026년 하반기 &lsquo;휴머노이드 특성화 대학원&rsquo; 신설 및 로봇 분야 국책 R&amp;D 지원 계획.</li>
+<li>산업통상부는 2026년 하반기 &lsquo;휴머노이드 특성화 대학원&rsquo;을 신설하여 석·박사급 전문인력을 양성할 예정임.</li>
+<li>
+<p>(해석) 로봇 기술 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 로봇 분야 국책 R&amp;D 및 실증과제에 대한 기술 개발 및 지원</li>
+<li><strong>팩트 근거:</strong> 산업통상부의 2026년 하반기 &lsquo;휴머노이드 특성화 대학원&rsquo; 신설 및 로봇 분야 국책 R&amp;D 지원 계획</li>
+<li><strong>투자 주체:</strong> 산업통상부</li>
+<li><strong>투자 목적:</strong> 로봇 인재 양성 및 연구 기반 확충</li>
+<li><strong>위탁 연구 니즈:</strong> 로봇 기술 개발 및 실증과제에 대한 기술 격차 해소</li>
+<li><strong>접근 전략:</strong> 산업부의 로봇 분야 국책 R&amp;D 및 실증과제에 대한 기술 지원 및 협력</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #정부계획 #협력 #제품출시 #기술</li>
+<li><strong>비고:</strong> 우선: 정부·R&amp;D 타깃 (프라운호퍼 협력 관점) · 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 정부·R&amp;D 타깃, r&amp;d, 산업통상부</li>
+</ul>
+<p><a id="0000-과기정통부-향후-5년간-기술주도-성장을-뒷받침할-투자전략-제시"></a></p>
+<h3>00:00 과기정통부, 향후 5년간 &ldquo;기술주도 성장&rdquo;을 뒷받침할 투자전략 제시</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 과학기술정보통신부</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 과학기술정보통신부</li>
+<li><strong>발행일:</strong> 2026-07-02</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769318</li>
+<li><strong>요약:</strong></li>
+<li>과기정통부, 향후 5년간 기술주도 성장 뒷받침할 투자전략 제시함.</li>
+<li>과기정통부는 제2차 국가연구개발 중장기 투자전략(안) 공청회를 개최하고, 향후 5년간 연구개발 4대 전략 8대 과제를 발표함.</li>
+<li>
+<p>(해석) 연구개발 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 2/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 전력계통 및 스마트그리드 기술 개발을 위한 연구개발 투자전략 수립</li>
+<li><strong>팩트 근거:</strong> 제2차 국가연구개발 중장기 투자전략(안) 공청회 개최, 5년간 연구개발 4대 전략 8대 과제 발표</li>
+<li><strong>투자 주체:</strong> 과기정통부</li>
+<li><strong>투자 목적:</strong> 저성장 위기 돌파를 위한 기술주도 성장</li>
+<li><strong>위탁 연구 니즈:</strong> 전력계통 및 스마트그리드 기술 개발을 위한 고난도 연구개발</li>
+<li><strong>접근 전략:</strong> 정부의 정책 정합성을 고려한 연구개발 투자전략 수립</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #투자 #제품출시 #기술 #기업동향</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 연구개발, 투자, 과기정통부</li>
+</ul>
+<p><a id="0000-선박-길잡이-국제표준-차세대-전자해도s-101-전-해역에-제공"></a></p>
+<h3>00:00 선박 길잡이 &lsquo;국제표준 차세대 전자해도(S-101)&rsquo; 전 해역에 제공</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 해양수산부</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 해양수산부</li>
+<li><strong>발행일:</strong> 2026-07-02</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769272</li>
+<li><strong>요약:</strong></li>
+<li>해양수산부 국립해양조사원이 7월 3일부터 우리나라 연안 전 해역에 차세대 국제표준 전자해도인 &lsquo;S-101 전자해도&rsquo;를 공식 간행함.</li>
+<li>해양수산부 국립해양조사원이 차세대 국제표준 전자해도인 &lsquo;S-101 전자해도&rsquo;를 공식 간행함</li>
+<li>
+<p>(해석) 전자해도 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 해양정보 연계 기술 개발</li>
+<li><strong>팩트 근거:</strong> 국립해양조사원이 S-101 전자해도 서비스를 위해 2026년 5월과 6월 두 차례에 걸쳐 실제 선박을 이용한 검증을 마침</li>
+<li><strong>투자 주체:</strong> 해양수산부 국립해양조사원</li>
+<li><strong>투자 목적:</strong> 해양 안전과 디지털 항해환경변화에 대응</li>
+<li><strong>위탁 연구 니즈:</strong> 디지털 기반 해양정보 연계 기술 개발</li>
+<li><strong>접근 전략:</strong> 해양수산부의 디지털 항해환경 구축 정책과 연계</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #정부계획 #협력 #제품출시 #규제</li>
+<li><strong>비고:</strong> 우선: 정부·R&amp;D 타깃 (프라운호퍼 협력 관점) · 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 정부·R&amp;D 타깃</li>
+</ul>
+<p><a id="0000-한인니-5년-공동-연구-결실이탄지-복원-통한-탄소저장량-평가서-발간-국립산림과학원-인도네시아-이탄지-복원으로-탄소중립기후위기-대응-선도"></a></p>
+<h3>00:00 한·인니 5년 공동 연구 결실이탄지 복원 통한 탄소저장량 평가서 발간 - 국립산림과학원, 인도네시아 이탄지 복원으로 탄소중립·기후위기 대응 선도 -</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 산림청</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 산림청</li>
+<li><strong>발행일:</strong> 2026-07-02</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769247</li>
+<li><strong>요약:</strong></li>
+<li>산림청 국립산림과학원이 인도네시아와 5년간 공동 연구한 이탄지 복원 연구 성과를 담은 보고서를 발간했음.</li>
+<li>산림청 국립산림과학원은 인도네시아와 5년간 공동 연구한 이탄지 복원 연구 성과를 담은 보고서를 발간했음</li>
+<li>
+<p>(해석) 산림 복원 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 탄소저장량 평가 기술 개발</li>
+<li><strong>팩트 근거:</strong> 2021년부터 5년간 인도네시아 남수마트라주에서 연구 수행</li>
+<li><strong>투자 주체:</strong> 산림청 국립산림과학원</li>
+<li><strong>투자 목적:</strong> 기후위기에 대응하고 국제사회 탄소중립에 기여</li>
+<li><strong>위탁 연구 니즈:</strong> 이탄지 복원 모델 개발과 탄소저장량 평가 기술 개발</li>
+<li><strong>접근 전략:</strong> 국제 공동 연구를 통해 선행 기술을 가진 국가와 현지 연구자와 노하우를 공유</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #정부계획 #협력 #제품출시 #기술</li>
+<li><strong>비고:</strong> 우선: 정부·R&amp;D 타깃 (프라운호퍼 협력 관점) · 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 정부·R&amp;D 타깃</li>
+</ul>
+<p><a id="0000-허장-재정경제부-2차관-해외-파견-재경관들과-영상회의-개최"></a></p>
+<h3>00:00 허장 재정경제부 2차관, 해외 파견 재경관들과 영상회의 개최</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 재정경제부</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 재정경제부</li>
+<li><strong>발행일:</strong> 2026-07-02</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769278</li>
+<li><strong>요약:</strong></li>
+<li>허장 재정경제부 2차관, 해외 파견 재경관들과 영상회의 개최 - 재정경제부는 해외 파견 재경관들과 영상회의를 개최하여 경제협력 및 투자 확대를 논의함.</li>
+<li>허장 재정경제부 2차관은 7.2일(목) 10:00 정부서울청사에서 재경관 영상회의를 주재하였음</li>
+<li>
+<p>(해석) 재정경제부 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 국제 경제협력 및 투자 확대와 관련한 R&amp;D 협력</li>
+<li><strong>투자 주체:</strong> 재정경제부</li>
+<li><strong>투자 목적:</strong> 경제협력 및 투자 확대</li>
+<li><strong>위탁 연구 니즈:</strong> 팩트 부족으로 판단 보류</li>
+<li><strong>접근 전략:</strong> 정부의 정책 정합성과 연계</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #투자 #제품출시 #기술</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 정부·R&amp;D 타깃</li>
+</ul>
+<hr />
+<h2>태그 분류체계 (월간 보고서 챕터와 매칭)</h2>
+<table>
+<thead>
+<tr>
+<th>태그</th>
+<th>의미</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>#기술</td>
+<td>신기술, R&amp;D, 기술 발표</td>
+</tr>
+<tr>
+<td>#논문</td>
+<td>학술 연구 결과 (성능, 실험, 방법론)</td>
+</tr>
+<tr>
+<td>#투자</td>
+<td>투자 라운드, 밸류에이션, 펀딩</td>
+</tr>
+<tr>
+<td>#M&amp;A</td>
+<td>인수합병, 전략적 제휴</td>
+</tr>
+<tr>
+<td>#제품출시</td>
+<td>신제품, 서비스 런칭</td>
+</tr>
+<tr>
+<td>#기업동향</td>
+<td>조직, 인력, 실적, 전략</td>
+</tr>
+<tr>
+<td>#규제</td>
+<td>법안, 정책, 표준</td>
+</tr>
+<tr>
+<td>#경쟁</td>
+<td>경쟁사 비교, 점유율, 포지셔닝</td>
+</tr>
+<tr>
+<td>#시장수치</td>
+<td>시장규모/성장률 추정치</td>
+</tr>
+<tr>
+<td>#리스크</td>
+<td>사고, 논란, 부정적 전망</td>
+</tr>
+<tr>
+<td>#전문가전망</td>
+<td>애널리스트/전문가 예측</td>
+</tr>
+</tbody>
+</table>
+<h2>신뢰도 등급 기준</h2>
+<ul>
+<li><strong>A (높음):</strong> 정부·공공기관 원문(korea.kr·부처 .go.kr 보도자료), 연합뉴스·뉴시스 1차 보도, 공공 R&amp;D·정책기관(KISTEP·KIET·KIPO·KETEP·한국전력 등), 국내 학술지·국책연구원 동료심사 논문</li>
+<li><strong>B (중간):</strong> 국내 경제·IT 전문매체(헤럴드경제·동아일보·전자신문·ZDNet Korea 등), 2차 인용·전문자료 요약, 기업·공기업 IR/보도자료</li>
+<li><strong>C (참고):</strong> 익명 소스, 추측성 기사, 단순 재가공 콘텐츠, 미검증 블로그 — <strong>자동 생성 시에는 C가 나오지 않음. 수동 기록 시에만 사용</strong></li>
+</ul></div>
+</div>
+</body>
+</html>

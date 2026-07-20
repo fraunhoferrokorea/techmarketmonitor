@@ -9,10 +9,11 @@ on:
       - ".github/workflows/deploy-daily-pages.yml"
       - "scripts/build_daily_pages.py"
       - "scripts/build_report_pages.py"
+      - "index.html"
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -23,9 +24,6 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
       - name: Checkout repository
@@ -41,16 +39,31 @@ jobs:
           pip install markdown
           python scripts/build_report_pages.py
 
+      # Legacy Pages (branch main) serves committed HTML. Keep docs/ in sync.
+      - name: Commit docs/ viewer if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs index.html .nojekyll
+          if git diff --staged --quiet; then
+            echo "No docs/ changes to commit"
+          else
+            git commit -m "pages: refresh daily/monthly output viewer"
+            git push
+          fi
+
+      # When repo Pages source is "GitHub Actions", this path also deploys.
       - name: Set up Pages
+        continue-on-error: true
         uses: actions/configure-pages@v6
-        with:
-          enablement: true
 
       - name: Upload Pages artifact
+        continue-on-error: true
         uses: actions/upload-pages-artifact@v5
         with:
           path: output/site
 
       - name: Deploy to GitHub Pages
+        continue-on-error: true
         id: deployment
         uses: actions/deploy-pages@v5

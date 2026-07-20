@@ -1,26 +1,12 @@
-#!/usr/bin/env python3
-"""Build GitHub Pages site from daily + monthly markdown OUTPUT."""
-from __future__ import annotations
-
-import json
-import re
-import shutil
-from pathlib import Path
-
-import markdown
-
-ROOT = Path(__file__).resolve().parent.parent
-DAILY_DIR = ROOT / "output" / "daily"
-MONTHLY_DIR = ROOT / "output" / "monthly"
-SITE_DIR = ROOT / "output" / "site"
-# Committed mirror for legacy GitHub Pages (branch main, folder / or /docs)
-DOCS_DIR = ROOT / "docs"
-
-_MD_EXT = ["tables", "fenced_code", "sane_lists", "smarty"]
-
-# Fraunhofer-inspired teal institutional palette (not purple / cream-serif)
-_CSS = """\
-:root {
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Fraunhofer Korea · R&amp;D Intelligence</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet"/>
+<style>:root {
   --bg: #f3f6f5;
   --surface: #ffffff;
   --ink: #1a2421;
@@ -200,18 +186,7 @@ mark {
   display: inline-flex; align-items: center; gap: 0.35rem;
   margin-bottom: 1rem; font-size: 0.9rem; font-weight: 600;
 }
-"""
-
-_INDEX_HTML = """\
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Fraunhofer Korea · R&amp;D Intelligence</title>
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
-<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet"/>
-<style>{css}</style>
+</style>
 </head>
 <body>
 <header class="app-header">
@@ -251,36 +226,36 @@ _INDEX_HTML = """\
 <p class="footer-note">OUTPUT only · keyword highlight (&lt;mark&gt;) preserved · generated from markdown reports</p>
 
 <script>
-const REPORTS = {reports_json};
+const REPORTS = {"daily": [{"label": "2026-07-19", "title": "Daily 2026-07-19", "href": "daily/2026-07-19.html", "meta": "1건 (기사 1 / 논문 0)"}, {"label": "2026-07-18", "title": "Daily 2026-07-18", "href": "daily/2026-07-18.html", "meta": "1건 (기사 1 / 논문 0)"}, {"label": "2026-07-17", "title": "Daily 2026-07-17", "href": "daily/2026-07-17.html", "meta": "0건 (기사 0 / 논문 0)"}, {"label": "2026-07-16", "title": "Daily 2026-07-16", "href": "daily/2026-07-16.html", "meta": "2건 (기사 2 / 논문 0)"}, {"label": "2026-07-15", "title": "Daily 2026-07-15", "href": "daily/2026-07-15.html", "meta": "0건 (기사 0 / 논문 0)"}, {"label": "2026-07-14", "title": "Daily 2026-07-14", "href": "daily/2026-07-14.html", "meta": "0건 (기사 0 / 논문 0)"}, {"label": "2026-07-13", "title": "Daily 2026-07-13", "href": "daily/2026-07-13.html", "meta": "1건 (기사 1 / 논문 0)"}, {"label": "2026-07-12", "title": "Daily 2026-07-12", "href": "daily/2026-07-12.html", "meta": "0건 (기사 0 / 논문 0)"}, {"label": "2026-07-11", "title": "Daily 2026-07-11", "href": "daily/2026-07-11.html", "meta": "0건 (기사 0 / 논문 0)"}, {"label": "2026-07-10", "title": "Daily 2026-07-10", "href": "daily/2026-07-10.html", "meta": "1건 (기사 1 / 논문 0)"}, {"label": "2026-07-09", "title": "Daily 2026-07-09", "href": "daily/2026-07-09.html", "meta": "20건 (기사 20 / 논문 0)"}, {"label": "2026-07-08", "title": "Daily 2026-07-08", "href": "daily/2026-07-08.html", "meta": "13건 (기사 13 / 논문 0)"}, {"label": "2026-07-07", "title": "Daily 2026-07-07", "href": "daily/2026-07-07.html", "meta": "23건 (기사 23 / 논문 0)"}, {"label": "2026-07-06", "title": "Daily 2026-07-06", "href": "daily/2026-07-06.html", "meta": "29건 (기사 29 / 논문 0)"}, {"label": "2026-07-05", "title": "Daily 2026-07-05", "href": "daily/2026-07-05.html", "meta": "29건 (기사 29 / 논문 0)"}, {"label": "2026-07-04", "title": "Daily 2026-07-04", "href": "daily/2026-07-04.html", "meta": "29건 (기사 29 / 논문 0)"}, {"label": "2026-07-03", "title": "Daily 2026-07-03", "href": "daily/2026-07-03.html", "meta": "30건 (기사 30 / 논문 0)"}, {"label": "2026-07-02", "title": "Daily 2026-07-02", "href": "daily/2026-07-02.html", "meta": "7건 (기사 7 / 논문 0)"}, {"label": "2026-07-01", "title": "Daily 2026-07-01", "href": "daily/2026-07-01.html", "meta": "0건 (기사 0 / 논문 0)"}, {"label": "2026-06-30", "title": "Daily 2026-06-30", "href": "daily/2026-06-30.html", "meta": "0건 (기사 0 / 논문 0)"}, {"label": "2026-06-29", "title": "Daily 2026-06-29", "href": "daily/2026-06-29.html", "meta": "12건 (기사 12 / 논문 0)"}], "monthly": [{"label": "2026년 6월", "title": "Monthly 2026-06", "href": "monthly/2026-06.html", "meta": "** 8건 (R&D 적합 4점 이상)"}]};
 
-function qs(id) {{ return document.getElementById(id); }}
+function qs(id) { return document.getElementById(id); }
 
 let kind = "daily";
 let currentHref = null;
 
-function labelFor(kindName) {{
+function labelFor(kindName) {
   return kindName === "daily" ? "Daily 날짜" : "Monthly 기간";
-}}
+}
 
-function renderList() {{
+function renderList() {
   const list = qs("date-list");
   const items = REPORTS[kind] || [];
   qs("list-heading").textContent = labelFor(kind);
-  if (!items.length) {{
+  if (!items.length) {
     list.innerHTML = '<li class="empty-hint">아직 생성된 리포트가 없습니다.</li>';
     return;
-  }}
-  list.innerHTML = items.map((item, i) => {{
+  }
+  list.innerHTML = items.map((item, i) => {
     const active = item.href === currentHref ? " active" : "";
-    const meta = item.meta ? `<span class="meta">${{item.meta}}</span>` : "";
-    return `<li><button type="button" class="${{active}}" data-href="${{item.href}}" data-title="${{item.title}}"><span>${{item.label}}</span>${{meta}}</button></li>`;
-  }}).join("");
-  list.querySelectorAll("button").forEach(btn => {{
+    const meta = item.meta ? `<span class="meta">${item.meta}</span>` : "";
+    return `<li><button type="button" class="${active}" data-href="${item.href}" data-title="${item.title}"><span>${item.label}</span>${meta}</button></li>`;
+  }).join("");
+  list.querySelectorAll("button").forEach(btn => {
     btn.addEventListener("click", () => loadReport(btn.dataset.href, btn.dataset.title));
-  }});
-}}
+  });
+}
 
-function setTab(next) {{
+function setTab(next) {
   kind = next;
   currentHref = null;
   qs("tab-daily").classList.toggle("active", kind === "daily");
@@ -292,16 +267,16 @@ function setTab(next) {{
   qs("report").innerHTML = "";
   history.replaceState(null, "", "#" + kind);
   renderList();
-}}
+}
 
-async function loadReport(href, title) {{
+async function loadReport(href, title) {
   currentHref = href;
   renderList();
   qs("empty-state").hidden = true;
   qs("report-wrap").hidden = false;
   qs("report").innerHTML = "<p style='color:var(--muted)'>불러오는 중…</p>";
   history.replaceState(null, "", "#" + kind + "/" + encodeURIComponent(href));
-  try {{
+  try {
     const res = await fetch(href);
     if (!res.ok) throw new Error("HTTP " + res.status);
     const html = await res.text();
@@ -311,205 +286,75 @@ async function loadReport(href, title) {{
     enhanceReport(qs("report"));
     document.title = (title || "Report") + " · Fraunhofer Korea";
     qs("main").scrollTop = 0;
-    window.scrollTo({{ top: 0, behavior: "smooth" }});
-  }} catch (err) {{
-    qs("report").innerHTML = "<p>리포트를 불러오지 못했습니다. <a href=\\"" + href + "\\">새 탭에서 열기</a></p>";
-  }}
-}}
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } catch (err) {
+    qs("report").innerHTML = "<p>리포트를 불러오지 못했습니다. <a href=\"" + href + "\">새 탭에서 열기</a></p>";
+  }
+}
 
-function enhanceReport(root) {{
+function enhanceReport(root) {
   // Score chips: **3/5**, 3/5, 적합도 5/5
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
   const nodes = [];
   while (walker.nextNode()) nodes.push(walker.currentNode);
-  const scoreRe = /(\\d)\\s*\\/\\s*5/g;
-  nodes.forEach(node => {{
+  const scoreRe = /(\d)\s*\/\s*5/g;
+  nodes.forEach(node => {
     if (!node.parentElement || ["SCRIPT", "STYLE", "MARK", "A", "CODE"].includes(node.parentElement.tagName)) return;
     if (!scoreRe.test(node.nodeValue)) return;
     scoreRe.lastIndex = 0;
     const span = document.createElement("span");
-    span.innerHTML = node.nodeValue.replace(scoreRe, (_, n) => {{
+    span.innerHTML = node.nodeValue.replace(scoreRe, (_, n) => {
       const v = Number(n);
       const cls = v >= 4 ? "high" : v === 3 ? "mid" : "low";
-      return `<span class="score ${{cls}}">${{n}}/5</span>`;
-    }});
+      return `<span class="score ${cls}">${n}/5</span>`;
+    });
     node.parentElement.replaceChild(span, node);
-  }});
+  });
 
   // Soft chips for header meta lines (첫 몇 줄의 키:값)
   const kids = Array.from(root.children);
   const metaLines = [];
-  for (const el of kids) {{
+  for (const el of kids) {
     if (el.tagName === "H1" || el.tagName === "HR") continue;
     if (el.tagName === "H2") break;
-    if (el.tagName === "P" && /날짜|기록자|총 항목|신뢰도|기간|생성일|발행|모니터링|분석 항목/.test(el.textContent)) {{
+    if (el.tagName === "P" && /날짜|기록자|총 항목|신뢰도|기간|생성일|발행|모니터링|분석 항목/.test(el.textContent)) {
       metaLines.push(el);
-    }}
-  }}
-  if (metaLines.length) {{
+    }
+  }
+  if (metaLines.length) {
     const box = document.createElement("div");
     box.className = "stats";
-    metaLines.forEach(p => {{
+    metaLines.forEach(p => {
       const chip = document.createElement("span");
       chip.className = "chip neutral";
       chip.textContent = p.textContent.trim();
       box.appendChild(chip);
       p.remove();
-    }});
+    });
     const h1 = root.querySelector("h1");
     if (h1 && h1.nextSibling) root.insertBefore(box, h1.nextSibling);
     else root.prepend(box);
-  }}
-}}
+  }
+}
 
 qs("tab-daily").addEventListener("click", () => setTab("daily"));
 qs("tab-monthly").addEventListener("click", () => setTab("monthly"));
 
-(function init() {{
+(function init() {
   const hash = (location.hash || "#daily").slice(1);
   const [k, ...rest] = hash.split("/");
   const startKind = (k === "monthly") ? "monthly" : "daily";
   setTab(startKind);
   const href = rest.length ? decodeURIComponent(rest.join("/")) : null;
-  if (href) {{
+  if (href) {
     const item = (REPORTS[startKind] || []).find(x => x.href === href);
     loadReport(href, item ? item.title : href);
-  }} else if ((REPORTS[startKind] || []).length) {{
+  } else if ((REPORTS[startKind] || []).length) {
     // auto-open latest
     const latest = REPORTS[startKind][0];
     loadReport(latest.href, latest.title);
-  }}
-}})();
+  }
+})();
 </script>
 </body>
 </html>
-"""
-
-_REPORT_HTML = """\
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>{title}</title>
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
-<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet"/>
-<style>{css}
-body {{ background: var(--surface); }}
-.standalone {{ max-width: 960px; margin: 0 auto; padding: 1.25rem 1.5rem 2.5rem; }}
-</style>
-</head>
-<body>
-<div class="standalone">
-  <p class="back-link"><a href="../index.html#{kind}">← {kind_label} 목록</a></p>
-  <div class="report">{content}</div>
-</div>
-</body>
-</html>
-"""
-
-
-def _md_to_html(md_text: str) -> str:
-    return markdown.markdown(md_text, extensions=_MD_EXT)
-
-
-def _daily_meta(md_text: str) -> str:
-    m = re.search(r"총 항목 수:\s*([^\n]+)", md_text)
-    if m:
-        # shorten e.g. "1건 (기사 1 / 논문 0) · ..."
-        raw = m.group(1).strip()
-        short = raw.split("·")[0].strip()
-        return short
-    return ""
-
-
-def _monthly_meta(md_text: str) -> str:
-    m = re.search(r"분석 항목:\s*([^\n]+)", md_text)
-    if m:
-        return m.group(1).split("·")[0].strip()
-    return ""
-
-
-def _write_report(rel_path: Path, title: str, kind: str, content: str) -> None:
-    kind_label = "Daily" if kind == "daily" else "Monthly"
-    html = _REPORT_HTML.format(
-        title=title,
-        css=_CSS,
-        kind=kind,
-        kind_label=kind_label,
-        content=content,
-    )
-    out = SITE_DIR / rel_path
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(html, encoding="utf-8")
-
-
-def main() -> None:
-    SITE_DIR.mkdir(parents=True, exist_ok=True)
-    # Clean previous generated HTML (keep folder)
-    for old in SITE_DIR.rglob("*.html"):
-        old.unlink()
-
-    catalog: dict[str, list[dict[str, str]]] = {"daily": [], "monthly": []}
-
-    daily_files = sorted(DAILY_DIR.glob("daily_*.md"), reverse=True)
-    for md_path in daily_files:
-        iso = md_path.stem.replace("daily_", "")
-        rel = Path("daily") / f"{iso}.html"
-        md_text = md_path.read_text(encoding="utf-8")
-        body = _md_to_html(md_text)
-        title = f"Daily {iso}"
-        _write_report(rel, title, "daily", body)
-        catalog["daily"].append(
-            {
-                "label": iso,
-                "title": title,
-                "href": rel.as_posix(),
-                "meta": _daily_meta(md_text),
-            }
-        )
-
-    monthly_files = sorted(MONTHLY_DIR.glob("monthly_*.md"), reverse=True)
-    for md_path in monthly_files:
-        ym = md_path.stem.replace("monthly_", "")
-        rel = Path("monthly") / f"{ym}.html"
-        md_text = md_path.read_text(encoding="utf-8")
-        body = _md_to_html(md_text)
-        title = f"Monthly {ym}"
-        _write_report(rel, title, "monthly", body)
-        # Prefer Korean period label if present
-        period = re.search(r"\*\*기간:\*\*\s*([^\n]+)", md_text)
-        label = period.group(1).strip() if period else ym
-        catalog["monthly"].append(
-            {
-                "label": label,
-                "title": title,
-                "href": rel.as_posix(),
-                "meta": _monthly_meta(md_text),
-            }
-        )
-
-    index = _INDEX_HTML.format(
-        css=_CSS,
-        reports_json=json.dumps(catalog, ensure_ascii=False),
-    )
-    (SITE_DIR / "index.html").write_text(index, encoding="utf-8")
-    (SITE_DIR / "reports.json").write_text(
-        json.dumps(catalog, ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
-
-    # Mirror into docs/ for branch-based (legacy) GitHub Pages.
-    if DOCS_DIR.exists():
-        shutil.rmtree(DOCS_DIR)
-    shutil.copytree(SITE_DIR, DOCS_DIR)
-    (DOCS_DIR / ".nojekyll").write_text("", encoding="utf-8")
-
-    print(
-        f"Built site → {SITE_DIR.relative_to(ROOT)} (+ docs/) "
-        f"({len(catalog['daily'])} daily, {len(catalog['monthly'])} monthly)"
-    )
-
-
-if __name__ == "__main__":
-    main()

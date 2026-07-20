@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Daily 2026-07-03</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet"/>
+<style>:root {
+  --bg: #f3f6f5;
+  --surface: #ffffff;
+  --ink: #1a2421;
+  --muted: #5a6b66;
+  --line: #d5e0dc;
+  --brand: #008878;
+  --brand-dark: #006b5e;
+  --brand-soft: #e6f5f2;
+  --mark: #fff3bf;
+  --score-high: #008878;
+  --score-mid: #c47a00;
+  --score-low: #8a9390;
+  --shadow: 0 1px 2px rgba(26, 36, 33, 0.06), 0 8px 24px rgba(26, 36, 33, 0.06);
+  --radius: 12px;
+  --font: "Pretendard", "Noto Sans KR", "Segoe UI", system-ui, sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: var(--font);
+  color: var(--ink);
+  background:
+    radial-gradient(1200px 500px at 10% -10%, #d8efe9 0%, transparent 55%),
+    radial-gradient(900px 400px at 100% 0%, #e8eef0 0%, transparent 50%),
+    var(--bg);
+  line-height: 1.65;
+  min-height: 100vh;
+}
+a { color: var(--brand-dark); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+a:hover { color: var(--brand); }
+
+.app-header {
+  position: sticky; top: 0; z-index: 20;
+  backdrop-filter: blur(10px);
+  background: rgba(243, 246, 245, 0.88);
+  border-bottom: 1px solid var(--line);
+}
+.app-header-inner {
+  max-width: 1120px; margin: 0 auto; padding: 0.85rem 1.25rem;
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+}
+.brand {
+  display: flex; align-items: center; gap: 0.75rem; min-width: 0;
+}
+.brand-mark {
+  width: 36px; height: 36px; border-radius: 9px;
+  background: linear-gradient(145deg, var(--brand), var(--brand-dark));
+  color: #fff; font-weight: 700; font-size: 0.78rem;
+  display: grid; place-items: center; flex-shrink: 0;
+  letter-spacing: -0.02em;
+}
+.brand-text { min-width: 0; }
+.brand-text strong { display: block; font-size: 0.98rem; letter-spacing: -0.02em; }
+.brand-text span { display: block; font-size: 0.78rem; color: var(--muted); }
+
+.layout {
+  max-width: 1120px; margin: 0 auto; padding: 1.25rem;
+  display: grid; grid-template-columns: 280px 1fr; gap: 1.25rem; align-items: start;
+}
+@media (max-width: 860px) {
+  .layout { grid-template-columns: 1fr; }
+}
+
+.panel {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+}
+.sidebar { padding: 1rem; position: sticky; top: 72px; }
+@media (max-width: 860px) { .sidebar { position: static; } }
+
+.seg {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0.35rem;
+  background: var(--brand-soft); padding: 0.3rem; border-radius: 10px; margin-bottom: 1rem;
+}
+.seg button {
+  appearance: none; border: 0; background: transparent; color: var(--muted);
+  font: inherit; font-weight: 600; font-size: 0.92rem; padding: 0.55rem 0.4rem;
+  border-radius: 8px; cursor: pointer; transition: 0.15s ease;
+}
+.seg button.active {
+  background: var(--surface); color: var(--brand-dark);
+  box-shadow: 0 1px 3px rgba(0, 107, 94, 0.18);
+}
+.seg button:hover:not(.active) { color: var(--ink); }
+
+.sidebar h2 {
+  margin: 0 0 0.65rem; font-size: 0.78rem; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--muted); font-weight: 700;
+}
+.date-list { list-style: none; margin: 0; padding: 0; max-height: min(70vh, 640px); overflow: auto; }
+.date-list li + li { margin-top: 0.25rem; }
+.date-list a, .date-list button {
+  width: 100%; text-align: left; appearance: none; border: 1px solid transparent;
+  background: transparent; color: inherit; font: inherit; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+  padding: 0.65rem 0.75rem; border-radius: 8px; text-decoration: none;
+}
+.date-list a:hover, .date-list button:hover { background: var(--brand-soft); }
+.date-list a.active, .date-list button.active {
+  background: var(--brand-soft); border-color: #b7ddd5; color: var(--brand-dark); font-weight: 600;
+}
+.date-list .meta { font-size: 0.75rem; color: var(--muted); white-space: nowrap; }
+.empty-hint { color: var(--muted); font-size: 0.9rem; padding: 0.5rem 0.25rem; }
+
+.main { padding: 0; min-height: 420px; overflow: hidden; }
+.main-empty {
+  padding: 3rem 1.5rem; text-align: center; color: var(--muted);
+}
+.main-empty .icon {
+  width: 56px; height: 56px; margin: 0 auto 1rem; border-radius: 14px;
+  background: var(--brand-soft); color: var(--brand); display: grid; place-items: center;
+  font-size: 1.4rem; font-weight: 700;
+}
+.report-frame { border: 0; width: 100%; min-height: 70vh; display: block; }
+.report-wrap { padding: 1.5rem 1.75rem 2.5rem; }
+
+.report h1 {
+  margin: 0 0 0.75rem; font-size: 1.55rem; letter-spacing: -0.03em; line-height: 1.3;
+}
+.report h2 {
+  margin: 2rem 0 0.75rem; font-size: 1.15rem; letter-spacing: -0.02em;
+  padding-bottom: 0.35rem; border-bottom: 2px solid var(--brand-soft);
+}
+.report h3 {
+  margin: 1.5rem 0 0.6rem; font-size: 1.05rem;
+  padding: 0.65rem 0.85rem; background: var(--brand-soft); border-radius: 8px;
+  border-left: 4px solid var(--brand);
+}
+.report p { margin: 0.55rem 0; }
+.report ul, .report ol { padding-left: 1.25rem; }
+.report li { margin: 0.25rem 0; }
+.report hr { border: 0; border-top: 1px solid var(--line); margin: 1.5rem 0; }
+
+.report table {
+  border-collapse: separate; border-spacing: 0; width: 100%;
+  margin: 1rem 0; font-size: 0.9rem; overflow: hidden;
+  border: 1px solid var(--line); border-radius: 10px; background: #fff;
+}
+.report th, .report td {
+  padding: 0.65rem 0.75rem; text-align: left; vertical-align: top;
+  border-bottom: 1px solid var(--line);
+}
+.report th { background: #eef6f4; font-weight: 650; color: var(--brand-dark); }
+.report tr:last-child td { border-bottom: 0; }
+.report tbody tr:hover td { background: #f7fbfa; }
+
+mark {
+  background: linear-gradient(180deg, transparent 8%, var(--mark) 8%, var(--mark) 92%, transparent 92%);
+  color: inherit; padding: 0 0.12em; border-radius: 2px;
+}
+
+.stats {
+  display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.85rem 0 1.25rem;
+}
+.chip {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  padding: 0.28rem 0.65rem; border-radius: 999px; font-size: 0.8rem; font-weight: 600;
+  background: var(--brand-soft); color: var(--brand-dark); border: 1px solid #c5e4dd;
+}
+.chip.neutral { background: #f0f2f1; color: var(--muted); border-color: var(--line); }
+.score {
+  display: inline-block; min-width: 2.4em; text-align: center;
+  padding: 0.1rem 0.45rem; border-radius: 6px; font-weight: 700; font-size: 0.85rem;
+  color: #fff;
+}
+.score.high { background: var(--score-high); }
+.score.mid { background: var(--score-mid); }
+.score.low { background: var(--score-low); }
+
+.footer-note {
+  max-width: 1120px; margin: 0 auto; padding: 0 1.25rem 2rem;
+  color: var(--muted); font-size: 0.8rem;
+}
+
+.back-link {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  margin-bottom: 1rem; font-size: 0.9rem; font-weight: 600;
+}
+
+body { background: var(--surface); }
+.standalone { max-width: 960px; margin: 0 auto; padding: 1.25rem 1.5rem 2.5rem; }
+</style>
+</head>
+<body>
+<div class="standalone">
+  <p class="back-link"><a href="../index.html#daily">← Daily 목록</a></p>
+  <div class="report"><h1>국내 R&amp;D 인텔리전스 데일리 로그</h1>
+<p>날짜: 2026-07-03
+기록자: Tech Market Monitor (auto)
+총 항목 수: 30건 (기사 30 / 논문 0)
+신뢰도 분포: A 2건 / B 28건 / C 0건</p>
+<h2>오늘의 R&amp;D 인텔리전스 요약</h2>
+<p><strong>모니터링 키워드 (상위 3개):</strong> hvdc · 전력계통 · 스마트그리드</p>
+<p><strong>오늘의 공통 흐름:</strong> 국내 정부·기업의 예산·R&amp;D 프로그램 신호가 다수 포착된 날</p>
+<p>오늘 수집 30건 (R&amp;D 적합 4점 이상 10건) · 뉴시스 속보, 헤럴드경제, 동아일보 경제 외 27개 출처</p>
+<p><strong>R&amp;D 기회 스캔 (누가 · 왜 · 무엇을):</strong></p>
+<table>
+<thead>
+<tr>
+<th>R&amp;D적합</th>
+<th>핵심 이슈</th>
+<th>고객 타겟</th>
+<th>R&amp;D 연계 포인트</th>
+<th>팩트 체크</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>4/5</strong></td>
+<td><a href="#2317-강원도-소형-데이터센터-기반-인공지능ai-산업-성장-지원사업-선정">강원도, ‘소형 데이터센터 기반 인공지능(AI) 산업</a> 강원도, 2027년까지 총사업비 98억원 규모의 ‘소형 데이터센터 기반 인공지능 산업 성장 지원사업’을 추진하고, 도내 기업 7개사가 대학 내 인공지능 데이터센터를 활용해 기술 개발과 실증을 추진할 예정임.</td>
+<td>강원도와 강릉시, 강원테크노파크, 강릉과학산업진흥원</td>
+<td>강원대학교와 한림대학교의 GPU 자원을 활용한 인공지능 서비스 개발과 실증을 지원하는 사업에서 인공지능 기술 개발 및 적용 분야에 대한 연구를 제안할 수 있음.</td>
+<td>국비 59억원, 총사업비 98억원, 2027년까지 추진, 강원대학교와 한림대학교의 GPU 자원 활용</td>
+</tr>
+<tr>
+<td><strong>4/5</strong></td>
+<td><a href="#1500-3500억달러-한미-전략투자-컨트롤타워-출범투자-의사결정-체계-완성">3500억달러 한미 전략투자 컨트롤타워 출범투자</a> 정부, 3500억달러 한미 전략투자 컨트롤 타워 출범산업통상부, 대미 투자 사업 추진임</td>
+<td>산업통상부, 재정경제부, 한미전략투자공사(KUIC)</td>
+<td>한미 전략투자에 따른 HVDC, 전력계통, 스마트그리드 기술 개발에 관한 연구를 제안할 수 있음</td>
+<td>3500억달러 규모의 한미 전략투자, 2000억달러 규모의 대미 투자, 1500억달러 규모의 조선협력 투자</td>
+</tr>
+<tr>
+<td><strong>4/5</strong></td>
+<td><a href="#1530-sk-협력사와-상생-8700억-기술-금융-지원-나서">SK “협력사와 상생” 8700억 기술-금융 지원 나서</a> SK그룹, 협력사에 8700억원 기술·금융 지원 나서 - 4300개 협력사 혜택 예상</td>
+<td>SK그룹</td>
+<td>SK그룹의 협력사에 대한 기술·금융 지원 사업과 연계하여 연구개발(R&amp;D) 지원을 제안할 수 있음</td>
+<td>SK그룹은 협력사에 8700억 원 규모의 기술·금융 지원을 제공하고, 1차 협력사뿐 아니라 2·3차 협력사까지 대금 지급 조건을 개선함</td>
+</tr>
+<tr>
+<td><strong>4/5</strong></td>
+<td><a href="#0551-독자-ai-반도체-개발하는-美-앤스로픽-삼성과-협력할-수도">독자 AI 반도체 개발하는 美 앤스로픽, 삼성과</a> 앤스로픽, 삼성전자와 AI 반도체 개발 협력 논의중이며 2㎚ 제조 공정과 첨단 패키징 시설을 활용할 계획임</td>
+<td>앤스로픽과 삼성전자</td>
+<td>AI 반도체 개발 및 생산 공정 최적화에 대한 전문 지식을 제공할 수 있음</td>
+<td>앤스로픽은 삼성전자와 2㎚ 제조 공정 및 첨단 패키징 시설을 활용하는 방안을 논의 중</td>
+</tr>
+<tr>
+<td><strong>4/5</strong></td>
+<td><a href="#1540-삼성sk-서남권-반도체-투자-맞춰노동부-현장-실무인력-양성-본격화">삼성·SK 서남권 반도체 투자 맞춰노동부, 현장</a> 고용노동부, 삼성전자와 SK하이닉스의 2025년까지 1.5조원 반도체 투자에 맞춰 2만명 현장 실무인력 양성할 계획임</td>
+<td>삼성전자, SK하이닉스, 고용노동부</td>
+<td>반도체 생산 공정의 효율성과 안정성을 높이는 스마트그리드 및 전력계통 기술 개발에 관한 연구를 제안할 수 있음</td>
+<td>서남권 대규모 반도체 투자 계획, 현장 실무인력 양성 필요성, 고용노동부의 간담회 개최</td>
+</tr>
+<tr>
+<td><strong>4/5</strong></td>
+<td><a href="#2353-부산-ai-기반-미래차-부품-품질검증-인프라-구축">부산, AI 기반 미래차 부품 품질검증 인프라 구축</a> 부산시, 산업통상부 공모사업에 선정되어 8억원을 투입해 친환경 미래차 부품 품질검증 인프라를 구축할 계획임</td>
+<td>산업통상자원부와 부산시</td>
+<td>스마트 품질 검증 체계 구축과 데이터 기반의 정밀 측정 및 시험·인증 기술 개발에 대한 R&amp;D 지원을 제안할 수 있음</td>
+<td>총사업비 8억원, 특화단지 입주기업 31개사, 2026년 뿌리산업 특화단지 지정 및 지원사업</td>
+</tr>
+<tr>
+<td><strong>4/5</strong></td>
+<td><a href="#1627-전국-도시철도-무임손실-국비-보전-연구용역-착수">전국 도시철도 무임손실 국비 보전 연구용역 착수</a> 서울교통공사 등 6개 도시철도 운영기관이 도시철도 무임수송제도 지속 가능 방안 마련 연구용역 착수보고회를 개최하고, 종합계약 방식으로 용역비를 분담할 계획임.</td>
+<td>서울교통공사 등 6개 도시철도 운영기관임.</td>
+<td>도시철도 운영기관의 무임 수송 손실 분석 및 국비 보전 방안 마련을 위한 데이터 분석 및 시뮬레이션 기술을 제공할 수 있음.</td>
+<td>6개 도시철도 운영기관이 종합계약 방식으로 용역비를 분담하며, 주요 과업은 국내외 대중교통 공공서비스의무(PSO) 제도 비교·분석 및 운영기관 재정 및 적자 원인 객관적 규명 등임.</td>
+</tr>
+<tr>
+<td><strong>4/5</strong></td>
+<td><a href="#1930-李-요즘-세상에-압력-넣는다고-옮기는-기업-있나-특혜론-반박">李 “요즘 세상에 압력 넣는다고 옮기는 기업 있나”</a> 이재명 대통령, 충청권에 392조 원 투자계획 발표 - 삼성·SK하이닉스·셀트리온 등 4대 첨단산업 중심으로 투자할 계획임</td>
+<td>삼성, SK하이닉스, 셀트리온 등</td>
+<td>충청권의 첨단산업 발전에 필요한 기술 개발 및 적용 분야에서 협력할 수 있음</td>
+<td>삼성, SK하이닉스, 셀트리온 등이 충청권에 약 392조 원을 투자할 계획</td>
+</tr>
+<tr>
+<td><strong>4/5</strong></td>
+<td><a href="#0758-블루산업개발-폐배터리-순환경제-승부수새만금-거점-확보-나선다">블루산업개발, &lsquo;폐배터리 순환경제&rsquo; 승부수새만금 거점</a> 블루산업개발, 폐배터리 순환경제 시장 진출사용 후 배터리 재사용·재활용 분야 사업 확대함</td>
+<td>블루산업개발</td>
+<td>블루산업개발의 폐배터리 순환경제 사업에 에너지저장 및 재활용 기술 개발을 제안할 수 있음</td>
+<td>블루산업개발, 사용 후 배터리 재사용·재활용 사업 기반을 보유한 기업과 MOU 체결</td>
+</tr>
+<tr>
+<td><strong>4/5</strong></td>
+<td><a href="#0806-크린앤사이언스-그래핀-양자점-신사업-속도필터배터리-소재-강화한다">크린앤사이언스, &lsquo;그래핀 양자점&rsquo; 신사업</a> 크린앤사이언스와 헥사에프아이씨, 그래핀 양자점을 이용한 차세대 필터와 배터리 소재 개발을 위한 MOU 체결하고 공동 연구 개발을 추진할 계획임</td>
+<td>크린앤사이언스와 헥사에프아이씨</td>
+<td>그래핀 양자점을 이용한 차세대 필터와 배터리 소재 개발에 필요한 고난도 기술 격차 해소를 위한 연구 개발을 제안할 수 있음</td>
+<td>크린앤사이언스와 헥사에프아이씨의 MOU 체결, 헥사에프아이씨의 그래핀 양자점 원천 기술</td>
+</tr>
+<tr>
+<td><strong>3/5</strong></td>
+<td><a href="#2259-부산시-뿌리산업-특화단지-사업-선정친환경차-부품기업-지원">부산시, 뿌리산업 특화단지 사업 선정친환경차 부품기업</a> 부산시가 산업통상부의 뿌리산업 특화단지 사업을 선정, 2026년 친환경차 부품기업 지원을 위해 사업을 추진할 계획임</td>
+<td>산업통상부와 부산시</td>
+<td>부산시의 뿌리산업 특화단지 사업에서 스마트그리드 및 전력계통 기술을 적용한 친환경차 부품 개발에 관한 연구를 제안할 수 있음</td>
+<td>산업통상부의 2026년 뿌리산업 특화단지 지정 및 지원사업 공모</td>
+</tr>
+<tr>
+<td><strong>3/5</strong></td>
+<td><a href="#1515-李대통령-3대-메가프로젝트-미래세대-위한-역사적-결단">李대통령 “3대 메가프로젝트, 미래세대 위한 역사적</a> 이재명 대통령, 3대 메가프로젝트 투자로 미래세대 위한 역사적 결단 필요함</td>
+<td>대통령과 정부임</td>
+<td>스마트그리드, 전력계통, HVDC 기술 개발에 관한 연구를 제안할 수 있음</td>
+<td>이재명 대통령의 3대 메가프로젝트 투자 계획과 관련한 팩트는 명시되지 않음</td>
+</tr>
+<tr>
+<td><strong>3/5</strong></td>
+<td><a href="#1815-울산경제자유구역청-유망기업-10개사-선정지원">울산경제자유구역청, 유망기업 10개사 선정·지원</a> 울산경제자유구역청, 2026년 대중소 상생 투자 플랫폼 공모전 시상식 개최, 10개 유망기업에 사업화 자금 800만원과 울산 이전 시 최대 1000만원 지원함.</td>
+<td>울산경제자유구역청</td>
+<td>에너지 및 스마트그리드 기술 개발</td>
+<td>사업화 자금 800만원, 울산 이전 시 최대 1000만원 지원</td>
+</tr>
+<tr>
+<td><strong>2/5</strong></td>
+<td><a href="#1559-최광진-ibk투자증권-대표-종투사-도약-기반-마련중소기업-특화-경쟁력-강화">최광진 IBK투자증권 대표 “종투사 도약 기반</a> IBK투자증권, 중소기업 특화 경쟁력 강화 및 종합금융투자사업자 도약을 추진할 계획임</td>
+<td>IBK투자증권</td>
+<td>중소기업을 위한 스마트그리드 및 전력계통 기술 개발</td>
+<td>명시 없음</td>
+</tr>
+<tr>
+<td><strong>2/5</strong></td>
+<td><a href="#1641-한국-대규모-반도체-투자-종말-시작됐다빅쇼트-주인공의-섬뜩한-경고">“한국 대규모 반도체 투자, ‘종말’</a> 삼성전자와 SK하이닉스가 800조원 규모의 신규 반도체 투자 계획을 발표함에 따라 투자자들이 주의해야 함.</td>
+<td>삼성전자와 SK하이닉스 등</td>
+<td>반도체 기술 개발 및 투자 전략 분석</td>
+<td>삼성전자와 SK하이닉스의 800조원 규모의 신규 투자 계획</td>
+</tr>
+<tr>
+<td><strong>2/5</strong></td>
+<td><a href="#2300-고점-대비-30-빠진-전력기기-업종-투자전략-물어보니">고점 대비 30% 빠진 전력기기 업종, 투자전략</a> 정부의 에너지 정책 정합성과 산업의 기술 개발 필요성에 대한 연구가 필요함.</td>
+<td>명시 없음</td>
+<td>전력계통 및 스마트그리드 기술 개발에 대한 연구를 제안할 수 있음</td>
+<td>명시 없음</td>
+</tr>
+<tr>
+<td><strong>2/5</strong></td>
+<td><a href="#2324-대법원-대법관-증원-채비-착수정부와-공간-확보-예산-협의">대법원, 대법관 증원 채비 착수정부와 &lsquo;공간 확보&rsquo;</a> 대법원, 대법관 증원에 따른 공간 확보 예산 협의 착수하고, 법원행정처 이전 계획 검토 중임.</td>
+<td>법원행정처와 기획예산처</td>
+<td>법원행정처의 청사 리모델링 및 공간 확보를 위한 스마트그리드 및 전력계통 기술 적용</td>
+<td>대법관 증원에 따른 공간 확보 필요성, 내년도 예산안 심의 신청</td>
+</tr>
+<tr>
+<td><strong>2/5</strong></td>
+<td><a href="#1553-dl이앤씨-국토부-상호협력평가-최우수-등급-획득">DL이앤씨, 국토부 상호협력평가 ‘최우수’ 등급 획득</a> DL이앤씨, 국토부 2026년 건설사업자간 상호협력평가 최우수 등급 획득함.</td>
+<td>DL이앤씨</td>
+<td>건설사업자 간 협력관계 구축을 위한 기술개발 및 공동기술개발</td>
+<td>2026년 건설사업자간 상호협력평가에서 최우수 등급 획득, 협력업자와 공동도급 실적 및 하도급 실적, 협력업자 육성, 신인도 등이 평가 기준</td>
+</tr>
+<tr>
+<td><strong>2/5</strong></td>
+<td><a href="#2306-ibk투자증권-비에이치아이-목표가시장-밸류에이션-하락">IBK투자증권, 비에이치아이 목표가↓&rdquo;시장 밸류에이션</a> IBK투자증권이 비에이치아이의 목표주가를 14만원에서 11만으로 하향 조정할 예정임.</td>
+<td>IBK투자증권</td>
+<td>전력계통 및 스마트그리드 기술 개발</td>
+<td>명시 없음</td>
+</tr>
+<tr>
+<td><strong>2/5</strong></td>
+<td><a href="#1530-hd현대일렉-11조-효성重-3100억원-전력기기-수주-잭팟">HD현대일렉 1.1조-효성重 3100억원, 전력기기</a> HD현대일렉트릭과 효성중공업이시장에서 대규모 전력기기 수주에 성공하여 1.1조원과 3100억원의 수주 금액을 확보함</td>
+<td>HD현대일렉트릭, 효성중공업</td>
+<td>전력기기 및 데이터센터 전력 인프라 관련 기술 개발에 대한 연구를 제안할 수 있음</td>
+<td>HD현대일렉트릭의 북미 데이터센터 전력기기 공급 계약 규모는 1조1212억 원, 효성중공업의 수주 금액은 3100억원</td>
+</tr>
+<tr>
+<td><strong>2/5</strong></td>
+<td><a href="#2327-nhn-kcp-페이페이-출시-등-日-비즈니스-설명회-성료">NHN KCP, 페이페이 출시 등 日 비즈니스 설명회</a> NHN KCP와 KOTRA가 일본 시장 진출 설명회를 개최하고 페이페이 서비스 출시를 앞두고 일본 진출을 희망하는 국내 기업들을 지원하기 위해 마련했음.</td>
+<td>NHN KCP와 KOTRA</td>
+<td>해당 없음</td>
+<td>NHN KCP와 KOTRA의 일본 시장 진출 설명회 개최, 페이페이 서비스 출시 예정</td>
+</tr>
+<tr>
+<td><strong>2/5</strong></td>
+<td><a href="#2312-해양교통안전공단-어선-클린사업장-3차-모집온열질환-예방-장비-포함">해양교통안전공단, 어선 클린사업장 3차 모집온열질환</a> 한국해양교통안전공단이 2026년 제3차 어선 클린사업장 조성 지원사업을 진행하며, 총 20억원 규모로 어선주 1인당 최대 1000만원 한도 내에서 시설·장비 도입 비용의 70%까지 국비 지원함.</td>
+<td>한국해양교통안전공단</td>
+<td>해양 교통 안전 기술 개발</td>
+<td>2026년 제3차 어선 클린사업장 조성 지원사업, 총 20억원 규모, 어선주 1인당 최대 1000만원 한도 내에서 시설·장비 도입 비용의 70%까지 국비 지원</td>
+</tr>
+<tr>
+<td><strong>2/5</strong></td>
+<td><a href="#1625-리얼푸드-식품-건기식업계-대학생과-함께-미래-먹거리-찾는다">[리얼푸드] 식품 ·건기식업계, 대학생과 함께 미래</a> KGC가 대학생과 함께 미래 먹거리 찾기 연구개발 경진대회를 개최 중임.</td>
+<td>KGC</td>
+<td>식품 및 건강기능식품 관련 연구개발</td>
+<td>KGC의 대학생 제품개발 경진대회, &lsquo;Healthy Aging&rsquo; 주제</td>
+</tr>
+<tr>
+<td><strong>2/5</strong></td>
+<td><a href="#2338-강서-에코델타시티에-특화통합공공임대-993호-들어선다">강서 에코델타시티에 특화·통합공공임대 993호 들어선다</a> 부산시, 강서 에코델타시티에 993호의 특화·통합공공임대주택을 건립하고 2029년 6월 준공을 목표로 함.</td>
+<td>부산시와 부산도시공사임.</td>
+<td>에코델타시티의 스마트그리드 및 전력계통 구축을 위한 기술 개발</td>
+<td>993호의 공급, 2028년 상반기 입주자 모집 공고, 2029년 6월 준공</td>
+</tr>
+<tr>
+<td><strong>2/5</strong></td>
+<td><a href="#2311-박재한-비트플래닛-공동대표-it-21-컨퍼런스서-우수상-수상">박재한 비트플래닛 공동대표, IT 21 컨퍼런스서</a> 비트플래닛 박재한 대표가 IT 21 컨퍼런스서 AI 데이터 가치 창출 우수상을 수상하고, 공공 IT 혁신과 AI·데이터 기술의 실질적 가치 창출에 힘써옴</td>
+<td>비트플래닛</td>
+<td>비트플래닛의 공공 IT 시스템 통합 및 AI·데이터 분석 기술을 접목한 서비스 기획·구축 사업 영역에서 협력할 수 있음</td>
+<td>비트플래닛 SI사업부문은 공공기관의 디지털 전환과 데이터 기반 업무혁신을 중심으로 사업을 전개하고 있으며, AI 기반 디지털 신뢰 인프라 스타트업 코어트러스트링크와 업무협약을 체결함</td>
+</tr>
+<tr>
+<td><strong>2/5</strong></td>
+<td><a href="#2149-수성대-syncode-팀-대구지역-대학연합-창업경진대회서-우수상-쾌거">수성대 Syncode 팀, 대구지역 대학연합</a> 수성대 Syncode 팀, 대구지역 대학연합 창업경진대회서 ‘우수상’ 수상하고 AI·메타버스 기술을 접목한 창업 아이디어를 선보임</td>
+<td>대학창업지원협의회(DRIVE), 수성대 창업보육센터</td>
+<td>AI와 메타버스 기술을 접목한 스마트그리드 솔루션 개발에 대한 연구를 제안할 수 있음</td>
+<td>대구지역 9개 대학이 공동 참여, 17개 팀이 사업계획 발표, 특허청 하이패스상(우수상) 수상</td>
+</tr>
+<tr>
+<td><strong>2/5</strong></td>
+<td><a href="#2230-추경호-시장-취임-직후-첫-대구시-간부-인사-단행">추경호 시장 취임 직후 첫 대구시 간부 인사 단행</a> 대구시, 추경호 시장 취임에 맞춰 간부 인사 단행하고 투자 역량 강화할 계획임</td>
+<td>대구시</td>
+<td>대구시의 경제 발전을 위한 스마트그리드 및 전력계통 기술 개발</td>
+<td>대구시 미래혁신성장실장에 김태운 임명, 일자리투자국장 및 창업진흥과장 경험</td>
+</tr>
+</tbody>
+</table>
+<p><em>(이하 3건은 R&amp;D 적합 1점 또는 국내 투자 신호 미약으로 표에서 생략)</em></p>
+<p><strong>국내 R&amp;D 타겟 시사점 (프라운호퍼 · hvdc · 전력계통 · 스마트그리드):</strong></p>
+<ul>
+<li><strong>[4/5] 산업통상부, 재정경제부, 한미전략투자공사(KUIC)</strong> — 목적: 대미 투자와 조선협력 투자의 최종 의사결정을 맡는 한미전략투자 운영위원회 출범 | 니즈: HVDC, 전력계통, 스마트그리드 기술 개발에 관한 연구 필요 | 접근: 정부의 한미 전략투자 정책과 산업통상부의 투자 계획에 따라 연구 제안 가능 (<a href="https://biz.heraldcorp.com/article/10796160">3500억달러 한미 전략투자 컨트롤타워 출범…투자 의사결정 체계 완성</a>)</li>
+<li><strong>[4/5] SK그룹</strong> — 목적: 협력사에 대한 기술·금융 지원을 제공하여 상생협력 체계를 강화하고, 반도체 생태계의 경쟁력 강화를 도모함 | 니즈: 고난도 연구개발(R&amp;D) 격차를 해소하기 위한 기술 지원이 필요함 | 접근: SK그룹의 기술·금융 지원 사업과 연계하여 연구개발(R&amp;D) 지원을 제안할 수 있음 (<a href="https://www.donga.com/news/Economy/article/all/20260702/134227197/2">SK “협력사와 상생” 8700억 기술-금융 지원 나서</a>)</li>
+<li><strong>[4/5] 앤스로픽과 삼성전자</strong> — 목적: AI 반도체 개발 및 생산 | 니즈: 고난도 AI 반도체 개발 및 생산 공정 최적화 | 접근: 삼성전자와의 협력을 통해 AI 반도체 개발 및 생산 공정 최적화에 대한 전문 지식을 제공할 수 있음 (<a href="https://www.fnnews.com/news/202607030503030818">독자 AI 반도체 개발하는 美 앤스로픽, 삼성과 협력할 수도</a>)</li>
+<li><strong>[4/5] 산업통상자원부와 부산시</strong> — 목적: 뿌리산업 특화단지의 경쟁력을 높이고 지역 뿌리기업의 지속 가능한 성장을 지원하기 위해 투자함 | 니즈: 첨단 정밀 측정·시험·인증 장비 구축과 AI 기반 스마트 품질관리 체계 개발이 필요함 | 접근: 부산시와 산업통상자원부의 정책 정합성을 고려하여 R&amp;D 지원을 제안할 수 있음 (<a href="https://www.newsis.com/view/NISX20260703_0003694366">부산, AI 기반 미래차 부품 품질검증 인프라 구축</a>)</li>
+<li>
+<p><strong>[4/5] 삼성전자, SK하이닉스, 고용노동부</strong> — 목적: 반도체 산업 경쟁력 확보를 위한 인력 양성 | 니즈: 반도체 생산 공정의 효율성과 안정성을 높이는 기술 개발 | 접근: 정부의 정책 정합성과 기업의 로드맵 연계를 통한 협력 (<a href="https://biz.heraldcorp.com/article/10796272">삼성·SK 서남권 반도체 투자 맞춰…노동부, 현장 실무인력 양성 본격화</a>)</p>
+</li>
+<li>
+<p><strong>상충되는 정보:</strong> (해당 없음)</p>
+</li>
+</ul>
+<hr />
+<h2>항목 기록</h2>
+<p><a id="2317-강원도-소형-데이터센터-기반-인공지능ai-산업-성장-지원사업-선정"></a></p>
+<h3>23:17 강원도, ‘소형 데이터센터 기반 인공지능(AI) 산업 성장 지원사업’ 선정</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 뉴시스 속보</li>
+<li><strong>저자/발행기관:</strong> 뉴시스 속보</li>
+<li><strong>발행일:</strong> 2026-07-02</li>
+<li><strong>링크/DOI:</strong> https://www.newsis.com/view/NISX20260703_0003694256</li>
+<li><strong>요약:</strong></li>
+<li>강원도, ‘소형 데이터센터 기반 인공지능 산업 성장 지원사업’ 선정, 국비 59억원 포함 총사업비 98억원 규모로 2027년까지 추진함.</li>
+<li>강원도는 과학기술정보통신부와 정보통신산업진흥원의 ‘2026년 소형 데이터센터 기반 인공지능 산업 성장 지원사업’ 공모에 선정됨.</li>
+<li>
+<p>(해석) 인공지능 산업 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 4/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 강원대학교와 한림대학교의 GPU 자원을 활용한 인공지능 서비스 개발과 실증을 지원하는 사업에서 인공지능 기술 개발 및 적용 분야에 대한 연구를 제안할 수 있음.</li>
+<li><strong>팩트 근거:</strong> 국비 59억원, 총사업비 98억원, 2027년까지 추진, 강원대학교와 한림대학교의 GPU 자원 활용</li>
+<li><strong>투자 주체:</strong> 강원도와 강릉시, 강원테크노파크, 강릉과학산업진흥원</li>
+<li><strong>투자 목적:</strong> 지역의 인공지능 산업 성장 지원, 도내 기업의 인공지능 서비스 개발과 실증 지원</li>
+<li><strong>위탁 연구 니즈:</strong> 인공지능 기술 개발 및 적용, GPU 자원 활용 효율성 향상</li>
+<li><strong>접근 전략:</strong> 강원대학교와 한림대학교의 GPU 자원 활용, 지역의 인공지능 협력 생태계 구축</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #기술</li>
+<li><strong>비고:</strong> 분석 키워드: hvdc, 전력계통, 스마트그리드 · 매칭: 공모</li>
+</ul>
+<p><a id="1500-3500억달러-한미-전략투자-컨트롤타워-출범투자-의사결정-체계-완성"></a></p>
+<h3>15:00 3500억달러 한미 전략투자 컨트롤타워 출범투자 의사결정 체계 완성</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 헤럴드경제</li>
+<li><strong>저자/발행기관:</strong> 헤럴드경제</li>
+<li><strong>발행일:</strong> 2026-07-02</li>
+<li><strong>링크/DOI:</strong> https://biz.heraldcorp.com/article/10796160</li>
+<li><strong>요약:</strong></li>
+<li>정부, 3500억달러 한미 전략투자 컨트롤타워 출범투자 의사결정 체계 완성.</li>
+<li>정부는 3500억달러 규모의 한미 전략투자를 총괄하는 최고 의사결정기구를 출범시킴</li>
+<li>
+<p>(해석) 한미 전략투자 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 4/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 한미 전략투자에 따른 HVDC, 전력계통, 스마트그리드 기술 개발에 관한 연구를 제안할 수 있음</li>
+<li><strong>팩트 근거:</strong> 3500억달러 규모의 한미 전략투자, 2000억달러 규모의 대미 투자, 1500억달러 규모의 조선협력 투자</li>
+<li><strong>투자 주체:</strong> 산업통상부, 재정경제부, 한미전략투자공사(KUIC)</li>
+<li><strong>투자 목적:</strong> 대미 투자와 조선협력 투자의 최종 의사결정을 맡는 한미전략투자 운영위원회 출범</li>
+<li><strong>위탁 연구 니즈:</strong> HVDC, 전력계통, 스마트그리드 기술 개발에 관한 연구 필요</li>
+<li><strong>접근 전략:</strong> 정부의 한미 전략투자 정책과 산업통상부의 투자 계획에 따라 연구 제안 가능</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #투자 #기업동향</li>
+<li><strong>비고:</strong> 분석 키워드: hvdc, 전력계통, 스마트그리드 · 매칭: mou, 투자, 산업통상부</li>
+</ul>
+<p><a id="1530-sk-협력사와-상생-8700억-기술-금융-지원-나서"></a></p>
+<h3>15:30 SK “협력사와 상생” 8700억 기술-금융 지원 나서</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 동아일보 경제</li>
+<li><strong>저자/발행기관:</strong> 동아일보 경제</li>
+<li><strong>발행일:</strong> 2026-07-02</li>
+<li><strong>링크/DOI:</strong> https://www.donga.com/news/Economy/article/all/20260702/134227197/2</li>
+<li><strong>요약:</strong></li>
+<li>SK그룹, 협력사에 8700억원 기술·금융 지원 나서 -</li>
+<li>SK그룹은 협력사에 대한 기술·금융 지원을 제공하여 상생협력 체계를 강화하고, 반도체 생태계의 경쟁력 강화를 도모함</li>
+<li>
+<p>(해석) 반도체 생태계 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 4/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> SK그룹의 협력사에 대한 기술·금융 지원 사업과 연계하여 연구개발(R&amp;D) 지원을 제안할 수 있음</li>
+<li><strong>팩트 근거:</strong> SK그룹은 협력사에 8700억 원 규모의 기술·금융 지원을 제공하고, 1차 협력사뿐 아니라 2·3차 협력사까지 대금 지급 조건을 개선함</li>
+<li><strong>투자 주체:</strong> SK그룹</li>
+<li><strong>투자 목적:</strong> 협력사에 대한 기술·금융 지원을 제공하여 상생협력 체계를 강화하고, 반도체 생태계의 경쟁력 강화를 도모함</li>
+<li><strong>위탁 연구 니즈:</strong> 고난도 연구개발(R&amp;D) 격차를 해소하기 위한 기술 지원이 필요함</li>
+<li><strong>접근 전략:</strong> SK그룹의 기술·금융 지원 사업과 연계하여 연구개발(R&amp;D) 지원을 제안할 수 있음</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #기술</li>
+<li><strong>비고:</strong> 분석 키워드: hvdc, 전력계통, 스마트그리드 · 매칭: 연구개발</li>
+</ul>
+<p><a id="0551-독자-ai-반도체-개발하는-美-앤스로픽-삼성과-협력할-수도"></a></p>
+<h3>05:51 독자 AI 반도체 개발하는 美 앤스로픽, 삼성과 협력할 수도</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 파이낸셜뉴스</li>
+<li><strong>저자/발행기관:</strong> 파이낸셜뉴스</li>
+<li><strong>발행일:</strong> 2026-07-03</li>
+<li><strong>링크/DOI:</strong> https://www.fnnews.com/news/202607030503030818</li>
+<li><strong>요약:</strong></li>
+<li>앤스로픽, 삼성전자와 AI 반도체 개발 협력 논의중임.</li>
+<li>앤스로픽은 자체적인 AI 구동용 반도체를 생산하기 위해 삼성전자와 협력할 계획임</li>
+<li>
+<p>(해석) AI 반도체 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 4/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> AI 반도체 개발 및 생산 공정 최적화에 대한 전문 지식을 제공할 수 있음</li>
+<li><strong>팩트 근거:</strong> 앤스로픽은 삼성전자와 2㎚ 제조 공정 및 첨단 패키징 시설을 활용하는 방안을 논의 중</li>
+<li><strong>투자 주체:</strong> 앤스로픽과 삼성전자</li>
+<li><strong>투자 목적:</strong> AI 반도체 개발 및 생산</li>
+<li><strong>위탁 연구 니즈:</strong> 고난도 AI 반도체 개발 및 생산 공정 최적화</li>
+<li><strong>접근 전략:</strong> 삼성전자와의 협력을 통해 AI 반도체 개발 및 생산 공정 최적화에 대한 전문 지식을 제공할 수 있음</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #투자</li>
+<li><strong>비고:</strong> 분석 키워드: hvdc, 전력계통, 스마트그리드 · 매칭: 투자</li>
+</ul>
+<p><a id="1540-삼성sk-서남권-반도체-투자-맞춰노동부-현장-실무인력-양성-본격화"></a></p>
+<h3>15:40 삼성·SK 서남권 반도체 투자 맞춰노동부, 현장 실무인력 양성 본격화</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 헤럴드경제</li>
+<li><strong>저자/발행기관:</strong> 헤럴드경제</li>
+<li><strong>발행일:</strong> 2026-07-02</li>
+<li><strong>링크/DOI:</strong> https://biz.heraldcorp.com/article/10796272</li>
+<li><strong>요약:</strong></li>
+<li>고용노동부, 삼성전자와 SK하이닉스의 서남권 반도체 투자에 발맞춰 현장 실무인력 양성 본격화할 계획임.</li>
+<li>정부는 삼성전자와 SK하이닉스의 서남권 반도체 투자 계획에 발맞춰 현장 실무인력 양성에 나섬</li>
+<li>
+<p>(해석) 서남권 반도체 투자 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 4/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 반도체 생산 공정의 효율성과 안정성을 높이는 스마트그리드 및 전력계통 기술 개발에 관한 연구를 제안할 수 있음</li>
+<li><strong>팩트 근거:</strong> 서남권 대규모 반도체 투자 계획, 현장 실무인력 양성 필요성, 고용노동부의 간담회 개최</li>
+<li><strong>투자 주체:</strong> 삼성전자, SK하이닉스, 고용노동부</li>
+<li><strong>투자 목적:</strong> 반도체 산업 경쟁력 확보를 위한 인력 양성</li>
+<li><strong>위탁 연구 니즈:</strong> 반도체 생산 공정의 효율성과 안정성을 높이는 기술 개발</li>
+<li><strong>접근 전략:</strong> 정부의 정책 정합성과 기업의 로드맵 연계를 통한 협력</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #투자 #경쟁 #기업동향</li>
+<li><strong>비고:</strong> 분석 키워드: hvdc, 전력계통, 스마트그리드 · 매칭: 투자</li>
+</ul>
+<p><a id="2353-부산-ai-기반-미래차-부품-품질검증-인프라-구축"></a></p>
+<h3>23:53 부산, AI 기반 미래차 부품 품질검증 인프라 구축</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 뉴시스 속보</li>
+<li><strong>저자/발행기관:</strong> 뉴시스 속보</li>
+<li><strong>발행일:</strong> 2026-07-02</li>
+<li><strong>링크/DOI:</strong> https://www.newsis.com/view/NISX20260703_0003694366</li>
+<li><strong>요약:</strong></li>
+<li>부산시, 산업통상부 공모사업 선정으로 친환경 미래차 부품 품질검증 인프라 구축할 계획임.</li>
+<li>부산시가 산업통상부의 공모사업에 선정돼 친환경 미래차 부품 품질검증 인프라를 구축할 계획임</li>
+<li>
+<p>(해석) AI 기반 품질 검증 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 4/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 스마트 품질 검증 체계 구축과 데이터 기반의 정밀 측정 및 시험·인증 기술 개발에 대한 R&amp;D 지원을 제안할 수 있음</li>
+<li><strong>팩트 근거:</strong> 총사업비 8억원, 특화단지 입주기업 31개사, 2026년 뿌리산업 특화단지 지정 및 지원사업</li>
+<li><strong>투자 주체:</strong> 산업통상자원부와 부산시</li>
+<li><strong>투자 목적:</strong> 뿌리산업 특화단지의 경쟁력을 높이고 지역 뿌리기업의 지속 가능한 성장을 지원하기 위해 투자함</li>
+<li><strong>위탁 연구 니즈:</strong> 첨단 정밀 측정·시험·인증 장비 구축과 AI 기반 스마트 품질관리 체계 개발이 필요함</li>
+<li><strong>접근 전략:</strong> 부산시와 산업통상자원부의 정책 정합성을 고려하여 R&amp;D 지원을 제안할 수 있음</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #기술</li>
+<li><strong>비고:</strong> 분석 키워드: hvdc, 전력계통, 스마트그리드 · 매칭: 공모, 산업통상부</li>
+</ul>
+<p><a id="1627-전국-도시철도-무임손실-국비-보전-연구용역-착수"></a></p>
+<h3>16:27 전국 도시철도 무임손실 국비 보전 연구용역 착수</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 헤럴드경제</li>
+<li><strong>저자/발행기관:</strong> 헤럴드경제</li>
+<li><strong>발행일:</strong> 2026-07-02</li>
+<li><strong>링크/DOI:</strong> https://biz.heraldcorp.com/article/10796374</li>
+<li><strong>요약:</strong></li>
+<li>서울교통공사 등 6개 도시철도 운영기관이 도시철도 무임수송제도 지속 가능 방안 마련 연구용역 착수보고회를 개최했음.</li>
+<li>원문 기준 핵심 사실을 추가 확인 필요</li>
+<li>
+<p>(해석) 도시철도 무임수송제도 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 4/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 도시철도 운영기관의 무임 수송 손실 분석 및 국비 보전 방안 마련을 위한 데이터 분석 및 시뮬레이션 기술을 제공할 수 있음.</li>
+<li><strong>팩트 근거:</strong> 6개 도시철도 운영기관이 종합계약 방식으로 용역비를 분담하며, 주요 과업은 국내외 대중교통 공공서비스의무(PSO) 제도 비교·분석 및 운영기관 재정 및 적자 원인 객관적 규명 등임.</li>
+<li><strong>투자 주체:</strong> 서울교통공사 등 6개 도시철도 운영기관임.</li>
+<li><strong>투자 목적:</strong> 도시철도 무임 수송 국비 보전과 관련, 정부를 설득할 정교한 논리와 구체적인 실행 방안을 마련하기 위한 것임.</li>
+<li><strong>위탁 연구 니즈:</strong> 도시철도 운영기관의 무임 수송 손실 분석 및 국비 보전 방안 마련을 위한 데이터 분석 및 시뮬레이션 기술임.</li>
+<li><strong>접근 전략:</strong> 도시철도 운영기관의 로드맵 구축을 지원할 수 있으며, 정부의 정책 정합성을 고려한 연구용역 참여가 가능함.</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #기술</li>
+<li><strong>비고:</strong> 분석 키워드: hvdc, 전력계통, 스마트그리드 · 매칭: 로드맵</li>
+</ul>
+<p><a id="1930-李-요즘-세상에-압력-넣는다고-옮기는-기업-있나-특혜론-반박"></a></p>
+<h3>19:30 李 “요즘 세상에 압력 넣는다고 옮기는 기업 있나” 특혜론 반박</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 동아일보 경제</li>
+<li><strong>저자/발행기관:</strong> 동아일보 경제</li>
+<li><strong>발행일:</strong> 2026-07-02</li>
+<li><strong>링크/DOI:</strong> https://www.donga.com/news/Politics/article/all/20260703/134228308/2</li>
+<li><strong>요약:</strong></li>
+<li>이재명 대통령, 충청권에 392조 원 투자계획 발표 - 삼성·SK하이닉스·셀트리온 등 4대 첨단산업 중심으로 투자할 계획임.</li>
+<li>충청권에 392조 원 투자계획을 발표했음</li>
+<li>
+<p>(해석) 충청권 첨단산업 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 4/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 충청권의 첨단산업 발전에 필요한 기술 개발 및 적용 분야에서 협력할 수 있음</li>
+<li><strong>팩트 근거:</strong> 삼성, SK하이닉스, 셀트리온 등이 충청권에 약 392조 원을 투자할 계획</li>
+<li><strong>투자 주체:</strong> 삼성, SK하이닉스, 셀트리온 등</li>
+<li><strong>투자 목적:</strong> 4대 첨단산업을 중심으로 충청권의 산업 발전을 도모함</li>
+<li><strong>위탁 연구 니즈:</strong> 첨단산업 기술 개발 및 적용에 대한 고난도 연구가 필요함</li>
+<li><strong>접근 전략:</strong> 충청권의 산업 발전을 지원하는 기술 개발 및 적용 분야에서 협력할 수 있음</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #투자</li>
+<li><strong>비고:</strong> 분석 키워드: hvdc, 전력계통, 스마트그리드 · 매칭: 투자</li>
+</ul>
+<p><a id="0758-블루산업개발-폐배터리-순환경제-승부수새만금-거점-확보-나선다"></a></p>
+<h3>07:58 블루산업개발, &lsquo;폐배터리 순환경제&rsquo; 승부수새만금 거점 확보 나선다</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 파이낸셜뉴스</li>
+<li><strong>저자/발행기관:</strong> 파이낸셜뉴스</li>
+<li><strong>발행일:</strong> 2026-07-03</li>
+<li><strong>링크/DOI:</strong> https://www.fnnews.com/news/202607030754269751</li>
+<li><strong>요약:</strong></li>
+<li>블루산업개발, 폐배터리 순환경제 시장 진출사용 후 배터리 재사용·재활용 분야 사업 확대.</li>
+<li>블루산업개발이 폐배터리 순환경제 시장에 진출하고 사용 후 배터리 재사용·재활용 분야까지 사업을 확대함</li>
+<li>
+<p>(해석) 폐배터리 순환경제 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 4/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 블루산업개발의 폐배터리 순환경제 사업에 에너지저장 및 재활용 기술 개발을 제안할 수 있음</li>
+<li><strong>팩트 근거:</strong> 블루산업개발, 사용 후 배터리 재사용·재활용 사업 기반을 보유한 기업과 MOU 체결</li>
+<li><strong>투자 주체:</strong> 블루산업개발</li>
+<li><strong>투자 목적:</strong> 폐배터리 순환경제 시장 진출 및 사용 후 배터리 재사용·재활용 분야 사업 확대</li>
+<li><strong>위탁 연구 니즈:</strong> 폐배터리 재활용 기술 개발 및 에너지저장장치의 효율성 향상</li>
+<li><strong>접근 전략:</strong> 블루산업개발의 사업 확대 계획에 따라 에너지저장 및 재활용 기술 개발을 제안할 수 있음</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #기술</li>
+<li><strong>비고:</strong> 분석 키워드: hvdc, 전력계통, 스마트그리드 · 매칭: 에너지저장, mou</li>
+</ul>
+<p><a id="0806-크린앤사이언스-그래핀-양자점-신사업-속도필터배터리-소재-강화한다"></a></p>
+<h3>08:06 크린앤사이언스, &lsquo;그래핀 양자점&rsquo; 신사업 속도필터·배터리 소재 강화한다</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 파이낸셜뉴스</li>
+<li><strong>저자/발행기관:</strong> 파이낸셜뉴스</li>
+<li><strong>발행일:</strong> 2026-07-03</li>
+<li><strong>링크/DOI:</strong> https://www.fnnews.com/news/202607030759268998</li>
+<li><strong>요약:</strong></li>
+<li>크린앤사이언스와 헥사에프아이씨, 그래핀 양자점을 이용한 차세대 필터와 배터리 소재 개발을 위한 MOU 체결함.</li>
+<li>크린앤사이언스와 헥사에프아이씨는 그래핀 양자점을 이용한 차세대 필터와 배터리 소재 개발을 위한 MOU를 체결함</li>
+<li>
+<p>(해석) 그래핀 양자점 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 4/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 그래핀 양자점을 이용한 차세대 필터와 배터리 소재 개발에 필요한 고난도 기술 격차 해소를 위한 연구 개발을 제안할 수 있음</li>
+<li><strong>팩트 근거:</strong> 크린앤사이언스와 헥사에프아이씨의 MOU 체결, 헥사에프아이씨의 그래핀 양자점 원천 기술</li>
+<li><strong>투자 주체:</strong> 크린앤사이언스와 헥사에프아이씨</li>
+<li><strong>투자 목적:</strong> 차세대 필터와 배터리 소재 개발을 위한 기술 협력</li>
+<li><strong>위탁 연구 니즈:</strong> 그래핀 양자점을 이용한 차세대 필터와 배터리 소재 개발에 필요한 고난도 기술 격차 해소</li>
+<li><strong>접근 전략:</strong> 크린앤사이언스와 헥사에프아이씨의 기술 협력에 필요한 연구 개발을 제안할 수 있음</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #기술</li>
+<li><strong>비고:</strong> 분석 키워드: hvdc, 전력계통, 스마트그리드 · 매칭: mou</li>
+</ul>
+<p><a id="2259-부산시-뿌리산업-특화단지-사업-선정친환경차-부품기업-지원"></a></p>
+<h3>22:59 부산시, 뿌리산업 특화단지 사업 선정친환경차 부품기업 지원</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 연합뉴스 산업</li>
+<li><strong>저자/발행기관:</strong> 연합뉴스 산업</li>
+<li><strong>발행일:</strong> 2026-07-02</li>
+<li><strong>링크/DOI:</strong> https://www.yna.co.kr/view/AKR20260703017500051</li>
+<li><strong>요약:</strong></li>
+<li>부산시, 뿌리산업 특화단지 사업 선정친환경차 부품기업 지원 -</li>
+<li>부산시가 산업통상부의 뿌리산업 특화단지 사업을 선정함</li>
+<li>
+<p>(해석) 뿌리산업 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 3/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 부산시의 뿌리산업 특화단지 사업에서 스마트그리드 및 전력계통 기술을 적용한 친환경차 부품 개발에 관한 연구를 제안할 수 있음</li>
+<li><strong>팩트 근거:</strong> 산업통상부의 2026년 뿌리산업 특화단지 지정 및 지원사업 공모</li>
+<li><strong>투자 주체:</strong> 산업통상부와 부산시</li>
+<li><strong>투자 목적:</strong> 뿌리산업의 경쟁력을 강화하고 친환경차 부품기업을 지원</li>
+<li><strong>위탁 연구 니즈:</strong> 스마트그리드 및 전력계통 기술을 적용한 친환경차 부품 개발에 관한 연구</li>
+<li><strong>접근 전략:</strong> 산업통상부의 정책 정합과 부산시의 산업 발전 계획에 따라 접근</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #기술</li>
+<li><strong>비고:</strong> 분석 키워드: hvdc, 전력계통, 스마트그리드 · 매칭: 공모, 산업통상부</li>
+</ul>
+<p><a id="1515-李대통령-3대-메가프로젝트-미래세대-위한-역사적-결단"></a></p>
+<h3>15:15 李대통령 “3대 메가프로젝트, 미래세대 위한 역사적 결단”</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 헤럴드경제</li>
+<li><strong>저자/발행기관:</strong> 헤럴드경제</li>
+<li><strong>발행일:</strong> 2026-07-02</li>
+<li><strong>링크/DOI:</strong> https://biz.heraldcorp.com/article/10796230</li>
+<li><strong>요약:</strong></li>
+<li>이재명 대통령, 3대 메가프로젝트 투자로 미래세대 위한 역사적 결단 필요함.</li>
+<li>이재명 대통령은 3대 메가프로젝트를 통해 미래세대를 위한 역사적 결단을 내릴 필요가 있다고 밝혔음</li>
+<li>
+<p>(해석) 4차 산업혁명 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 3/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 스마트그리드, 전력계통, HVDC 기술 개발에 관한 연구를 제안할 수 있음</li>
+<li><strong>팩트 근거:</strong> 이재명 대통령의 3대 메가프로젝트 투자 계획과 관련한 팩트는 명시되지 않음</li>
+<li><strong>투자 주체:</strong> 대통령과 정부임</li>
+<li><strong>투자 목적:</strong> 미래세대를 위한 역사적 결단과 4차 산업혁명에 대비하기 위함임</li>
+<li><strong>위탁 연구 니즈:</strong> 팩트 부족으로 판단 보류임</li>
+<li><strong>접근 전략:</strong> 정부의 정책 정합성을 고려하여 접근할 수 있음</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #투자</li>
+<li><strong>비고:</strong> 분석 키워드: hvdc, 전력계통, 스마트그리드 · 매칭: 투자</li>
+</ul>
+<p><a id="1815-울산경제자유구역청-유망기업-10개사-선정지원"></a></p>
+<h3>18:15 울산경제자유구역청, 유망기업 10개사 선정·지원</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 헤럴드경제</li>
+<li><strong>저자/발행기관:</strong> 헤럴드경제</li>
+<li><strong>발행일:</strong> 2026-07-02</li>
+<li><strong>링크/DOI:</strong> https://biz.heraldcorp.com/article/10796521</li>
+<li><strong>요약:</strong></li>
+<li>울산경제자유구역청, 2026년 울산경제자유구역 대중소 상생 투자 플랫폼 공모전 시상식 개최, 10개 유망기업 선정·지원.</li>
+<li>울산경제자유구역청은 2026년 울산경제자유구역 대중소 상생 투자 플랫폼 공모전 시상식을 개최하고, 10개 유망기업을 선정하여 지원함.</li>
+<li>
+<p>(해석) 대중소 상생 투자 플랫폼 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 3/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 에너지 및 스마트그리드 기술 개발</li>
+<li><strong>팩트 근거:</strong> 사업화 자금 800만원, 울산 이전 시 최대 1000만원 지원</li>
+<li><strong>투자 주체:</strong> 울산경제자유구역청</li>
+<li><strong>투자 목적:</strong> 대중소 기업 간 상호 협력을 통한 동반성장</li>
+<li><strong>위탁 연구 니즈:</strong> 에너지 및 스마트그리드 기술 개발</li>
+<li><strong>접근 전략:</strong> 지역 대기업과의 사업 협력 기회와 투자사와의 연결망 참여</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #투자</li>
+<li><strong>비고:</strong> 분석 키워드: hvdc, 전력계통, 스마트그리드 · 매칭: 투자, 공모</li>
+</ul>
+<p><a id="1559-최광진-ibk투자증권-대표-종투사-도약-기반-마련중소기업-특화-경쟁력-강화"></a></p>
+<h3>15:59 최광진 IBK투자증권 대표 “종투사 도약 기반 마련중소기업 특화 경쟁력 강화”</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 헤럴드경제</li>
+<li><strong>저자/발행기관:</strong> 헤럴드경제</li>
+<li><strong>발행일:</strong> 2026-07-02</li>
+<li><strong>링크/DOI:</strong> https://biz.heraldcorp.com/article/10796310</li>
+<li><strong>요약:</strong></li>
+<li>IBK투자증권, 중소기업 특화 경쟁력 강화 및 종합금융투자사업자 도약 추진.</li>
+<li>IBK투자증권이 중소기업 특화 경쟁력 강화 및 종합금융투자사업자 도약을 추진함</li>
+<li>
+<p>(해석) 중소기업 특화 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 2/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 중소기업을 위한 스마트그리드 및 전력계통 기술 개발</li>
+<li><strong>투자 주체:</strong> IBK투자증권</li>
+<li><strong>투자 목적:</strong> 중소기업 특화 경쟁력 강화</li>
+<li><strong>위탁 연구 니즈:</strong> 팩트 부족으로 판단 보류</li>
+<li><strong>접근 전략:</strong> 중소기업을 위한 스마트그리드 및 전력계통 기술 개발과 연계</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #투자 #경쟁</li>
+<li><strong>비고:</strong> 분석 키워드: hvdc, 전력계통, 스마트그리드 · 매칭: 투자</li>
+</ul>
+<p><a id="1641-한국-대규모-반도체-투자-종말-시작됐다빅쇼트-주인공의-섬뜩한-경고"></a></p>
+<h3>16:41 “한국 대규모 반도체 투자, ‘종말’ 시작됐다”‘빅쇼트’ 주인공의 섬뜩한 경고</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 헤럴드경제</li>
+<li><strong>저자/발행기관:</strong> 헤럴드경제</li>
+<li><strong>발행일:</strong> 2026-07-02</li>
+<li><strong>링크/DOI:</strong> https://biz.heraldcorp.com/article/10796401</li>
+<li><strong>요약:</strong></li>
+<li>한국 반도체 기업들의 대규모 투자 계획이 AI 투자 사이클의 정점 신호로 해석됨에 따라 투자자들이 주의해야 함.</li>
+<li>한국 반도체 기업들의 대규모 투자 계획이 AI 투자 사이클의 정점 신호로 해석되 중임.</li>
+<li>
+<p>(해석) 반도체 투자 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 2/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 반도체 기술 개발 및 투자 전략 분석</li>
+<li><strong>팩트 근거:</strong> 삼성전자와 SK하이닉스의 800조원 규모의 신규 투자 계획</li>
+<li><strong>투자 주체:</strong> 삼성전자와 SK하이닉스 등</li>
+<li><strong>투자 목적:</strong> 신규 반도체 생산 라인 구축</li>
+<li><strong>위탁 연구 니즈:</strong> 반도체 기술 개발 및 투자 전략 분석</li>
+<li><strong>접근 전략:</strong> 투자자들이 반도체 기술 개발 및 투자 전략 분석에 대한 전문가 의견을 수렴해야 함</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #투자</li>
+<li><strong>비고:</strong> 분석 키워드: hvdc, 전력계통, 스마트그리드 · 매칭: 투자</li>
+</ul>
+<p><a id="2300-고점-대비-30-빠진-전력기기-업종-투자전략-물어보니"></a></p>
+<h3>23:00 고점 대비 30% 빠진 전력기기 업종, 투자전략 물어보니</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 한국경제</li>
+<li><strong>저자/발행기관:</strong> 한국경제</li>
+<li><strong>발행일:</strong> 2026-07-02</li>
+<li><strong>링크/DOI:</strong> https://www.hankyung.com/article/202607022402i</li>
+<li><strong>요약:</strong></li>
+<li>전력기기 업종 투자전략에 대한 분석이 이루어짐.</li>
+<li>전력기기 업종의 투자전략에 대한 분석이 이루어짐</li>
+<li>
+<p>(해석) 전력기기 업종 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 2/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 전력계통 및 스마트그리드 기술 개발에 대한 연구를 제안할 수 있음</li>
+<li><strong>투자 주체:</strong> 명시 없음</li>
+<li><strong>투자 목적:</strong> 해당 없음</li>
+<li><strong>위탁 연구 니즈:</strong> 팩트 부족으로 판단 보류</li>
+<li><strong>접근 전략:</strong> 정부의 에너지 정책 정합성과 산업의 기술 개발 필요성에 대한 연구가 필요함</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #투자 #기업동향</li>
+<li><strong>비고:</strong> 분석 키워드: hvdc, 전력계통, 스마트그리드 · 매칭: 투자</li>
+</ul>
+<p><a id="2324-대법원-대법관-증원-채비-착수정부와-공간-확보-예산-협의"></a></p>
+<h3>23:24 대법원, 대법관 증원 채비 착수정부와 &lsquo;공간 확보&rsquo; 예산 협의</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 뉴시스 속보</li>
+<li><strong>저자/발행기관:</strong> 뉴시스 속보</li>
+<li><strong>발행일:</strong> 2026-07-02</li>
+<li><strong>링크/DOI:</strong> https://www.newsis.com/view/NISX20260703_0003694236</li>
+<li><strong>요약:</strong></li>
+<li>대법원, 대법관 증원에 따른 공간 확보 예산 협의 착수함.</li>
+<li>대법원은 대법관 증원을 위해 서울 서초구 청사 공간 확보를 위한 관계부처 협의에 착수함.</li>
+<li>
+<p>(해석) 법원행정 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 2/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 법원행정처의 청사 리모델링 및 공간 확보를 위한 스마트그리드 및 전력계통 기술 적용</li>
+<li><strong>팩트 근거:</strong> 대법관 증원에 따른 공간 확보 필요성, 내년도 예산안 심의 신청</li>
+<li><strong>투자 주체:</strong> 법원행정처와 기획예산처</li>
+<li><strong>투자 목적:</strong> 대법관 증원에 따른 공간 확보</li>
+<li><strong>위탁 연구 니즈:</strong> 법원행정처의 청사 리모델링 및 공간 확보를 위한 기술적 지원 필요</li>
+<li><strong>접근 전략:</strong> 법원행정처와의 협의를 통해 스마트그리드 및 전력계통 기술 적용 가능성 탐색</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #기술</li>
+<li><strong>비고:</strong> 분석 키워드: hvdc, 전력계통, 스마트그리드 · 매칭: 예산, 사업계획</li>
+</ul>
+<p><a id="1553-dl이앤씨-국토부-상호협력평가-최우수-등급-획득"></a></p>
+<h3>15:53 DL이앤씨, 국토부 상호협력평가 ‘최우수’ 등급 획득</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 헤럴드경제</li>
+<li><strong>저자/발행기관:</strong> 헤럴드경제</li>
+<li><strong>발행일:</strong> 2026-07-02</li>
+<li><strong>링크/DOI:</strong> https://biz.heraldcorp.com/article/10796290</li>
+<li><strong>요약:</strong></li>
+<li>DL이앤씨, 국토부 상호협력평가 ‘최우수’ 등급 획득.</li>
+<li>DL이앤씨는 국토교통부의 2026년 건설사업자간 상호협력평가에서 최우수 등급을 받음.</li>
+<li>
+<p>(해석) 건설산업 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 2/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 건설사업자 간 협력관계 구축을 위한 기술개발 및 공동기술개발</li>
+<li><strong>팩트 근거:</strong> 2026년 건설사업자간 상호협력평가에서 최우수 등급 획득, 협력업자와 공동도급 실적 및 하도급 실적, 협력업자 육성, 신인도 등이 평가 기준</li>
+<li><strong>투자 주체:</strong> DL이앤씨</li>
+<li><strong>투자 목적:</strong> 건설산업의 균형 있는 발전과 건설공사의 효율적 수행</li>
+<li><strong>위탁 연구 니즈:</strong> 협력업자와의 공동기술개발 및 기술지원</li>
+<li><strong>접근 전략:</strong> 건설산업기본법상 벌점 감경 등의 혜택을 받을 수 있는 우수기업으로 선정</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #기술</li>
+<li><strong>비고:</strong> 분석 키워드: hvdc, 전력계통, 스마트그리드 · 매칭: 기술개발</li>
+</ul>
+<p><a id="2306-ibk투자증권-비에이치아이-목표가시장-밸류에이션-하락"></a></p>
+<h3>23:06 IBK투자증권, 비에이치아이 목표가↓&rdquo;시장 밸류에이션 하락&rdquo;</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 연합뉴스 경제</li>
+<li><strong>저자/발행기관:</strong> 연합뉴스 경제</li>
+<li><strong>발행일:</strong> 2026-07-02</li>
+<li><strong>링크/DOI:</strong> https://www.yna.co.kr/view/AKR20260703020100008</li>
+<li><strong>요약:</strong></li>
+<li>IBK투자증권, 비에이치아이 목표가 하향 조정함.</li>
+<li>IBK투자증권이 비에이치아이의 목표주가를 하향 조정함.</li>
+<li>
+<p>(해석) 투자 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 2/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 전력계통 및 스마트그리드 기술 개발</li>
+<li><strong>투자 주체:</strong> IBK투자증권</li>
+<li><strong>투자 목적:</strong> 해당 없음</li>
+<li><strong>위탁 연구 니즈:</strong> 팩트 부족으로 판단 보류</li>
+<li><strong>접근 전략:</strong> 투자 신호를 바탕으로 전력계통 및 스마트그리드 기술 개발의 기회를 탐색함.</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #투자</li>
+<li><strong>비고:</strong> 분석 키워드: hvdc, 전력계통, 스마트그리드 · 매칭: 투자</li>
+</ul>
+<p><a id="1530-hd현대일렉-11조-효성重-3100억원-전력기기-수주-잭팟"></a></p>
+<h3>15:30 HD현대일렉 1.1조-효성重 3100억원, 전력기기 수주 잭팟</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 동아일보 경제</li>
+<li><strong>저자/발행기관:</strong> 동아일보 경제</li>
+<li><strong>발행일:</strong> 2026-07-02</li>
+<li><strong>링크/DOI:</strong> https://www.donga.com/news/Economy/article/all/20260702/134227263/2</li>
+<li><strong>요약:</strong></li>
+<li>HD현대일렉트릭과 효성중공업이시장에서 대규모 전력기기 수주에 성공함에 따라 국내 전력기기 업체들의 해외시장 영향력이 커지고 있음.</li>
+<li>HD현대일렉트릭과 효성중공업이시장에서 대규모 전력기기 수주에 성공함</li>
+<li>
+<p>(해석) 전력기기 수주 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 2/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 전력기기 및 데이터센터 전력 인프라 관련 기술 개발에 대한 연구를 제안할 수 있음</li>
+<li><strong>팩트 근거:</strong> HD현대일렉트릭의 북미 데이터센터 전력기기 공급 계약 규모는 1조1212억 원, 효성중공업의 수주 금액은 3100억원</li>
+<li><strong>투자 주체:</strong> HD현대일렉트릭, 효성중공업</li>
+<li><strong>투자 목적:</strong> 데이터센터 전력 인프라 구축</li>
+<li><strong>위탁 연구 니즈:</strong> 전력기기 기술 개발 및 데이터센터 전력 인프라 최적화</li>
+<li><strong>접근 전략:</strong> 전력기기 및 데이터센터 전력 인프라 기술 개발에 대한 연구 제안</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #투자</li>
+<li><strong>비고:</strong> 분석 키워드: hvdc, 전력계통, 스마트그리드 · 매칭: 전력망, 투자, hd현대일렉트릭</li>
+</ul>
+<p><a id="2327-nhn-kcp-페이페이-출시-등-日-비즈니스-설명회-성료"></a></p>
+<h3>23:27 NHN KCP, 페이페이 출시 등 日 비즈니스 설명회 성료</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 뉴시스 속보</li>
+<li><strong>저자/발행기관:</strong> 뉴시스 속보</li>
+<li><strong>발행일:</strong> 2026-07-02</li>
+<li><strong>링크/DOI:</strong> https://www.newsis.com/view/NISX20260703_0003694265</li>
+<li><strong>요약:</strong></li>
+<li>NHN KCP와 KOTRA가 일본 시장 진출 설명회를 개최하고 페이페이 서비스 출시를 앞두고 일본 진출을 희망하는 국내 기업들을 지원하기 위해 마련했음.</li>
+<li>NHN KCP와 KOTRA가 일본 시장 진출 설명회를 개최했음. 이 설명회는 일본 진출을 희망하는 국내 기업들을 지원하기 위해 마련됐음.</li>
+<li>
+<p>(해석) 페이페이 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 2/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>팩트 근거:</strong> NHN KCP와 KOTRA의 일본 시장 진출 설명회 개최, 페이페이 서비스 출시 예정</li>
+<li><strong>투자 주체:</strong> NHN KCP와 KOTRA</li>
+<li><strong>투자 목적:</strong> 일본 시장 진출을 위한 결제 인프라 구축</li>
+<li><strong>위탁 연구 니즈:</strong> 팩트 부족으로 판단 보류</li>
+<li><strong>접근 전략:</strong> 정부 지원 제도와 결제 인프라 구축 방안 소개</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #투자 #제품출시</li>
+<li><strong>비고:</strong> 분석 키워드: hvdc, 전력계통, 스마트그리드 · 매칭: 투자</li>
+</ul>
+<p><a id="2312-해양교통안전공단-어선-클린사업장-3차-모집온열질환-예방-장비-포함"></a></p>
+<h3>23:12 해양교통안전공단, 어선 클린사업장 3차 모집온열질환 예방 장비 포함</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 뉴시스 속보</li>
+<li><strong>저자/발행기관:</strong> 뉴시스 속보</li>
+<li><strong>발행일:</strong> 2026-07-02</li>
+<li><strong>링크/DOI:</strong> https://www.newsis.com/view/NISX20260703_0003694207</li>
+<li><strong>요약:</strong></li>
+<li>한국해양교통안전공단, 2026년 제3차 어선 클린사업장 조성 지원사업 대상자 모집온열질환 예방 장비 포함.</li>
+<li>한국해양교통안전공단이 2026년 제3차 어선 클린사업장 조성 지원사업 대상자를 모집하고, 온열질환 예방 장비를 포함한 안전관리 설비 지원을 확대함.</li>
+<li>
+<p>(해석) 어선 클린사업장 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 2/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 해양 교통 안전 기술 개발</li>
+<li><strong>팩트 근거:</strong> 2026년 제3차 어선 클린사업장 조성 지원사업, 총 20억원 규모, 어선주 1인당 최대 1000만원 한도 내에서 시설·장비 도입 비용의 70%까지 국비 지원</li>
+<li><strong>투자 주체:</strong> 한국해양교통안전공단</li>
+<li><strong>투자 목적:</strong> 어선 작업환경 개선과 안전사고 예방</li>
+<li><strong>위탁 연구 니즈:</strong> 어선 안전관리 기술 개발 및 온열질환 예방 설비 개발</li>
+<li><strong>접근 전략:</strong> 해양 교통 안전 기술 개발 및 지원 사업과 연계</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #기술</li>
+<li><strong>비고:</strong> 분석 키워드: hvdc, 전력계통, 스마트그리드 · 매칭: 공모</li>
+</ul>
+<p><a id="1625-리얼푸드-식품-건기식업계-대학생과-함께-미래-먹거리-찾는다"></a></p>
+<h3>16:25 [리얼푸드] 식품 ·건기식업계, 대학생과 함께 미래 먹거리 찾는다</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 헤럴드경제</li>
+<li><strong>저자/발행기관:</strong> 헤럴드경제</li>
+<li><strong>발행일:</strong> 2026-07-02</li>
+<li><strong>링크/DOI:</strong> https://biz.heraldcorp.com/article/10796368</li>
+<li><strong>요약:</strong></li>
+<li>식품·건기식업계가 대학생과 함께 미래 먹거리 찾기 연구개발을 추진하고 있음을 보여주는 경진대회가 개최됨.</li>
+<li>KGC가 대학생 제품개발 경진대회를 개최하여 젊은 세대의 시각을 제품 콘셉트 개발에 반영 중임.</li>
+<li>
+<p>(해석) 식품 연구개발 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 2/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 식품 및 건강기능식품 관련 연구개발</li>
+<li><strong>팩트 근거:</strong> KGC의 대학생 제품개발 경진대회, &lsquo;Healthy Aging&rsquo; 주제</li>
+<li><strong>투자 주체:</strong> KGC</li>
+<li><strong>투자 목적:</strong> 제품개발과 연구개발(R&amp;D)에 대학생 아이디어를 활용</li>
+<li><strong>위탁 연구 니즈:</strong> 식품 및 건강기능식품 관련 연구개발 격차</li>
+<li><strong>접근 전략:</strong> 젊은 세대의 시각을 제품 개발에 반영하는 전략</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #기술</li>
+<li><strong>비고:</strong> 분석 키워드: hvdc, 전력계통, 스마트그리드 · 매칭: 연구개발, 공모</li>
+</ul>
+<p><a id="2338-강서-에코델타시티에-특화통합공공임대-993호-들어선다"></a></p>
+<h3>23:38 강서 에코델타시티에 특화·통합공공임대 993호 들어선다</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 뉴시스 속보</li>
+<li><strong>저자/발행기관:</strong> 뉴시스 속보</li>
+<li><strong>발행일:</strong> 2026-07-02</li>
+<li><strong>링크/DOI:</strong> https://www.newsis.com/view/NISX20260703_0003694314</li>
+<li><strong>요약:</strong></li>
+<li>부산시, 강서 에코델타시티에 특화·통합공공임대 993호 들어선다 -</li>
+<li>부산시가 강서 에코델타시티에 특화·통합공공임대 993호를 건립할 계획임.</li>
+<li>
+<p>(해석) 에코델타시티 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 2/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 에코델타시티의 스마트그리드 및 전력계통 구축을 위한 기술 개발</li>
+<li><strong>팩트 근거:</strong> 993호의 공급, 2028년 상반기 입주자 모집 공고, 2029년 6월 준공</li>
+<li><strong>투자 주체:</strong> 부산시와 부산도시공사임.</li>
+<li><strong>투자 목적:</strong> 직장과 가까운 곳에서 안정적으로 거주할 수 있도록 직주근접형 정주 기반을 조성하는 것이 핵심임.</li>
+<li><strong>위탁 연구 니즈:</strong> 에코델타시티의 스마트그리드 및 전력계통 구축을 위한 기술 개발이 필요함.</li>
+<li><strong>접근 전략:</strong> 부산시의 도시 개발 정책과 연계하여 에코델타시티의 스마트그리드 및 전력계통 구축을 위한 기술 개발을 제안할 수 있음.</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #기술</li>
+<li><strong>비고:</strong> 분석 키워드: hvdc, 전력계통, 스마트그리드 · 매칭: 공모</li>
+</ul>
+<p><a id="2311-박재한-비트플래닛-공동대표-it-21-컨퍼런스서-우수상-수상"></a></p>
+<h3>23:11 박재한 비트플래닛 공동대표, IT 21 컨퍼런스서 우수상 수상</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 뉴시스 속보</li>
+<li><strong>저자/발행기관:</strong> 뉴시스 속보</li>
+<li><strong>발행일:</strong> 2026-07-02</li>
+<li><strong>링크/DOI:</strong> https://www.newsis.com/view/NISX20260703_0003694255</li>
+<li><strong>요약:</strong></li>
+<li>비트플래닛 박재한 대표, IT 21 컨퍼런스서 AI 데이터 가치 창출 우수상 수상함.</li>
+<li>비트플래닛 박재한 대표가 IT 21 컨퍼런스서 AI 데이터 가치 창출 우수상을 수상함</li>
+<li>
+<p>(해석) AI 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 2/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 비트플래닛의 공공 IT 시스템 통합 및 AI·데이터 분석 기술을 접목한 서비스 기획·구축 사업 영역에서 협력할 수 있음</li>
+<li><strong>팩트 근거:</strong> 비트플래닛 SI사업부문은 공공기관의 디지털 전환과 데이터 기반 업무혁신을 중심으로 사업을 전개하고 있으며, AI 기반 디지털 신뢰 인프라 스타트업 코어트러스트링크와 업무협약을 체결함</li>
+<li><strong>투자 주체:</strong> 비트플래닛</li>
+<li><strong>투자 목적:</strong> 공공 IT 혁신과 AI·데이터 기술의 실질적 가치 창출</li>
+<li><strong>위탁 연구 니즈:</strong> 고난도 R&amp;D 격차는 명시되지 않으나, AI와 데이터 기반 기술의 고도화 필요성은 존재함</li>
+<li><strong>접근 전략:</strong> 비트플래닛의 사업 영역과 연계하여 공공 IT 혁신을 선도하고 산업 발전에 기여할 수 있도록 협력할 수 있음</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #기술</li>
+<li><strong>비고:</strong> 분석 키워드: hvdc, 전력계통, 스마트그리드 · 매칭: mou</li>
+</ul>
+<p><a id="2149-수성대-syncode-팀-대구지역-대학연합-창업경진대회서-우수상-쾌거"></a></p>
+<h3>21:49 수성대 Syncode 팀, 대구지역 대학연합 창업경진대회서 ‘우수상’ 쾌거</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 헤럴드경제</li>
+<li><strong>저자/발행기관:</strong> 헤럴드경제</li>
+<li><strong>발행일:</strong> 2026-07-02</li>
+<li><strong>링크/DOI:</strong> https://biz.heraldcorp.com/article/10796647</li>
+<li><strong>요약:</strong></li>
+<li>수성대 Syncode 팀, 대구지역 대학연합 창업경진대회서 ‘우수상’ 수상함.</li>
+<li>수성대 Syncode 팀이 대구지역 대학연합 창업경진대회에서 우수상을 수상함</li>
+<li>
+<p>(해석) 대구지역 창업 아이디어 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 2/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> AI와 메타버스 기술을 접목한 스마트그리드 솔루션 개발에 대한 연구를 제안할 수 있음</li>
+<li><strong>팩트 근거:</strong> 대구지역 9개 대학이 공동 참여, 17개 팀이 사업계획 발표, 특허청 하이패스상(우수상) 수상</li>
+<li><strong>투자 주체:</strong> 대학창업지원협의회(DRIVE), 수성대 창업보육센터</li>
+<li><strong>투자 목적:</strong> 지역 자원과 특성을 활용한 로컬 및 기술창업 아이디어 발굴</li>
+<li><strong>위탁 연구 니즈:</strong> AI와 메타버스 기술을 접목한 창의적인 창업 아이디어 개발</li>
+<li><strong>접근 전략:</strong> 지역 창업 생태계의 지속적인 발전을 위해 학생 창업 활성화와 기술 지원</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #기술</li>
+<li><strong>비고:</strong> 분석 키워드: hvdc, 전력계통, 스마트그리드 · 매칭: 사업계획</li>
+</ul>
+<p><a id="2230-추경호-시장-취임-직후-첫-대구시-간부-인사-단행"></a></p>
+<h3>22:30 추경호 시장 취임 직후 첫 대구시 간부 인사 단행</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 헤럴드경제</li>
+<li><strong>저자/발행기관:</strong> 헤럴드경제</li>
+<li><strong>발행일:</strong> 2026-07-02</li>
+<li><strong>링크/DOI:</strong> https://biz.heraldcorp.com/article/10796657</li>
+<li><strong>요약:</strong></li>
+<li>대구시, 추경호 시장 취임에 맞춰 간부 인사 단행 - 투자 역량 강화 예상.</li>
+<li>대구시, 추경호 시장 취임에 맞춰 간부 인사 단행</li>
+<li>
+<p>(해석) 대구시 인사 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 2/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 대구시의 경제 발전을 위한 스마트그리드 및 전력계통 기술 개발</li>
+<li><strong>팩트 근거:</strong> 대구시 미래혁신성장실장에 김태운 임명, 일자리투자국장 및 창업진흥과장 경험</li>
+<li><strong>투자 주체:</strong> 대구시</li>
+<li><strong>투자 목적:</strong> 지역 경제 대개조 및 대기업 유치</li>
+<li><strong>위탁 연구 니즈:</strong> 팩트 부족으로 판단 보류</li>
+<li><strong>접근 전략:</strong> 정부 정책 정합 및 지역 경제 발전을 위한 기술 개발</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #투자</li>
+<li><strong>비고:</strong> 분석 키워드: hvdc, 전력계통, 스마트그리드 · 매칭: 투자</li>
+</ul>
+<p><a id="2106-경북보건대김천시사회복지협의회-재직자-직무교육-업무협약-체결"></a></p>
+<h3>21:06 경북보건대·김천시사회복지협의회, 재직자 직무교육 업무협약 체결</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 헤럴드경제</li>
+<li><strong>저자/발행기관:</strong> 헤럴드경제</li>
+<li><strong>발행일:</strong> 2026-07-02</li>
+<li><strong>링크/DOI:</strong> https://biz.heraldcorp.com/article/10796630</li>
+<li><strong>요약:</strong></li>
+<li>경북보건대와 김천시사회복지협의회, 재직자 직무교육 업무협약 체결함.</li>
+<li>경북보건대와 김천시사회복지협의회가 재직자 직무교육을 위한 업무협약을 체결함.</li>
+<li>
+<p>(해석) 재직자 직무교육 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>투자 주체:</strong> 경북보건대와 김천시사회복지협의회임.</li>
+<li><strong>투자 목적:</strong> 지역 사회복지기관 재직자의 직무역량 강화를 위한 직무교육임.</li>
+<li><strong>위탁 연구 니즈:</strong> 팩트 부족으로 판단 보류함.</li>
+<li><strong>접근 전략:</strong> 정부의 정책 정합성과 기업의 로드맵 연계가 필요함.</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #기술</li>
+<li><strong>비고:</strong> 분석 키워드: hvdc, 전력계통, 스마트그리드 · 매칭: mou</li>
+</ul>
+<p><a id="0430-1억-날린-미자-이번엔-몰빵-투자한-곳은제발-나가주세요-주주들-오열"></a></p>
+<h3>04:30 1억 날린 미자, 이번엔 &lsquo;몰빵&rsquo; 투자한 곳은?&rdquo;제발 나가주세요&rdquo; 주주들 오열</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 파이낸셜뉴스</li>
+<li><strong>저자/발행기관:</strong> 파이낸셜뉴스</li>
+<li><strong>발행일:</strong> 2026-07-03</li>
+<li><strong>링크/DOI:</strong> https://www.fnnews.com/news/202607021545054009</li>
+<li><strong>요약:</strong></li>
+<li>코미디언 미자가 주식 투자로 1억 원 손실을 본 사실을 밝혀 논란이 일고 있지만, 이 기사에는 한국의 투자 동향과 기술 개발에 대한 정보가 없으므로 R&amp;D 위탁 연구 수주와 관련이 없음.</li>
+<li>코미디언 미자가 주식 투자로 1억 원 손실을 본 사실을 밝혔음.</li>
+<li>
+<p>(해석) 이 기사에는 hvdc, 전력계통, 스마트그리드와 관련된 투자 신호나 기술 격차에 대한 정보가 없으므로 R&amp;D 위탁 연구 수주와 관련이 없음</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>투자 주체:</strong> 미자(본명 장윤희).</li>
+<li><strong>투자 목적:</strong> 해당 없음</li>
+<li><strong>위탁 연구 니즈:</strong> 팩트 부족으로 판단 보류</li>
+<li><strong>접근 전략:</strong> 해당 없음</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #투자 #리스크 #기술</li>
+<li><strong>비고:</strong> 분석 키워드: hvdc, 전력계통, 스마트그리드 · 키워드 관련도: 직접 · 매칭: 투자</li>
+</ul>
+<p><a id="1614-반도체-쇼크-코스피-7600선-후퇴개인-사자에도-8000선-깨져-투자360"></a></p>
+<h3>16:14 ‘반도체 쇼크’ 코스피 7600선 후퇴개인 사자에도 8000선 깨져 [투자360]</h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 헤럴드경제</li>
+<li><strong>저자/발행기관:</strong> 헤럴드경제</li>
+<li><strong>발행일:</strong> 2026-07-02</li>
+<li><strong>링크/DOI:</strong> https://biz.heraldcorp.com/article/10796335</li>
+<li><strong>요약:</strong></li>
+<li>코스피 지수가 반도체 대형주 급락에 7% 넘게 밀리며 7600선까지 후퇴했음.</li>
+<li>원문 기준 핵심 사실을 추가 확인 필요</li>
+<li>
+<p>(해석) 반도체 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>투자 주체:</strong> 명시 없음</li>
+<li><strong>투자 목적:</strong> 해당 없음</li>
+<li><strong>위탁 연구 니즈:</strong> 팩트 부족으로 판단 보류</li>
+<li><strong>접근 전략:</strong> 팩트 기반 접근 전략 없음</li>
+<li><strong>신뢰도:</strong> B</li>
+<li><strong>태그:</strong> #투자</li>
+<li><strong>비고:</strong> 분석 키워드: hvdc, 전력계통, 스마트그리드 · 매칭: 투자</li>
+</ul>
+<hr />
+<h2>태그 분류체계 (월간 보고서 챕터와 매칭)</h2>
+<table>
+<thead>
+<tr>
+<th>태그</th>
+<th>의미</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>#기술</td>
+<td>신기술, R&amp;D, 기술 발표</td>
+</tr>
+<tr>
+<td>#논문</td>
+<td>학술 연구 결과 (성능, 실험, 방법론)</td>
+</tr>
+<tr>
+<td>#투자</td>
+<td>투자 라운드, 밸류에이션, 펀딩</td>
+</tr>
+<tr>
+<td>#M&amp;A</td>
+<td>인수합병, 전략적 제휴</td>
+</tr>
+<tr>
+<td>#제품출시</td>
+<td>신제품, 서비스 런칭</td>
+</tr>
+<tr>
+<td>#기업동향</td>
+<td>조직, 인력, 실적, 전략</td>
+</tr>
+<tr>
+<td>#규제</td>
+<td>법안, 정책, 표준</td>
+</tr>
+<tr>
+<td>#경쟁</td>
+<td>경쟁사 비교, 점유율, 포지셔닝</td>
+</tr>
+<tr>
+<td>#시장수치</td>
+<td>시장규모/성장률 추정치</td>
+</tr>
+<tr>
+<td>#리스크</td>
+<td>사고, 논란, 부정적 전망</td>
+</tr>
+<tr>
+<td>#전문가전망</td>
+<td>애널리스트/전문가 예측</td>
+</tr>
+</tbody>
+</table>
+<h2>신뢰도 등급 기준</h2>
+<ul>
+<li><strong>A (높음):</strong> 정부·공공기관 원문(korea.kr·부처 .go.kr 보도자료), 연합뉴스·뉴시스 1차 보도, 공공 R&amp;D·정책기관(KISTEP·KIET·KIPO·KETEP·한국전력 등), 국내 학술지·국책연구원 동료심사 논문</li>
+<li><strong>B (중간):</strong> 국내 경제·IT 전문매체(헤럴드경제·동아일보·전자신문·ZDNet Korea 등), 2차 인용·전문자료 요약, 기업·공기업 IR/보도자료</li>
+<li><strong>C (참고):</strong> 익명 소스, 추측성 기사, 단순 재가공 콘텐츠, 미검증 블로그 — <strong>자동 생성 시에는 C가 나오지 않음. 수동 기록 시에만 사용</strong></li>
+</ul></div>
+</div>
+</body>
+</html>

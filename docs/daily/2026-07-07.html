@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Daily 2026-07-07</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet"/>
+<style>:root {
+  --bg: #f3f6f5;
+  --surface: #ffffff;
+  --ink: #1a2421;
+  --muted: #5a6b66;
+  --line: #d5e0dc;
+  --brand: #008878;
+  --brand-dark: #006b5e;
+  --brand-soft: #e6f5f2;
+  --mark: #fff3bf;
+  --score-high: #008878;
+  --score-mid: #c47a00;
+  --score-low: #8a9390;
+  --shadow: 0 1px 2px rgba(26, 36, 33, 0.06), 0 8px 24px rgba(26, 36, 33, 0.06);
+  --radius: 12px;
+  --font: "Pretendard", "Noto Sans KR", "Segoe UI", system-ui, sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: var(--font);
+  color: var(--ink);
+  background:
+    radial-gradient(1200px 500px at 10% -10%, #d8efe9 0%, transparent 55%),
+    radial-gradient(900px 400px at 100% 0%, #e8eef0 0%, transparent 50%),
+    var(--bg);
+  line-height: 1.65;
+  min-height: 100vh;
+}
+a { color: var(--brand-dark); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+a:hover { color: var(--brand); }
+
+.app-header {
+  position: sticky; top: 0; z-index: 20;
+  backdrop-filter: blur(10px);
+  background: rgba(243, 246, 245, 0.88);
+  border-bottom: 1px solid var(--line);
+}
+.app-header-inner {
+  max-width: 1120px; margin: 0 auto; padding: 0.85rem 1.25rem;
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+}
+.brand {
+  display: flex; align-items: center; gap: 0.75rem; min-width: 0;
+}
+.brand-mark {
+  width: 36px; height: 36px; border-radius: 9px;
+  background: linear-gradient(145deg, var(--brand), var(--brand-dark));
+  color: #fff; font-weight: 700; font-size: 0.78rem;
+  display: grid; place-items: center; flex-shrink: 0;
+  letter-spacing: -0.02em;
+}
+.brand-text { min-width: 0; }
+.brand-text strong { display: block; font-size: 0.98rem; letter-spacing: -0.02em; }
+.brand-text span { display: block; font-size: 0.78rem; color: var(--muted); }
+
+.layout {
+  max-width: 1120px; margin: 0 auto; padding: 1.25rem;
+  display: grid; grid-template-columns: 280px 1fr; gap: 1.25rem; align-items: start;
+}
+@media (max-width: 860px) {
+  .layout { grid-template-columns: 1fr; }
+}
+
+.panel {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+}
+.sidebar { padding: 1rem; position: sticky; top: 72px; }
+@media (max-width: 860px) { .sidebar { position: static; } }
+
+.seg {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0.35rem;
+  background: var(--brand-soft); padding: 0.3rem; border-radius: 10px; margin-bottom: 1rem;
+}
+.seg button {
+  appearance: none; border: 0; background: transparent; color: var(--muted);
+  font: inherit; font-weight: 600; font-size: 0.92rem; padding: 0.55rem 0.4rem;
+  border-radius: 8px; cursor: pointer; transition: 0.15s ease;
+}
+.seg button.active {
+  background: var(--surface); color: var(--brand-dark);
+  box-shadow: 0 1px 3px rgba(0, 107, 94, 0.18);
+}
+.seg button:hover:not(.active) { color: var(--ink); }
+
+.sidebar h2 {
+  margin: 0 0 0.65rem; font-size: 0.78rem; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--muted); font-weight: 700;
+}
+.date-list { list-style: none; margin: 0; padding: 0; max-height: min(70vh, 640px); overflow: auto; }
+.date-list li + li { margin-top: 0.25rem; }
+.date-list a, .date-list button {
+  width: 100%; text-align: left; appearance: none; border: 1px solid transparent;
+  background: transparent; color: inherit; font: inherit; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+  padding: 0.65rem 0.75rem; border-radius: 8px; text-decoration: none;
+}
+.date-list a:hover, .date-list button:hover { background: var(--brand-soft); }
+.date-list a.active, .date-list button.active {
+  background: var(--brand-soft); border-color: #b7ddd5; color: var(--brand-dark); font-weight: 600;
+}
+.date-list .meta { font-size: 0.75rem; color: var(--muted); white-space: nowrap; }
+.empty-hint { color: var(--muted); font-size: 0.9rem; padding: 0.5rem 0.25rem; }
+
+.main { padding: 0; min-height: 420px; overflow: hidden; }
+.main-empty {
+  padding: 3rem 1.5rem; text-align: center; color: var(--muted);
+}
+.main-empty .icon {
+  width: 56px; height: 56px; margin: 0 auto 1rem; border-radius: 14px;
+  background: var(--brand-soft); color: var(--brand); display: grid; place-items: center;
+  font-size: 1.4rem; font-weight: 700;
+}
+.report-frame { border: 0; width: 100%; min-height: 70vh; display: block; }
+.report-wrap { padding: 1.5rem 1.75rem 2.5rem; }
+
+.report h1 {
+  margin: 0 0 0.75rem; font-size: 1.55rem; letter-spacing: -0.03em; line-height: 1.3;
+}
+.report h2 {
+  margin: 2rem 0 0.75rem; font-size: 1.15rem; letter-spacing: -0.02em;
+  padding-bottom: 0.35rem; border-bottom: 2px solid var(--brand-soft);
+}
+.report h3 {
+  margin: 1.5rem 0 0.6rem; font-size: 1.05rem;
+  padding: 0.65rem 0.85rem; background: var(--brand-soft); border-radius: 8px;
+  border-left: 4px solid var(--brand);
+}
+.report p { margin: 0.55rem 0; }
+.report ul, .report ol { padding-left: 1.25rem; }
+.report li { margin: 0.25rem 0; }
+.report hr { border: 0; border-top: 1px solid var(--line); margin: 1.5rem 0; }
+
+.report table {
+  border-collapse: separate; border-spacing: 0; width: 100%;
+  margin: 1rem 0; font-size: 0.9rem; overflow: hidden;
+  border: 1px solid var(--line); border-radius: 10px; background: #fff;
+}
+.report th, .report td {
+  padding: 0.65rem 0.75rem; text-align: left; vertical-align: top;
+  border-bottom: 1px solid var(--line);
+}
+.report th { background: #eef6f4; font-weight: 650; color: var(--brand-dark); }
+.report tr:last-child td { border-bottom: 0; }
+.report tbody tr:hover td { background: #f7fbfa; }
+
+mark {
+  background: linear-gradient(180deg, transparent 8%, var(--mark) 8%, var(--mark) 92%, transparent 92%);
+  color: inherit; padding: 0 0.12em; border-radius: 2px;
+}
+
+.stats {
+  display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.85rem 0 1.25rem;
+}
+.chip {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  padding: 0.28rem 0.65rem; border-radius: 999px; font-size: 0.8rem; font-weight: 600;
+  background: var(--brand-soft); color: var(--brand-dark); border: 1px solid #c5e4dd;
+}
+.chip.neutral { background: #f0f2f1; color: var(--muted); border-color: var(--line); }
+.score {
+  display: inline-block; min-width: 2.4em; text-align: center;
+  padding: 0.1rem 0.45rem; border-radius: 6px; font-weight: 700; font-size: 0.85rem;
+  color: #fff;
+}
+.score.high { background: var(--score-high); }
+.score.mid { background: var(--score-mid); }
+.score.low { background: var(--score-low); }
+
+.footer-note {
+  max-width: 1120px; margin: 0 auto; padding: 0 1.25rem 2rem;
+  color: var(--muted); font-size: 0.8rem;
+}
+
+.back-link {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  margin-bottom: 1rem; font-size: 0.9rem; font-weight: 600;
+}
+
+body { background: var(--surface); }
+.standalone { max-width: 960px; margin: 0 auto; padding: 1.25rem 1.5rem 2.5rem; }
+</style>
+</head>
+<body>
+<div class="standalone">
+  <p class="back-link"><a href="../index.html#daily">← Daily 목록</a></p>
+  <div class="report"><h1>국내 R&amp;D 인텔리전스 데일리 로그</h1>
+<p>날짜: 2026-07-07
+기록자: Tech Market Monitor (auto)
+총 항목 수: 23건 (기사 23 / 논문 0)
+신뢰도 분포: A 23건 / B 0건 / C 0건</p>
+<h2>오늘의 R&amp;D 인텔리전스 요약</h2>
+<p><strong>모니터링 키워드 (상위 3개):</strong> 전력계통 · 스마트그리드 · 파워그리드</p>
+<p><strong>오늘의 공통 흐름:</strong> 국내 R&amp;D 수주 직접 연계 신호는 약하고 배경 모니터링 위주인 날</p>
+<p>오늘 수집 23건 (R&amp;D 적합 4점 이상 0건) · 정책브리핑 기후에너지환경부, 정책브리핑 보건복지부, 정책브리핑 경제사회노동위원회 외 20개 출처</p>
+<p><strong>R&amp;D 기회 스캔 (누가 · 왜 · 무엇을):</strong></p>
+<table>
+<thead>
+<tr>
+<th>R&amp;D적합</th>
+<th>핵심 이슈</th>
+<th>고객 타겟</th>
+<th>R&amp;D 연계 포인트</th>
+<th>팩트 체크</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>3/5</strong></td>
+<td><a href="#0000-인공지능으로-일하는-방식-바꾼다-기후부-인공지능-활용-업무혁신-본격-추진">인공지능으로 일하는 방식 바꾼다 기후부, 인공지능</a> 기후에너지환경부, 7~9월 인공지능 기반 업무자동화 및 서비스 기획·구현 추진</td>
+<td>기후에너지환경부</td>
+<td>인공지능 기반 전력계통 운영 최적화 기술 개발</td>
+<td>기후에너지환경부, 7월부터 9월까지 인공지능 기반 업무자동화 및 서비스 기획·구현 추진</td>
+</tr>
+<tr>
+<td><strong>2/5</strong></td>
+<td><a href="#0000-과기정통부-경남전북-ax-연구개발사업-공모-개시">과기정통부, &lsquo;경남·전북 AX 연구개발사업&rsquo; 공모 개시</a> 과기정통부가 2026년부터 2030년까지 1조 4,131억원 규모의 경남·전북 AX 연구개발사업을 공모하고, 7월 28일까지 제안서를 접수할 예정임.</td>
+<td>과기정통부</td>
+<td>피지컬 AI 핵심기술 확보를 위한 연구개발 과제</td>
+<td>5년간(&lsquo;26~&lsquo;30) 총 1조 4,131억원(경남 6,763억원, 전북 7,368억원) 규모</td>
+</tr>
+</tbody>
+</table>
+<p><em>(이하 21건은 R&amp;D 적합 1점 또는 국내 투자 신호 미약으로 표에서 생략)</em></p>
+<p><strong>국내 R&amp;D 타겟 시사점 (프라운호퍼 · 전력계통 · 스마트그리드 · 파워그리드):</strong></p>
+<ul>
+<li><strong>[3/5] 기후에너지환경부</strong> — 목적: 업무혁신 | 니즈: 인공지능 기반 업무 자동화 및 서비스 기획·구현 기술 개발 | 접근: 기후에너지환경부의 업무혁신 정책과 연계 (<a href="https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769803">인공지능으로 일하는 방식 바꾼다… 기후부, 인공지능 활용 업무혁신 본격 추진</a>)</li>
+<li><strong>[2/5] 과기정통부</strong> — 목적: 피지컬 AI 핵심기술 확보를 위한 연구개발 | 니즈: 피지컬 AI 기반 제조혁신 기술 개발 | 접근: 정부의 연구개발사업 공모와 연계한 기술 협력 (<a href="https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769799">과기정통부, &lsquo;경남·전북 AX 연구개발사업&rsquo; 공모 개시</a>)</li>
+<li><strong>[1/5] 국토교통부와 한국도로협회</strong> — 목적: 지속가능한 도로산업 발전 | 니즈: 지속가능한 도로인프라 기술 개발 | 접근: 국토교통부의 지속가능한 도로산업 발전 정책과 연계 (<a href="https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769751">「2026 도로의 날 기념식」 AI·디지털 전환, 안전하고 지속가능한 K-Road!</a>)</li>
+<li><strong>[1/5] 국토교통부</strong> — 목적: 교통 서비스 강화 | 니즈: 교통 서비스 효율화 기술 개발 필요 | 접근: 교통 서비스 효율화 기술 개발을 위한 정부 정책 정합성 활용 (<a href="https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769795">경기 5개 광역버스 노선 새로 달린다</a>)</li>
+<li>
+<p><strong>[1/5] 국토교통부</strong> — 목적: 완전 무인화를 목표로 자율주행 정책 추진 | 니즈: 자율주행 관련 기술 개발 및 안전운행 시스템 연구 필요 | 접근: 자율주행 관련 기업과 연구기관을 대상으로 설명회 개최를 통해 협력 가능 (<a href="https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769794">더 안전한 무인 자율주행차 시대 열린다&hellip; 정부, 가이드라인 마련으로 상용화 속도</a>)</p>
+</li>
+<li>
+<p><strong>상충되는 정보:</strong> (해당 없음)</p>
+</li>
+</ul>
+<hr />
+<h2>항목 기록</h2>
+<p><a id="0000-인공지능으로-일하는-방식-바꾼다-기후부-인공지능-활용-업무혁신-본격-추진"></a></p>
+<h3>00:00 인공지능으로 일하는 방식 바꾼다 기후부, 인공지능 활용 업무혁신 본격 추진</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 기후에너지환경부</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 기후에너지환경부</li>
+<li><strong>발행일:</strong> 2026-07-07</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769803</li>
+<li><strong>요약:</strong></li>
+<li>기후에너지환경부, 7~9월 인공지능 기반 업무자동화 및 서비스 기획·구현 추진.</li>
+<li>기후에너지환경부는 인공지능 기반 업무자동화와 서비스 기획·구현을 추진함.</li>
+<li>
+<p>(해석) 기후에너지환경부의 인공지능 기반 업무혁신 추진은 전력계통 운영 최적화 기술 개발에 대한 투자 신호를 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 3/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 인공지능 기반 전력계통 운영 최적화 기술 개발</li>
+<li><strong>팩트 근거:</strong> 기후에너지환경부, 7월부터 9월까지 인공지능 기반 업무자동화 및 서비스 기획·구현 추진</li>
+<li><strong>투자 주체:</strong> 기후에너지환경부</li>
+<li><strong>투자 목적:</strong> 업무혁신</li>
+<li><strong>위탁 연구 니즈:</strong> 인공지능 기반 업무 자동화 및 서비스 기획·구현 기술 개발</li>
+<li><strong>접근 전략:</strong> 기후에너지환경부의 업무혁신 정책과 연계</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #제품출시 #기술</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 키워드 관련도: 직접 · 매칭: 정부·R&amp;D 타깃, 한국전력</li>
+</ul>
+<p><a id="0000-치매-어르신-재산-안전하게-치매안심재산관리서비스-첫-계약-체결"></a></p>
+<h3>00:00 &lsquo;치매 어르신 재산 안전하게&rsquo; 치매안심재산관리서비스 첫 계약 체결</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 보건복지부</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 보건복지부</li>
+<li><strong>발행일:</strong> 2026-07-07</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769800</li>
+<li><strong>요약:</strong></li>
+<li>보건복지부가 치매 어르신 재산 안전을 위한 치매안심재산관리서비스 시범사업을 시행중임.</li>
+<li>보건복지부는 치매 어르신의 재산을 안전하게 관리하기 위한 치매안심재산관리서비스 시범사업을 시행중임.</li>
+<li>
+<p>(해석) 치매안심재산관리서비스 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 재산관리 서비스의 효율성과 안전성 향상을 위한 IT 기술 개발</li>
+<li><strong>팩트 근거:</strong> 시범사업 기간 동안 무료이며, 본사업 전환에 따라 이용료가 부과될 경우 이용자는 서비스 이용 중단 가능</li>
+<li><strong>투자 주체:</strong> 국민연금공단이 계약에 따라 대상자의 재산을 투명하게 관리·보호하는 공공신탁 기반 재산관리 지원사업을 수행함.</li>
+<li><strong>투자 목적:</strong> 치매 등으로 인해 경제적 착취나 재산 오남용 위험에서 벗어나 맞춤형 재정지원계획을 통해 안전한 노후생활 보장임.</li>
+<li><strong>위탁 연구 니즈:</strong> 재산관리 서비스의 효율성과 안전성 향상을 위한 IT 기술 개발이 필요함.</li>
+<li><strong>접근 전략:</strong> 정부의 정책 정합성을 고려하여 재산관리 서비스의 기술 개발에 대한 협력을 추진할 수 있음.</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #제품출시 #기술</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 정부·R&amp;D 타깃</li>
+</ul>
+<p><a id="0000-보도자료-구직-청년들경력직-중심-채용이-취업의-걸림돌-ai전환-시대를-맞아-활용역량-강화-교육도-필요-경사노위-청년일자리-희망-위원회첫-청년-라운드-테이블-청년의-현장-목소리를-듣다"></a></p>
+<h3>00:00 [보도자료] 구직 청년들&rdquo;경력직 중심 채용이 취업의 걸림돌&rdquo; &ldquo;AI전환 시대를 맞아 활용역량 강화 교육도 필요&rdquo; 경사노위 「청년일자리 희망 위원회」첫 &lsquo;청년 라운드 테이블&rsquo; 청년의 현장 목소리를 듣다</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 경제사회노동위원회</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 경제사회노동위원회</li>
+<li><strong>발행일:</strong> 2026-07-07</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769816</li>
+<li><strong>요약:</strong></li>
+<li>경제사회노동위원회 청년일자리 희망 위원회, 청년 라운드 테이블 개최해 취업준비 과정의 어려움과 경력직 중심 채용에 대한 인식 등 청년들의 의견을 청취함.</li>
+<li>경제사회노동위원회 청년일자리 희망 위원회, 청년 라운드 테이블 개최</li>
+<li>
+<p>(해석) 청년 일자리 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 노동시장 진입을 위한 경력 형성 및 취업준비 과정의 지원 기술 개발</li>
+<li><strong>팩트 근거:</strong> 청년고용률 43.8%, 청년 실업률 7.2%, 비경제활동인구 412만 8천명</li>
+<li><strong>투자 주체:</strong> 경제사회노동위원회</li>
+<li><strong>투자 목적:</strong> 청년 일자리 정책 개선</li>
+<li><strong>위탁 연구 니즈:</strong> 경력 형성을 위한 기회 확대 및 취업준비 과정의 지원 기술 개발</li>
+<li><strong>접근 전략:</strong> 정부의 청년 일자리 정책과 연계한 기술 개발 및 지원</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #제품출시 #기술</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 정부·R&amp;D 타깃</li>
+</ul>
+<p><a id="0000-2026-도로의-날-기념식-ai디지털-전환-안전하고-지속가능한-k-road"></a></p>
+<h3>00:00 「2026 도로의 날 기념식」 AI·디지털 전환, 안전하고 지속가능한 K-Road!</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 국토교통부</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 국토교통부</li>
+<li><strong>발행일:</strong> 2026-07-07</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769751</li>
+<li><strong>요약:</strong></li>
+<li>국토교통부와 한국도로협회가 &lsquo;2026 도로의 날 기념식&rsquo;을 개최하고 지속가능한 도로산업 발전에 투자할 계획임.</li>
+<li>국토교통부와 한국도로협회가 &lsquo;2026 도로의 날 기념식&rsquo;을 개최하고 지속가능한 도로산업 발전에 투자할 계획임</li>
+<li>
+<p>(해석) 지속가능한 도로산업 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 지속가능한 도로인프라 기술 개발</li>
+<li><strong>팩트 근거:</strong> 국토교통부와 한국도로협회가 &lsquo;2026 도로의 날 기념식&rsquo;을 개최</li>
+<li><strong>투자 주체:</strong> 국토교통부와 한국도로협회</li>
+<li><strong>투자 목적:</strong> 지속가능한 도로산업 발전</li>
+<li><strong>위탁 연구 니즈:</strong> 지속가능한 도로인프라 기술 개발</li>
+<li><strong>접근 전략:</strong> 국토교통부의 지속가능한 도로산업 발전 정책과 연계</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #투자 #제품출시 #기술</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 정부·R&amp;D 타깃, 투자</li>
+</ul>
+<p><a id="0000-경기-5개-광역버스-노선-새로-달린다"></a></p>
+<h3>00:00 경기 5개 광역버스 노선 새로 달린다</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 국토교통부</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 국토교통부</li>
+<li><strong>발행일:</strong> 2026-07-07</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769795</li>
+<li><strong>요약:</strong></li>
+<li>국토교통부, 수도권 외곽과 서울 연결 광역버스 노선 5개 신설.</li>
+<li>국토교통부가 수도권 외곽과 서울을 연결하는 광역버스 노선 5개를 신설함.</li>
+<li>
+<p>(해석) 광역버스 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 교통 서비스 효율화 기술 개발</li>
+<li><strong>팩트 근거:</strong> 5개 광역버스 노선 신설, 이용 현황 모니터링, 배차 간격 조정</li>
+<li><strong>투자 주체:</strong> 국토교통부</li>
+<li><strong>투자 목적:</strong> 교통 서비스 강화</li>
+<li><strong>위탁 연구 니즈:</strong> 교통 서비스 효율화 기술 개발 필요</li>
+<li><strong>접근 전략:</strong> 교통 서비스 효율화 기술 개발을 위한 정부 정책 정합성 활용</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #제품출시 #기술</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 정부·R&amp;D 타깃</li>
+</ul>
+<p><a id="0000-과기정통부-경남전북-ax-연구개발사업-공모-개시"></a></p>
+<h3>00:00 과기정통부, &lsquo;경남·전북 AX 연구개발사업&rsquo; 공모 개시</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 과학기술정보통신부</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 과학기술정보통신부</li>
+<li><strong>발행일:</strong> 2026-07-07</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769799</li>
+<li><strong>요약:</strong></li>
+<li>과기정통부, 5년간 1조 4,131억원 규모 &lsquo;경남·전북 AX 연구개발사업&rsquo; 공모 개시함.</li>
+<li>과기정통부는 경남과 전북을 연계해 피지컬 AI 기반 제조혁신 구현을 위한 연구개발사업을 공모함.</li>
+<li>
+<p>(해석) 피지컬 AI 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 2/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 피지컬 AI 핵심기술 확보를 위한 연구개발 과제</li>
+<li><strong>팩트 근거:</strong> 5년간(&lsquo;26~&lsquo;30) 총 1조 4,131억원(경남 6,763억원, 전북 7,368억원) 규모</li>
+<li><strong>투자 주체:</strong> 과기정통부</li>
+<li><strong>투자 목적:</strong> 피지컬 AI 핵심기술 확보를 위한 연구개발</li>
+<li><strong>위탁 연구 니즈:</strong> 피지컬 AI 기반 제조혁신 기술 개발</li>
+<li><strong>접근 전략:</strong> 정부의 연구개발사업 공모와 연계한 기술 협력</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #정부계획 #협력 #제품출시</li>
+<li><strong>비고:</strong> 우선: 정부·R&amp;D 타깃 (프라운호퍼 협력 관점) · 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 연구개발, 공모, 과기정통부</li>
+</ul>
+<p><a id="0000-광화문-현판-한글-병기-국민에게-묻는다-26일-모두의-토론회-개최"></a></p>
+<h3>00:00 광화문 현판 &lsquo;한글 병기&rsquo; 국민에게 묻는다, 26일 &lsquo;모두의 토론회&rsquo; 개최</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 문화체육관광부</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 문화체육관광부</li>
+<li><strong>발행일:</strong> 2026-07-07</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769823</li>
+<li><strong>요약:</strong></li>
+<li>문화체육관광부와 행정안전부가 &lsquo;광화문 한글 현판 병기&rsquo; 토론회를 개최함.</li>
+<li>문화체육관광부와 행정안전부가 &lsquo;광화문 한글 현판 병기&rsquo; 토론회를 개최함</li>
+<li>
+<p>(해석) 문화유산 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>팩트 근거:</strong> 토론회 개최일정·장소·참가자 수 등</li>
+<li><strong>투자 주체:</strong> 문화체육관광부와 행정안전부</li>
+<li><strong>투자 목적:</strong> 광화문 현판 병기에 대한 국민 의견 수렴</li>
+<li><strong>위탁 연구 니즈:</strong> 팩트 부족으로 판단 보류</li>
+<li><strong>접근 전략:</strong> 정부 정책 정합성 고려</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #제품출시 #기술</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 정부·R&amp;D 타깃</li>
+</ul>
+<p><a id="0000-국민-88-동물-물건과-구별해야-법무부-민법-개정-논의-재점화"></a></p>
+<h3>00:00 국민 88% &ldquo;동물, 물건과 구별해야&rdquo; 법무부, 민법 개정 논의 재점화</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 법무부</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 법무부</li>
+<li><strong>발행일:</strong> 2026-07-07</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769767</li>
+<li><strong>요약:</strong></li>
+<li>법무부, 동물의 법적 지위 개선을 위한 토론회 개최.</li>
+<li>법무부가 동물의 법적 지위 개선을 위한 토론회를 개최함.</li>
+<li>
+<p>(해석) 민법 개정 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>팩트 근거:</strong> 민법 개정을 위한 의견 수렴 절차 착수, 동물의 법적 지위 개선 필요성</li>
+<li><strong>투자 주체:</strong> 법무부</li>
+<li><strong>투자 목적:</strong> 동물의 법적 지위 개선</li>
+<li><strong>위탁 연구 니즈:</strong> 팩트 부족으로 판단 보류</li>
+<li><strong>접근 전략:</strong> 정부 정책 정합</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #제품출시 #기술</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 정부·R&amp;D 타깃, 연구개발</li>
+</ul>
+<p><a id="0000-국민-일상-속-불편은-덜고-안전과-편의는-높이는-경찰청-국민-체감-과제-본격-추진"></a></p>
+<h3>00:00 국민 일상 속 불편은 덜고, 안전과 편의는 높이는 경찰청 &lsquo;국민 체감 과제&rsquo; 본격 추진</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 경찰청</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 경찰청</li>
+<li><strong>발행일:</strong> 2026-07-07</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769822</li>
+<li><strong>요약:</strong></li>
+<li>경찰청, &lsquo;국민 체감 과제&rsquo; 추진으로 일상 속 불편 개선 및 안전 강화 추진함.</li>
+<li>경찰청이 &lsquo;국민 체감 과제&rsquo;를 추진하여 일상 속 불편을 개선하고 안전을 강화함.</li>
+<li>
+<p>(해석) 경찰청의 &lsquo;국민 체감 과제&rsquo;는 인공지능 서비스 개발 및 온라인 시스템 구축에 대한 투자 신호를 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 인공지능 기반 서비스 개발 및 온라인 시스템 구축</li>
+<li><strong>팩트 근거:</strong> 전자적 방식 발송, 모바일 발송, 온라인 시스템 구축 등</li>
+<li><strong>투자 주체:</strong> 경찰청</li>
+<li><strong>투자 목적:</strong> 국민의 일상 속 불편을 개선하고 안전을 강화함.</li>
+<li><strong>위탁 연구 니즈:</strong> 인공지능 서비스 개발 및 온라인 시스템 구축의 기술 격차</li>
+<li><strong>접근 전략:</strong> 경찰청의 정책 정합성을 고려하여 인공지능 서비스 개발 및 온라인 시스템 구축에 대한 협력을 추진함.</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #제품출시 #기술</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 정부·R&amp;D 타깃</li>
+</ul>
+<p><a id="0000-국제사회와-ai-민주정국제사회와-ai-민주정부-비전-공유-및-주요-거점국가와-ai-협력-확대부-비전-공유-및-주요-거점국가와-ai-협력-확대"></a></p>
+<h3>00:00 국제사회와 &lsquo;AI 민주정국제사회와 &lsquo;AI 민주정부&rsquo; 비전 공유 및 주요 거점국가와 AI 협력 확대부&rsquo; 비전 공유 및 주요 거점국가와 AI 협력 확대</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 행정안전부</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 행정안전부</li>
+<li><strong>발행일:</strong> 2026-07-07</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769815</li>
+<li><strong>요약:</strong></li>
+<li>김민재 행정안전부 차관이 스위스와 세르비아, 이집트를 방문해 &lsquo;AI 민주정부&rsquo; 비전을 공유하고 주요 거점국가와 AI 협력을 확대할 계획임.</li>
+<li>김민재 행정안전부 차관이 7월 8일부터 7월 15일까지 스위스와 세르비아, 이집트를 방문해 &lsquo;AI 민주정부&rsquo; 비전을 공유하고 주요 거점국가와 AI 협력을 확대할 계획임</li>
+<li>
+<p>(해석) AI 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 인공지능 기반 공공서비스 고도화 기술 개발</li>
+<li><strong>팩트 근거:</strong> 김민재 행정안전부 차관의 스위스와 세르비아, 이집트 방문 및 &lsquo;AI 민주정부&rsquo; 추진전략 발표</li>
+<li><strong>투자 주체:</strong> 행정안전부</li>
+<li><strong>투자 목적:</strong> 인공지능 기반 공공서비스 전환 및 고도화</li>
+<li><strong>위탁 연구 니즈:</strong> 인공지능 기반 공공서비스 고도화 기술 개발</li>
+<li><strong>접근 전략:</strong> 행정안전부와의 협력을 통해 인공지능 기반 공공서비스 고도화 기술 개발에 참여할 수 있음</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #제품출시 #기술</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 정부·R&amp;D 타깃, mou</li>
+</ul>
+<p><a id="0000-농식품부-베트남-거점-삼아-아세안-k-식자재신선농산물-영토-넓힌다"></a></p>
+<h3>00:00 농식품부, 베트남 거점 삼아 아세안 &lsquo;K-식자재·신선농산물&rsquo; 영토 넓힌다</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 농림축산식품부</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 농림축산식품부</li>
+<li><strong>발행일:</strong> 2026-07-07</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769788</li>
+<li><strong>요약:</strong></li>
+<li>농식품부, 베트남 거점으로 아세안 &lsquo;K-식자재·신선농산물&rsquo; 수출 확대 추진함.</li>
+<li>농식품부가 베트남에 거점을 두고 아세안 지역에서 한국 식자재와 신선 농산물을 수출하기 위한 사업을 추진함</li>
+<li>
+<p>(해석) 식품 수출 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 신선식품 수송을 위한 에너지 효율적인 냉동 기술 개발</li>
+<li><strong>팩트 근거:</strong> 베트남에 복합형 거점물류센터 구축, 신선농축산물 특성에 맞춘 급속 냉장·냉동 시스템</li>
+<li><strong>투자 주체:</strong> 농식품부</li>
+<li><strong>투자 목적:</strong> 아세안 지역에서 한국 식자재와 신선 농산물의 수출을 확대하기 위함</li>
+<li><strong>위탁 연구 니즈:</strong> 팩트 부족으로 판단 보류</li>
+<li><strong>접근 전략:</strong> 정부의 식품 수출 확대 정책과 연계하여 물류 및 냉동 기술 개발에 대한 협력을 추진할 수 있음</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #제품출시 #기술</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 정부·R&amp;D 타깃, mou</li>
+</ul>
+<p><a id="0000-더-안전한-무인-자율주행차-시대-열린다-정부-가이드라인-마련으로-상용화-속도"></a></p>
+<h3>00:00 더 안전한 무인 자율주행차 시대 열린다 정부, 가이드라인 마련으로 상용화 속도</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 국토교통부</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 국토교통부</li>
+<li><strong>발행일:</strong> 2026-07-07</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769794</li>
+<li><strong>요약:</strong></li>
+<li>국토교통부, 무인 자율주행차 안전운행 요건 가이드라인 마련.</li>
+<li>국토교통부는 무인 자율주행차 안전운행 요건 가이드라인을 마련하였음.</li>
+<li>
+<p>(해석) 국토교통부의 무인 자율주행차 안전운행 가이드라인 마련은 자율주행 기술 개발 및 안전운행 시스템 연구에 대한 투자 신호임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 자율주행 기술 개발 및 안전운행 시스템 연구</li>
+<li><strong>팩트 근거:</strong> 무인 자율주행차 운행을 위한 최소 주행실적으로 15,000km 이상의 실증 주행 필수</li>
+<li><strong>투자 주체:</strong> 국토교통부</li>
+<li><strong>투자 목적:</strong> 완전 무인화를 목표로 자율주행 정책 추진</li>
+<li><strong>위탁 연구 니즈:</strong> 자율주행 관련 기술 개발 및 안전운행 시스템 연구 필요</li>
+<li><strong>접근 전략:</strong> 자율주행 관련 기업과 연구기관을 대상으로 설명회 개최를 통해 협력 가능</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #제품출시 #기술</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 정부·R&amp;D 타깃, 연구개발, 기술개발</li>
+</ul>
+<p><a id="0000-미래-팬데믹-대비-인공지능-기반-백신-연구개발-위한-한국형-팬데믹-대비-엔진-워크숍-개최77화"></a></p>
+<h3>00:00 미래 팬데믹 대비 인공지능 기반 백신 연구개발 위한 &lsquo;한국형 팬데믹 대비 엔진 워크숍&rsquo; 개최(7.7.화)</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 질병관리청</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 질병관리청</li>
+<li><strong>발행일:</strong> 2026-07-07</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769765</li>
+<li><strong>요약:</strong></li>
+<li>질병관리청과 감염병혁신연합(CEPI)이 공동으로 &lsquo;한국형 팬데믹 대비 엔진 워크숍&rsquo;을 개최함.</li>
+<li>원문 기준 핵심 사실을 추가 확인 필요</li>
+<li>
+<p>(해석) 인공지능 기반 백신 연구개발 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 인공지능 기반 백신 개발 플랫폼 기술</li>
+<li><strong>팩트 근거:</strong> 한국형 팬데믹 대비 엔진 워크숍 개최, CEPI PPX 기술 구현 현황, 에볼라 바이러스 대응을 위한 AI 활용 사례 등</li>
+<li><strong>투자 주체:</strong> 질병관리청, 감염병혁신연합(CEPI), 국립보건연구원 등</li>
+<li><strong>투자 목적:</strong> 한국형 팬데믹 대비 엔진 구축, 백신 개발 플랫폼 기술 확보</li>
+<li><strong>위탁 연구 니즈:</strong> 인공지능 기반 백신 개발 플랫폼 기술 개발, 초고속 항원 설계 및 백신 개발 전주기 통합 지원</li>
+<li><strong>접근 전략:</strong> 감염병 위기관리체계 고도화, 초고속 항원 설계 및 백신 개발 전주기 통합 지원</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #정부계획 #협력 #제품출시 #기술</li>
+<li><strong>비고:</strong> 우선: 정부·R&amp;D 타깃 (프라운호퍼 협력 관점) · 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 정부·R&amp;D 타깃, 연구개발, 로드맵</li>
+</ul>
+<p><a id="0000-방위사업청-캐나다-잠수함사업-우선협상대상자-선정결과-존중"></a></p>
+<h3>00:00 방위사업청, 캐나다 잠수함사업 우선협상대상자 선정결과 존중</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 방위사업청</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 방위사업청</li>
+<li><strong>발행일:</strong> 2026-07-07</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769753</li>
+<li><strong>요약:</strong></li>
+<li>방위사업청, 캐나다 잠수함사업 우선협상대상자 선정결과 존중.</li>
+<li>방위사업청은 캐나다 잠수함사업 우선협상대상자 선정결과를 존중하고, 신속하게 방산 AI 대전환을 추진</li>
+<li>
+<p>(해석) 방위산업 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 방산 AI 기술 개발</li>
+<li><strong>팩트 근거:</strong> 방위사업청이 신속하게 방산 AI 대전환을 추진</li>
+<li><strong>투자 주체:</strong> 방위사업청, 한화오션, HD현대중공업</li>
+<li><strong>투자 목적:</strong> 기술 격차 확보</li>
+<li><strong>위탁 연구 니즈:</strong> 고난도 R&amp;D 격차</li>
+<li><strong>접근 전략:</strong> 정부와의 협력관계 형성</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #제품출시 #기술</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 정부·R&amp;D 타깃, 산업통상부</li>
+</ul>
+<p><a id="0000-법무부-검찰인권존중미래위원회-진상조사단-면담-및-국민제안사건-접수기간-연장-결정"></a></p>
+<h3>00:00 법무부 &lsquo;검찰인권존중미래위원회&rsquo;, 진상조사단 면담 및 국민제안사건 접수기간 연장 결정</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 법무부</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 법무부</li>
+<li><strong>발행일:</strong> 2026-07-07</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769762</li>
+<li><strong>요약:</strong></li>
+<li>법무부 &lsquo;검찰인권존중미래위원회&rsquo; 4차 회의에서 진상조사단 면담 및 국민제안사건 접수기간 연장 결정함.</li>
+<li>원문 기준 핵심 사실을 추가 확인 필요</li>
+<li>
+<p>(해석) 법무부 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>투자 주체:</strong> 명시 없음</li>
+<li><strong>투자 목적:</strong> 해당 없음</li>
+<li><strong>위탁 연구 니즈:</strong> 팩트 부족으로 판단 보류</li>
+<li><strong>접근 전략:</strong> 정부 정책 정합</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #제품출시 #기술</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 정부·R&amp;D 타깃</li>
+</ul>
+<p><a id="0000-불법허위조작정보-유통-방지-시행령-국무회의-통과"></a></p>
+<h3>00:00 불법·허위조작정보 유통 방지 시행령, 국무회의 통과</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 방송미디어통신위원회</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 방송미디어통신위원회</li>
+<li><strong>발행일:</strong> 2026-07-07</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769786</li>
+<li><strong>요약:</strong></li>
+<li>방송미디어통신위원회, 불법·허위조작정보 유통 방지 시행령 국무회의 통과.</li>
+<li>방송미디어통신위원회가 불법·허위조작정보 유통 방지 시행령을 국무회의에 통과시킴</li>
+<li>
+<p>(해석) 정보보호 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 정보통신망 보안 기술 개발</li>
+<li><strong>팩트 근거:</strong> 대규모 정보통신서비스 제공자, 가중 손해배상 적용 대상 게재자, 공인 등에 대한 규정</li>
+<li><strong>투자 주체:</strong> 방송미디어통신위원회</li>
+<li><strong>투자 목적:</strong> 불법·허위조작정보 유통 방지</li>
+<li><strong>위탁 연구 니즈:</strong> 정보통신망 보안 기술 개발</li>
+<li><strong>접근 전략:</strong> 정보보호 정책 정합성에 따라 연구 제안</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #제품출시 #기술</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 정부·R&amp;D 타깃</li>
+</ul>
+<p><a id="0000-소방청-국내-최대-제어로봇학시스템학회와-손잡고-학술대회에-소방재난-분과세션-운영"></a></p>
+<h3>00:00 소방청, 국내 최대 제어로봇학시스템학회와 손잡고 학술대회에 「소방재난 분과(세션)」 운영</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 소방청</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 소방청</li>
+<li><strong>발행일:</strong> 2026-07-07</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769754</li>
+<li><strong>요약:</strong></li>
+<li>소방청, 제어로봇학시스템학회와 손잡고 학술대회에 「소방재난 분과」 운영.</li>
+<li>소방청과 제어로봇학시스템학회가 공동으로 학술대회에 소방재난 분과를 운영</li>
+<li>
+<p>(해석) 로봇기술 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 로봇과 인공지능 기술을 활용한 재난 대응 시스템 개발</li>
+<li><strong>팩트 근거:</strong> 2026 제41회 제어로봇시스템학회(ICROS) 학술대회에서 소방재난 분과(세션) 운영, 24편의 논문 발표</li>
+<li><strong>투자 주체:</strong> 소방청</li>
+<li><strong>투자 목적:</strong> 재난 대응력 향상을 위한 로봇과 인공지능 기술의 개발</li>
+<li><strong>위탁 연구 니즈:</strong> 로봇과 인공지능 기술을 활용한 재난 대응 시스템 개발</li>
+<li><strong>접근 전략:</strong> 소방청과 제어로봇학시스템학회와의 협력을 통해 재난 대응 기술 개발</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #제품출시 #기술</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: ems</li>
+</ul>
+<p><a id="0000-시민이-자라나는-학교를-위해-한-일-교사가-함께-협력한다"></a></p>
+<h3>00:00 시민이 자라나는 학교를 위해 한-일 교사가 함께 협력한다</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 교육부</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 교육부</li>
+<li><strong>발행일:</strong> 2026-07-07</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769752</li>
+<li><strong>요약:</strong></li>
+<li>교육부가 한-일 교사 협력을 통해 시민이 자라나는 학교를 지원한다는 계획을 발표했지만, 투자 및 기술 개발 계획은 명시되지 않음.</li>
+<li>교육부가 시민이 자라나는 학교를 위해 한-일 교사 협력을 발표했음</li>
+<li>
+<p>(해석) 교육부 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>투자 주체:</strong> 명시 없음</li>
+<li><strong>투자 목적:</strong> 해당 없음</li>
+<li><strong>위탁 연구 니즈:</strong> 팩트 부족으로 판단 보류</li>
+<li><strong>접근 전략:</strong> 정부 정책 정합성 미확인</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #투자 #제품출시 #기술</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 정부·R&amp;D 타깃</li>
+</ul>
+<p><a id="0000-여름철-폭염-대비-프로야구장-안전-점검-실시"></a></p>
+<h3>00:00 여름철 폭염 대비 프로야구장 안전 점검 실시</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 문화체육관광부</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 문화체육관광부</li>
+<li><strong>발행일:</strong> 2026-07-07</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769755</li>
+<li><strong>요약:</strong></li>
+<li>문화체육관광부가 여름철 폭염 대비 프로야구장 안전 점검을 실시할 예정임.</li>
+<li>원문 기준 핵심 사실을 추가 확인 필요</li>
+<li>
+<p>(해석) 안전 점검 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>투자 주체:</strong> 문화체육관광부</li>
+<li><strong>투자 목적:</strong> 폭염 대비 안전 점검</li>
+<li><strong>위탁 연구 니즈:</strong> 팩트 부족으로 판단 보류</li>
+<li><strong>접근 전략:</strong> 정부 정책 정합</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #제품출시 #기술</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 정부·R&amp;D 타깃</li>
+</ul>
+<p><a id="0000-자연자본공시-대응-전략-국내외-전문가들에게-듣는다"></a></p>
+<h3>00:00 자연자본공시 대응 전략, 국내외 전문가들에게 듣는다</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 기후에너지환경부</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 기후에너지환경부</li>
+<li><strong>발행일:</strong> 2026-07-07</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769821</li>
+<li><strong>요약:</strong></li>
+<li>기후에너지환경부와 대한상공회의소가 공동으로 제4차 자연자본공시 토론회를 개최하고, 국내외 전문가들이 자연자본 투자 전략과 대응 방안을 논의함.</li>
+<li>기후에너지환경부와 대한상공회의소가 공동으로 제4차 자연자본공시 토론회를 개최함.</li>
+<li>
+<p>(해석) 자연자본공시 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 자연자본 관리와 생물다양성 보존을 위한 기술 개발</li>
+<li><strong>팩트 근거:</strong> 제4차 자연자본공시 토론회 개최, TNFD 참여기관 약 1,919개</li>
+<li><strong>투자 주체:</strong> 기후에너지환경부, 대한상공회의소, 삼성전자, 에스케이증권 등</li>
+<li><strong>투자 목적:</strong> 자연자본 관리와 생물다양성 보존을 위한 투자 전략 수립</li>
+<li><strong>위탁 연구 니즈:</strong> 자연자본 관련 위험성 평가와 생물다양성 보존 활동에 대한 연구 필요</li>
+<li><strong>접근 전략:</strong> 기후에너지환경부와의 협력을 통해 자연자본 관리와 생물다양성 보존을 위한 기술 개발에 참여</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #투자 #제품출시 #기술 #기업동향</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 정부·R&amp;D 타깃, mou, 투자</li>
+</ul>
+<p><a id="0000-정읍국유림관리소-여름철-우기-전-사방사업-전격-완료"></a></p>
+<h3>00:00 정읍국유림관리소, 여름철 우기 전 사방사업 전격 완료!</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 산림청</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 산림청</li>
+<li><strong>발행일:</strong> 2026-07-07</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769759</li>
+<li><strong>요약:</strong></li>
+<li>산림청 정읍국유림관리소, 여름철 우기 전 사방사업 완료.</li>
+<li>산림청 정읍국유림관리소는 여름철 우기 전 사방사업을 완료했음.</li>
+<li>
+<p>(해석) 산림재해 예방 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 산림재해 예방 기술 개발</li>
+<li><strong>팩트 근거:</strong> 사방사업 6월 말 완료, 사방댐 2개소, 계류보전 2.25km, 산지사방 1.5ha</li>
+<li><strong>투자 주체:</strong> 산림청</li>
+<li><strong>투자 목적:</strong> 산림재해 예방</li>
+<li><strong>위탁 연구 니즈:</strong> 산림재해 예방 기술 개발</li>
+<li><strong>접근 전략:</strong> 산림청과 협력하여 산림재해 예방 기술 개발</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #제품출시 #기술</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 정부·R&amp;D 타깃</li>
+</ul>
+<p><a id="0000-준비된-기술인재-직업공통능력-인증으로-증명한다"></a></p>
+<h3>00:00 준비된 기술인재, 직업공통능력 인증으로 증명한다</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 교육부</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 교육부</li>
+<li><strong>발행일:</strong> 2026-07-07</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769806</li>
+<li><strong>요약:</strong></li>
+<li>교육부, 기술인재 직업공통능력 인증제 시행.</li>
+<li>교육부, 기술인재 직업공통능력 인증제 시행</li>
+<li>
+<p>(해석) 기술인재 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 기술인재 양성 및 직업공통능력 인증을 위한 교육 프로그램 개발</li>
+<li><strong>투자 주체:</strong> 교육부</li>
+<li><strong>투자 목적:</strong> 기술인재 양성 및 직업능력 향상</li>
+<li><strong>위탁 연구 니즈:</strong> 기술인재 교육 프로그램 개발 및 직업공통능력 인증제 운영</li>
+<li><strong>접근 전략:</strong> 교육부와의 협력 및 기술인재 양성 프로그램 개발</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #정부계획 #협력 #제품출시 #기술</li>
+<li><strong>비고:</strong> 우선: 정부·R&amp;D 타깃 (프라운호퍼 협력 관점) · 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 정부·R&amp;D 타깃</li>
+</ul>
+<p><a id="0000-해외-에볼라바이러스병-확산-국내-유입-대비-범부처-총력-대응77화"></a></p>
+<h3>00:00 해외 에볼라바이러스병 확산, 국내 유입 대비 범부처 총력 대응(7.7.화)</h3>
+<ul>
+<li><strong>자료유형:</strong> 공식발표(IR·정책)</li>
+<li><strong>출처:</strong> 정책브리핑 질병관리청</li>
+<li><strong>저자/발행기관:</strong> 정책브리핑 질병관리청</li>
+<li><strong>발행일:</strong> 2026-07-07</li>
+<li><strong>링크/DOI:</strong> https://www.korea.kr/briefing/pressReleaseView.do?newsId=156769827</li>
+<li><strong>요약:</strong></li>
+<li>질병관리청, 감염병 위기관리체계 고도화 방안 추진중임.</li>
+<li>질병관리청은 감염병 위기관리체계 고도화 방안을 수립하여 추진 중임.</li>
+<li>
+<p>(해석) 감염병 관리 흐름과 연결되는 시장 신호로 보임</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 1/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>제안 R&amp;D 영역:</strong> 감염병 특성 신속 규명 및 연계 활용 체계 개발</li>
+<li><strong>팩트 근거:</strong> 감염병 위기관리체계 고도화, 감염병 전주기 맞춤형 의료대응체계 구축</li>
+<li><strong>투자 주체:</strong> 질병관리청</li>
+<li><strong>투자 목적:</strong> 감염병 위험 감소를 위한 핵심대응수단 개발</li>
+<li><strong>위탁 연구 니즈:</strong> 감염병 특성 신속 규명 및 연계 활용 체계 개발</li>
+<li><strong>접근 전략:</strong> 감염병 위기 맞춤형 대응 인프라 및 역량 강화</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #투자 #제품출시 #기술</li>
+<li><strong>비고:</strong> 분석 키워드: 전력계통, 스마트그리드, 파워그리드 · 매칭: 정부·R&amp;D 타깃, 연구개발, 투자</li>
+</ul>
+<hr />
+<h2>태그 분류체계 (월간 보고서 챕터와 매칭)</h2>
+<table>
+<thead>
+<tr>
+<th>태그</th>
+<th>의미</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>#기술</td>
+<td>신기술, R&amp;D, 기술 발표</td>
+</tr>
+<tr>
+<td>#논문</td>
+<td>학술 연구 결과 (성능, 실험, 방법론)</td>
+</tr>
+<tr>
+<td>#투자</td>
+<td>투자 라운드, 밸류에이션, 펀딩</td>
+</tr>
+<tr>
+<td>#M&amp;A</td>
+<td>인수합병, 전략적 제휴</td>
+</tr>
+<tr>
+<td>#제품출시</td>
+<td>신제품, 서비스 런칭</td>
+</tr>
+<tr>
+<td>#기업동향</td>
+<td>조직, 인력, 실적, 전략</td>
+</tr>
+<tr>
+<td>#규제</td>
+<td>법안, 정책, 표준</td>
+</tr>
+<tr>
+<td>#경쟁</td>
+<td>경쟁사 비교, 점유율, 포지셔닝</td>
+</tr>
+<tr>
+<td>#시장수치</td>
+<td>시장규모/성장률 추정치</td>
+</tr>
+<tr>
+<td>#리스크</td>
+<td>사고, 논란, 부정적 전망</td>
+</tr>
+<tr>
+<td>#전문가전망</td>
+<td>애널리스트/전문가 예측</td>
+</tr>
+</tbody>
+</table>
+<h2>신뢰도 등급 기준</h2>
+<ul>
+<li><strong>A (높음):</strong> 정부·공공기관 원문(korea.kr·부처 .go.kr 보도자료), 연합뉴스·뉴시스 1차 보도, 공공 R&amp;D·정책기관(KISTEP·KIET·KIPO·KETEP·한국전력 등), 국내 학술지·국책연구원 동료심사 논문</li>
+<li><strong>B (중간):</strong> 국내 경제·IT 전문매체(헤럴드경제·동아일보·전자신문·ZDNet Korea 등), 2차 인용·전문자료 요약, 기업·공기업 IR/보도자료</li>
+<li><strong>C (참고):</strong> 익명 소스, 추측성 기사, 단순 재가공 콘텐츠, 미검증 블로그 — <strong>자동 생성 시에는 C가 나오지 않음. 수동 기록 시에만 사용</strong></li>
+</ul></div>
+</div>
+</body>
+</html>
