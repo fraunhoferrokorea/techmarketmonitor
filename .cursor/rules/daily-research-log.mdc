@@ -28,7 +28,7 @@ Full manual: `templates/daily_research_log_template.md` · Code rules: `src/dail
 Add when there are **1+ items** in the day (auto pipeline always generates for 1+).
 
 Structure (auto-generated):
-- **분석 기준 키워드 (상위 3개)**
+- **모니터링 키워드** (keywords.txt 전체)
 - **오늘의 공통 흐름** (one-line theme)
 - Table: `| 관련도 | 항목 | 한 줄 요약 |` with **직접/간접** relevance
 - Item links `[title](#slug) · [원문](url)` — `#slug` jumps in-doc; `원문` opens the source
