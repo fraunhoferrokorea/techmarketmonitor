@@ -1,12 +1,14 @@
-name: Deploy Daily Reports (GitHub Pages)
+name: Deploy Report Viewer (GitHub Pages)
 
 on:
   push:
     branches: [main]
     paths:
       - "output/daily/**"
+      - "output/monthly/**"
       - ".github/workflows/deploy-daily-pages.yml"
       - "scripts/build_daily_pages.py"
+      - "scripts/build_report_pages.py"
   workflow_dispatch:
 
 permissions:
@@ -34,10 +36,10 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Build static site from daily markdown
+      - name: Build static site from daily + monthly markdown
         run: |
           pip install markdown
-          python scripts/build_daily_pages.py
+          python scripts/build_report_pages.py
 
       - name: Set up Pages
         uses: actions/configure-pages@v6
@@ -45,7 +47,7 @@ jobs:
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5
         with:
-          path: output/daily
+          path: output/site
 
       - name: Deploy to GitHub Pages
         id: deployment
