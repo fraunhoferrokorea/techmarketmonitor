@@ -4,8 +4,8 @@
 # 국내 시장·정책·ICT 소스만 수집합니다.
 # 새 소스를 추가할 때는 name / url / category 세 필드가 필수입니다.
 # method: post 는 POST RSS만 허용하는 부처(산업통상부 등)에 사용합니다.
+# method: html / pacst 는 HTML 스크래퍼(src/fetchers/html_boards.py · pacst.py)가 수집합니다.
 # RSSFetcher가 feedparser로 가져오므로 표준 RSS 2.0 / Atom 1.0 URL이면 됩니다.
-# 국토부·국방부·우주항공청·TIPA·KETEP·에너지경제신문·PACST 는 HTML 스크래퍼로 보강합니다.
 # ─────────────────────────────────────────────────────────────────────────────
 
 # ── 국내 ICT / 정책 / 공공 R&D ─────────────────────────────────────────
@@ -35,14 +35,54 @@ korean:
   - name: 재정경제부 보도자료
     url: https://www.mofe.go.kr/com/detailRssTagService.do?bbsId=MOSFBBS_000000000028
     category: korean
+  - name: 국토교통부 보도자료
+    url: https://www.molit.go.kr/USR/NEWS/m_71/lst.jsp
+    category: korean
+    method: html
+  - name: 국방부 보도자료
+    url: https://www.mnd.go.kr/mnd/167/subview.do
+    category: korean
+    method: html
+  - name: 우주항공청 보도자료
+    url: https://www.kasa.go.kr/prog/plcyBrf/brief/kor/sub01_01_04/list.do
+    category: korean
+    method: html
+  - name: PACST 보도자료
+    url: https://www.pacst.go.kr/jsp/board/boardList.jsp?board_id=4
+    category: korean
+    method: pacst
+  - name: KEIT 알림
+    url: https://www.keit.re.kr/rss/board.es?bid=0031
+    category: korean
+  - name: KETEP 보도자료
+    url: https://www.ketep.re.kr/
+    category: korean
+    method: html
+  - name: KIAT 보도자료
+    url: https://www.kiat.or.kr/front/user/main.do
+    category: korean
+    method: html
+  - name: TIPA 보도자료
+    url: https://www.tipa.or.kr/s040102
+    category: korean
+    method: html
+  - name: NRF 보도자료
+    url: https://www.nrf.re.kr/page/95?menuNo=95
+    category: korean
+    method: html
+  - name: KAIA 보도자료
+    url: https://www.kaia.re.kr/portal/bbs/list/B0000058.do?menuNo=200824
+    category: korean
+    method: html
+  - name: KRIT 보도자료
+    url: https://www.krit.re.kr/krit/bbs/press_list.do
+    category: korean
+    method: html
   - name: KISTEP
     url: https://www.kistep.re.kr/rss/board.es?bid=0051
     category: korean
   - name: KIPO 보도자료
     url: https://www.kipo.go.kr/ko/report/UXmlRssApp.do?menuCd=SCD0200618
-    category: korean
-  - name: KEIT 알림
-    url: https://www.keit.re.kr/rss/board.es?bid=0031
     category: korean
   - name: 한국전력 보도자료
     url: https://www.kepco.co.kr/home/customer/publicity/press/rss.do
@@ -92,6 +132,10 @@ korean:
   - name: 전기신문
     url: https://www.electimes.com/rss/allArticle.xml
     category: korean
+  - name: 에너지경제신문
+    url: https://www.ekn.kr/web/
+    category: korean
+    method: html
   - name: 에너지타임즈
     url: https://www.energytimes.kr/rss/allArticle.xml
     category: korean

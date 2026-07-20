@@ -11,7 +11,7 @@ from src.article_enrichment import enrich_raw_articles
 from src.config import Settings, load_settings, load_sources
 from src.daily_report import log_to_summarized_article, save_daily_report
 from src.fetchers.html_boards import fetch_html_boards_for_date, fetch_html_boards_recent
-from src.fetchers.pacst import fetch_pacst_for_date
+from src.fetchers.pacst import fetch_pacst_for_date, fetch_pacst_recent
 from src.fetchers.registry import build_fetchers
 from src.filter import filter_articles
 from src.korea_scope import filter_domestic_articles
@@ -227,6 +227,7 @@ def run_daily_monitor(
         _merge_extra(fetch_pacst_for_date(log_date), "PACST")
     else:
         _merge_extra(fetch_html_boards_recent(), "ministry/agency HTML")
+        _merge_extra(fetch_pacst_recent(), "PACST")
 
     if window_end is not None:
         recent_articles = _within_log_date(

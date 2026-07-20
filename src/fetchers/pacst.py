@@ -129,6 +129,73 @@ def _parse_board_page(
     return articles, all_before and bool(matches)
 
 
+def _parse_board_page_recent(
+    html: str,
+    *,
+    section: str,
+    source_name: str,
+    seen_urls: set[str],
+) -> list[RawArticle]:
+    articles: list[RawArticle] = []
+    matches: list[re.Match[str]] = []
+    matches.extend(_LIST_ITEM_RE.finditer(html))
+    matches.extend(_THUMB_ITEM_RE.finditer(html))
+
+    for match in matches:
+        published_raw = match.group("published")
+        url = _canonical_url(match.group("href"), section)
+        if url in seen_urls:
+            continue
+        seen_urls.add(url)
+
+        title = _clean_title(match.group("title"))
+        articles.append(
+            RawArticle(
+                title=title,
+                url=url,
+                summary=title,
+                source_name=source_name,
+                category="korean",
+                published_at=_parse_published(published_raw),
+            )
+        )
+
+    return articles
+
+
+def fetch_pacst_recent(*, max_pages: int = 3) -> list[RawArticle]:
+    """Fetch recent PACST board posts (daily pipeline)."""
+    articles: list[RawArticle] = []
+    seen_urls: set[str] = set()
+
+    for section, board_id, source_name in _BOARDS:
+        for page_index in range(1, max_pages + 1):
+            try:
+                html = _fetch_board_page(section, board_id, page_index)
+            except Exception as exc:
+                logger.warning(
+                    "PACST fetch failed (%s board_id=%d p%d): %s",
+                    section,
+                    board_id,
+                    page_index,
+                    exc,
+                )
+                break
+
+            page_articles = _parse_board_page_recent(
+                html,
+                section=section,
+                source_name=source_name,
+                seen_urls=seen_urls,
+            )
+            if not page_articles:
+                break
+            articles.extend(page_articles)
+
+    logger.info("PACST recent: fetched %d article(s)", len(articles))
+    return articles
+
+
 def fetch_pacst_for_date(log_date: date) -> list[RawArticle]:
     """Fetch PACST board posts published on one calendar day."""
     articles: list[RawArticle] = []

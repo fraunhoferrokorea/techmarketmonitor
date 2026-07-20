@@ -1,20 +1,12 @@
 # Tech Market Monitor — RSS Source Configuration
 # ─────────────────────────────────────────────────────────────────────────────
-# 한 줄에 소스 하나: 이름 | RSS URL | 카테고리 [| METHOD]
-# METHOD는 선택(기본 GET). 산업부처럼 POST RSS만 되는 경우 post 를 붙입니다.
+# 한 줄에 소스 하나: 이름 | URL | 카테고리 [| METHOD]
+# METHOD: GET(기본), POST(RSS POST), html(HTML 게시판), pacst(PACST 전용)
 # #으로 시작하는 줄과 빈 줄은 무시됩니다.
-# 이 파일만 수정하면 다음 실행부터 수집 소스가 변경됩니다.
-#
-# 카테고리:
-#   korean — 국내 ICT / 정책 / 공공 R&D
-#
-# 참고: 국토부·국방부·우주항공청·TIPA·KETEP·에너지경제신문 등은
-#       RSS가 없거나 불안정해 HTML 게시판 스크래퍼(src/fetchers/html_boards.py)로 수집합니다.
-#       국가과학기술자문회의(PACST)는 catch-up 시 전용 스크래퍼로 보강합니다.
-#       KIAT는 홈 보도자료 탭 티저(board_id=41), NRF·KAIA·KRIT는 보도자료 목록 HTML로 수집합니다.
+# html·pacst 항목은 src/fetchers/html_boards.py · pacst.py 가 수집합니다.
 # ─────────────────────────────────────────────────────────────────────────────
 
-# ── 정부부처 보도자료 (부처 원문 RSS) ───────────────────────────────────
+# ── 정부부처 보도자료 (RSS) ─────────────────────────────────────────────
 과기정통부 보도자료 | https://www.msit.go.kr/user/rss/rss.do?bbsSeqNo=94 | korean
 과기정통부 정보통신 | https://www.msit.go.kr/user/rss/rss.do?bbsSeqNo=67 | korean
 과기정통부 과학기술정책 | https://www.msit.go.kr/user/rss/rss.do?bbsSeqNo=70 | korean
@@ -24,10 +16,28 @@
 중소벤처기업부 보도자료 | https://www.mss.go.kr/rss/smba/board/86.do | korean
 재정경제부 보도자료 | https://www.mofe.go.kr/com/detailRssTagService.do?bbsId=MOSFBBS_000000000028 | korean
 
-# ── 공공 R&D·지식재산 ─────────────────────────────────────────────────
+# ── 정부부처 보도자료 (HTML) ────────────────────────────────────────────
+국토교통부 보도자료 | https://www.molit.go.kr/USR/NEWS/m_71/lst.jsp | korean | html
+국방부 보도자료 | https://www.mnd.go.kr/mnd/167/subview.do | korean | html
+우주항공청 보도자료 | https://www.kasa.go.kr/prog/plcyBrf/brief/kor/sub01_01_04/list.do | korean | html
+
+# ── 국가과학기술자문회의 (PACST) ────────────────────────────────────────
+PACST 보도자료 | https://www.pacst.go.kr/jsp/board/boardList.jsp?board_id=4 | korean | pacst
+
+# ── R&D 전담기관 (RSS) ──────────────────────────────────────────────────
+KEIT 알림 | https://www.keit.re.kr/rss/board.es?bid=0031 | korean
+
+# ── R&D 전담기관 (HTML) ─────────────────────────────────────────────────
+KETEP 보도자료 | https://www.ketep.re.kr/ | korean | html
+KIAT 보도자료 | https://www.kiat.or.kr/front/user/main.do | korean | html
+TIPA 보도자료 | https://www.tipa.or.kr/s040102 | korean | html
+NRF 보도자료 | https://www.nrf.re.kr/page/95?menuNo=95 | korean | html
+KAIA 보도자료 | https://www.kaia.re.kr/portal/bbs/list/B0000058.do?menuNo=200824 | korean | html
+KRIT 보도자료 | https://www.krit.re.kr/krit/bbs/press_list.do | korean | html
+
+# ── 공공 R&D·지식재산 (기타 RSS) ────────────────────────────────────────
 KISTEP | https://www.kistep.re.kr/rss/board.es?bid=0051 | korean
 KIPO 보도자료 | https://www.kipo.go.kr/ko/report/UXmlRssApp.do?menuCd=SCD0200618 | korean
-KEIT 알림 | https://www.keit.re.kr/rss/board.es?bid=0031 | korean
 한국전력 보도자료 | https://www.kepco.co.kr/home/customer/publicity/press/rss.do | korean
 
 # ── 국가기간통신·경제지 ───────────────────────────────────────────────
@@ -48,5 +58,6 @@ ZDNet Korea | http://feeds.feedburner.com/zdkorea | korean
 한겨레 과학 | https://www.hani.co.kr/rss/science | korean
 동아일보 과학 | https://rss.donga.com/science.xml | korean
 전기신문 | https://www.electimes.com/rss/allArticle.xml | korean
+에너지경제신문 | https://www.ekn.kr/web/ | korean | html
 에너지타임즈 | https://www.energytimes.kr/rss/allArticle.xml | korean
 인더스트리뉴스 | https://www.industrynews.co.kr/rss/allArticle.xml | korean

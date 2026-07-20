@@ -124,7 +124,7 @@ _SOURCE_GROUPS = ("korean",)
 
 
 def _load_sources_txt(path: Path) -> list[dict]:
-    """Read one source per line: name | url | category."""
+    """Read one source per line: name | url | category [| method]."""
     try:
         lines = path.read_text(encoding="utf-8").splitlines()
     except FileNotFoundError:

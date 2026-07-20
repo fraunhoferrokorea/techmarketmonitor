@@ -3,16 +3,20 @@ from __future__ import annotations
 from src.fetchers.rss import RSSFetcher
 
 
+_NON_RSS_METHODS = frozenset({"HTML", "PACST"})
+
+
 def build_fetchers(sources: list[dict], keywords: list[str]) -> list[RSSFetcher]:
-    """Instantiate one RSSFetcher per source entry."""
+    """Instantiate one RSSFetcher per RSS/Atom source entry."""
     fetchers: list[RSSFetcher] = []
     for source in sources:
         name = source.get("name", "Unknown")
         url = source.get("url", "")
         category = source.get("category", "general")
-        method = source.get("method", "GET")
-        if url:
-            fetchers.append(
-                RSSFetcher(name=name, url=url, category=category, method=method)
-            )
+        method = (source.get("method", "GET") or "GET").upper()
+        if not url or method in _NON_RSS_METHODS:
+            continue
+        fetchers.append(
+            RSSFetcher(name=name, url=url, category=category, method=method)
+        )
     return fetchers
