@@ -15,6 +15,8 @@ MONTHLY_DIR = ROOT / "output" / "monthly"
 SITE_DIR = ROOT / "output" / "site"
 # Committed mirror for legacy GitHub Pages (branch main, folder / or /docs)
 DOCS_DIR = ROOT / "docs"
+GH_REPO = "fraunhoferrokorea/techmarketmonitor"
+GH_BRANCH = "main"
 
 _MD_EXT = ["tables", "fenced_code", "sane_lists", "smarty"]
 
@@ -93,12 +95,12 @@ a:hover { color: var(--brand); }
 @media (max-width: 860px) { .sidebar { position: static; } }
 
 .seg {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 0.35rem;
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.35rem;
   background: var(--brand-soft); padding: 0.3rem; border-radius: 10px; margin-bottom: 1rem;
 }
 .seg button {
   appearance: none; border: 0; background: transparent; color: var(--muted);
-  font: inherit; font-weight: 600; font-size: 0.92rem; padding: 0.55rem 0.4rem;
+  font: inherit; font-weight: 600; font-size: 0.85rem; padding: 0.55rem 0.3rem;
   border-radius: 8px; cursor: pointer; transition: 0.15s ease;
 }
 .seg button.active {
@@ -106,6 +108,59 @@ a:hover { color: var(--brand); }
   box-shadow: 0 1px 3px rgba(0, 107, 94, 0.18);
 }
 .seg button:hover:not(.active) { color: var(--ink); }
+
+.config-toolbar {
+  display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center;
+  margin: 0 0 0.85rem; padding-bottom: 0.85rem; border-bottom: 1px solid var(--line);
+}
+.config-toolbar .spacer { flex: 1; min-width: 0.5rem; }
+.btn {
+  appearance: none; border: 1px solid var(--line); background: var(--surface);
+  color: var(--ink); font: inherit; font-size: 0.85rem; font-weight: 600;
+  padding: 0.45rem 0.75rem; border-radius: 8px; cursor: pointer;
+  transition: 0.15s ease; text-decoration: none; display: inline-flex; align-items: center;
+}
+.btn:hover { border-color: #b7ddd5; background: var(--brand-soft); color: var(--brand-dark); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn.primary {
+  background: var(--brand); border-color: var(--brand); color: #fff;
+}
+.btn.primary:hover:not(:disabled) { background: var(--brand-dark); border-color: var(--brand-dark); color: #fff; }
+.btn.ghost { background: transparent; }
+.config-editor {
+  width: 100%; min-height: 52vh; resize: vertical;
+  font-family: ui-monospace, "Cascadia Code", "Consolas", monospace;
+  font-size: 0.82rem; line-height: 1.55;
+  padding: 0.85rem 1rem; border: 1px solid var(--line); border-radius: 10px;
+  background: #fafcfb; color: var(--ink); tab-size: 2;
+}
+.config-editor:focus {
+  outline: 2px solid #b7ddd5; outline-offset: 1px; background: #fff;
+}
+.config-hint {
+  margin: 0.75rem 0 0; color: var(--muted); font-size: 0.8rem; line-height: 1.5;
+}
+.config-status {
+  font-size: 0.8rem; font-weight: 600; color: var(--muted);
+}
+.config-status.dirty { color: var(--score-mid); }
+.config-status.ok { color: var(--brand-dark); }
+.config-status.err { color: #b42318; }
+.config-token {
+  margin-top: 1rem; padding: 0.85rem 1rem; border: 1px dashed #c5e4dd;
+  border-radius: 10px; background: #f7fbfa;
+}
+.config-token summary {
+  cursor: pointer; font-weight: 650; font-size: 0.88rem; color: var(--brand-dark);
+}
+.config-token .row {
+  display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.65rem; align-items: center;
+}
+.config-token input[type="password"] {
+  flex: 1; min-width: 180px; font: inherit; font-size: 0.85rem;
+  padding: 0.45rem 0.65rem; border: 1px solid var(--line); border-radius: 8px;
+}
+.config-token p { margin: 0.5rem 0 0; font-size: 0.78rem; color: var(--muted); }
 
 .sidebar h2 {
   margin: 0 0 0.65rem; font-size: 0.78rem; letter-spacing: 0.06em;
@@ -228,9 +283,10 @@ _INDEX_HTML = """\
 
 <div class="layout">
   <aside class="panel sidebar">
-    <div class="seg" role="tablist" aria-label="리포트 종류">
+    <div class="seg" role="tablist" aria-label="뷰어 모드">
       <button type="button" id="tab-daily" class="active" role="tab" aria-selected="true">Daily</button>
       <button type="button" id="tab-monthly" role="tab" aria-selected="false">Monthly</button>
+      <button type="button" id="tab-config" role="tab" aria-selected="false">Config</button>
     </div>
     <h2 id="list-heading">Daily 날짜</h2>
     <ul class="date-list" id="date-list"></ul>
@@ -245,32 +301,103 @@ _INDEX_HTML = """\
     <div class="report-wrap" id="report-wrap" hidden>
       <div class="report" id="report"></div>
     </div>
+    <div class="report-wrap" id="config-wrap" hidden>
+      <div class="config-toolbar">
+        <strong id="config-title">keywords.txt</strong>
+        <span class="chip neutral" id="config-meta">—</span>
+        <span class="config-status" id="config-status"></span>
+        <span class="spacer"></span>
+        <button type="button" class="btn ghost" id="btn-reload">다시 불러오기</button>
+        <button type="button" class="btn ghost" id="btn-copy">복사</button>
+        <button type="button" class="btn" id="btn-download">다운로드</button>
+        <a class="btn" id="btn-github" href="#" target="_blank" rel="noopener">GitHub에서 편집</a>
+        <button type="button" class="btn primary" id="btn-commit" disabled>GitHub에 저장</button>
+      </div>
+      <textarea class="config-editor" id="config-editor" spellcheck="false" wrap="off"
+        aria-label="설정 파일 편집기"></textarea>
+      <p class="config-hint" id="config-hint"></p>
+      <details class="config-token">
+        <summary>GitHub에 직접 저장 (Personal Access Token)</summary>
+        <div class="row">
+          <input type="password" id="gh-token" placeholder="ghp_… 또는 fine-grained token" autocomplete="off"/>
+          <button type="button" class="btn" id="btn-save-token">토큰 세션 저장</button>
+          <button type="button" class="btn ghost" id="btn-clear-token">지우기</button>
+        </div>
+        <p>토큰은 이 브라우저 세션에만 보관됩니다. Contents: Write 권한이 필요합니다.
+          저장 시 <code>main</code> 브랜치의 해당 파일을 커밋합니다.</p>
+      </details>
+    </div>
   </main>
 </div>
 
-<p class="footer-note">OUTPUT only · keyword highlight (&lt;mark&gt;) preserved · generated from markdown reports</p>
+<p class="footer-note">OUTPUT + Config · keyword highlight (&lt;mark&gt;) preserved · generated from markdown reports</p>
 
 <script>
 const REPORTS = {reports_json};
+const CONFIG_FILES = {config_json};
+const GH_REPO = {gh_repo_json};
+const GH_BRANCH = {gh_branch_json};
+const TOKEN_KEY = "tmm_gh_token";
 
 function qs(id) {{ return document.getElementById(id); }}
 
 let kind = "daily";
 let currentHref = null;
+let currentConfigId = null;
+let loadedText = "";
+let fileSha = null;
 
 function labelFor(kindName) {{
-  return kindName === "daily" ? "Daily 날짜" : "Monthly 기간";
+  if (kindName === "daily") return "Daily 날짜";
+  if (kindName === "monthly") return "Monthly 기간";
+  return "설정 파일";
+}}
+
+function activeLines(text) {{
+  return text.split(/\\r?\\n/).filter(l => {{
+    const t = l.trim();
+    return t && !t.startsWith("#");
+  }}).length;
+}}
+
+function setStatus(msg, cls) {{
+  const el = qs("config-status");
+  el.textContent = msg || "";
+  el.className = "config-status" + (cls ? " " + cls : "");
+}}
+
+function updateDirty() {{
+  const ed = qs("config-editor");
+  const dirty = ed.value !== loadedText;
+  qs("btn-commit").disabled = !dirty || !sessionStorage.getItem(TOKEN_KEY);
+  if (!qs("config-status").classList.contains("ok") && !qs("config-status").classList.contains("err")) {{
+    setStatus(dirty ? "수정됨 (미저장)" : "", dirty ? "dirty" : "");
+  }}
+  const meta = activeLines(ed.value);
+  const file = CONFIG_FILES.find(f => f.id === currentConfigId);
+  const unit = file && file.id === "sources" ? "소스" : "키워드";
+  qs("config-meta").textContent = meta + "개 " + unit + " (주석 제외)";
 }}
 
 function renderList() {{
   const list = qs("date-list");
-  const items = REPORTS[kind] || [];
   qs("list-heading").textContent = labelFor(kind);
+  if (kind === "config") {{
+    list.innerHTML = CONFIG_FILES.map(f => {{
+      const active = f.id === currentConfigId ? " active" : "";
+      return `<li><button type="button" class="${{active}}" data-config="${{f.id}}"><span>${{f.label}}</span><span class="meta">${{f.path}}</span></button></li>`;
+    }}).join("");
+    list.querySelectorAll("button").forEach(btn => {{
+      btn.addEventListener("click", () => loadConfig(btn.dataset.config));
+    }});
+    return;
+  }}
+  const items = REPORTS[kind] || [];
   if (!items.length) {{
     list.innerHTML = '<li class="empty-hint">아직 생성된 리포트가 없습니다.</li>';
     return;
   }}
-  list.innerHTML = items.map((item, i) => {{
+  list.innerHTML = items.map(item => {{
     const active = item.href === currentHref ? " active" : "";
     const meta = item.meta ? `<span class="meta">${{item.meta}}</span>` : "";
     return `<li><button type="button" class="${{active}}" data-href="${{item.href}}" data-title="${{item.title}}"><span>${{item.label}}</span>${{meta}}</button></li>`;
@@ -283,21 +410,34 @@ function renderList() {{
 function setTab(next) {{
   kind = next;
   currentHref = null;
-  qs("tab-daily").classList.toggle("active", kind === "daily");
-  qs("tab-monthly").classList.toggle("active", kind === "monthly");
-  qs("tab-daily").setAttribute("aria-selected", kind === "daily" ? "true" : "false");
-  qs("tab-monthly").setAttribute("aria-selected", kind === "monthly" ? "true" : "false");
-  qs("empty-state").hidden = false;
+  ["daily", "monthly", "config"].forEach(k => {{
+    const btn = qs("tab-" + k);
+    const on = kind === k;
+    btn.classList.toggle("active", on);
+    btn.setAttribute("aria-selected", on ? "true" : "false");
+  }});
+  qs("empty-state").hidden = true;
   qs("report-wrap").hidden = true;
+  qs("config-wrap").hidden = true;
   qs("report").innerHTML = "";
+  if (kind === "config") {{
+    history.replaceState(null, "", "#config");
+    renderList();
+    const start = currentConfigId || (CONFIG_FILES[0] && CONFIG_FILES[0].id);
+    if (start) loadConfig(start);
+    return;
+  }}
+  qs("empty-state").hidden = false;
   history.replaceState(null, "", "#" + kind);
   renderList();
 }}
 
 async function loadReport(href, title) {{
   currentHref = href;
+  currentConfigId = null;
   renderList();
   qs("empty-state").hidden = true;
+  qs("config-wrap").hidden = true;
   qs("report-wrap").hidden = false;
   qs("report").innerHTML = "<p style='color:var(--muted)'>불러오는 중…</p>";
   history.replaceState(null, "", "#" + kind + "/" + encodeURIComponent(href));
@@ -317,8 +457,145 @@ async function loadReport(href, title) {{
   }}
 }}
 
+async function loadConfig(id, opts) {{
+  const force = opts && opts.force;
+  const file = CONFIG_FILES.find(f => f.id === id);
+  if (!file) return;
+  if (!force && currentConfigId && qs("config-editor").value !== loadedText) {{
+    if (!confirm("저장하지 않은 변경이 있습니다. 다른 파일로 이동할까요?")) return;
+  }}
+  currentConfigId = id;
+  currentHref = null;
+  renderList();
+  qs("empty-state").hidden = true;
+  qs("report-wrap").hidden = true;
+  qs("config-wrap").hidden = false;
+  qs("config-title").textContent = file.label;
+  qs("config-hint").textContent = file.hint;
+  qs("btn-github").href = `https://github.com/${{GH_REPO}}/edit/${{GH_BRANCH}}/${{file.path}}`;
+  qs("config-editor").value = "불러오는 중…";
+  qs("config-editor").disabled = true;
+  setStatus("", "");
+  history.replaceState(null, "", "#config/" + id);
+  fileSha = null;
+  try {{
+    let text = "";
+    // Prefer live file from GitHub raw (always current), fall back to built snapshot.
+    try {{
+      const raw = await fetch(
+        `https://raw.githubusercontent.com/${{GH_REPO}}/${{GH_BRANCH}}/${{file.path}}?t=${{Date.now()}}`
+      );
+      if (raw.ok) text = await raw.text();
+    }} catch (_) {{ /* ignore */ }}
+    if (!text) {{
+      const res = await fetch(file.href + "?t=" + Date.now());
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      text = await res.text();
+    }}
+    loadedText = text.replace(/\\r\\n/g, "\\n");
+    qs("config-editor").value = loadedText;
+    qs("config-editor").disabled = false;
+    document.title = file.label + " · Fraunhofer Korea";
+    updateDirty();
+    setStatus("불러옴", "ok");
+    // Best-effort SHA for commit API
+    try {{
+      const meta = await fetch(
+        `https://api.github.com/repos/${{GH_REPO}}/contents/${{file.path}}?ref=${{GH_BRANCH}}`
+      );
+      if (meta.ok) {{
+        const j = await meta.json();
+        fileSha = j.sha || null;
+      }}
+    }} catch (_) {{ /* public API may rate-limit */ }}
+  }} catch (err) {{
+    qs("config-editor").value = "";
+    qs("config-editor").disabled = false;
+    setStatus("불러오기 실패: " + err.message, "err");
+  }}
+}}
+
+function downloadCurrent() {{
+  const file = CONFIG_FILES.find(f => f.id === currentConfigId);
+  if (!file) return;
+  const blob = new Blob([qs("config-editor").value], {{ type: "text/plain;charset=utf-8" }});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = file.path.split("/").pop();
+  a.click();
+  URL.revokeObjectURL(a.href);
+  setStatus("다운로드됨 — 로컬 저장 후 커밋하세요", "ok");
+}}
+
+async function copyCurrent() {{
+  try {{
+    await navigator.clipboard.writeText(qs("config-editor").value);
+    setStatus("클립보드에 복사됨", "ok");
+  }} catch (_) {{
+    setStatus("복사 실패", "err");
+  }}
+}}
+
+function utf8ToBase64(str) {{
+  const bytes = new TextEncoder().encode(str);
+  let bin = "";
+  bytes.forEach(b => {{ bin += String.fromCharCode(b); }});
+  return btoa(bin);
+}}
+
+async function commitCurrent() {{
+  const file = CONFIG_FILES.find(f => f.id === currentConfigId);
+  const token = sessionStorage.getItem(TOKEN_KEY);
+  if (!file || !token) return;
+  const content = qs("config-editor").value;
+  if (content === loadedText) {{
+    setStatus("변경 사항 없음", "");
+    return;
+  }}
+  qs("btn-commit").disabled = true;
+  setStatus("저장 중…", "");
+  try {{
+    if (!fileSha) {{
+      const meta = await fetch(
+        `https://api.github.com/repos/${{GH_REPO}}/contents/${{file.path}}?ref=${{GH_BRANCH}}`,
+        {{ headers: {{ Authorization: "Bearer " + token, Accept: "application/vnd.github+json" }} }}
+      );
+      if (meta.ok) {{
+        const j = await meta.json();
+        fileSha = j.sha;
+      }}
+    }}
+    const body = {{
+      message: `config: update ${{file.path}} via viewer`,
+      content: utf8ToBase64(content),
+      branch: GH_BRANCH,
+    }};
+    if (fileSha) body.sha = fileSha;
+    const res = await fetch(
+      `https://api.github.com/repos/${{GH_REPO}}/contents/${{file.path}}`,
+      {{
+        method: "PUT",
+        headers: {{
+          Authorization: "Bearer " + token,
+          Accept: "application/vnd.github+json",
+          "Content-Type": "application/json",
+        }},
+        body: JSON.stringify(body),
+      }}
+    );
+    const data = await res.json().catch(() => ({{}}));
+    if (!res.ok) throw new Error(data.message || ("HTTP " + res.status));
+    fileSha = data.content && data.content.sha ? data.content.sha : fileSha;
+    loadedText = content;
+    setStatus("GitHub에 저장됨", "ok");
+    updateDirty();
+  }} catch (err) {{
+    setStatus("저장 실패: " + err.message, "err");
+    updateDirty();
+  }}
+}}
+
 function enhanceReport(root) {{
-  // Score chips: **3/5**, 3/5, 적합도 5/5
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
   const nodes = [];
   while (walker.nextNode()) nodes.push(walker.currentNode);
@@ -336,7 +613,6 @@ function enhanceReport(root) {{
     node.parentElement.replaceChild(span, node);
   }});
 
-  // Soft chips for header meta lines (첫 몇 줄의 키:값)
   const kids = Array.from(root.children);
   const metaLines = [];
   for (const el of kids) {{
@@ -364,10 +640,45 @@ function enhanceReport(root) {{
 
 qs("tab-daily").addEventListener("click", () => setTab("daily"));
 qs("tab-monthly").addEventListener("click", () => setTab("monthly"));
+qs("tab-config").addEventListener("click", () => setTab("config"));
+qs("config-editor").addEventListener("input", () => {{
+  setStatus("", "");
+  updateDirty();
+}});
+qs("btn-reload").addEventListener("click", () => {{
+  if (!currentConfigId) return;
+  if (qs("config-editor").value !== loadedText) {{
+    if (!confirm("저장하지 않은 변경을 버리고 다시 불러올까요?")) return;
+  }}
+  loadConfig(currentConfigId, {{ force: true }});
+}});
+qs("btn-download").addEventListener("click", downloadCurrent);
+qs("btn-copy").addEventListener("click", copyCurrent);
+qs("btn-commit").addEventListener("click", commitCurrent);
+qs("btn-save-token").addEventListener("click", () => {{
+  const v = qs("gh-token").value.trim();
+  if (!v) return;
+  sessionStorage.setItem(TOKEN_KEY, v);
+  qs("gh-token").value = "";
+  setStatus("토큰 세션 저장됨", "ok");
+  updateDirty();
+}});
+qs("btn-clear-token").addEventListener("click", () => {{
+  sessionStorage.removeItem(TOKEN_KEY);
+  qs("gh-token").value = "";
+  setStatus("토큰 삭제됨", "");
+  updateDirty();
+}});
 
 (function init() {{
   const hash = (location.hash || "#daily").slice(1);
   const [k, ...rest] = hash.split("/");
+  if (k === "config") {{
+    setTab("config");
+    const id = rest[0] || (CONFIG_FILES[0] && CONFIG_FILES[0].id);
+    if (id) loadConfig(id);
+    return;
+  }}
   const startKind = (k === "monthly") ? "monthly" : "daily";
   setTab(startKind);
   const href = rest.length ? decodeURIComponent(rest.join("/")) : null;
@@ -375,7 +686,6 @@ qs("tab-monthly").addEventListener("click", () => setTab("monthly"));
     const item = (REPORTS[startKind] || []).find(x => x.href === href);
     loadReport(href, item ? item.title : href);
   }} else if ((REPORTS[startKind] || []).length) {{
-    // auto-open latest
     const latest = REPORTS[startKind][0];
     loadReport(latest.href, latest.title);
   }}
@@ -452,6 +762,23 @@ def main() -> None:
 
     catalog: dict[str, list[dict[str, str]]] = {"daily": [], "monthly": []}
 
+    config_files = [
+        {
+            "id": "keywords",
+            "label": "keywords.txt",
+            "path": "keywords.txt",
+            "href": "config/keywords.txt",
+            "hint": "한 줄에 키워드 하나. # 주석·빈 줄 무시. 상위 3개=분석, 상위 5개=수집 필터.",
+        },
+        {
+            "id": "sources",
+            "label": "sources.txt",
+            "path": "sources.txt",
+            "href": "config/sources.txt",
+            "hint": "형식: 이름 | URL | 카테고리 [| METHOD]. METHOD: GET/POST/html/pacst.",
+        },
+    ]
+
     daily_files = sorted(DAILY_DIR.glob("daily_*.md"), reverse=True)
     for md_path in daily_files:
         iso = md_path.stem.replace("daily_", "")
@@ -492,12 +819,23 @@ def main() -> None:
     index = _INDEX_HTML.format(
         css=_CSS,
         reports_json=json.dumps(catalog, ensure_ascii=False),
+        config_json=json.dumps(config_files, ensure_ascii=False),
+        gh_repo_json=json.dumps(GH_REPO),
+        gh_branch_json=json.dumps(GH_BRANCH),
     )
     (SITE_DIR / "index.html").write_text(index, encoding="utf-8")
     (SITE_DIR / "reports.json").write_text(
         json.dumps(catalog, ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
+
+    # Snapshot operational config files for the Config viewer.
+    cfg_out = SITE_DIR / "config"
+    cfg_out.mkdir(parents=True, exist_ok=True)
+    for src_name in ("keywords.txt", "sources.txt"):
+        src = ROOT / src_name
+        if src.is_file():
+            shutil.copy2(src, cfg_out / src_name)
 
     # Mirror into docs/ for branch-based (legacy) GitHub Pages.
     if DOCS_DIR.exists():
@@ -507,7 +845,8 @@ def main() -> None:
 
     print(
         f"Built site → {SITE_DIR.relative_to(ROOT)} (+ docs/) "
-        f"({len(catalog['daily'])} daily, {len(catalog['monthly'])} monthly)"
+        f"({len(catalog['daily'])} daily, {len(catalog['monthly'])} monthly, "
+        f"{len(config_files)} config)"
     )
 
 

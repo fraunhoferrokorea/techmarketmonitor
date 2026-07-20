@@ -79,12 +79,12 @@ a:hover { color: var(--brand); }
 @media (max-width: 860px) { .sidebar { position: static; } }
 
 .seg {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 0.35rem;
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.35rem;
   background: var(--brand-soft); padding: 0.3rem; border-radius: 10px; margin-bottom: 1rem;
 }
 .seg button {
   appearance: none; border: 0; background: transparent; color: var(--muted);
-  font: inherit; font-weight: 600; font-size: 0.92rem; padding: 0.55rem 0.4rem;
+  font: inherit; font-weight: 600; font-size: 0.85rem; padding: 0.55rem 0.3rem;
   border-radius: 8px; cursor: pointer; transition: 0.15s ease;
 }
 .seg button.active {
@@ -92,6 +92,59 @@ a:hover { color: var(--brand); }
   box-shadow: 0 1px 3px rgba(0, 107, 94, 0.18);
 }
 .seg button:hover:not(.active) { color: var(--ink); }
+
+.config-toolbar {
+  display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center;
+  margin: 0 0 0.85rem; padding-bottom: 0.85rem; border-bottom: 1px solid var(--line);
+}
+.config-toolbar .spacer { flex: 1; min-width: 0.5rem; }
+.btn {
+  appearance: none; border: 1px solid var(--line); background: var(--surface);
+  color: var(--ink); font: inherit; font-size: 0.85rem; font-weight: 600;
+  padding: 0.45rem 0.75rem; border-radius: 8px; cursor: pointer;
+  transition: 0.15s ease; text-decoration: none; display: inline-flex; align-items: center;
+}
+.btn:hover { border-color: #b7ddd5; background: var(--brand-soft); color: var(--brand-dark); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn.primary {
+  background: var(--brand); border-color: var(--brand); color: #fff;
+}
+.btn.primary:hover:not(:disabled) { background: var(--brand-dark); border-color: var(--brand-dark); color: #fff; }
+.btn.ghost { background: transparent; }
+.config-editor {
+  width: 100%; min-height: 52vh; resize: vertical;
+  font-family: ui-monospace, "Cascadia Code", "Consolas", monospace;
+  font-size: 0.82rem; line-height: 1.55;
+  padding: 0.85rem 1rem; border: 1px solid var(--line); border-radius: 10px;
+  background: #fafcfb; color: var(--ink); tab-size: 2;
+}
+.config-editor:focus {
+  outline: 2px solid #b7ddd5; outline-offset: 1px; background: #fff;
+}
+.config-hint {
+  margin: 0.75rem 0 0; color: var(--muted); font-size: 0.8rem; line-height: 1.5;
+}
+.config-status {
+  font-size: 0.8rem; font-weight: 600; color: var(--muted);
+}
+.config-status.dirty { color: var(--score-mid); }
+.config-status.ok { color: var(--brand-dark); }
+.config-status.err { color: #b42318; }
+.config-token {
+  margin-top: 1rem; padding: 0.85rem 1rem; border: 1px dashed #c5e4dd;
+  border-radius: 10px; background: #f7fbfa;
+}
+.config-token summary {
+  cursor: pointer; font-weight: 650; font-size: 0.88rem; color: var(--brand-dark);
+}
+.config-token .row {
+  display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.65rem; align-items: center;
+}
+.config-token input[type="password"] {
+  flex: 1; min-width: 180px; font: inherit; font-size: 0.85rem;
+  padding: 0.45rem 0.65rem; border: 1px solid var(--line); border-radius: 8px;
+}
+.config-token p { margin: 0.5rem 0 0; font-size: 0.78rem; color: var(--muted); }
 
 .sidebar h2 {
   margin: 0 0 0.65rem; font-size: 0.78rem; letter-spacing: 0.06em;

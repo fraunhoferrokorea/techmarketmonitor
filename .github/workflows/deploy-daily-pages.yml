@@ -11,6 +11,8 @@ on:
     paths:
       - "output/daily/**"
       - "output/monthly/**"
+      - "keywords.txt"
+      - "sources.txt"
       - ".github/workflows/deploy-daily-pages.yml"
       - "scripts/build_daily_pages.py"
       - "scripts/build_report_pages.py"
