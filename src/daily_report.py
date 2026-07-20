@@ -792,7 +792,7 @@ def _text_mentions_power(text: str, top_keywords: list[str]) -> bool:
 
 
 def _classify_relevance(article: SummarizedArticle, top_keywords: list[str]) -> str:
-    """Classify how strongly an article relates to the top-3 tracking keywords.
+    """Classify how strongly an article relates to the monitoring keywords.
 
     Uses title + matched_keywords for direct/indirect decisions so speculative
     LLM mentions of 스마트그리드/전력계통 cannot inflate relevance.
@@ -1726,7 +1726,7 @@ def _build_low_relevance_section(
     lines = [
         "## 관련도 낮음 (참고)",
         "",
-        "모니터링 키워드(전력계통·스마트그리드·파워그리드)와 직접·간접 연관이 약해 "
+        "모니터링 키워드와 직접·간접 연관이 약해 "
         "본문에서 제외한 항목임. 필요 시 원문만 확인.",
         "",
     ]

@@ -768,7 +768,7 @@ def main() -> None:
             "label": "keywords.txt",
             "path": "keywords.txt",
             "href": "config/keywords.txt",
-            "hint": "한 줄에 키워드 하나. # 주석·빈 줄 무시. 상위 3개=분석, 상위 5개=수집 필터.",
+            "hint": "한 줄에 키워드 하나. # 주석·빈 줄 무시. 전체 키워드=수집 필터·분석(LLM·요약) 공통.",
         },
         {
             "id": "sources",

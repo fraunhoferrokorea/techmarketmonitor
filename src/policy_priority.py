@@ -126,7 +126,7 @@ def has_energy_grid_domain(
 def passes_gov_collection_exception(
     article: RawArticle | FilteredArticle | SummarizedArticle,
 ) -> bool:
-    """Gov-target may skip top-N core keywords only with energy/grid domain (or Fraunhofer)."""
+    """Gov-target may skip required keywords only with energy/grid domain (or Fraunhofer)."""
     text = _combined_text(article)
     if re.search(r"프라운호퍼|fraunhofer", text, re.I):
         return True

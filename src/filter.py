@@ -32,10 +32,11 @@ def passes_collection_filter(
     keywords: list[str],
     required_keywords: list[str] | None = None,
 ) -> bool:
-    """True when article would pass fetch-time keyword + top-N core filter.
+    """True when article would pass fetch-time keyword collection filter.
 
-    Core (top-N) keywords are required unless the item is a gov/R&D target that
-    also has an energy·grid domain hint (or explicit Fraunhofer mention).
+    Required keywords (normally the full keywords.txt list) must match unless
+    the item is a gov/R&D target that also has an energy·grid domain hint
+    (or explicit Fraunhofer mention).
     """
     if is_excluded_rd_news(article):
         return False
@@ -113,7 +114,7 @@ def filter_articles(
         )
     if dropped_core:
         logger.info(
-            "Keyword filter: excluded %d domestic article(s) with no top-%d keyword match",
+            "Keyword filter: excluded %d domestic article(s) with no required keyword match (%d keywords)",
             dropped_core,
             len(core),
         )
