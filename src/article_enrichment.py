@@ -96,11 +96,15 @@ def _should_enrich(article: RawArticle) -> bool:
 
 def _fetch_page_html(url: str) -> str:
     try:
+        headers = {"User-Agent": _USER_AGENT}
+        # KRIT press detail pages require a same-site Referer.
+        if "krit.re.kr" in url.lower():
+            headers["Referer"] = "https://www.krit.re.kr/krit/bbs/press_list.do"
         response = httpx.get(
             url,
             follow_redirects=True,
             timeout=_TIMEOUT,
-            headers={"User-Agent": _USER_AGENT},
+            headers=headers,
         )
         response.raise_for_status()
     except Exception as exc:

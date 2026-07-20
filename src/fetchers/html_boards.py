@@ -91,6 +91,37 @@ _KETEP_RE = re.compile(
     re.S,
 )
 
+_KAIA_RE = re.compile(
+    r'<td class="t_subject">\s*'
+    r'<a href="(?P<href>/portal/bbs/view/B0000058/\d+\.do[^"]*)">(?P<title>.*?)</a>\s*'
+    r"</td>\s*"
+    r"<td>(?P<published>\d{4}-\d{2}-\d{2})</td>",
+    re.S,
+)
+
+_KRIT_RE = re.compile(
+    r"""onclick="fnView\('press','','(?P<id>\d+)','(?P<page>\d+)','',''\);"[^>]*>"""
+    r"<span>\d+</span>(?P<title>.*?)</a>[\s\S]*?"
+    r'class="date">(?P<published>\d{4}-\d{2}-\d{2})</li>',
+    re.S,
+)
+
+_NRF_RE = re.compile(
+    r'class="table-list-link view_btn"\s*'
+    r'data-post_no="(?P<post>\d+)"[^>]*>\s*(?P<title>.*?)\s*</a>[\s\S]*?'
+    r'class="table-list-date">(?P<published>\d{4}-\d{2}-\d{2})</span>',
+    re.S,
+)
+
+_KIAT_RE = re.compile(
+    r"""mainContentsGo\('41','(?P<cid>[a-f0-9]+)'\)">\s*"""
+    r'<span class="tit_news">(?P<title>.*?)</span>\s*'
+    r'<span class="date">(?P<published>\d{4}-\d{2}-\d{2})</span>',
+    re.S,
+)
+
+_KIAT_MENU_ID = "ae72d61a9a9745febf0f0ede05b375f7"
+
 
 def _parse_molit(html: str, seen: set[str]) -> list[tuple[str, str, date]]:
     base = "https://www.molit.go.kr/USR/NEWS/m_71/"
@@ -187,6 +218,80 @@ def _parse_ketep(html: str, seen: set[str]) -> list[tuple[str, str, date]]:
     return rows
 
 
+def _parse_kaia(html: str, seen: set[str]) -> list[tuple[str, str, date]]:
+    rows: list[tuple[str, str, date]] = []
+    for match in _KAIA_RE.finditer(html):
+        day = _parse_day(match.group("published"))
+        if not day:
+            continue
+        href = unescape(match.group("href"))
+        # Keep a short canonical view URL.
+        short = re.sub(r"\?.*$", "", href)
+        url = urljoin("https://www.kaia.re.kr", short) + "?menuNo=200824"
+        title = _clean(match.group("title"))
+        if not title or url in seen:
+            continue
+        seen.add(url)
+        rows.append((title, url, day))
+    return rows
+
+
+def _parse_krit(html: str, seen: set[str]) -> list[tuple[str, str, date]]:
+    rows: list[tuple[str, str, date]] = []
+    for match in _KRIT_RE.finditer(html):
+        day = _parse_day(match.group("published"))
+        if not day:
+            continue
+        ntt_id = match.group("id")
+        page = match.group("page")
+        url = (
+            "https://www.krit.re.kr/krit/bbs/press_view.do"
+            f"?bbsId=press&nttId={ntt_id}&page={page}&menu_no=01080100"
+        )
+        title = _clean(match.group("title"))
+        if not title or url in seen:
+            continue
+        seen.add(url)
+        rows.append((title, url, day))
+    return rows
+
+
+def _parse_nrf(html: str, seen: set[str]) -> list[tuple[str, str, date]]:
+    rows: list[tuple[str, str, date]] = []
+    for match in _NRF_RE.finditer(html):
+        day = _parse_day(match.group("published"))
+        if not day:
+            continue
+        post = match.group("post")
+        url = f"https://www.nrf.re.kr/page/95?ac=view&menuNo=95&postNo={post}"
+        title = _clean(match.group("title"))
+        if not title or url in seen:
+            continue
+        seen.add(url)
+        rows.append((title, url, day))
+    return rows
+
+
+def _parse_kiat(html: str, seen: set[str]) -> list[tuple[str, str, date]]:
+    """Homepage press-tab teasers (board_id=41). Full list AJAX is JS-gated."""
+    rows: list[tuple[str, str, date]] = []
+    for match in _KIAT_RE.finditer(html):
+        day = _parse_day(match.group("published"))
+        if not day:
+            continue
+        cid = match.group("cid")
+        url = (
+            "https://www.kiat.or.kr/front/board/boardContentsView.do"
+            f"?board_id=41&contents_id={cid}&MenuId={_KIAT_MENU_ID}"
+        )
+        title = _clean(match.group("title"))
+        if not title or url in seen:
+            continue
+        seen.add(url)
+        rows.append((title, url, day))
+    return rows
+
+
 class _Board:
     def __init__(
         self,
@@ -244,6 +349,33 @@ _BOARDS: tuple[_Board, ...] = (
         "https://www.ketep.re.kr/",
         _parse_ketep,
         max_pages=1,
+    ),
+    _Board(
+        "KIAT 보도자료",
+        "https://www.kiat.or.kr/front/user/main.do",
+        _parse_kiat,
+        max_pages=1,
+    ),
+    _Board(
+        "NRF 보도자료",
+        "https://www.nrf.re.kr/page/95?menuNo=95",
+        _parse_nrf,
+        page_param="pageNum",
+        max_pages=5,
+    ),
+    _Board(
+        "KAIA 보도자료",
+        "https://www.kaia.re.kr/portal/bbs/list/B0000058.do?menuNo=200824",
+        _parse_kaia,
+        page_param="pageIndex",
+        max_pages=5,
+    ),
+    _Board(
+        "KRIT 보도자료",
+        "https://www.krit.re.kr/krit/bbs/press_list.do",
+        _parse_krit,
+        page_param="page",
+        max_pages=5,
     ),
 )
 
