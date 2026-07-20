@@ -293,20 +293,21 @@ mark {
         <button type="button" class="btn ghost" id="btn-copy">복사</button>
         <button type="button" class="btn" id="btn-download">다운로드</button>
         <a class="btn" id="btn-github" href="#" target="_blank" rel="noopener">GitHub에서 편집</a>
-        <button type="button" class="btn primary" id="btn-commit" disabled>GitHub에 저장</button>
+        <button type="button" class="btn primary" id="btn-commit">GitHub에 저장</button>
       </div>
       <textarea class="config-editor" id="config-editor" spellcheck="false" wrap="off"
         aria-label="설정 파일 편집기"></textarea>
       <p class="config-hint" id="config-hint"></p>
-      <details class="config-token">
-        <summary>GitHub에 직접 저장 (Personal Access Token)</summary>
+      <details class="config-token" id="token-panel" open>
+        <summary>Personal Access Token 입력 (Contents: Write)</summary>
         <div class="row">
           <input type="password" id="gh-token" placeholder="ghp_… 또는 fine-grained token" autocomplete="off"/>
-          <button type="button" class="btn" id="btn-save-token">토큰 세션 저장</button>
-          <button type="button" class="btn ghost" id="btn-clear-token">지우기</button>
+          <button type="button" class="btn primary" id="btn-token-commit">토큰으로 GitHub에 저장</button>
+          <button type="button" class="btn ghost" id="btn-clear-token">토큰 지우기</button>
         </div>
-        <p>토큰은 이 브라우저 세션에만 보관됩니다. Contents: Write 권한이 필요합니다.
-          저장 시 <code>main</code> 브랜치의 해당 파일을 커밋합니다.</p>
+        <p id="token-status">토큰 상태: 없음</p>
+        <p>1) 위에서 내용을 수정한 뒤 2) 토큰을 넣고 3) 「토큰으로 GitHub에 저장」또는 위쪽 「GitHub에 저장」을 누르세요.
+          토큰은 이 브라우저 탭 세션에만 보관되며, GitHub <code>main</code>의 해당 파일을 커밋합니다.</p>
       </details>
     </div>
   </main>
@@ -355,23 +356,34 @@ function resolveToken() {
   if (typed) {
     sessionStorage.setItem(TOKEN_KEY, typed);
     qs("gh-token").value = "";
+    syncTokenUi();
     return typed;
   }
   return null;
 }
 
+function syncTokenUi() {
+  const ready = !!sessionStorage.getItem(TOKEN_KEY) || !!(qs("gh-token").value || "").trim();
+  const el = qs("token-status");
+  if (el) el.textContent = ready ? "토큰 상태: 준비됨 (이 탭 세션)" : "토큰 상태: 없음 — 아래에 입력하세요";
+  const panel = qs("token-panel");
+  if (panel && !sessionStorage.getItem(TOKEN_KEY)) panel.open = true;
+}
+
 function updateDirty() {
   const ed = qs("config-editor");
   const dirty = ed.value !== loadedText;
-  // Only block when there is nothing to save — missing token is handled on click.
-  qs("btn-commit").disabled = !dirty;
+  // Never silently disable — click handlers explain what is missing.
+  if (!qs("btn-commit").dataset.saving) qs("btn-commit").disabled = false;
+  if (!qs("btn-token-commit").dataset.saving) qs("btn-token-commit").disabled = false;
   if (!qs("config-status").classList.contains("ok") && !qs("config-status").classList.contains("err")) {
-    setStatus(dirty ? "수정됨 (미저장)" : "", dirty ? "dirty" : "");
+    setStatus(dirty ? "수정됨 (미저장) — GitHub에 저장을 누르세요" : "", dirty ? "dirty" : "");
   }
   const meta = activeLines(ed.value);
   const file = CONFIG_FILES.find(f => f.id === currentConfigId);
   const unit = file && file.id === "sources" ? "소스" : "키워드";
   qs("config-meta").textContent = meta + "개 " + unit + " (주석 제외)";
+  syncTokenUi();
 }
 
 function renderList() {
@@ -544,19 +556,23 @@ async function commitCurrent() {
   if (!file) return;
   const content = qs("config-editor").value;
   if (content === loadedText) {
-    setStatus("변경 사항 없음 — 먼저 내용을 수정하세요", "");
+    setStatus("변경 사항 없음 — 에디터에서 한 글자라도 수정한 뒤 다시 누르세요", "err");
     return;
   }
   const token = resolveToken();
   if (!token) {
-    const panel = document.querySelector(".config-token");
+    const panel = qs("token-panel");
     if (panel) panel.open = true;
     qs("gh-token").focus();
-    setStatus("토큰을 입력한 뒤 다시 「GitHub에 저장」을 누르세요", "err");
+    setStatus("토큰이 필요합니다 — 아래 칸에 PAT를 입력한 뒤 「토큰으로 GitHub에 저장」을 누르세요", "err");
+    syncTokenUi();
     return;
   }
+  qs("btn-commit").dataset.saving = "1";
+  qs("btn-token-commit").dataset.saving = "1";
   qs("btn-commit").disabled = true;
-  setStatus("저장 중…", "");
+  qs("btn-token-commit").disabled = true;
+  setStatus("GitHub에 저장 중…", "");
   try {
     if (!fileSha) {
       const meta = await fetch(
@@ -591,9 +607,11 @@ async function commitCurrent() {
     fileSha = data.content && data.content.sha ? data.content.sha : fileSha;
     loadedText = content;
     setStatus("GitHub에 저장됨", "ok");
-    updateDirty();
   } catch (err) {
     setStatus("저장 실패: " + err.message, "err");
+  } finally {
+    delete qs("btn-commit").dataset.saving;
+    delete qs("btn-token-commit").dataset.saving;
     updateDirty();
   }
 }
@@ -664,20 +682,16 @@ qs("btn-reload").addEventListener("click", () => {
 qs("btn-download").addEventListener("click", downloadCurrent);
 qs("btn-copy").addEventListener("click", copyCurrent);
 qs("btn-commit").addEventListener("click", commitCurrent);
-qs("btn-save-token").addEventListener("click", () => {
-  const v = qs("gh-token").value.trim();
-  if (!v) return;
-  sessionStorage.setItem(TOKEN_KEY, v);
-  qs("gh-token").value = "";
-  setStatus("토큰 세션 저장됨", "ok");
-  updateDirty();
-});
+qs("btn-token-commit").addEventListener("click", commitCurrent);
+qs("gh-token").addEventListener("input", syncTokenUi);
 qs("btn-clear-token").addEventListener("click", () => {
   sessionStorage.removeItem(TOKEN_KEY);
   qs("gh-token").value = "";
   setStatus("토큰 삭제됨", "");
+  syncTokenUi();
   updateDirty();
 });
+syncTokenUi();
 
 (function init() {
   const hash = (location.hash || "#daily").slice(1);
