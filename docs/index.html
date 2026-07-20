@@ -221,6 +221,15 @@ mark {
   background: var(--brand-soft); color: var(--brand-dark); border: 1px solid #c5e4dd;
 }
 .chip.neutral { background: #f0f2f1; color: var(--muted); border-color: var(--line); }
+.kw-header {
+  margin: 0.35rem 0 1rem;
+  padding: 0.65rem 0.85rem;
+  background: var(--brand-soft);
+  border: 1px solid #c5e4dd;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
 .score {
   display: inline-block; min-width: 2.4em; text-align: center;
   padding: 0.1rem 0.45rem; border-radius: 6px; font-weight: 700; font-size: 0.85rem;
@@ -428,7 +437,8 @@ async function loadReport(href, title) {
   qs("report").innerHTML = "<p style='color:var(--muted)'>불러오는 중…</p>";
   history.replaceState(null, "", "#" + kind + "/" + encodeURIComponent(href));
   try {
-    const res = await fetch(href);
+    const bust = href.includes("?") ? "&" : "?";
+    const res = await fetch(href + bust + "v=" + Date.now(), { cache: "no-store" });
     if (!res.ok) throw new Error("HTTP " + res.status);
     const html = await res.text();
     const doc = new DOMParser().parseFromString(html, "text/html");
@@ -611,7 +621,7 @@ function enhanceReport(root) {
   for (const el of kids) {
     if (el.tagName === "H1" || el.tagName === "HR") continue;
     if (el.tagName === "H2") break;
-    if (el.tagName === "P" && /날짜|기록자|총 항목|신뢰도|기간|생성일|발행|모니터링|분석 항목/.test(el.textContent)) {
+    if (el.tagName === "P" && /날짜|기록자|총 항목|신뢰도|기간|생성일|발행|분석 항목/.test(el.textContent)) {
       metaLines.push(el);
     }
   }
@@ -629,6 +639,12 @@ function enhanceReport(root) {
     if (h1 && h1.nextSibling) root.insertBefore(box, h1.nextSibling);
     else root.prepend(box);
   }
+  // Keep monitoring-keyword line as a full paragraph (top-5 + 등), not a truncated chip.
+  root.querySelectorAll("p").forEach(p => {
+    if (/^모니터링 키워드/.test((p.textContent || "").trim())) {
+      p.classList.add("kw-header");
+    }
+  });
 }
 
 qs("tab-daily").addEventListener("click", () => setTab("daily"));
