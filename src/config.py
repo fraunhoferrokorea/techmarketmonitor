@@ -42,11 +42,12 @@ def _normalize_keyword(keyword: str) -> str:
 
 
 def _load_keywords_config(path: Path) -> tuple[list[str], list[str], list[str], list[str]]:
-    """Load keywords.txt → (labels, normalized_for_match, top3, top5_normalized).
+    """Load keywords.txt → (labels, normalized_for_match, analysis, filter_normalized).
 
-    Top 3 = first three keyword lines — LLM analysis and executive summary.
-    Top 5 = first five keyword lines — required for article collection/filter pass.
-    Full list is used for RSS fetch and matched_keywords tagging.
+    All non-comment keyword lines are used for:
+    - analysis: LLM keyword_relevance, daily/monthly executive summary
+    - filter: required for article collection/filter pass (gov-target exception)
+    - full normalized list: RSS fetch and matched_keywords tagging
     """
     try:
         lines = path.read_text(encoding="utf-8").splitlines()
@@ -61,12 +62,12 @@ def _load_keywords_config(path: Path) -> tuple[list[str], list[str], list[str], 
         labels.append(stripped)
 
     normalized = [_normalize_keyword(k) for k in labels]
-    return labels, normalized, labels[:3], normalized[:5]
+    return labels, normalized, labels, normalized
 
 
 def _load_keywords_txt(path: Path) -> list[str]:
     """Read one keyword per line from *path*; skip blank lines and # comments."""
-    labels, _, _ = _load_keywords_config(path)
+    labels, _, _, _ = _load_keywords_config(path)
     return labels
 
 
@@ -93,8 +94,8 @@ def load_settings() -> Settings:
     if not keywords:
         keywords = [_normalize_keyword(k) for k in _DEFAULT_KEYWORDS]
         raw_labels = list(_DEFAULT_KEYWORDS)
-        analysis = raw_labels[:3]
-        filter_kw = keywords[:5]
+        analysis = list(raw_labels)
+        filter_kw = list(keywords)
 
     database_path = Path(os.getenv("DATABASE_PATH", "data/monitor.db"))
     if not database_path.is_absolute():

@@ -344,7 +344,7 @@ def build_daily_rd_insights(
     top_keywords: list[str] | None = None,
 ) -> list[str]:
     """Aggregate domestic R&D targeting signals for the daily executive summary."""
-    kws = " · ".join((top_keywords or [])[:3]) or "(미설정)"
+    kws = " · ".join(top_keywords or []) or "(미설정)"
     domestic: list[tuple[int, SummarizedArticle, dict[str, str]]] = []
 
     for article in articles:

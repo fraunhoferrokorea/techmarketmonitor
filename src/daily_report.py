@@ -843,14 +843,34 @@ def _indirect_reason(article: SummarizedArticle) -> str:
 
 def _keyword_focus_phrase(top_keywords: list[str]) -> str:
     parts: list[str] = []
-    for kw in top_keywords[:3]:
+    for kw in top_keywords:
         if kw == "전력계통":
             parts.append("전력망 안정·용량·부하")
         elif kw == "파워그리드":
             parts.append("송전·배전·피크·VPP")
         elif kw == "스마트그리드":
             parts.append("지능형 운영·분산자원·수요반응")
-    return ", ".join(parts[:2]) if parts else "전력·그리드"
+        elif kw == "에너지고속도로":
+            parts.append("장거리 송전·에너지 고속도로")
+        elif "HVDC" in kw or "전력변환" in kw:
+            parts.append("HVDC·전력변환·계통연계")
+        elif "ESS" in kw or "계통연계" in kw:
+            parts.append("장주기 ESS·계통연계")
+        elif "그리드포밍" in kw or "Grid-forming" in kw:
+            parts.append("그리드포밍 인버터")
+        elif "DC Grid" in kw or kw == "DC Grid":
+            parts.append("DC 그리드")
+        elif "사이버보안" in kw:
+            parts.append("전력망 사이버보안")
+        elif "Digital Grid" in kw or "배전망" in kw:
+            parts.append("배전망 디지털화")
+        elif "출력예측" in kw:
+            parts.append("재생에너지 출력예측")
+        elif "유지관리" in kw:
+            parts.append("송전설비 AI 유지관리")
+        elif "AI 기반 전력계통" in kw:
+            parts.append("AI 전력계통 운영")
+    return ", ".join(parts[:3]) if parts else "전력·그리드"
 
 
 def _keyword_connection(
@@ -859,7 +879,7 @@ def _keyword_connection(
     level: str,
 ) -> str:
     """Last sentence in the executive-summary row: keyword relevance rationale."""
-    kws = top_keywords[:3]
+    kws = top_keywords
     kw_label = " · ".join(kws)
 
     if level == "direct":
@@ -1324,7 +1344,7 @@ def _relevance_trigger(
 
 def _kw_impact_narrative(top_keywords: list[str], reason: str) -> str:
     """One readable sentence linking each tracking keyword to the indirect reason."""
-    kw_set = set(top_keywords[:3])
+    kw_set = set(top_keywords)
 
     if reason == "데이터센터 전력 부하":
         labels: list[str] = []
@@ -1334,6 +1354,8 @@ def _kw_impact_narrative(top_keywords: list[str], reason: str) -> str:
             labels.append("**파워그리드**(배전망·전력 장기 구매 PPA)")
         if "스마트그리드" in kw_set:
             labels.append("**스마트그리드**(부하 예측·수요반응·피크 분산)")
+        if any("ESS" in kw for kw in kw_set):
+            labels.append("**장주기 ESS**(피크 완화·계통연계)")
         if labels:
             joined = ", ".join(labels)
             return (
@@ -1347,23 +1369,27 @@ def _kw_impact_narrative(top_keywords: list[str], reason: str) -> str:
             "기사는 배터리 기술·출시·시장이 중심이라 전력망 운영 이슈는 2순위"
         )
     elif reason == "AI 인프라 전력 소비":
-        kws = " · ".join(top_keywords[:3])
+        kws = " · ".join(top_keywords)
         return f"AI 인프라 확장은 {kws} 관점의 전력 수요·공급·망 운영에 간접 영향을 줄 수 있음"
 
-    kws = " · ".join(top_keywords[:3])
+    kws = " · ".join(top_keywords)
     return f"{reason} 경로로 {kws} 추적 키워드에 간접 영향 가능"
 
 
 def _direct_implication_plain(top_keywords: list[str]) -> str:
     parts: list[str] = []
-    for kw in top_keywords[:3]:
+    for kw in top_keywords:
         if kw == "전력계통":
             parts.append("전력망 안정·용량·부하")
         elif kw == "파워그리드":
             parts.append("송전·배전·피크·VPP")
         elif kw == "스마트그리드":
             parts.append("지능형 운영·분산자원·수요반응")
-    focus = ", ".join(parts[:2]) if parts else "전력·그리드"
+        elif "ESS" in kw:
+            parts.append("장주기 ESS·계통연계")
+        elif "HVDC" in kw or "전력변환" in kw:
+            parts.append("HVDC·전력변환")
+    focus = ", ".join(parts[:3]) if parts else "전력·그리드"
     return (
         f"즉 기사가 다루는 핵심이 {focus} 등 추적 키워드와 바로 맞닿아 "
         f"'직접' 연관으로 분류함"
@@ -1386,12 +1412,12 @@ def _signal_kw_label(
 ) -> str:
     """Pick the most relevant tracking-keyword subset for the signal header."""
     blob = _article_text_blob(article).lower()
-    hits = [kw for kw in top_keywords[:3] if kw.lower() in blob]
+    hits = [kw for kw in top_keywords if kw.lower() in blob]
     if hits:
-        return " · ".join(hits[:2])
+        return " · ".join(hits[:3])
     if level_label == "직접":
         return top_keywords[0] if top_keywords else "(미설정)"
-    return " · ".join(top_keywords[:3])
+    return " · ".join(top_keywords[:3]) if top_keywords else "(미설정)"
 
 
 def _build_keyword_signal_for_group(
@@ -1485,7 +1511,7 @@ def _build_executive_summary(
     """
     kws = top_keywords or []
     kw_header = (
-        " · ".join(f"<mark>{kw}</mark>" for kw in kws[:3]) if kws else "(미설정)"
+        " · ".join(f"<mark>{kw}</mark>" for kw in kws) if kws else "(미설정)"
     )
     stats = _build_rd_daily_stats(articles, kws)
 
@@ -1496,7 +1522,7 @@ def _build_executive_summary(
     lines = [
         "## 오늘의 R&D 인텔리전스 요약",
         "",
-        f"**모니터링 키워드 (상위 3개):** {kw_header}",
+        f"**모니터링 키워드:** {kw_header}",
         "",
         f"**수집 현황:** {stats}",
         "",
@@ -1629,7 +1655,7 @@ def _build_item_block(
     if is_gov_target(article):
         note_parts.append("우선: 정부·R&D 타깃 (프라운호퍼 협력 관점)")
     if top_keywords:
-        marked = ", ".join(f"<mark>{kw}</mark>" for kw in top_keywords[:3])
+        marked = ", ".join(f"<mark>{kw}</mark>" for kw in top_keywords)
         note_parts.append(f"분석 키워드: {marked}")
     level = _classify_relevance(article, top_keywords or [])
     if level != "none":
@@ -1762,11 +1788,11 @@ def _build_markdown(
     else:
         article_slugs = {}
         if kws:
-            kw_header = " · ".join(f"<mark>{kw}</mark>" for kw in kws[:3])
+            kw_header = " · ".join(f"<mark>{kw}</mark>" for kw in kws)
             lines += [
                 "## 오늘의 R&D 인텔리전스 요약",
                 "",
-                f"**모니터링 키워드 (상위 3개):** {kw_header}",
+                f"**모니터링 키워드:** {kw_header}",
                 "",
                 "오늘 직접·간접 관련 수집 항목 없음"
                 + (f" (관련도 낮은 {len(low)}건은 아래 참고 섹션)." if low else "."),

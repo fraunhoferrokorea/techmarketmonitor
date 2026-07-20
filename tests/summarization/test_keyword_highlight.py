@@ -80,3 +80,62 @@ def test_keywords_for_highlight_skips_gov_label():
 
 def test_strip_keyword_marks():
     assert strip_keyword_marks("한전 <mark>스마트그리드</mark> 실증") == "한전 스마트그리드 실증"
+
+
+def test_monthly_markdown_highlights_keywords():
+    from src.rd_monthly_report import _build_markdown
+
+    kws = ["전력계통", "스마트그리드", "파워그리드"]
+    compact = [
+        {
+            "ref": 1,
+            "date": "2026-07-01",
+            "title": "한전 스마트그리드 실증",
+            "url": "https://example.com/sg",
+            "source": "정책브리핑",
+            "score": 4,
+            "relevance": "직접",
+            "matched_keywords": "스마트그리드, 전력계통",
+            "actor": "한전",
+            "purpose": "전력계통 현대화",
+            "pain": "스마트그리드 실증 역량",
+            "strategy": "공동연구",
+            "proposable": "파워그리드 분석",
+            "fact": "스마트그리드 예산 발표",
+            "keyword_relevance": "",
+            "summary": "한전이 스마트그리드와 전력계통 실증에 착수함.",
+        }
+    ]
+    structured = {
+        "executive_summary": "당월 스마트그리드·전력계통 R&D 신호가 확인됨.",
+        "context_highlights": [
+            {
+                "relevance": "직접",
+                "matched_keywords": "스마트그리드, 전력계통",
+                "summary": "스마트그리드 실증이 확대됨.",
+                "refs": [1],
+            }
+        ],
+        "opportunities": [
+            {
+                "field": "전력·그리드",
+                "summary": "스마트그리드 관련 위탁 수요가 있음.",
+                "items": ["한전이 파워그리드 분석을 추진함."],
+                "refs": [1],
+            }
+        ],
+        "action_plan": [
+            {
+                "target": "한전",
+                "rd_area": "스마트그리드 실증",
+                "contact_angle": "전력계통 공동연구",
+            }
+        ],
+    }
+    md = _build_markdown(2026, 7, [{"id": 1}], compact, structured, kws)
+
+    assert "**모니터링 키워드:** <mark>전력계통</mark> · <mark>스마트그리드</mark> · <mark>파워그리드</mark>" in md
+    assert "<mark>스마트그리드</mark>" in md
+    assert "<mark>전력계통</mark>" in md
+    assert "<mark>파워그리드</mark>" in md
+    assert "매칭: <mark>스마트그리드</mark>, <mark>전력계통</mark>" in md

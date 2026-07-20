@@ -184,7 +184,7 @@ Scope (MUST follow):
 
 R&D suitability scoring (rd_match_score 1–5) — weigh BOTH:
 (A) Fraunhofer Korea commission/cooperation potential (Korean actor, budget, R&D technology gap)
-(B) Relevance to the monitoring keywords (top 3 in the user message — e.g. grid/power topics)
+(B) Relevance to the monitoring keywords (full list in the user message — e.g. grid/power topics)
 - 5: Strong (A) AND direct monitoring-keyword alignment (topic explicitly names or requires those technologies)
 - 4: Strong (A) with indirect keyword link, OR moderate (A) with direct keyword fit
 - 3: Korean policy/industry signal with partial budget OR weak keyword overlap
@@ -199,7 +199,7 @@ ALWAYS score 1 (non-R&D) for these even if industry keywords appear:
 - Exception: official government ministry press releases (policy direction) may score higher even without explicit budget IF a domestic commissioning actor and program intent are stated
 
 Monitoring-keyword honesty (CRITICAL):
-- If the source text has NO factual link to the analysis baseline keywords (top 3), set keyword_relevance to "모니터링 키워드와 직접·간접 관련 없음." and do NOT invent 전력계통/스마트그리드/파워그리드 R&D proposals.
+- If the source text has NO factual link to the analysis baseline keywords (full list), set keyword_relevance to "모니터링 키워드와 직접·간접 관련 없음." and do NOT invent 전력계통/스마트그리드/파워그리드 R&D proposals.
 - NEVER insert 전력계통, 스마트그리드, 파워그리드, 전력망, or English grid synonyms into 위탁 연구 니즈 / 접근 전략 / rd_proposable_area unless those terms (or clear synonyms) appear in the source text.
 - Speculative "could support smart grid" links → score ≤2 and rd_proposable_area "해당 없음".
 
@@ -429,7 +429,7 @@ class Summarizer:
             api_key=os.getenv("OPENAI_API_KEY"),
             base_url=os.getenv("OPENAI_BASE_URL"),
         )
-        self._top_keywords: list[str] = settings.keywords[:3]
+        self._top_keywords: list[str] = list(settings.analysis_keywords)
         self._settings = settings
 
     def summarize(self, article: FilteredArticle) -> SummarizedArticle:
@@ -454,7 +454,7 @@ class Summarizer:
             f"URL: {article.url}\n"
             f"Source: {article.source_name} ({article.category})\n"
             f"Matched keywords (all): {', '.join(article.matched_keywords)}\n"
-            f"Analysis baseline keywords (keywords.txt top 3 — keyword_relevance MUST explain "
+            f"Analysis baseline keywords (all keywords.txt entries — keyword_relevance MUST explain "
             f"how THIS article relates to these, not generic keyword definitions; "
             f"if no factual link, write '모니터링 키워드와 직접·간접 관련 없음.' and do not invent grid R&D): "
             f"{', '.join(self._top_keywords)}\n"

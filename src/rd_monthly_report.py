@@ -14,6 +14,8 @@ from openai import OpenAI
 
 from src.config import PROJECT_ROOT, Settings
 from src.daily_report import (
+    _highlight_after_md_label,
+    _highlight_keywords,
     keyword_relevance_label,
     log_to_summarized_article,
     monthly_credibility_distribution,
@@ -75,7 +77,7 @@ def _synthesize_monthly_ko(
     prompt = f"""당신은 Fraunhofer 한국 사무소 R&D 전략가입니다.
 {year}년 {month}월 국내 R&D 인텔리전스 항목 {len(entries)}건(적합도 {MONTHLY_RD_MIN_SCORE}점 이상)을 바탕으로 **4~5페이지 분량**의 월간 보고서 JSON을 작성하세요.
 
-모니터링 컨텍스트 키워드(상위 3): {kw_label}
+모니터링 컨텍스트 키워드(keywords.txt 전체): {kw_label}
 - 각 항목의 relevance(직접/간접/약함), matched_keywords, keyword_relevance 필드를 기준으로 중요도를 판단함.
 - executive_summary·context_highlights·opportunities는 **직접·간접** 관련 항목을 정부·R&D 신호와 함께 우선 배치함.
 - 정부·공공기관 투자 주체(actor)는 유지하되, 전력·에너지·그리드 등 모니터링 키워드와 직접 연결된 항목을 상단에 둠.
@@ -125,6 +127,47 @@ def _escape_table_cell(text: str) -> str:
     return (text or "").replace("|", "\\|").replace("\n", " ")
 
 
+def _hl_kws_for_entry(item: dict, top_keywords: list[str]) -> list[str]:
+    """Matched + analysis keywords for one monthly entry, longest-first."""
+    matched = [
+        part.strip()
+        for part in (item.get("matched_keywords") or "").split(",")
+        if part.strip()
+    ]
+    seen: set[str] = set()
+    ordered: list[str] = []
+    for raw in matched + list(top_keywords or []):
+        kw = (raw or "").strip()
+        if not kw:
+            continue
+        key = kw.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        ordered.append(kw)
+    ordered.sort(key=len, reverse=True)
+    return ordered
+
+
+def _mark_keyword_tokens(text: str, keywords: list[str]) -> str:
+    """Wrap comma/·-separated keyword tokens that match *keywords*."""
+    if not text or text == "—" or not keywords:
+        return text
+    known = {kw.lower(): kw for kw in keywords if kw}
+    parts = re.split(r"(\s*[,·]\s*)", text)
+    out: list[str] = []
+    for part in parts:
+        if re.fullmatch(r"\s*[,·]\s*", part or ""):
+            out.append(part)
+            continue
+        token = (part or "").strip()
+        if token.lower() in known:
+            out.append(f"<mark>{token}</mark>")
+        else:
+            out.append(part)
+    return "".join(out)
+
+
 def _build_markdown(
     year: int,
     month: int,
@@ -134,7 +177,13 @@ def _build_markdown(
     top_keywords: list[str],
 ) -> str:
     today = date.today().isoformat()
-    kw_label = " · ".join(top_keywords) if top_keywords else "(미설정)"
+    kws = top_keywords or []
+    kw_label = (
+        " · ".join(f"<mark>{kw}</mark>" for kw in kws) if kws else "(미설정)"
+    )
+    exec_summary = _highlight_keywords(
+        structured.get("executive_summary", "") or "", kws
+    )
     lines: list[str] = [
         "# 국내 R&D 인텔리전스 월간 보고서",
         "",
@@ -148,7 +197,7 @@ def _build_markdown(
         "",
         "## 1. Executive Summary",
         "",
-        structured.get("executive_summary", ""),
+        exec_summary,
         "",
         "## 2. 컨텍스트 중요도 상위",
         "",
@@ -158,8 +207,10 @@ def _build_markdown(
     if highlights:
         for item in highlights:
             rel = item.get("relevance", "")
-            matched = item.get("matched_keywords", "")
-            summary = item.get("summary", "")
+            matched = _mark_keyword_tokens(
+                item.get("matched_keywords", "") or "", kws
+            )
+            summary = _highlight_keywords(item.get("summary", "") or "", kws)
             prefix = f"**[{rel}]**" if rel else "**[—]**"
             if matched:
                 prefix += f" ({matched})"
@@ -172,9 +223,17 @@ def _build_markdown(
         )
         if context_items:
             for item in context_items[:8]:
+                hl = _hl_kws_for_entry(item, kws)
                 prop = (item.get("proposable") or "")[:50]
-                matched = item.get("matched_keywords") or prop or "—"
-                issue = (item.get("summary") or item["title"])[:160]
+                matched_raw = item.get("matched_keywords") or prop or "—"
+                matched = (
+                    _mark_keyword_tokens(matched_raw, hl)
+                    if item.get("matched_keywords")
+                    else _highlight_keywords(matched_raw, hl)
+                )
+                issue = _highlight_keywords(
+                    (item.get("summary") or item["title"])[:160], hl
+                )
                 lines.append(
                     f"- **[{item['relevance']}]** ({matched}) {issue}"
                 )
@@ -196,10 +255,10 @@ def _build_markdown(
     if opportunities:
         for opp in opportunities:
             field = opp.get("field", "기타")
-            summary = opp.get("summary", "")
+            summary = _highlight_keywords(opp.get("summary", "") or "", kws)
             lines.append(f"- **{field}:** {summary}")
             for item_line in opp.get("items") or []:
-                lines.append(f"  - {item_line}")
+                lines.append(f"  - {_highlight_keywords(item_line or '', kws)}")
     else:
         lines.append("- (해당 없음)")
 
@@ -217,24 +276,32 @@ def _build_markdown(
         ),
     )[:8]
     for item in detail_items:
-        title = (item.get("summary") or item["title"])[:140]
+        hl = _hl_kws_for_entry(item, kws)
+        title = _highlight_keywords(
+            (item.get("summary") or item["title"])[:140], hl
+        )
         lines.append(f"### [{item['ref']}] {title}")
         lines.append("")
-        if item.get("actor"):
-            lines.append(f"- **투자 주체:** {item['actor']}")
-        if item.get("purpose"):
-            lines.append(f"- **투자 목적:** {item['purpose']}")
-        if item.get("pain"):
-            lines.append(f"- **위탁 연구 니즈:** {item['pain']}")
-        if item.get("proposable"):
-            lines.append(f"- **제안 R&D:** {item['proposable']}")
-        if item.get("strategy"):
-            lines.append(f"- **접근 전략:** {item['strategy']}")
-        if item.get("fact"):
-            lines.append(f"- **팩트 근거:** {item['fact']}")
+        detail_fields = [
+            ("투자 주체", item.get("actor")),
+            ("투자 목적", item.get("purpose")),
+            ("위탁 연구 니즈", item.get("pain")),
+            ("제안 R&D", item.get("proposable")),
+            ("접근 전략", item.get("strategy")),
+            ("팩트 근거", item.get("fact")),
+        ]
+        for label, value in detail_fields:
+            if value:
+                lines.append(
+                    _highlight_after_md_label(f"- **{label}:** {value}", hl)
+                )
         rel = item.get("relevance", "—")
-        matched = item.get("matched_keywords") or "—"
-        lines.append(f"- **관련도:** {rel} · 매칭: {matched} · 적합도 {item['score']}/5")
+        matched = _mark_keyword_tokens(
+            item.get("matched_keywords") or "—", hl
+        )
+        lines.append(
+            f"- **관련도:** {rel} · 매칭: {matched} · 적합도 {item['score']}/5"
+        )
         if item.get("url"):
             lines.append(f"- **출처:** [{item.get('source') or '링크'}]({item['url']})")
         lines.append("")
@@ -249,11 +316,14 @@ def _build_markdown(
     action_plan = structured.get("action_plan") or []
     if action_plan:
         for action in action_plan:
-            lines.append(
-                f"| {_escape_table_cell(action.get('target', ''))} "
-                f"| {_escape_table_cell(action.get('rd_area', ''))} "
-                f"| {_escape_table_cell(action.get('contact_angle', ''))} |"
+            target = _escape_table_cell(action.get("target", ""))
+            rd_area = _highlight_keywords(
+                _escape_table_cell(action.get("rd_area", "")), kws
             )
+            angle = _highlight_keywords(
+                _escape_table_cell(action.get("contact_angle", "")), kws
+            )
+            lines.append(f"| {target} | {rd_area} | {angle} |")
     else:
         lines.append("| — | — | — |")
 
@@ -266,7 +336,10 @@ def _build_markdown(
     ]
 
     for item in compact:
-        issue = (item["summary"] or item["title"])[:120]
+        hl = _hl_kws_for_entry(item, kws)
+        issue = _highlight_keywords(
+            _escape_table_cell((item["summary"] or item["title"])[:120]), hl
+        )
         url = item["url"]
         source_label = item["source"] or url
         if url:
@@ -278,7 +351,7 @@ def _build_markdown(
             f"| {item.get('relevance', '—')} "
             f"| {item['date']} "
             f"| {_escape_table_cell(item['actor'] or '—')} "
-            f"| {_escape_table_cell(issue)} "
+            f"| {issue} "
             f"| {source_cell} |"
         )
 

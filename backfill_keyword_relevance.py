@@ -35,7 +35,7 @@ _MAX_RETRIES = 4
 _REQUEST_DELAY = 1.2
 
 _KR_PROMPT = """\
-아래 기사가 분석 기준 키워드 상위 3개(이하 '추적 키워드')와 어떻게 구체적으로 연결되는지 한국어 1~3문단으로 서술하십시오.
+아래 기사가 분석 기준 키워드 전체(이하 '추적 키워드')와 어떻게 구체적으로 연결되는지 한국어 1~3문단으로 서술하십시오.
 
 [필수 규칙]
 1. 첫 문장은 반드시 이 기사에 등장하는 고유명사·수치·날짜·이벤트명 중 하나로 시작할 것.
@@ -58,7 +58,7 @@ _KR_PROMPT = """\
 6. 종결어미: 과거 '-었음/-았음/-했음/-났음/-켰음', 현재·일반 '-함/-임/-됨/-분석됨' 등 명사형. '-습니다', '-합니다', '-다' 종결 사용 금지.
 7. 한자·일본어 문자 사용 금지. 반드시 한국어만.
 
-추적 키워드 (상위 3개): {keywords}
+추적 키워드 (keywords.txt 전체): {keywords}
 
 기사 제목: {title}
 출처: {source}
@@ -138,7 +138,7 @@ def backfill(target_date: date | None, settings, force: bool = False) -> None:
         base_url=os.getenv("OPENAI_BASE_URL"),
     )
     model = (os.getenv("MODEL_NAME") or os.getenv("OPENAI_MODEL", "gemini-2.0-flash-lite")).strip()
-    top_keywords = settings.keywords[:3]
+    top_keywords = list(settings.analysis_keywords)
 
     conn = sqlite3.connect(settings.database_path)
     conn.row_factory = sqlite3.Row

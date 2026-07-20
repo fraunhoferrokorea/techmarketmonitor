@@ -679,7 +679,7 @@ def generate_daily() -> None:
     from datetime import date
     settings = load_settings()
     target = date(2026, 6, 21)
-    top_kw = settings.keywords[:3]
+    top_kw = list(settings.analysis_keywords)
 
     print(f"Generating daily report for {target} ({len(DAILY_ARTICLES)} articles)...")
     path = save_daily_report(target, DAILY_ARTICLES, top_keywords=top_kw)

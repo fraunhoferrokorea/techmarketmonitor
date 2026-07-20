@@ -201,7 +201,7 @@ def monthly_cmd(year: int | None, month: int | None, no_cleanup: bool) -> None:
 
 @cli.command("show-config")
 def show_config_cmd() -> None:
-    """Print project paths and keywords.txt top-3 (verify local setup)."""
+    """Print project paths and keywords.txt analysis list (verify local setup)."""
     settings = load_settings()
     click.echo(
         json.dumps(
@@ -209,7 +209,8 @@ def show_config_cmd() -> None:
                 "project_root": str(PROJECT_ROOT),
                 "keywords_path": str(settings.keywords_path),
                 "keywords_path_exists": settings.keywords_path.is_file(),
-                "analysis_keywords_top3": settings.analysis_keywords,
+                "analysis_keywords": settings.analysis_keywords,
+                "filter_keywords": settings.filter_keywords,
                 "keyword_count": len(settings.keyword_labels),
                 "database_path": str(settings.database_path),
                 "reports_output_dir": str(settings.reports_output_dir),
