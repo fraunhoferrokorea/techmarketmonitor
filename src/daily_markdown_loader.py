@@ -44,6 +44,10 @@ def _extract_md_label(value: str) -> str:
     return value
 
 
+def _strip_md_links(text: str) -> str:
+    return _MD_LINK_RE.sub(r"\1", text)
+
+
 def load_logs_from_daily_markdown(
     year: int,
     month: int,
@@ -144,7 +148,8 @@ def _parse_item_block(block: str, log_date: date) -> dict | None:
     if not header_match:
         return None
 
-    title = _strip_mark_tags(header_match.group(2).strip())
+    title = _strip_mark_tags(_strip_md_links(header_match.group(2).strip()))
+    title_url = _extract_md_href(header_match.group(2))
     fields: dict[str, str] = {}
     summary_lines: list[str] = []
     in_summary = False
@@ -153,7 +158,9 @@ def _parse_item_block(block: str, log_date: date) -> dict | None:
         if in_summary:
             bullet = _SUMMARY_BULLET.match(line)
             if bullet:
-                summary_lines.append(_strip_mark_tags(bullet.group(1).strip()))
+                summary_lines.append(
+                    _strip_mark_tags(_strip_md_links(bullet.group(1).strip()))
+                )
                 continue
             if line.strip() == "":
                 continue
@@ -172,7 +179,7 @@ def _parse_item_block(block: str, log_date: date) -> dict | None:
             continue
         fields[label] = value
 
-    url = _extract_md_href(fields.get("링크/DOI", ""))
+    url = _extract_md_href(fields.get("링크/DOI", "")) or title_url
     if not url or not title:
         return None
 

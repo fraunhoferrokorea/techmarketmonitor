@@ -1,4 +1,4 @@
-"""Daily report reference links should be clickable markdown."""
+"""Daily report reference links should be clickable on title and summary."""
 
 from __future__ import annotations
 
@@ -6,14 +6,21 @@ from datetime import date, datetime
 from pathlib import Path
 
 from src.daily_markdown_loader import parse_daily_report
-from src.daily_report import _build_item_block, _build_item_slugs, _md_link
+from src.daily_report import (
+    _build_executive_summary,
+    _build_item_block,
+    _build_item_slugs,
+    _md_link,
+)
 from src.models import SummarizedArticle
+
+_URL = "https://www.korea.kr/briefing/pressReleaseView.do?newsId=156770276"
 
 
 def _sample_article() -> SummarizedArticle:
     return SummarizedArticle(
         title="전력망 고도화 보도자료",
-        url="https://www.korea.kr/briefing/pressReleaseView.do?newsId=156770276",
+        url=_URL,
         source_name="정책브리핑",
         category="enterprise",
         published_at=datetime(2026, 7, 9, 10, 0),
@@ -32,39 +39,38 @@ def test_md_link_escapes_brackets() -> None:
     assert _md_link("A[B]C", "https://example.com") == "[A［B］C](https://example.com)"
 
 
-def test_item_block_uses_clickable_source_and_url() -> None:
+def test_item_block_links_title_and_first_summary() -> None:
     article = _sample_article()
     slug = "1000-전력망-고도화-보도자료"
     block = "\n".join(_build_item_block(article, 1, date(2026, 7, 9), ["전력계통"], slug))
-    assert (
-        "- **출처:** [정책브리핑](https://www.korea.kr/briefing/pressReleaseView.do?newsId=156770276)"
-        in block
+    assert f"### 10:00 [전력망 고도화 보도자료]({_URL})" in block
+    assert any(
+        line.startswith("  - [") and _URL in line
+        for line in block.splitlines()
     )
-    assert (
-        "- **링크/DOI:** [원문](https://www.korea.kr/briefing/pressReleaseView.do?newsId=156770276)"
-        in block
-    )
+    assert "- **출처:** 정책브리핑" in block
+    assert f"- **링크/DOI:** {_URL}" in block
 
 
-def test_loader_unwraps_markdown_links(tmp_path: Path) -> None:
+def test_loader_unwraps_title_link_and_plain_url(tmp_path: Path) -> None:
     md = tmp_path / "daily_2026-07-09.md"
     md.write_text(
-        """# 국내 R&D 인텔리전스 데일리 로그
+        f"""# 국내 R&D 인텔리전스 데일리 로그
 
 날짜: 2026-07-09
 
 ## 항목 기록
 
 <a id="slug"></a>
-### 10:00 전력망 고도화 보도자료
+### 10:00 [전력망 고도화 보도자료]({_URL})
 
 - **자료유형:** 공식발표(IR·정책)
-- **출처:** [정책브리핑](https://www.korea.kr/briefing/pressReleaseView.do?newsId=156770276)
+- **출처:** 정책브리핑
 - **저자/발행기관:** 정책브리핑
 - **발행일:** 2026-07-09
-- **링크/DOI:** [원문](https://www.korea.kr/briefing/pressReleaseView.do?newsId=156770276)
+- **링크/DOI:** {_URL}
 - **요약:**
-  - 개요: 전력망 고도화 추진함
+  - [개요: 전력망 고도화 추진함]({_URL})
 - **신뢰도:** A
 - **태그:** #규제
 """,
@@ -72,9 +78,8 @@ def test_loader_unwraps_markdown_links(tmp_path: Path) -> None:
     )
     entries = parse_daily_report(md, log_date=date(2026, 7, 9))
     assert len(entries) == 1
-    assert entries[0]["url"] == (
-        "https://www.korea.kr/briefing/pressReleaseView.do?newsId=156770276"
-    )
+    assert entries[0]["url"] == _URL
+    assert entries[0]["title"] == "전력망 고도화 보도자료"
     assert entries[0]["source_name"] == "정책브리핑"
 
 
@@ -103,10 +108,9 @@ def test_loader_keeps_plain_url_compat(tmp_path: Path) -> None:
     assert entries[0]["source_name"] == "연합뉴스"
 
 
-def test_scan_table_includes_external_원문_link() -> None:
-    from src.daily_report import _build_executive_summary
-
+def test_scan_table_title_links_to_source() -> None:
     article = _sample_article()
     slugs = _build_item_slugs([article])
     text = "\n".join(_build_executive_summary([article], ["전력계통"], slugs))
-    assert "· [원문](https://www.korea.kr/briefing/pressReleaseView.do?newsId=156770276)" in text
+    assert f"[전력망 고도화 보도자료]({_URL})" in text
+    assert f"· [원문]({_URL})" not in text

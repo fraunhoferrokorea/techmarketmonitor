@@ -538,6 +538,9 @@ def _truncate_text(text: str, hard_limit: int) -> str:
     return text[:hard_limit].rstrip(",.;:")
 
 
+_MD_LINK_RE = re.compile(r"\[([^\]]*)\]\((https?://[^)\s]+)\)")
+
+
 def _md_link(label: str, url: str) -> str:
     """Markdown hyperlink safe for daily tables and item fields."""
     safe_label = (
@@ -551,6 +554,26 @@ def _md_link(label: str, url: str) -> str:
     return f"[{safe_label}]({url.strip()})"
 
 
+def _strip_md_links(text: str) -> str:
+    """Remove markdown link wrappers, keeping the label text."""
+    return _MD_LINK_RE.sub(r"\1", text)
+
+
+def _article_url(article: SummarizedArticle) -> str:
+    return (article.url or "").strip()
+
+
+def _is_http_url(url: str) -> bool:
+    return url.startswith(("http://", "https://"))
+
+
+def _link_text(text: str, url: str) -> str:
+    """Wrap *text* in a markdown link when *url* is http(s)."""
+    if _is_http_url(url):
+        return _md_link(text, url)
+    return text
+
+
 def _item_summary_link(
     article: SummarizedArticle,
     slug: str,
@@ -561,11 +584,10 @@ def _item_summary_link(
     short = _truncate_text(title, max_len)
     if highlight_keywords:
         short = _highlight_keywords(short, highlight_keywords)
-    internal = f"[{short}](#{slug})"
-    url = (article.url or "").strip()
-    if url.startswith(("http://", "https://")):
-        return f"{internal} · {_md_link('원문', url)}"
-    return internal
+    url = _article_url(article)
+    if _is_http_url(url):
+        return _md_link(short, url)
+    return f"[{short}](#{slug})"
 
 
 def _published_date(article: SummarizedArticle, fallback: date) -> str:
@@ -1488,13 +1510,11 @@ def _build_executive_summary(
         issue = _highlight_keywords(issue, hl_kws)
         target = _highlight_keywords(target, hl_kws)
         link_point = _highlight_keywords(link_point, hl_kws)
-        url = (article.url or "").strip()
+        url = _article_url(article)
         basis = (article.rd_fact_basis or "").strip()
         if basis and basis not in ("명시 없음",) and not basis.startswith("http"):
             fact = _highlight_keywords(basis.replace("|", "\\|"), hl_kws)
-            if url.startswith(("http://", "https://")):
-                fact = f"{fact} · {_md_link('원문', url)}"
-        elif url.startswith(("http://", "https://")):
+        elif _is_http_url(url):
             fact = _md_link("원문", url)
         else:
             fact = (basis or url).replace("|", "\\|")
@@ -1593,26 +1613,29 @@ def _build_item_block(
     heading_title = article.title.replace("…", "").replace("...", "").strip()
     heading_title = _highlight_keywords(heading_title, hl_kws)
     source_name = (article.source_name or "").strip() or "출처"
-    url = (article.url or "").strip()
-    if url.startswith(("http://", "https://")):
-        source_field = _md_link(source_name, url)
-        link_field = _md_link("원문", url)
-    else:
-        source_field = source_name
-        link_field = url
+    url = _article_url(article)
+    heading_title = _link_text(heading_title, url)
+
+    linked_summary: list[str] = []
+    for idx, line in enumerate(summary_lines):
+        if idx == 0 and _is_http_url(url) and not line.startswith("(해석)"):
+            linked_summary.append(_link_text(line, url))
+        else:
+            linked_summary.append(line)
+
     lines = [
         _item_anchor_tag(slug),
         f"### {_time_label(article, index)} {heading_title}",
         "",
         f"- **자료유형:** {material}",
-        f"- **출처:** {source_field}",
+        f"- **출처:** {source_name}",
         f"- **저자/발행기관:** {source_name}",
         f"- **발행일:** {_published_date(article, log_date)}",
-        f"- **링크/DOI:** {link_field}",
+        f"- **링크/DOI:** {url if url else '—'}",
     ]
 
     lines.append("- **요약:**")
-    for line in summary_lines:
+    for line in linked_summary:
         lines.append(f"  - {line}")
 
     rd_lines = build_rd_targeting_block(article, top_keywords)
@@ -1651,11 +1674,10 @@ def _build_low_relevance_section(
         level = _classify_relevance(article, kws)
         level_ko = RELEVANCE_LABEL_KO.get(level, level)
         title = article.title.replace("…", "").replace("...", "").strip()
-        url = (article.url or "").strip()
-        link = _md_link("원문", url) if url.startswith(("http://", "https://")) else ""
-        tail = f" · {link}" if link else ""
+        url = _article_url(article)
+        title_part = _link_text(title, url) if _is_http_url(url) else title
         lines.append(
-            f"{index}. [{level_ko}] {title} — {article.source_name}{tail}"
+            f"{index}. [{level_ko}] {title_part} — {article.source_name}"
         )
     lines.append("")
     return lines
