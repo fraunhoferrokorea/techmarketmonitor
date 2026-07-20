@@ -1,4 +1,4 @@
-"""Preview monthly R&D candidates from archive/RSS without LLM (heuristic scoring)."""
+"""Preview monthly R&D candidates from configured ministry/agency sources (no LLM)."""
 from __future__ import annotations
 
 import sys
@@ -10,7 +10,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.config import load_settings, load_sources
 from src.daily_report import classify_keyword_relevance
-from src.fetchers.korea_kr_archive import fetch_korea_kr_for_date
+from src.fetchers.html_boards import fetch_html_boards_for_date
+from src.fetchers.pacst import fetch_pacst_for_date
 from src.fetchers.registry import build_fetchers
 from src.filter import filter_articles
 from src.models import SummarizedArticle
@@ -82,7 +83,8 @@ def main() -> None:
     candidates: list[tuple[date, int, str, str, str]] = []
     cursor = start
     while cursor <= end:
-        raw = list(fetch_korea_kr_for_date(cursor))
+        raw = list(fetch_html_boards_for_date(cursor))
+        raw.extend(fetch_pacst_for_date(cursor))
         seen = {a.url for a in raw}
         for article in rss_raw:
             if _pub_date(article) == cursor and article.url not in seen:
@@ -107,21 +109,14 @@ def main() -> None:
         cursor += timedelta(days=1)
 
     candidates.sort(key=lambda x: (-x[1], x[0].isoformat()))
-    non_policy = [c for c in candidates if "정책브리핑" not in c[3]]
 
     print(f"=== Heuristic monthly candidates {start}..{end} (score>={MONTHLY_RD_MIN_SCORE}) ===")
-    print(f"Total: {len(candidates)} | Non-정책브리핑: {len(non_policy)}")
+    print(f"Total: {len(candidates)} (ministry/agency press releases only)")
     print()
     for d, score, rel, src, title in candidates[:50]:
         print(f"{d} | {score}/5 | {rel:6s} | {src} | {title[:70]}")
     if len(candidates) > 50:
         print(f"... and {len(candidates) - 50} more")
-    print()
-    print("=== Non-정책브리핑 only ===")
-    if not non_policy:
-        print("(none)")
-    for d, score, rel, src, title in non_policy:
-        print(f"{d} | {score}/5 | {rel:6s} | {src} | {title[:70]}")
 
 
 if __name__ == "__main__":

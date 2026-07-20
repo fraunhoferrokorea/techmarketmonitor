@@ -66,7 +66,7 @@ def test_filter_passes_gov_target_with_core_keyword() -> None:
 def test_filter_passes_gov_target_with_energy_domain_without_core_keyword() -> None:
     article = _article(
         "기후에너지환경부, 에너지전환 로드맵 발표",
-        source="정책브리핑 기후에너지환경부",
+        source="기후에너지환경부 보도자료",
         summary="재생에너지 확대와 전력망 보강 계획을 확정함.",
     )
     result = filter_articles(
@@ -99,7 +99,7 @@ def test_filter_passes_mou_from_official_source_with_energy_domain() -> None:
 
 
 def test_filter_excludes_health_mou_without_energy_domain() -> None:
-    article = _article("한-몽 보건의료 협력 MOU 체결", source="정책브리핑 보건복지부")
+    article = _article("한-몽 보건의료 협력 MOU 체결", source="보건복지부 보도자료")
     result = filter_articles(
         [article],
         keywords=["전력계통", "MOU"],
@@ -182,12 +182,12 @@ def test_filter_keeps_energy_budget_program_without_core_top5() -> None:
     assert len(result) == 1
 
 
-def test_is_plan_document_expdoc_url() -> None:
+def test_is_plan_document_master_plan_from_ministry() -> None:
     article = RawArticle(
-        title="2026 디지털정부 전망",
-        url="https://www.korea.kr/archive/expDocView.do?docId=41730",
+        title="제6차 국가표준기본계획(2026-2030) 확정",
+        url="https://www.msit.go.kr/bbs/view.do?sCode=user&mId=113&bbsSeqNo=94&nttSeqNo=1",
         summary="",
-        source_name="정책브리핑 전문자료 행정안전부",
+        source_name="과기정통부 보도자료",
         category="korean",
         published_at=datetime.now(tz=timezone.utc),
     )

@@ -17,7 +17,7 @@ def _article(
     base = dict(
         title=title,
         url=f"https://example.com/{url_suffix}",
-        source_name="정책브리핑 산업통상부",
+        source_name="산업통상부 보도자료",
         category="korean",
         published_at=datetime(2026, 7, 9, 1, 0, tzinfo=timezone.utc),
         matched_keywords=matched,

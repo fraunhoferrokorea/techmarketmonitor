@@ -14,14 +14,14 @@ from src.daily_report import (
 )
 from src.models import SummarizedArticle
 
-_URL = "https://www.korea.kr/briefing/pressReleaseView.do?newsId=156770276"
+_URL = "https://www.mcee.go.kr/home/web/board/read.do?menuId=286&boardMasterId=1&boardId=1"
 
 
 def _sample_article() -> SummarizedArticle:
     return SummarizedArticle(
         title="전력망 고도화 보도자료",
         url=_URL,
-        source_name="정책브리핑",
+        source_name="기후에너지환경부 보도자료",
         category="enterprise",
         published_at=datetime(2026, 7, 9, 10, 0),
         matched_keywords=["전력계통"],
@@ -48,7 +48,7 @@ def test_item_block_links_title_and_first_summary() -> None:
         line.startswith("  - [") and _URL in line
         for line in block.splitlines()
     )
-    assert "- **출처:** 정책브리핑" in block
+    assert "- **출처:** 기후에너지환경부 보도자료" in block
     assert f"- **링크/DOI:** {_URL}" in block
 
 
@@ -65,8 +65,8 @@ def test_loader_unwraps_title_link_and_plain_url(tmp_path: Path) -> None:
 ### 10:00 [전력망 고도화 보도자료]({_URL})
 
 - **자료유형:** 공식발표(IR·정책)
-- **출처:** 정책브리핑
-- **저자/발행기관:** 정책브리핑
+- **출처:** 기후에너지환경부 보도자료
+- **저자/발행기관:** 기후에너지환경부 보도자료
 - **발행일:** 2026-07-09
 - **링크/DOI:** {_URL}
 - **요약:**
@@ -80,7 +80,7 @@ def test_loader_unwraps_title_link_and_plain_url(tmp_path: Path) -> None:
     assert len(entries) == 1
     assert entries[0]["url"] == _URL
     assert entries[0]["title"] == "전력망 고도화 보도자료"
-    assert entries[0]["source_name"] == "정책브리핑"
+    assert entries[0]["source_name"] == "기후에너지환경부 보도자료"
 
 
 def test_loader_keeps_plain_url_compat(tmp_path: Path) -> None:

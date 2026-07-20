@@ -17,7 +17,7 @@ def _article(**overrides) -> SummarizedArticle:
     base = dict(
         title="한전 스마트그리드 실증 착수",
         url="https://example.com/sg",
-        source_name="정책브리핑",
+        source_name="산업통상부 보도자료",
         category="tech_news",
         published_at=datetime(2026, 7, 9, 10, 0, tzinfo=timezone.utc),
         matched_keywords=["스마트그리드", "전력망"],
@@ -92,7 +92,7 @@ def test_monthly_markdown_highlights_keywords():
             "date": "2026-07-01",
             "title": "한전 스마트그리드 실증",
             "url": "https://example.com/sg",
-            "source": "정책브리핑",
+            "source": "산업통상부 보도자료",
             "score": 4,
             "relevance": "직접",
             "matched_keywords": "스마트그리드, 전력계통",

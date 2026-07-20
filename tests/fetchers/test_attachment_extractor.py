@@ -47,7 +47,7 @@ def test_enrich_includes_pdf_marker(monkeypatch=None) -> None:
         title="제6차 국가표준기본계획 발표",
         url="https://www.korea.kr/briefing/pressReleaseView.do?newsId=1",
         summary="짧은 RSS 요약",
-        source_name="정책브리핑 산업통상부",
+        source_name="산업통상부 보도자료",
         category="korean",
         published_at=datetime.now(tz=timezone.utc),
     )
