@@ -185,7 +185,7 @@ def send_daily_report_email(
 ) -> dict:
     """Email a newly generated daily markdown report."""
     count_line = (
-        f"총 {article_count}건의 기사/논문이 포함되어 있습니다.\n"
+        f"총 {article_count}건의 기사/보도자료/논문이 포함되어 있습니다.\n"
         if article_count is not None
         else ""
     )

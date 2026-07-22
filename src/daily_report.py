@@ -244,11 +244,27 @@ def _material_type(article: SummarizedArticle) -> str:
     if article.category == "academic":
         return "논문"
     source = article.source_name.lower()
+    url = article.url.lower()
+    # Press-release boards / gov sources before Tier-1 research so
+    # "KIPO 보도자료" etc. are not mislabeled as 보고서(시장조사).
+    if (
+        "보도자료" in source
+        or any(h in source for h in _GOVERNMENT_HINTS)
+        or any(h in url for h in _GOVERNMENT_HINTS)
+    ):
+        return "보도자료"
     if any(h in source for h in _TIER1_RESEARCH):
         return "보고서(시장조사)"
-    if any(h in source for h in _GOVERNMENT_HINTS) or any(h in article.url.lower() for h in _GOVERNMENT_HINTS):
-        return "공식발표(IR·정책)"
     return _CATEGORY_MATERIAL_TYPE.get(article.category, "기사")
+
+
+def _homepage_bucket(material: str) -> str:
+    """Map item-level 자료유형 to homepage count buckets."""
+    if material == "논문":
+        return "논문"
+    if material in ("보도자료", "공식발표(IR·정책)"):
+        return "보도자료"
+    return "기사"
 
 
 def _credibility(article: SummarizedArticle) -> str:
@@ -1777,15 +1793,18 @@ def _build_markdown(
         a for a in sorted_all if _classify_relevance(a, kws) in ("weak", "none")
     ]
 
-    paper_count = sum(1 for a in primary if _material_type(a) == "논문")
-    article_count = len(primary) - paper_count
+    buckets = Counter(_homepage_bucket(_material_type(a)) for a in primary)
+    article_count = buckets.get("기사", 0)
+    press_count = buckets.get("보도자료", 0)
+    paper_count = buckets.get("논문", 0)
 
     cred_counts = Counter(_credibility_grade(_credibility(a)) for a in primary)
     author = recorder or os.getenv("DAILY_LOG_RECORDER", "Tech Market Monitor (auto)")
 
     iso = log_date.isoformat()
     header_total = (
-        f"총 항목 수: {len(primary)}건 (기사 {article_count} / 논문 {paper_count})"
+        f"총 항목 수: {len(primary)}건 "
+        f"(기사 {article_count} / 보도자료 {press_count} / 논문 {paper_count})"
     )
     if low:
         header_total += f" · 관련도 낮음 {len(low)}건은 참고 섹션"

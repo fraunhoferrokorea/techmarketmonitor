@@ -958,7 +958,7 @@ def _md_to_html(md_text: str) -> str:
 def _daily_meta(md_text: str) -> str:
     m = re.search(r"총 항목 수:\s*([^\n]+)", md_text)
     if m:
-        # shorten e.g. "1건 (기사 1 / 논문 0) · ..."
+        # shorten e.g. "1건 (기사 1 / 보도자료 0 / 논문 0) · ..."
         raw = m.group(1).strip()
         short = raw.split("·")[0].strip()
         return short

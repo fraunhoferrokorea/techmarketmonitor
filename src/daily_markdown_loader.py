@@ -16,7 +16,8 @@ _MATERIAL_TO_CATEGORY = {
     "논문": "academic",
     "기사": "tech_news",
     "보고서(시장조사)": "enterprise",
-    "공식발표(IR·정책)": "enterprise",
+    "보도자료": "korean",
+    "공식발표(IR·정책)": "enterprise",  # legacy alias
 }
 _MARK_TAG_RE = re.compile(r"</?mark>", re.IGNORECASE)
 _MD_LINK_RE = re.compile(r"\[([^\]]*)\]\((https?://[^)\s]+)\)")

@@ -19,7 +19,7 @@ Full manual: `templates/daily_research_log_template.md` · Code rules: `src/dail
 
 날짜: YYYY-MM-DD
 기록자:
-총 항목 수: N건 (기사 n / 논문 n)
+총 항목 수: N건 (기사 n / 보도자료 n / 논문 n)
 신뢰도 분포: A n건 / B n건 / C n건
 ```
 
@@ -45,7 +45,7 @@ Avoid vague filler in summary cells: no deictic subjects ("이 기술은"), no g
 <a id="anchor-slug"></a>
 ### 1. Title
 
-- **자료유형:** 기사 / 논문 / 보고서(시장조사) / 공식발표(IR·정책) / 기타
+- **자료유형:** 기사 / 보도자료 / 논문 / 보고서(시장조사) / 기타
 - **출처:** [outlet](https://article-url)
 - **저자/발행기관:**
 - **발행일:** YYYY-MM-DD
