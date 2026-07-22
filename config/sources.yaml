@@ -5,25 +5,28 @@
 # 새 소스를 추가할 때는 name / url / category 세 필드가 필수입니다.
 # method: post 는 POST RSS만 허용하는 부처(산업통상부 등)에 사용합니다.
 # method: html / pacst 는 HTML 스크래퍼(src/fetchers/html_boards.py · pacst.py)가 수집합니다.
-# url: 가능하면 브라우저 목록 페이지. feed_url: 수집용 RSS(선택).
+# url: 브라우저에서 열리는 목록/홈. feed_url: 수집용 RSS(선택).
 # RSSFetcher가 feed_url(없으면 url)을 feedparser로 가져옵니다.
 #
 # 정부부처·기관: 각 누리집 보도자료만 사용 (정책브리핑 korea.kr 정책뉴스·경유 금지).
 # ─────────────────────────────────────────────────────────────────────────────
 
-# ── 국내 ICT / 정책 / 공공 R&D ─────────────────────────────────────────
 korean:
   - name: 과기정통부 보도자료
-    url: https://www.msit.go.kr/user/rss/rss.do?bbsSeqNo=94
+    url: https://www.msit.go.kr/
+    feed_url: https://www.msit.go.kr/user/rss/rss.do?bbsSeqNo=94
     category: korean
   - name: 과기정통부 정보통신
-    url: https://www.msit.go.kr/user/rss/rss.do?bbsSeqNo=67
+    url: https://www.msit.go.kr/
+    feed_url: https://www.msit.go.kr/user/rss/rss.do?bbsSeqNo=67
     category: korean
   - name: 과기정통부 과학기술정책
-    url: https://www.msit.go.kr/user/rss/rss.do?bbsSeqNo=70
+    url: https://www.msit.go.kr/
+    feed_url: https://www.msit.go.kr/user/rss/rss.do?bbsSeqNo=70
     category: korean
   - name: 과기정통부 연구성과
-    url: https://www.msit.go.kr/user/rss/rss.do?bbsSeqNo=89
+    url: https://www.msit.go.kr/
+    feed_url: https://www.msit.go.kr/user/rss/rss.do?bbsSeqNo=89
     category: korean
   - name: 산업통상부 보도자료
     url: https://www.motir.go.kr/kor/article/ATCL3f49a5a8c
@@ -31,7 +34,8 @@ korean:
     category: korean
     method: POST
   - name: 기후에너지환경부 보도자료
-    url: https://www.mcee.go.kr/home/web/board/rss.do?menuId=286&boardMasterId=1
+    url: https://www.mcee.go.kr/home/web/main.do
+    feed_url: https://www.mcee.go.kr/home/web/board/rss.do?menuId=286&boardMasterId=1
     category: korean
   - name: 중소벤처기업부 보도자료
     url: https://www.mss.go.kr/site/smba/ex/bbs/List.do?cbIdx=86
@@ -98,57 +102,74 @@ korean:
     category: korean
     method: html
   - name: 연합뉴스 산업
-    url: https://www.yna.co.kr/rss/industry.xml
+    url: https://www.yna.co.kr/
+    feed_url: https://www.yna.co.kr/rss/industry.xml
     category: korean
   - name: 연합뉴스 경제
-    url: https://www.yna.co.kr/rss/economy.xml
+    url: https://www.yna.co.kr/
+    feed_url: https://www.yna.co.kr/rss/economy.xml
     category: korean
   - name: 뉴시스 속보
-    url: https://newsis.com/RSS/sokbo.xml
+    url: https://www.newsis.com/
+    feed_url: https://newsis.com/RSS/sokbo.xml
     category: korean
   - name: 한국경제
-    url: https://www.hankyung.com/feed/all-news
+    url: https://www.hankyung.com/
+    feed_url: https://www.hankyung.com/feed/all-news
     category: korean
   - name: 매일경제 경제
-    url: https://www.mk.co.kr/rss/30100041/
+    url: https://www.mk.co.kr/
+    feed_url: https://www.mk.co.kr/rss/30100041/
     category: korean
   - name: 동아일보 경제
-    url: https://rss.donga.com/economy.xml
+    url: https://www.donga.com/news/Economy
+    feed_url: https://rss.donga.com/economy.xml
     category: korean
   - name: 경향신문 경제
-    url: http://www.khan.co.kr/rss/rssdata/economy_news.xml
+    url: https://www.khan.co.kr/economy
+    feed_url: http://www.khan.co.kr/rss/rssdata/economy_news.xml
     category: korean
   - name: 파이낸셜뉴스
-    url: https://www.fnnews.com/rss/r20/fn_realnews_all.xml
+    url: https://www.fnnews.com/
+    feed_url: https://www.fnnews.com/rss/r20/fn_realnews_all.xml
     category: korean
   - name: 헤럴드경제
-    url: https://biz.heraldcorp.com/rss/google/newsAll
+    url: https://biz.heraldcorp.com/
+    feed_url: https://biz.heraldcorp.com/rss/google/newsAll
     category: korean
   - name: 전자신문 IT
-    url: http://rss.etnews.com/Section901.xml
+    url: https://www.etnews.com/
+    feed_url: http://rss.etnews.com/Section901.xml
     category: korean
   - name: 전자신문 통신/방송
-    url: http://rss.etnews.com/Section902.xml
+    url: https://www.etnews.com/
+    feed_url: http://rss.etnews.com/Section902.xml
     category: korean
   - name: ZDNet Korea
-    url: http://feeds.feedburner.com/zdkorea
+    url: https://zdnet.co.kr/
+    feed_url: http://feeds.feedburner.com/zdkorea
     category: korean
   - name: 한겨레 과학
-    url: https://www.hani.co.kr/rss/science
+    url: https://www.hani.co.kr/arti/science/
+    feed_url: https://www.hani.co.kr/rss/science
     category: korean
   - name: 동아일보 과학
-    url: https://rss.donga.com/science.xml
+    url: https://www.donga.com/news/It
+    feed_url: https://rss.donga.com/science.xml
     category: korean
   - name: 전기신문
-    url: https://www.electimes.com/rss/allArticle.xml
+    url: https://www.electimes.com/
+    feed_url: https://www.electimes.com/rss/allArticle.xml
     category: korean
   - name: 에너지경제신문
     url: https://www.ekn.kr/web/
     category: korean
     method: html
   - name: 에너지타임즈
-    url: https://www.energytimes.kr/rss/allArticle.xml
+    url: https://www.energytimes.kr/
+    feed_url: https://www.energytimes.kr/rss/allArticle.xml
     category: korean
   - name: 인더스트리뉴스
-    url: https://www.industrynews.co.kr/rss/allArticle.xml
+    url: https://www.industrynews.co.kr/
+    feed_url: https://www.industrynews.co.kr/rss/allArticle.xml
     category: korean
