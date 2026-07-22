@@ -40,3 +40,33 @@ def test_load_settings_analysis_matches_full_file_order() -> None:
     assert len(settings.analysis_keywords) == len(settings.keyword_labels)
     assert settings.analysis_keywords[0] == "전력계통"
     assert "재생에너지 출력예측" in settings.analysis_keywords
+
+
+def test_load_keyword_groups_from_section_headers(tmp_path: Path) -> None:
+    from src.config import load_keyword_groups
+
+    kw_file = tmp_path / "keywords.txt"
+    kw_file.write_text(
+        "# intro\n"
+        "# ── 전력·에너지 (Fraunhofer 핵심) ───────────────────\n"
+        "HVDC\n"
+        "전력계통\n"
+        "# ── 제조·AI ───────────────────────────────────────\n"
+        "제조AI\n"
+        "스마트공장\n",
+        encoding="utf-8",
+    )
+    groups = load_keyword_groups(kw_file)
+    assert [g.label for g in groups] == ["전력·에너지", "제조·AI"]
+    assert list(groups[0].keywords) == ["HVDC", "전력계통"]
+    assert list(groups[1].keywords) == ["제조AI", "스마트공장"]
+
+
+def test_load_settings_keyword_groups_match_file() -> None:
+    settings = load_settings()
+    assert settings.keyword_groups
+    assert settings.keyword_groups[0].label == "전력·에너지"
+    assert "HVDC" in settings.keyword_groups[0].keywords
+    assert sum(len(g.keywords) for g in settings.keyword_groups) == len(
+        settings.keyword_labels
+    )

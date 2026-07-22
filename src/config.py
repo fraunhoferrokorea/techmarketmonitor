@@ -33,6 +33,14 @@ _DEFAULT_KEYWORDS: list[str] = [
 
 
 @dataclass(frozen=True)
+class KeywordGroup:
+    """One `# ── Section ──` block from keywords.txt."""
+
+    label: str
+    keywords: tuple[str, ...]
+
+
+@dataclass(frozen=True)
 class Settings:
     openai_api_key: str
     openai_model: str
@@ -46,6 +54,59 @@ class Settings:
     analysis_keywords: list[str]
     filter_keywords: list[str]
     keywords_path: Path
+    keyword_groups: tuple[KeywordGroup, ...]
+
+
+_SECTION_HEADER_RE = re.compile(
+    r"^#\s*[─\-–]{2,}\s*(.+?)\s*[─\-–]{2,}\s*$"
+)
+
+
+def _section_label_from_header(raw: str) -> str:
+    """`전력·에너지 (Fraunhofer 핵심)` → `전력·에너지`."""
+    label = re.sub(r"\s*\([^)]*\)\s*", " ", (raw or "").strip())
+    return re.sub(r"\s{2,}", " ", label).strip(" -–—") or "모니터링 키워드"
+
+
+def load_keyword_groups(path: Path) -> tuple[KeywordGroup, ...]:
+    """Parse keywords.txt section headers into labeled keyword groups.
+
+    Lines like ``# ── 전력·에너지 (Fraunhofer 핵심) ──`` start a group.
+    Keywords before any section header go into a default group if present.
+    If the file has keywords but no section headers, one group
+    ``모니터링 키워드`` is returned so monthly §3 stays keyword-driven.
+    """
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except FileNotFoundError:
+        return ()
+
+    groups: list[KeywordGroup] = []
+    current_label: str | None = None
+    current_kws: list[str] = []
+
+    def _flush() -> None:
+        nonlocal current_label, current_kws
+        if current_kws:
+            label = current_label or "모니터링 키워드"
+            groups.append(KeywordGroup(label=label, keywords=tuple(current_kws)))
+        current_label = None
+        current_kws = []
+
+    for line in lines:
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if stripped.startswith("#"):
+            m = _SECTION_HEADER_RE.match(stripped)
+            if m:
+                _flush()
+                current_label = _section_label_from_header(m.group(1))
+            continue
+        current_kws.append(stripped)
+
+    _flush()
+    return tuple(groups)
 
 
 def _normalize_keyword(keyword: str) -> str:
@@ -109,6 +170,12 @@ def load_settings() -> Settings:
         analysis = list(raw_labels)
         filter_kw = list(keywords)
 
+    keyword_groups = load_keyword_groups(keywords_path)
+    if not keyword_groups and raw_labels:
+        keyword_groups = (
+            KeywordGroup(label="모니터링 키워드", keywords=tuple(raw_labels)),
+        )
+
     database_path = Path(os.getenv("DATABASE_PATH", "data/monitor.db"))
     if not database_path.is_absolute():
         database_path = PROJECT_ROOT / database_path
@@ -130,6 +197,7 @@ def load_settings() -> Settings:
         analysis_keywords=analysis,
         filter_keywords=filter_kw,
         keywords_path=keywords_path,
+        keyword_groups=keyword_groups,
     )
 
 

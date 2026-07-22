@@ -12,7 +12,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from openai import OpenAI
 
-from src.config import PROJECT_ROOT, Settings
+from src.config import PROJECT_ROOT, KeywordGroup, Settings, load_keyword_groups
 from src.daily_report import (
     _highlight_after_md_label,
     _highlight_keywords,
@@ -40,12 +40,7 @@ from src.press_evidence import (
 
 logger = logging.getLogger(__name__)
 
-_THEME_RULES: tuple[tuple[str, re.Pattern[str]], ...] = (
-    ("전력·그리드", re.compile(r"전력|그리드|grid|송배전|BESS|에너지저장", re.I)),
-    ("제조AI·스마트공장", re.compile(r"제조|AI|에이전트|스마트공장|파운데이션", re.I)),
-    ("표준·인증·보안", re.compile(r"표준|KS|인증|드론|대드론", re.I)),
-    ("바이오·그린", re.compile(r"바이오|산림|그린", re.I)),
-)
+OTHER_THEME = "기타 정부·R&D"
 
 
 def _compact_entry(log: dict, ref: int, top_keywords: list[str]) -> dict:
@@ -123,6 +118,7 @@ def _factcheck_structured(
     structured: dict,
     entries: list[dict],
     top_keywords: list[str],
+    groups: tuple[KeywordGroup, ...] | list[KeywordGroup] | None = None,
 ) -> dict:
     """Strip keyword-dump hallucinations from LLM monthly synthesis."""
     by_ref = {e["ref"]: e for e in entries}
@@ -142,11 +138,11 @@ def _factcheck_structured(
 
     fixed_opps = []
     for opp in structured.get("opportunities") or []:
-        field = opp.get("field") or "기타"
+        field = opp.get("field") or OTHER_THEME
         summary = opp.get("summary") or ""
         theme_entries = [
             by_ref[r] for r in (opp.get("refs") or []) if r in by_ref
-        ] or [e for e in entries if _theme_for_entry(e) == field]
+        ] or [e for e in entries if _theme_for_entry(e, groups) == field]
         theme_attested: list[str] = []
         for e in theme_entries:
             theme_attested.extend(e.get("attested_keywords") or [])
@@ -180,9 +176,39 @@ def _factcheck_structured(
             {
                 **opp,
                 "summary": summary,
-                "items": _dedupe_opportunity_items(items or opp.get("items") or []),
+                "items": [
+                    _normalize_opportunity_item_bold(x)
+                    for x in _dedupe_opportunity_items(items or opp.get("items") or [])
+                ],
             }
         )
+    # Rebuild opportunities from keyword groups when LLM used legacy buckets.
+    group_labels = {g.label for g in (groups or ())}
+    legacy = {"제조AI·스마트공장", "표준·인증·보안", "바이오·그린", "전력·그리드"}
+    used_fields = {o.get("field") for o in fixed_opps}
+    if fixed_opps and (
+        (used_fields & legacy) or (group_labels and not (used_fields & group_labels) and used_fields != {OTHER_THEME})
+    ):
+        # Prefer deterministic keyword-group buckets over stale LLM field names.
+        rebuilt = []
+        for theme, theme_items in _group_by_theme(entries, groups):
+            theme_attested: list[str] = []
+            for e in theme_items:
+                theme_attested.extend(e.get("attested_keywords") or [])
+            theme_attested = list(dict.fromkeys(theme_attested))
+            actors = sorted({e.get("actor", "") for e in theme_items if e.get("actor")})
+            rebuilt.append(
+                {
+                    "field": theme,
+                    "summary": theme_intro_from_evidence(theme, actors, theme_attested),
+                    "items": [
+                        _normalize_opportunity_item_bold(_entry_narrative(e))
+                        for e in theme_items[:5]
+                    ],
+                    "refs": [e["ref"] for e in theme_items[:5]],
+                }
+            )
+        fixed_opps = rebuilt
     structured["opportunities"] = fixed_opps
     return structured
 
@@ -192,6 +218,7 @@ def _synthesize_monthly_ko(
     month: int,
     entries: list[dict],
     top_keywords: list[str],
+    groups: tuple[KeywordGroup, ...] | list[KeywordGroup] | None = None,
 ) -> dict:
     load_dotenv(PROJECT_ROOT / ".env")
     client = OpenAI(
@@ -199,14 +226,19 @@ def _synthesize_monthly_ko(
         base_url=os.getenv("OPENAI_BASE_URL"),
     )
     kw_label = " · ".join(top_keywords) if top_keywords else "(미설정)"
+    group_labels = [g.label for g in (groups or ())]
+    field_choices = " / ".join(group_labels + [OTHER_THEME]) if group_labels else OTHER_THEME
     prompt = f"""당신은 Fraunhofer 한국 사무소 R&D 전략가입니다.
 {year}년 {month}월 국내 R&D 인텔리전스 항목 {len(entries)}건(적합도 {MONTHLY_RD_MIN_SCORE}점 이상)을 바탕으로 **4~5페이지 분량**의 월간 보고서 JSON을 작성하세요.
 
 모니터링 컨텍스트 키워드(keywords.txt 전체): {kw_label}
+§3 분야(field) 허용값(keywords.txt 섹션 기준): {field_choices}
+- opportunities.field는 위 허용값만 사용. 제조AI·스마트공장·표준·인증·바이오 등 레거시 라벨 금지.
 - 각 항목의 relevance(직접/간접/약함), matched_keywords, keyword_relevance, **attested_keywords**, **evidence_quotes** 필드를 기준으로 중요도를 판단함.
 - executive_summary·context_highlights·opportunities는 **직접·간접** 관련 항목을 정부·R&D 신호와 함께 우선 배치함.
 - executive_summary는 주제가 바뀔 때마다 줄바꿈(문단 사이 빈 줄). 집계·관련도·최우선 이슈·분야축·후속 안내를 한 줄에 이어서 쓰지 말 것.
-- 정부·공공기관 투자 주체(actor)는 유지하되, 전력·에너지·그리드 등 모니터링 키워드와 직접 연결된 항목을 상단에 둠.
+- **모니터링 축 = keywords.txt만.** executive_summary에 '제조AI·스마트공장 축', '표준·인증 축', '바이오 축' 등 레거시 고정 라벨을 쓰지 말 것. 키워드 미매칭 항목은 '관련도 약함 정부·R&D 신호'로만 언급.
+- 정부·공공기관 투자 주체(actor)는 유지하되, 모니터링 키워드와 직접 연결된 항목을 상단에 둠.
 
 규칙:
 - 한국 국내 정부·기업 R&D 위탁·협력 기회만 다룸. 해외 시장·글로벌 벤더 분석 금지.
@@ -224,7 +256,8 @@ def _synthesize_monthly_ko(
 - keyword_relevance, fact, actor, purpose, relevance, attested_keywords, evidence_quotes 필드를 적극 활용. pain/strategy/proposable는 참고만 하고 그대로 복사하지 말 것.
 - opportunities.summary는 분야별 서두 1~2문장(건수·[정부]·[컨텍스트] 라벨 금지). **원문에 없는 키워드 리스트 삽입 금지.**
 - opportunities.items는 항목마다 팩트 중심 1~2문장(짧게): 누가·언제·무엇·수치. **긴 「」 원문 인용은 §4에만.** 명사형 종결.
-- **중복 금지:** 동일 정책·동일 금액(예: 20조원+100조원)이 복수 부처 보도로 나와도 opportunities/action_plan에 한 번만. 투자 주체는 합쳐 표기.
+- **볼드 통일:** items는 `**투자주체** — 서술` 형식만. 분야명·금액·키워드를 볼드하지 말 것.
+- **중복 금지:** 동일 정책·동일 금액(예: 20조원+100조원)이 복수 부처 보도로 나와도 opportunities에 한 번만. 투자 주체는 합쳐 표기.
 - §3은 분야별 요약, §4는 상세 카드 — 같은 「」 인용·같은 문단을 양쪽에 복붙하지 말 것.
 
 입력 데이터:
@@ -232,12 +265,15 @@ def _synthesize_monthly_ko(
 
 JSON 스키마:
 {{
-  "executive_summary": "5~7문장. 주제(집계 건수 / 관련도 구분 / 최우선 이슈 / 분야축별 동향 / 후속 섹션 안내)가 바뀔 때마다 문단을 나누고 문단 사이에 빈 줄(\\n\\n)을 넣음. attested 키워드·원문 「」 인용 가능한 이슈만 + 국내 전력·에너지·ICT R&D 투자 트렌드 + 당월 정부·기업 핵심 수치. 없는 사실 금지. 한 덩어리 문단으로 붙이지 말 것",
+  "executive_summary": "5~7문장. 주제(집계 건수 / 관련도 구분 / 최우선 이슈 / 키워드 섹션 동향 / 후속 섹션 안내)가 바뀔 때마다 문단을 나누고 문단 사이에 빈 줄(\\n\\n)을 넣음. attested 키워드·원문 「」 인용 가능한 이슈만 + 당월 정부·기업 핵심 수치. 없는 사실 금지. 한 덩어리 문단으로 붙이지 말 것",
   "context_highlights": [
     {{"relevance": "직접|간접", "matched_keywords": "매칭 키워드", "summary": "핵심 이슈 2~3문장(팩트·수치·「」인용). 의견은 '(의견)' 별도 문장", "refs": [1]}}
   ],
   "opportunities": [
-    {{"field": "분야명(전력·그리드/제조AI/표준·인증 등)", "summary": "분야 공통 맥락 1~2문장(attested 키워드만)", "items": ["팩트+원문인용 항목 서술", "..."], "refs": [1,2]}}
+    {{"field": "{field_choices} 중 하나", "summary": "분야 공통 맥락 1~2문장(attested 키워드만)", "items": ["**주체** — 팩트 서술", "..."], "refs": [1,2]}}
+  ],
+  "action_plan": [
+    {{"target": "부처/기업명", "contact_angle": "추진 팩트(일정·규모·시행일)", "rd_area": "핵심 팩트 요약(사업·표준·수치)", "refs": [1]}}
   ]
 }}"""
     response = client.chat.completions.create(
@@ -384,7 +420,7 @@ def _build_markdown(
             weak_items = [c for c in compact if c.get("relevance") == "약함"]
             if weak_items:
                 lines.append(
-                    f"- 정부·R&D 타깃 {len(weak_items)}건은 §5 스코어카드에 정리함."
+                    f"- 정부·R&D 타깃 {len(weak_items)}건은 §6 스코어카드에 정리함."
                 )
 
     lines += [
@@ -398,9 +434,12 @@ def _build_markdown(
         for opp in opportunities:
             field = opp.get("field", "기타")
             summary = _highlight_keywords(opp.get("summary", "") or "", kws)
-            lines.append(f"- **{field}:** {summary}")
+            # §3 bold rule: theme plain; actor bold only (see _normalize_opportunity_item_bold).
+            lines.append(f"- {field}: {summary}")
             for item_line in opp.get("items") or []:
-                lines.append(f"  - {_highlight_keywords(item_line or '', kws)}")
+                lines.append(
+                    f"  - {_highlight_keywords(_normalize_opportunity_item_bold(item_line or ''), kws)}"
+                )
     else:
         lines.append("- (해당 없음)")
 
@@ -425,17 +464,24 @@ def _build_markdown(
         lines.append(f"### [{item['ref']}] {title}")
         lines.append("")
         # Fact-only detail: omit speculative 위탁/제안/접근/관련도.
+        fact_text = (item.get("fact") or item.get("summary") or "").strip()
+        quotes = item.get("evidence_quotes") or []
+        # Avoid repeating the same 「」 in 팩트 근거 and 원문 인용.
+        if quotes and _QUOTE_RE.search(fact_text):
+            stripped = _QUOTE_RE.sub("", fact_text)
+            stripped = re.sub(r"원문 인용(?:\([^)]*\))?\s*:\s*", "", stripped)
+            stripped = re.sub(r"\s{2,}", " ", stripped).strip(" .")
+            fact_text = stripped or (item.get("summary") or "")
         detail_fields = [
             ("투자 주체", item.get("actor")),
             ("투자 목적", item.get("purpose")),
-            ("팩트 근거", item.get("fact") or item.get("summary")),
+            ("팩트 근거", fact_text),
         ]
         for label, value in detail_fields:
             if value:
                 lines.append(
                     _highlight_after_md_label(f"- **{label}:** {value}", hl)
                 )
-        quotes = item.get("evidence_quotes") or []
         if quotes:
             lines.append("- **원문 인용:**")
             for quote in quotes[:3]:
@@ -466,7 +512,29 @@ def _build_markdown(
         lines.append("")
 
     lines += [
-        "## 5. 부록: 월간 R&D 스코어카드",
+        "## 5. Action Plan (접촉 타겟)",
+        "",
+        "| 타겟 (부처/기업) | 핵심 팩트 | 추진 팩트 |",
+        "|----------------|----------|----------|",
+    ]
+
+    action_plan = structured.get("action_plan") or []
+    if action_plan:
+        for action in action_plan:
+            target = _escape_table_cell(action.get("target", ""))
+            rd_area = _highlight_keywords(
+                _escape_table_cell(action.get("rd_area", "")), kws
+            )
+            angle = _highlight_keywords(
+                _escape_table_cell(action.get("contact_angle", "")), kws
+            )
+            lines.append(f"| {target} | {rd_area} | {angle} |")
+    else:
+        lines.append("| — | — | — |")
+
+    lines += [
+        "",
+        "## 6. 부록: 월간 R&D 스코어카드",
         "",
         "| 점수 | 관련도 | 날짜 | 투자 주체 | 핵심 이슈 | 출처 |",
         "|------|--------|------|----------|----------|------|",
@@ -515,6 +583,7 @@ def generate_rd_monthly_report(
 ) -> Path:
     """Generate Korea-only R&D intelligence monthly Markdown report."""
     top_keywords = settings.analysis_keywords
+    groups = _resolve_keyword_groups(settings, top_keywords)
     rd_logs, excluded = prepare_logs_for_monthly_rd(logs, top_keywords=top_keywords)
     if excluded:
         logger.info(
@@ -545,11 +614,11 @@ def generate_rd_monthly_report(
             month,
         )
     try:
-        structured = _synthesize_monthly_ko(year, month, compact, top_keywords)
+        structured = _synthesize_monthly_ko(year, month, compact, top_keywords, groups)
     except Exception as exc:
         logger.warning("LLM monthly synthesis failed (%s) — using template fallback", exc)
-        structured = _fallback_structure(compact, top_keywords, year, month)
-    structured = _factcheck_structured(structured, compact, top_keywords)
+        structured = _fallback_structure(compact, top_keywords, year, month, groups)
+    structured = _factcheck_structured(structured, compact, top_keywords, groups)
 
     markdown = _build_markdown(year, month, rd_logs, compact, structured, top_keywords)
 
@@ -563,6 +632,27 @@ def generate_rd_monthly_report(
 
 _AMOUNT_RE = re.compile(r"\d+(?:\.\d+)?(?:조|억|만)?원")
 _QUOTE_RE = re.compile(r"「[^」]{12,}」")
+# §3 item: bold only the investment actor before the first em dash.
+_OPP_ACTOR_BOLD_RE = re.compile(
+    r"^(?:\*\*)?(.+?)(?:\*\*)?\s*[—–-]\s*(.*)$",
+    re.DOTALL,
+)
+
+
+def _normalize_opportunity_item_bold(text: str) -> str:
+    """§3 bold convention: only the actor (주체) is bold; strip other **."""
+    raw = (text or "").strip()
+    if not raw:
+        return raw
+    m = _OPP_ACTOR_BOLD_RE.match(raw)
+    if not m:
+        # No actor separator — remove all bold so themes/phrases aren't emphasized.
+        return re.sub(r"\*\*([^*]+)\*\*", r"\1", raw)
+    actor = re.sub(r"\*\*", "", m.group(1)).strip()
+    rest = re.sub(r"\*\*([^*]+)\*\*", r"\1", m.group(2)).strip()
+    if not actor:
+        return rest
+    return f"**{actor}** — {rest}" if rest else f"**{actor}**"
 
 
 def _policy_fingerprint(entry: dict) -> str:
@@ -576,11 +666,11 @@ def _policy_fingerprint(entry: dict) -> str:
         ]
     )
     amounts = tuple(sorted(set(_AMOUNT_RE.findall(blob))))
+    # Two+ distinctive money figures (e.g. 20조원+100조원) identify one policy
+    # even when theme classifiers diverge across co-announcing ministries.
     if len(amounts) < 2:
         return ""
-    theme = _theme_for_entry(entry)
-    # Same theme + same money figures => one policy story (e.g. 20조+100조 제조AI).
-    return f"{theme}|{'|'.join(amounts)}"
+    return "|".join(amounts)
 
 
 def _merge_deduped_entry(primary: dict, secondary: dict) -> dict:
@@ -688,28 +778,62 @@ def _dedupe_opportunity_items(items: list[str]) -> list[str]:
     return kept
 
 
-def _theme_for_entry(entry: dict) -> str:
+def _theme_for_entry(
+    entry: dict,
+    groups: tuple[KeywordGroup, ...] | list[KeywordGroup] | None = None,
+) -> str:
+    """Assign §3 bucket from keywords.txt groups (not legacy hardcoded themes)."""
+    groups = tuple(groups or ())
+    if not groups:
+        return OTHER_THEME
+
+    attested = [k for k in (entry.get("attested_keywords") or []) if k]
+    matched_raw = entry.get("matched_keywords") or ""
+    matched = [p.strip() for p in re.split(r"[,，|/]", matched_raw) if p.strip()]
     blob = " ".join(
         [
-            entry.get("proposable") or "",
-            entry.get("pain") or "",
-            entry.get("purpose") or "",
+            " ".join(attested),
+            " ".join(matched),
             entry.get("summary") or "",
             entry.get("title") or "",
+            entry.get("fact") or "",
+            entry.get("purpose") or "",
+            entry.get("proposable") or "",
+            entry.get("pain") or "",
         ]
-    )
-    for label, pattern in _THEME_RULES:
-        if pattern.search(blob):
-            return label
-    return "기타 정부·R&D"
+    ).lower()
+
+    best_label = ""
+    best_hits = 0
+    for group in groups:
+        hits = 0
+        for kw in group.keywords:
+            k = (kw or "").strip()
+            if not k:
+                continue
+            # Prefer explicit attested/matched lists.
+            if any(k.lower() == a.lower() for a in attested) or any(
+                k.lower() == m.lower() for m in matched
+            ):
+                hits += 3
+            elif k.lower() in blob:
+                hits += 1
+        if hits > best_hits:
+            best_hits = hits
+            best_label = group.label
+    return best_label if best_hits > 0 else OTHER_THEME
 
 
-def _group_by_theme(entries: list[dict]) -> list[tuple[str, list[dict]]]:
+def _group_by_theme(
+    entries: list[dict],
+    groups: tuple[KeywordGroup, ...] | list[KeywordGroup] | None = None,
+) -> list[tuple[str, list[dict]]]:
+    groups = tuple(groups or ())
     buckets: dict[str, list[dict]] = defaultdict(list)
     for entry in entries:
-        buckets[_theme_for_entry(entry)].append(entry)
+        buckets[_theme_for_entry(entry, groups)].append(entry)
 
-    order = ["전력·그리드", "제조AI·스마트공장", "표준·인증·보안", "바이오·그린", "기타 정부·R&D"]
+    order = [g.label for g in groups] + [OTHER_THEME]
     ranked: list[tuple[str, list[dict]]] = []
     for label in order:
         if label in buckets:
@@ -717,6 +841,22 @@ def _group_by_theme(entries: list[dict]) -> list[tuple[str, list[dict]]]:
     for label, items in buckets.items():
         ranked.append((label, items))
     return ranked
+
+
+def _resolve_keyword_groups(
+    settings: Settings | None = None,
+    top_keywords: list[str] | None = None,
+) -> tuple[KeywordGroup, ...]:
+    if settings and settings.keyword_groups:
+        return settings.keyword_groups
+    path = settings.keywords_path if settings else (PROJECT_ROOT / "keywords.txt")
+    groups = load_keyword_groups(path)
+    if groups:
+        return groups
+    kws = list(top_keywords or (settings.analysis_keywords if settings else []) or [])
+    if kws:
+        return (KeywordGroup(label="모니터링 키워드", keywords=tuple(kws)),)
+    return ()
 
 
 def _noun_clause(text: str) -> str:
@@ -793,6 +933,7 @@ def _build_executive_summary_fallback(
     top_keywords: list[str],
     year: int,
     month: int,
+    groups: tuple[KeywordGroup, ...] | list[KeywordGroup] | None = None,
 ) -> str:
     unique = _dedupe_entries(entries)
     direct = [e for e in unique if e.get("relevance") == "직접"]
@@ -807,7 +948,7 @@ def _build_executive_summary_fallback(
         if attested
         else (" · ".join(top_keywords[:5]) if top_keywords else "모니터링 키워드")
     )
-    themes = [label for label, _ in _group_by_theme(unique)]
+    groups = tuple(groups or ())
 
     parts = [
         f"{year}년 {month}월 국내 R&D 인텔리전스 월간 집계에서 R&D 적합 {MONTHLY_RD_MIN_SCORE}점 이상 "
@@ -826,18 +967,30 @@ def _build_executive_summary_fallback(
             f"최우선 이슈는 **{top.get('actor') or '정부'}** — "
             f"{(top.get('summary') or top.get('title', ''))[:160]}."
         )
-    if "제조AI·스마트공장" in themes:
+    # Keyword-group sections only (from keywords.txt), never legacy 제조AI/표준 axes.
+    for label, items in _group_by_theme(unique, groups):
+        if label == OTHER_THEME:
+            continue
+        focused = [
+            e
+            for e in items
+            if e.get("relevance") in ("직접", "간접") or e.get("attested_keywords")
+        ]
+        if not focused:
+            continue
+        g0 = focused[0]
         parts.append(
-            "제조AI·스마트공장 축에서는 과기정통부·산업통상부·중기부가 "
-            "20조원 규모 민·관 합동 투자와 에이전트 실증 사업을 병행 추진함."
+            f"keywords.txt 섹션「{label}」에서는 "
+            f"**{g0.get('actor') or '정부'}** 관련 "
+            f"{(g0.get('summary') or g0.get('title') or '')[:140]}."
         )
-    if "표준·인증·보안" in themes:
+    if weak:
         parts.append(
-            "표준·인증 축에서는 산업통상부의 대드론 성능시험 국가표준(KS) 제정이 "
-            "국가중요시설 보안 R&D 수요로 연결됨."
+            f"모니터링 키워드와 원문 직접 연결이 약한 정부·R&D 신호 {len(weak)}건은 "
+            f"관련도 약함으로 §3·§4에 정리함."
         )
     parts.append(
-        "§2 컨텍스트 중요도·§3 분야별 기회·§4 타겟 상세·§5 스코어카드에 "
+        "§2 컨텍스트 중요도·§3 분야별 기회·§4 타겟 상세·§5 Action Plan·§6 스코어카드에 "
         "투자 주체·팩트 근거를 정리함."
     )
     return _format_executive_summary_paragraphs("\n\n".join(parts))
@@ -848,8 +1001,10 @@ def _fallback_structure(
     top_keywords: list[str],
     year: int,
     month: int,
+    groups: tuple[KeywordGroup, ...] | list[KeywordGroup] | None = None,
 ) -> dict:
     unique = _dedupe_entries(entries)
+    groups = tuple(groups or ())
     _rel_rank = {"직접": 0, "간접": 1, "약함": 2}
 
     context_highlights = sorted(
@@ -867,7 +1022,7 @@ def _fallback_structure(
     )[:8]
 
     opportunities = []
-    for theme, items in _group_by_theme(unique):
+    for theme, items in _group_by_theme(unique, groups):
         theme_items = sorted(
             items,
             key=lambda e: (_rel_rank.get(e.get("relevance", ""), 9), -e.get("score", 0)),
@@ -881,10 +1036,36 @@ def _fallback_structure(
             }
         )
 
+    seen_actors: set[str] = set()
+    action_plan = []
+    for e in sorted(
+        unique,
+        key=lambda row: (_rel_rank.get(row.get("relevance", ""), 9), -row.get("score", 0)),
+    ):
+        actor = (e.get("actor") or "").strip()
+        if not actor or actor in seen_actors:
+            continue
+        seen_actors.add(actor)
+        # Prefer non-quote fact summary for Action Plan cells.
+        fact = (e.get("fact") or "").strip()
+        if _QUOTE_RE.search(fact):
+            fact = (e.get("summary") or e.get("purpose") or "")[:160]
+        action_plan.append(
+            {
+                "target": actor,
+                "contact_angle": fact or e.get("purpose", ""),
+                "rd_area": (e.get("summary") or e.get("title") or "")[:160],
+                "refs": [e["ref"]],
+            }
+        )
+        if len(action_plan) >= 8:
+            break
+
     return {
         "executive_summary": _build_executive_summary_fallback(
-            entries, top_keywords, year, month
+            entries, top_keywords, year, month, groups
         ),
         "context_highlights": context_highlights,
         "opportunities": opportunities,
+        "action_plan": action_plan,
     }

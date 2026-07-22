@@ -1,5 +1,5 @@
 ---
-description: Monthly R&D report §4 detail must be fact-only with press quotes
+description: Monthly R&D report §4 detail and Action Plan must be fact-only with press quotes
 globs:
   - src/rd_monthly_report.py
   - src/press_evidence.py
@@ -12,7 +12,7 @@ globs:
 
 ## Fact-check pipeline (required)
 
-Before writing opportunities / §4:
+Before writing opportunities / §4 / Action Plan:
 
 1. **Re-fetch** government press HTML + attachments (`press_evidence.fetch_press_corpus`).
 2. **Attest** which monitoring keywords literally appear in the corpus (`attested_keywords`).
@@ -22,6 +22,26 @@ Before writing opportunities / §4:
 6. **Opinion split:** speculation/proposal stays out of fact sentences; if unavoidable, prefix `(의견)` on its own line. Default: omit opinion.
 
 Never claim “당월 … [전체 모니터링 키워드]와 연계된 신호를 발표함” unless each listed term is attested in a press release.
+
+## Anti-duplication workflow (required every monthly)
+
+Apply **before** finalizing §3 / §4 / §5 / §6:
+
+1. **Same policy, multiple ministries** — If two+ press releases share the same distinctive amounts in the same theme (e.g. `20조원` + `100조원` manufacturing AI from MSIT and MOTIE), **merge into one target**. Union actors; keep both source URLs; mark “(동일 정책·복수 부처 보도 통합)”.
+2. **§3 vs §4 roles** — §3 = short field bullets (1–2 sentences, no long 「」 dumps). §4 = full detail cards (투자 주체 / 목적 / 팩트 근거 / 원문 인용 / 출처). Do **not** paste the same quote block into both.
+3. **Intra-item quote once** — Never repeat the same 「」 snippet in 팩트 근거 **and** 원문 인용 **and** 보도자료 원문. Quote lives under **원문 인용** only; 팩트 근거 stays numeric/program summary.
+4. **Action Plan / Scorecard** — One row per merged policy target (not one row per ministry press URL).
+5. **Code path** — `rd_monthly_report._dedupe_entries` (URL + policy fingerprint) runs after press evidence attach; `_dedupe_opportunity_items` cleans §3 bullets; `_entry_narrative` stays short.
+
+When manually editing a generated monthly, run this checklist on the draft before delivery.
+
+## Monitoring axis = keywords.txt only
+
+- §1 Executive Summary must **not** invent legacy buckets as monitoring “축” (`제조AI·스마트공장 축`, `표준·인증 축`, `바이오 축`).
+- §3 field labels come from `keywords.txt` section headers (`# ── 전력·에너지 … ──`) via `load_keyword_groups` / `Settings.keyword_groups`.
+- Hardcoded `_THEME_RULES` (제조AI·표준·바이오) are removed. Off-keyword hits → `기타 정부·R&D`.
+- When `keywords.txt` sections change, monthly §3 buckets follow automatically.
+- Fallback `_build_executive_summary_fallback` must not hardcode 제조AI/표준 sentences.
 
 ## §4 주요 R&D 타겟 상세 (per item)
 
@@ -49,12 +69,18 @@ Render **only**:
 
 - Use `theme_intro_from_evidence`: only attested keywords, or an explicit “원문 직접 언급 제한적” caveat.
 - `_factcheck_structured` must strip keyword-dump hallucinations from LLM output.
+- Keep bullets short; long quotes belong in §4 only.
+- **Bold rule (통일):** §3에서 **투자 주체(actor)만** `**볼드**`. 분야명(주제/테마)은 볼드하지 않음.
+  - 맞음: `- 전력·그리드: …` / `  - **과기정통부** — …`
+  - 틀림: `- **전력·그리드:** …` (주제 볼드) 또는 본문 중간 임의 볼드
+- Renderer: field plain; `_normalize_opportunity_item_bold` enforces actor-only bold.
 
-## §5 부록: 월간 R&D 스코어카드
+## §5 Action Plan
 
-Scorecard table only (no Action Plan section).
+Columns: `타겟 | 핵심 팩트 | 추진 팩트` — source numbers/dates only.
+One row per unique (merged) policy target.
 
 ## Generation
 
-`src/rd_monthly_report.py`: `_attach_press_evidence` → synthesize → `_factcheck_structured` → `_build_markdown`.
+`src/rd_monthly_report.py`: `_attach_press_evidence` → `_dedupe_entries` → synthesize → `_factcheck_structured` → `_build_markdown`.
 `src/press_evidence.py` owns attestation + quotation helpers.
