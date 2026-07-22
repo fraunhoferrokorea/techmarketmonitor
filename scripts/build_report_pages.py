@@ -20,43 +20,6 @@ GH_BRANCH = "main"
 
 _MD_EXT = ["tables", "fenced_code", "sane_lists", "smarty"]
 
-
-def _write_sources_markdown(sources_txt: Path, dest: Path) -> None:
-    """Write a GitHub-friendly markdown table with clickable browse URLs."""
-    lines = [
-        "# 수집 소스 링크",
-        "",
-        "브라우저에서 바로 열리는 **목록/홈 페이지** 하이퍼링크입니다.",
-        "실제 RSS 수집 주소는 `sources.txt`의 `FEED_URL` 칸을 사용합니다.",
-        "",
-        "| 소스 | 바로가기 | 방식 |",
-        "| --- | --- | --- |",
-    ]
-    try:
-        raw_lines = sources_txt.read_text(encoding="utf-8").splitlines()
-    except FileNotFoundError:
-        dest.write_text("\n".join(lines) + "\n", encoding="utf-8")
-        return
-
-    for line in raw_lines:
-        stripped = line.strip()
-        if not stripped or stripped.startswith("#"):
-            continue
-        parts = [p.strip() for p in stripped.split("|")]
-        if len(parts) < 2:
-            continue
-        name, url = parts[0], parts[1]
-        method = (parts[3] if len(parts) > 3 else "GET").upper()
-        if not name or not url.startswith(("http://", "https://")):
-            continue
-        # Escape pipes in names for markdown tables.
-        safe_name = name.replace("|", "\\|")
-        lines.append(f"| {safe_name} | [{url}]({url}) | `{method}` |")
-
-    lines.append("")
-    dest.write_text("\n".join(lines) + "\n", encoding="utf-8")
-
-
 # Fraunhofer-inspired teal institutional palette (not purple / cream-serif)
 _CSS = """\
 :root {
@@ -174,30 +137,20 @@ a:hover { color: var(--brand); }
 .config-editor:focus {
   outline: 2px solid #b7ddd5; outline-offset: 1px; background: #fff;
 }
-.config-links {
-  margin: 0 0 0.85rem; padding: 0.75rem 0.9rem;
-  border: 1px solid var(--line); border-radius: 10px; background: #f7fbfa;
-  max-height: min(42vh, 420px); overflow: auto;
+.config-linked {
+  width: 100%; min-height: 36vh; max-height: min(70vh, 720px); overflow: auto;
+  margin: 0 0 0.75rem; padding: 0.85rem 1rem;
+  border: 1px solid var(--line); border-radius: 10px;
+  background: #fafcfb; color: var(--ink);
+  font-family: ui-monospace, "Cascadia Code", "Consolas", monospace;
+  font-size: 0.82rem; line-height: 1.55; white-space: pre-wrap; word-break: break-all;
 }
-.config-links[hidden] { display: none !important; }
-.config-links h3 {
-  margin: 0 0 0.55rem; font-size: 0.78rem; letter-spacing: 0.04em;
-  text-transform: uppercase; color: var(--muted); font-weight: 700;
-}
-.config-links ol {
-  margin: 0; padding: 0 0 0 1.15rem; display: grid; gap: 0.35rem;
-}
-.config-links li {
-  font-size: 0.86rem; line-height: 1.45; color: var(--ink);
-}
-.config-links a {
+.config-linked[hidden] { display: none !important; }
+.config-linked a {
   color: var(--brand-dark); font-weight: 650; text-decoration: underline;
-  text-underline-offset: 2px; word-break: break-all;
+  text-underline-offset: 2px;
 }
-.config-links a:hover { color: var(--brand); }
-.config-links .method {
-  margin-left: 0.35rem; color: var(--muted); font-size: 0.75rem; font-weight: 600;
-}
+.config-linked a:hover { color: var(--brand); }
 .config-hint {
   margin: 0.75rem 0 0; color: var(--muted); font-size: 0.8rem; line-height: 1.5;
 }
@@ -383,10 +336,7 @@ _INDEX_HTML = """\
         <a class="btn" id="btn-github" href="#" target="_blank" rel="noopener">GitHub에서 편집</a>
         <button type="button" class="btn primary" id="btn-commit">GitHub에 저장</button>
       </div>
-      <div class="config-links" id="config-links" hidden>
-        <h3>클릭 가능한 소스 링크 (새 탭)</h3>
-        <ol id="config-links-list"></ol>
-      </div>
+      <div class="config-linked" id="config-linked" hidden aria-label="설정 파일 링크 보기"></div>
       <textarea class="config-editor" id="config-editor" spellcheck="false" wrap="off"
         aria-label="설정 파일 편집기"></textarea>
       <p class="config-hint" id="config-hint"></p>
@@ -444,52 +394,28 @@ function escapeHtml(s) {{
     .replace(/"/g, "&quot;");
 }}
 
-function parseSourceRows(text) {{
-  return text.split(/\\r?\\n/).map(line => line.trim()).filter(line => line && !line.startsWith("#")).map(line => {{
-    const parts = line.split("|").map(p => p.trim());
-    return {{
-      name: parts[0] || "",
-      url: parts[1] || "",
-      method: (parts[3] || "GET").toUpperCase(),
-    }};
-  }}).filter(row => row.name && /^https?:\\/\\//i.test(row.url));
+function linkifyConfigText(text) {{
+  // Turn bare http(s) URLs into in-place hyperlinks (same text, clickable).
+  const escaped = escapeHtml(text || "");
+  return escaped.replace(
+    /(https?:\\/\\/[^\\s<|&]+)/g,
+    (url) => `<a href="${{url}}" target="_blank" rel="noopener noreferrer">${{url}}</a>`
+  );
 }}
 
-function parseMarkdownSourceRows(text) {{
-  const rows = [];
-  for (const line of text.split(/\\r?\\n/)) {{
-    const m = line.match(/^\\|\\s*(.+?)\\s*\\|\\s*\\[(https?:\\/\\/[^\\]]+)\\]\\(\\2\\)\\s*\\|\\s*`?([^`|]+)`?\\s*\\|/);
-    if (!m) continue;
-    rows.push({{ name: m[1].trim(), url: m[2].trim(), method: m[3].trim().toUpperCase() }});
+function renderConfigLinked(text) {{
+  const view = qs("config-linked");
+  const editor = qs("config-editor");
+  if (!view || !editor) return;
+  if (currentConfigId === "sources") {{
+    view.hidden = false;
+    view.innerHTML = linkifyConfigText(text || "");
+    editor.style.minHeight = "22vh";
+  }} else {{
+    view.hidden = true;
+    view.innerHTML = "";
+    editor.style.minHeight = "";
   }}
-  return rows;
-}}
-
-function renderSourceLinks(text) {{
-  const panel = qs("config-links");
-  const list = qs("config-links-list");
-  if (!panel || !list) return;
-  let rows = [];
-  if (currentConfigId === "sources") rows = parseSourceRows(text || "");
-  else if (currentConfigId === "sources-md") rows = parseMarkdownSourceRows(text || "");
-  else {{
-    panel.hidden = true;
-    list.innerHTML = "";
-    return;
-  }}
-  if (!rows.length) {{
-    panel.hidden = true;
-    list.innerHTML = "";
-    return;
-  }}
-  panel.hidden = false;
-  list.innerHTML = rows.map(row => {{
-    const href = escapeHtml(row.url);
-    const name = escapeHtml(row.name);
-    const method = escapeHtml(row.method);
-    return `<li><a href="${{href}}" target="_blank" rel="noopener noreferrer">${{name}}</a>`
-      + `<span class="method">${{method}}</span></li>`;
-  }}).join("");
 }}
 
 function setStatus(msg, cls) {{
@@ -543,7 +469,8 @@ function updateDirty() {{
   const unit = file && file.id === "sources" ? "소스" : "키워드";
   const metaEl = qs("config-meta");
   if (metaEl) metaEl.textContent = meta + "개 " + unit + " (주석 제외)";
-  if (currentConfigId === "sources" || currentConfigId === "sources-md") renderSourceLinks(ed.value);
+  if (currentConfigId === "sources") renderConfigLinked(ed.value);
+  else renderConfigLinked("");
   syncTokenUi();
 }}
 
@@ -980,14 +907,7 @@ def main() -> None:
             "label": "sources.txt",
             "path": "sources.txt",
             "href": "config/sources.txt",
-            "hint": "형식: 이름 | URL | 카테고리 [| METHOD [| FEED_URL]]. URL은 클릭 가능한 목록/홈 페이지, FEED_URL은 수집용 RSS. 위 링크 목록에서 새 탭으로 열 수 있습니다. GitHub 표 보기: SOURCES.md",
-        },
-        {
-            "id": "sources-md",
-            "label": "SOURCES.md (링크 표)",
-            "path": "SOURCES.md",
-            "href": "config/sources.md",
-            "hint": "GitHub·홈페이지용 클릭 가능 하이퍼링크 표. 편집은 sources.txt에서 하세요.",
+            "hint": "형식: 이름 | URL | 카테고리 [| METHOD]. URL은 브라우저에서 열리는 목록/홈(하이퍼링크). RSS 수집 주소는 config/sources.yaml 의 feed_url.",
         },
     ]
 
@@ -1048,11 +968,6 @@ def main() -> None:
         src = ROOT / src_name
         if src.is_file():
             shutil.copy2(src, cfg_out / src_name)
-
-    sources_txt = ROOT / "sources.txt"
-    if sources_txt.is_file():
-        _write_sources_markdown(sources_txt, cfg_out / "sources.md")
-        _write_sources_markdown(sources_txt, ROOT / "SOURCES.md")
 
     # Mirror into docs/ for branch-based (legacy) GitHub Pages.
     if DOCS_DIR.exists():

@@ -13,19 +13,19 @@
 
 korean:
   - name: 과기정통부 보도자료
-    url: https://www.msit.go.kr/
+    url: https://www.msit.go.kr/index.do
     feed_url: https://www.msit.go.kr/user/rss/rss.do?bbsSeqNo=94
     category: korean
   - name: 과기정통부 정보통신
-    url: https://www.msit.go.kr/
+    url: https://www.msit.go.kr/index.do
     feed_url: https://www.msit.go.kr/user/rss/rss.do?bbsSeqNo=67
     category: korean
   - name: 과기정통부 과학기술정책
-    url: https://www.msit.go.kr/
+    url: https://www.msit.go.kr/index.do
     feed_url: https://www.msit.go.kr/user/rss/rss.do?bbsSeqNo=70
     category: korean
   - name: 과기정통부 연구성과
-    url: https://www.msit.go.kr/
+    url: https://www.msit.go.kr/index.do
     feed_url: https://www.msit.go.kr/user/rss/rss.do?bbsSeqNo=89
     category: korean
   - name: 산업통상부 보도자료
@@ -114,7 +114,7 @@ korean:
     feed_url: https://newsis.com/RSS/sokbo.xml
     category: korean
   - name: 한국경제
-    url: https://www.hankyung.com/
+    url: https://www.hankyung.com/economy
     feed_url: https://www.hankyung.com/feed/all-news
     category: korean
   - name: 매일경제 경제

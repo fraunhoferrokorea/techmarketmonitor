@@ -125,10 +125,10 @@ _SOURCE_GROUPS = ("korean",)
 
 
 def _load_sources_txt(path: Path) -> list[dict]:
-    """Read one source per line: name | url | category [| method [| feed_url]].
+    """Read one source per line: name | url | category [| method].
 
-    ``url`` is the human-browsable page when possible. Optional ``feed_url`` is
-    the machine RSS/Atom endpoint used by RSSFetcher (e.g. POST-only feeds).
+    ``url`` is the browser-openable list/home page (hyperlink target).
+    Optional RSS ``feed_url`` is merged from config/sources.yaml by name.
     """
     try:
         lines = path.read_text(encoding="utf-8").splitlines()
@@ -146,15 +146,29 @@ def _load_sources_txt(path: Path) -> list[dict]:
         name, url = parts[0], parts[1]
         category = parts[2] if len(parts) > 2 else "general"
         method = parts[3] if len(parts) > 3 else "GET"
-        feed_url = parts[4] if len(parts) > 4 else ""
         if url:
             entry = {"name": name, "url": url, "category": category}
             if method and method.upper() != "GET":
                 entry["method"] = method.upper()
-            if feed_url:
-                entry["feed_url"] = feed_url
             sources.append(entry)
     return sources
+
+
+def _feed_urls_from_yaml() -> dict[str, str]:
+    """Map source name → RSS feed_url from sources.yaml (machine-only)."""
+    try:
+        with (CONFIG_DIR / "sources.yaml").open(encoding="utf-8") as handle:
+            data = yaml.safe_load(handle) or {}
+    except FileNotFoundError:
+        return {}
+    feeds: dict[str, str] = {}
+    for group in _SOURCE_GROUPS:
+        for item in data.get(group, []) or []:
+            name = (item or {}).get("name")
+            feed = (item or {}).get("feed_url")
+            if name and feed:
+                feeds[str(name)] = str(feed)
+    return feeds
 
 
 def _load_sources_yaml() -> list[dict]:
@@ -170,6 +184,11 @@ def _load_sources_yaml() -> list[dict]:
 
 def load_sources() -> list[dict]:
     raw = _load_sources_txt(_SOURCES_TXT)
-    if raw:
-        return raw
-    return _load_sources_yaml()
+    if not raw:
+        return _load_sources_yaml()
+    feeds = _feed_urls_from_yaml()
+    for entry in raw:
+        feed = feeds.get(entry["name"])
+        if feed:
+            entry["feed_url"] = feed
+    return raw

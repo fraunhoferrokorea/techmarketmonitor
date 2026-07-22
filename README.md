@@ -175,9 +175,8 @@ Python **3.11** 권장 (GitHub Actions 기준).
 
 ### `sources.txt` — RSS 소스 (한 줄 = 소스 1개, **현재 운영 기준**)
 
-- 형식: `이름 | URL | 카테고리 [| METHOD [| FEED_URL]]`
-- **URL** = 브라우저에서 열리는 목록/홈(하이퍼링크용), **FEED_URL** = 수집용 RSS
-- 클릭 가능한 표: [`SOURCES.md`](SOURCES.md) (GitHub에서 링크 바로 열림)
+- 형식: `이름 | URL | 카테고리 [| METHOD]`
+- **URL** = 브라우저에서 열리는 목록/홈(하이퍼링크 대상). RSS 수집 주소는 `config/sources.yaml`의 `feed_url`
 - `#`으로 시작하는 줄과 빈 줄은 무시
 - 이 파일만 수정하면 다음 실행부터 수집 소스 변경
 - **현재 구성:** 국내 ICT·정책·공공 R&D·전문지 + catch-up 시 **PACST·HTML 보드**
