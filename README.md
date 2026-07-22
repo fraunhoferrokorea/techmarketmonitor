@@ -177,6 +177,7 @@ Python **3.11** 권장 (GitHub Actions 기준).
 
 - 형식: `이름 | URL | 카테고리 [| METHOD]`
 - **URL** = 브라우저에서 열리는 목록/홈(하이퍼링크 대상). RSS 수집 주소는 `config/sources.yaml`의 `feed_url`
+- **GitHub에서 클릭:** [`sources.md`](sources.md) (홈페이지 Config와 동일한 링크 목록)
 - `#`으로 시작하는 줄과 빈 줄은 무시
 - 이 파일만 수정하면 다음 실행부터 수집 소스 변경
 - **현재 구성:** 국내 ICT·정책·공공 R&D·전문지 + catch-up 시 **PACST·HTML 보드**

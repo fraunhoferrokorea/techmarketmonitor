@@ -20,6 +20,40 @@ GH_BRANCH = "main"
 
 _MD_EXT = ["tables", "fenced_code", "sane_lists", "smarty"]
 
+
+def _write_sources_markdown(sources_txt: Path, dest: Path) -> None:
+    """GitHub-rendered clickable list (same browse URLs as homepage Config)."""
+    lines = [
+        "# 수집 소스 링크",
+        "",
+        "홈페이지 Config와 같은 **클릭 가능한** 목록/홈 URL입니다.",
+        "수집기 설정 원본은 [`sources.txt`](sources.txt)이고, RSS 주소는 `config/sources.yaml`의 `feed_url`입니다.",
+        "",
+    ]
+    try:
+        raw_lines = sources_txt.read_text(encoding="utf-8").splitlines()
+    except FileNotFoundError:
+        dest.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        return
+
+    count = 0
+    for line in raw_lines:
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        parts = [p.strip() for p in stripped.split("|")]
+        if len(parts) < 2:
+            continue
+        name, url = parts[0], parts[1]
+        if not name or not url.startswith(("http://", "https://")):
+            continue
+        lines.append(f"- **{name}** — [{url}]({url})")
+        count += 1
+
+    lines.extend(["", f"_총 {count}개 소스_", ""])
+    dest.write_text("\n".join(lines), encoding="utf-8")
+
+
 # Fraunhofer-inspired teal institutional palette (not purple / cream-serif)
 _CSS = """\
 :root {
@@ -1047,6 +1081,12 @@ def main() -> None:
         src = ROOT / src_name
         if src.is_file():
             shutil.copy2(src, cfg_out / src_name)
+
+    # GitHub-clickable mirror of sources (markdown renders hyperlinks; .txt does not).
+    sources_txt = ROOT / "sources.txt"
+    if sources_txt.is_file():
+        _write_sources_markdown(sources_txt, ROOT / "sources.md")
+        _write_sources_markdown(sources_txt, cfg_out / "sources.md")
 
     # Mirror into docs/ for branch-based (legacy) GitHub Pages.
     if DOCS_DIR.exists():

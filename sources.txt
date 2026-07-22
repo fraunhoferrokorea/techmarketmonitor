@@ -1,5 +1,6 @@
 # Tech Market Monitor — Source Configuration
 # ─────────────────────────────────────────────────────────────────────────────
+# GitHub에서 클릭 가능한 링크 목록: sources.md (홈페이지 Config와 동일)
 # 한 줄에 소스 하나: 이름 | URL | 카테고리 [| METHOD]
 # URL: 브라우저에서 바로 열리는 목록/홈 페이지(이 주소가 하이퍼링크 대상).
 # METHOD: GET(기본 RSS는 yaml feed_url로 수집), POST, html, pacst
