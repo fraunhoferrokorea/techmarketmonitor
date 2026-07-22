@@ -352,6 +352,7 @@ def log_to_summarized_article(log: dict) -> SummarizedArticle:
             rd_match_score=int(log.get("rd_match_score") or 0),
             rd_proposable_area=str(log.get("rd_proposable_area") or ""),
             rd_fact_basis=str(log.get("rd_fact_basis") or ""),
+            rd_evidence_quotes=list(log.get("rd_evidence_quotes") or []),
         )
     )
 

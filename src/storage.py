@@ -69,6 +69,7 @@ class DailyLogStore:
                 ("rd_match_score", "0"),
                 ("rd_proposable_area", "''"),
                 ("rd_fact_basis", "''"),
+                ("rd_evidence_quotes", "'[]'"),
             ):
                 try:
                     conn.execute(
@@ -112,7 +113,8 @@ class DailyLogStore:
                     ko_one_liner = ?,
                     rd_match_score = ?,
                     rd_proposable_area = ?,
-                    rd_fact_basis = ?
+                    rd_fact_basis = ?,
+                    rd_evidence_quotes = ?
                 WHERE id = ?
                 """,
                 (
@@ -125,6 +127,7 @@ class DailyLogStore:
                     entry.rd_match_score,
                     entry.rd_proposable_area,
                     entry.rd_fact_basis,
+                    json.dumps(entry.rd_evidence_quotes or []),
                     row_id,
                 ),
             )
@@ -144,8 +147,9 @@ class DailyLogStore:
                             key_trends, ko_summary_steps, en_summary_steps,
                             keyword_relevance, ko_one_liner,
                             rd_match_score, rd_proposable_area, rd_fact_basis,
+                            rd_evidence_quotes,
                             created_at
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """,
                         (
                             log_date.isoformat(),
@@ -164,6 +168,7 @@ class DailyLogStore:
                             entry.rd_match_score,
                             entry.rd_proposable_area,
                             entry.rd_fact_basis,
+                            json.dumps(entry.rd_evidence_quotes or []),
                             now,
                         ),
                     )
@@ -196,6 +201,14 @@ class DailyLogStore:
             item["rd_match_score"] = int(item.get("rd_match_score") or 0)
             item["rd_proposable_area"] = item.get("rd_proposable_area") or ""
             item["rd_fact_basis"] = item.get("rd_fact_basis") or ""
+            raw_quotes = item.get("rd_evidence_quotes") or "[]"
+            if isinstance(raw_quotes, str):
+                try:
+                    item["rd_evidence_quotes"] = json.loads(raw_quotes)
+                except json.JSONDecodeError:
+                    item["rd_evidence_quotes"] = []
+            else:
+                item["rd_evidence_quotes"] = list(raw_quotes or [])
             results.append(item)
         return results
 
@@ -243,6 +256,14 @@ class DailyLogStore:
             item["rd_match_score"] = int(item.get("rd_match_score") or 0)
             item["rd_proposable_area"] = item.get("rd_proposable_area") or ""
             item["rd_fact_basis"] = item.get("rd_fact_basis") or ""
+            raw_quotes = item.get("rd_evidence_quotes") or "[]"
+            if isinstance(raw_quotes, str):
+                try:
+                    item["rd_evidence_quotes"] = json.loads(raw_quotes)
+                except json.JSONDecodeError:
+                    item["rd_evidence_quotes"] = []
+            else:
+                item["rd_evidence_quotes"] = list(raw_quotes or [])
             results.append(item)
         return results
 

@@ -49,6 +49,7 @@ _GOV_URL_TOKENS = (
     "krit.re.kr",
     "kipo.go.kr",
     "kepco.co.kr",
+    "korea.kr",
 )
 
 _BODY_PATTERNS: list[re.Pattern[str]] = [

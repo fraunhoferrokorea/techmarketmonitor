@@ -182,6 +182,11 @@ Scope (MUST follow):
 - Prioritize: budget announcements, R&D programs, MOU/collaboration, infrastructure plans, technology acquisition — over product launches without investment plans.
 - Fact-only: amounts, program periods, required technologies ONLY when stated. No speculation.
 
+FACTCHECK (필수 — 요약·인용·의견 분리):
+1) **없는 내용 금지:** 보도자료·기사·논문 원문에 없는 수치·기관명·사업명·기술용어·일정·규모를 요약에 넣지 말 것. 불확실하면 '명시 없음' / '해당 없음' / '팩트 부족으로 판단 보류'.
+2) **직접 인용 우선:** fact_basis·개요에는 원문 핵심 구절을 「」로 그대로 붙여 요약함. 의역보다 짧은 직접 인용(예산·일정·사업명·기술명)을 우선함. 인용은 원문 부분 문자열이어야 하며 단어를 바꿔 쓰지 말 것.
+3) **의견 분리:** 분석가 판단·시사점·제안·추론은 팩트 문장과 섞지 말 것. keyword_relevance·위탁 연구 니즈·접근 전략·rd_proposable_area에만 두고, 문장 앞에 '(의견)'을 붙임. 개요·투자 주체·투자 목적·ko_one_liner·fact_basis에는 의견 금지.
+
 R&D suitability scoring (rd_match_score 1–5) — weigh BOTH:
 (A) Fraunhofer Korea commission/cooperation potential (Korean actor, budget, R&D technology gap)
 (B) Relevance to the monitoring keywords (full list in the user message — e.g. grid/power topics)
@@ -199,7 +204,7 @@ ALWAYS score 1 (non-R&D) for these even if industry keywords appear:
 - Exception: official government ministry press releases (policy direction) may score higher even without explicit budget IF a domestic commissioning actor and program intent are stated
 
 Monitoring-keyword honesty (CRITICAL):
-- If the source text has NO factual link to the analysis baseline keywords (full list), set keyword_relevance to "모니터링 키워드와 직접·간접 관련 없음." and do NOT invent 전력계통/스마트그리드/파워그리드 R&D proposals.
+- If the source text has NO factual link to the analysis baseline keywords (full list), set keyword_relevance to "(의견) 모니터링 키워드와 직접·간접 관련 없음." and do NOT invent 전력계통/스마트그리드/파워그리드 R&D proposals.
 - NEVER insert 전력계통, 스마트그리드, 파워그리드, 전력망, or English grid synonyms into 위탁 연구 니즈 / 접근 전략 / rd_proposable_area unless those terms (or clear synonyms) appear in the source text.
 - Speculative "could support smart grid" links → score ≤2 and rd_proposable_area "해당 없음".
 
@@ -210,20 +215,20 @@ Inclusion requires explicit facts only (no speculation):
 
 Return valid JSON with this exact schema:
 {
-  "summary": "1문장 한국어 R&D·투자 헤드라인. 반드시 '출처: <url>'로 끝남",
-  "key_trends": ["기술·투자 동향 키워드 1", "기술·투자 동향 키워드 2"],
+  "summary": "1문장 한국어 R&D·투자 헤드라인(원문 팩트만). 반드시 '출처: <url>'로 끝남",
+  "key_trends": ["원문에 나온 기술·투자 동향 키워드 1", "키워드 2"],
   "rd_match_score": 3,
-  "rd_proposable_area": "제안 가능 R&D 영역 1문장 (팩트 기반, 없으면 '해당 없음'). 'Fraunhofer/프라운호퍼' 주어·소유격 명시 금지",
-  "fact_basis": "예산·일정·규모 등 팩트 근거 요약 (없으면 '명시 없음')",
+  "rd_proposable_area": "(의견) 제안 가능 R&D 영역 1문장. 원문 근거 없으면 '해당 없음'. 'Fraunhofer/프라운호퍼' 주어·소유격 명시 금지",
+  "fact_basis": "원문 예산·일정·규모를 「」 직접 인용으로 제시(예: 「2027–2031년 5000억원 투입」). 인용 불가 시에만 짧게 요약. 없으면 '명시 없음'. 원문에 없는 모니터링 키워드 나열 금지",
   "ko_summary_steps": [
-    "**개요:** <육하원칙 1-2문장. 국내 주체·사업·일정·규모 팩트만>",
-    "**투자 주체:** <국내 정부 부처·공기업·민간 기업명. 없으면 '명시 없음'>",
-    "**투자 목적:** <국산화/내재화/고도화/시간단축 등. 없으면 '해당 없음'>",
-    "**위탁 연구 니즈:** <고난도 R&D 격차 — 팩트만. 없으면 '팩트 부족으로 판단 보류'>",
-    "**접근 전략:** <정부=정책 정합, 기업=로드맵 연계. 팩트 기반>"
+    "**개요:** <육하원칙 1-2문장. 국내 주체·사업·일정·규모 팩트만. 가능하면 「」 직접 인용 포함>",
+    "**투자 주체:** <원문에 나온 국내 정부 부처·공기업·민간 기업명만. 없으면 '명시 없음'>",
+    "**투자 목적:** <원문에 명시된 국산화/내재화/고도화/시간단축 등만. 없으면 '해당 없음'>",
+    "**위탁 연구 니즈:** <(의견) … 원문 격차·니즈가 있을 때만. 없으면 '팩트 부족으로 판단 보류'>",
+    "**접근 전략:** <(의견) … 정부=정책 정합, 기업=로드맵 연계. 원문 근거 없으면 '해당 없음'>"
   ],
-  "ko_one_liner": "<데일리 표 '핵심 이슈'용 1문장. 원문에 명시된 국내 주체·사업·수치·일정만. 해석·제안·접근전략·시장시사 금지. 70~150자. -함/-임/-었음 종결>",
-  "keyword_relevance": "<2문장 이내. 이 기사가 Fraunhofer R&D 수주 관점에서 왜 중요한지 — 투자 신호·기술 격차·정책 정합성 중심. 키워드 정의·일반론 금지>"
+  "ko_one_liner": "<데일리 표 '핵심 이슈'용 1문장. 원문에 명시된 국내 주체·사업·수치·일정만. 해석·의견·제안·접근전략·시장시사 금지. 70~150자. -함/-임/-었음 종결>",
+  "keyword_relevance": "<(의견)으로 시작. 2문장 이내. Fraunhofer R&D 수주 관점 시사점만. 키워드 정의·일반론·원문에 없는 사실 금지>"
 }
 
 CRITICAL KOREAN RULES:
@@ -231,7 +236,7 @@ CRITICAL KOREAN RULES:
 - No deictic subjects (이/그/저/해당/본). Name institutions explicitly.
 - rd_proposable_area and **접근 전략:** do not write "Fraunhofer는/가/의" or "프라운호퍼는/가/의" — the report is already Fraunhofer-focused.
 - No stray Chinese/Japanese characters.
-- ko_summary_steps and keyword_relevance must be independently written in natural Korean.
+- ko_summary_steps facts (개요·투자 주체·투자 목적) must stay fact-only; opinions only in 위탁/접근/keyword_relevance/rd_proposable_area with '(의견)' prefix.
 - English terms: use industry-standard Korean or acronym with Korean gloss on first use.
 
 Example ko_one_liner (Korea-only):
@@ -386,6 +391,7 @@ def repolish_summarized_article(article: SummarizedArticle) -> SummarizedArticle
         rd_match_score=article.rd_match_score,
         rd_proposable_area=rd_proposable_area,
         rd_fact_basis=article.rd_fact_basis,
+        rd_evidence_quotes=list(article.rd_evidence_quotes or []),
     )
 
 
@@ -437,7 +443,11 @@ class Summarizer:
         from src.fact_grounding import sanitize_summarized_article
 
         result = summarize_with_focus_if_needed(article, self._settings, self._summarize_standard)
-        return sanitize_summarized_article(article, result)
+        return sanitize_summarized_article(
+            article,
+            result,
+            monitoring_keywords=self._top_keywords,
+        )
 
     def _summarize_standard(self, article: FilteredArticle) -> SummarizedArticle:
         preview_len = 1500 if is_gov_target(article) else 1200

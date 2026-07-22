@@ -42,6 +42,30 @@ def test_extract_hwpx_text_from_zip_xml() -> None:
     assert "전력계통" in text
 
 
+def test_extract_odt_text_from_zip() -> None:
+    import io
+    import zipfile
+
+    from src.attachment_extractor import extract_attachment_text, extract_odt_text
+
+    xml = (
+        '<?xml version="1.0" encoding="UTF-8"?>'
+        '<office:document-content xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" '
+        'xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0">'
+        "<office:body><office:text><text:p>HVDC 초고압 직류송전</text:p>"
+        "</office:text></office:body></office:document-content>"
+    )
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w") as archive:
+        archive.writestr("mimetype", "application/vnd.oasis.opendocument.text")
+        archive.writestr("content.xml", xml)
+    content = buffer.getvalue()
+    assert "HVDC" in extract_odt_text(content)
+    assert "HVDC" in extract_attachment_text(
+        content, "application/vnd.oasis.opendocument.text", "https://example.com/a.odt"
+    )
+
+
 def test_enrich_includes_pdf_marker(monkeypatch=None) -> None:
     article = RawArticle(
         title="제6차 국가표준기본계획 발표",

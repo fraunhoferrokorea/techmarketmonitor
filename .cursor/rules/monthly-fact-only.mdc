@@ -1,20 +1,35 @@
 ---
-description: Monthly R&D report §4 detail and Action Plan must be fact-only
+description: Monthly R&D report §4 detail and Action Plan must be fact-only with press quotes
 globs:
   - src/rd_monthly_report.py
+  - src/press_evidence.py
+  - src/fact_grounding.py
   - output/monthly/**
   - docs/monthly/**
 ---
 
-# Monthly R&D Report — Fact-Only Detail
+# Monthly R&D Report — Fact-Only + Press Quotation
+
+## Fact-check pipeline (required)
+
+Before writing opportunities / §4 / Action Plan:
+
+1. **Re-fetch** government press HTML + attachments (`press_evidence.fetch_press_corpus`).
+2. **Attest** which monitoring keywords literally appear in the corpus (`attested_keywords`).
+3. **Quote** short verbatim snippets around attested terms (`evidence_quotes`, 「」).
+4. **Reject** theme leads that dump the full `keywords.txt` list without attestation.
+
+Never claim “당월 … [전체 모니터링 키워드]와 연계된 신호를 발표함” unless each listed term is attested in a press release.
 
 ## §4 주요 R&D 타겟 상세 (per item)
 
 Render **only**:
 1. **투자 주체**
 2. **투자 목적**
-3. **팩트 근거** — long, concrete: dates, amounts, counts, standard IDs, program names, venues, attendees, effective dates from the source press release
-4. **출처**
+3. **팩트 근거** — dates, amounts, counts, standard IDs, program names from the source
+4. **원문 인용** — direct 「」 quotes from the press attachment/body (preferred evidence)
+5. **원문 확인 키워드** — attested subset only
+6. **출처**
 
 **Do not render** in §4:
 - 위탁 연구 니즈
@@ -22,14 +37,16 @@ Render **only**:
 - 접근 전략
 - 관련도 · 매칭 · 적합도
 
+## §3 Opportunities summary
+
+- Use `theme_intro_from_evidence`: only attested keywords, or an explicit “원문 직접 언급 제한적” caveat.
+- `_factcheck_structured` must strip keyword-dump hallucinations from LLM output.
+
 ## §5 Action Plan
 
-Columns: `타겟 | 핵심 팩트 | 추진 팩트` — fill with source numbers/dates, not “제안 가능함 / 협력 가능함 / 정책 정합”.
-
-## §6 스코어카드
-
-May keep score / 관련도 (appendix ranking only).
+Columns: `타겟 | 핵심 팩트 | 추진 팩트` — source numbers/dates only.
 
 ## Generation
 
-`src/rd_monthly_report.py` `_build_markdown` omits speculative fields; LLM prompt forbids copying pain/strategy/proposable into opportunities/action_plan.
+`src/rd_monthly_report.py`: `_attach_press_evidence` → synthesize → `_factcheck_structured` → `_build_markdown`.
+`src/press_evidence.py` owns attestation + quotation helpers.

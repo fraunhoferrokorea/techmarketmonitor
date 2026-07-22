@@ -42,3 +42,4 @@ class SummarizedArticle:
     rd_match_score: int = 0
     rd_proposable_area: str = ""
     rd_fact_basis: str = ""
+    rd_evidence_quotes: list[str] = field(default_factory=list)

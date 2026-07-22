@@ -77,11 +77,40 @@ def _looks_like_pdf(content: bytes, content_type: str, url: str) -> bool:
 
 def _looks_like_hwpx(content: bytes, content_type: str, url: str) -> bool:
     ctype = (content_type or "").lower()
-    if "hwpx" in ctype or "zip" in ctype:
+    path = url.lower().split("?")[0]
+    if path.endswith(".hwpx") or "hwpx" in ctype:
         return True
-    if content[:2] == b"PK":
-        return url.lower().split("?")[0].endswith(".hwpx")
-    return url.lower().split("?")[0].endswith(".hwpx")
+    if content[:2] != b"PK":
+        return False
+    try:
+        with zipfile.ZipFile(BytesIO(content)) as archive:
+            return any(
+                name.startswith("Contents/") and name.endswith(".xml")
+                for name in archive.namelist()
+            )
+    except zipfile.BadZipFile:
+        return False
+
+
+def _looks_like_odt(content: bytes, content_type: str, url: str) -> bool:
+    ctype = (content_type or "").lower()
+    path = url.lower().split("?")[0]
+    if path.endswith(".odt") or "opendocument" in ctype:
+        return True
+    if content[:2] != b"PK":
+        return False
+    try:
+        with zipfile.ZipFile(BytesIO(content)) as archive:
+            names = set(archive.namelist())
+            if "content.xml" not in names:
+                return False
+            if "mimetype" in names:
+                mime = archive.read("mimetype").decode("utf-8", errors="ignore")
+                return "opendocument" in mime
+            # korea.kr often serves ODT without relying on extension
+            return not any(n.startswith("Contents/") for n in names)
+    except zipfile.BadZipFile:
+        return False
 
 
 def extract_pdf_text(content: bytes) -> str:
@@ -113,11 +142,34 @@ def extract_hwpx_text(content: bytes) -> str:
         return ""
 
 
+def extract_odt_text(content: bytes) -> str:
+    """Extract plain text from an ODT (OpenDocument Text) archive."""
+    try:
+        import xml.etree.ElementTree as ET
+
+        with zipfile.ZipFile(BytesIO(content)) as archive:
+            if "content.xml" not in archive.namelist():
+                return ""
+            root = ET.fromstring(archive.read("content.xml"))
+            return re.sub(r"\s+", " ", "".join(root.itertext())).strip()
+    except zipfile.BadZipFile:
+        return ""
+
+
 def extract_attachment_text(content: bytes, content_type: str, url: str) -> str:
     if _looks_like_pdf(content, content_type, url):
         return extract_pdf_text(content)
     if _looks_like_hwpx(content, content_type, url):
-        return extract_hwpx_text(content)
+        text = extract_hwpx_text(content)
+        if text:
+            return text
+    if _looks_like_odt(content, content_type, url):
+        return extract_odt_text(content)
+    # korea.kr download.do often omits extension — try ODT then HWPX on zip payloads
+    if content[:2] == b"PK":
+        text = extract_odt_text(content) or extract_hwpx_text(content)
+        if text:
+            return text
     return ""
 
 

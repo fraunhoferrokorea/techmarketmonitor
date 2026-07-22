@@ -103,6 +103,21 @@ _MONITORING_KEYWORDS = (
     "가상발전소",
     "계통안정",
     "전력품질",
+    "에너지고속도로",
+    "차세대 전력변환기",
+    "HVDC",
+    "MMC",
+    "STATCOM",
+    "배전망 디지털화",
+    "Digital Grid",
+    "장주기 ESS",
+    "계통연계",
+    "전력망 사이버보안",
+    "그리드포밍",
+    "Grid-forming",
+    "DC Grid",
+    "송전설비",
+    "출력예측",
     "smart grid",
     "power grid",
     "microgrid",
@@ -358,25 +373,27 @@ def _overview_from_steps(steps: list[str]) -> str:
 def sanitize_summarized_article(
     source: FilteredArticle,
     summarized: SummarizedArticle,
+    *,
+    monitoring_keywords: list[str] | None = None,
 ) -> SummarizedArticle:
     """Drop or reset LLM fields that are not supported by the source article text."""
+    from src.press_evidence import collect_press_evidence, format_evidence_basis
+
     corpus = build_source_corpus(source)
     issues = audit_summarized_fields(source, summarized)
-    if not issues:
-        return summarized
-
-    logger.warning(
-        "Fact grounding: sanitized %d issue(s) for %s",
-        len(issues),
-        summarized.title[:60],
-    )
-    for issue in issues[:8]:
-        logger.info(
-            "  - %s (%s): %s",
-            issue.field,
-            issue.reason,
-            issue.detail,
+    if issues:
+        logger.warning(
+            "Fact grounding: sanitized %d issue(s) for %s",
+            len(issues),
+            summarized.title[:60],
         )
+        for issue in issues[:8]:
+            logger.info(
+                "  - %s (%s): %s",
+                issue.field,
+                issue.reason,
+                issue.detail,
+            )
 
     ko_steps = list(summarized.ko_summary_steps)
     rd_proposable = summarized.rd_proposable_area
@@ -384,6 +401,7 @@ def sanitize_summarized_article(
     ko_one_liner = summarized.ko_one_liner
     keyword_relevance = summarized.keyword_relevance
     rd_match_score = summarized.rd_match_score
+    rd_evidence_quotes = list(summarized.rd_evidence_quotes or [])
 
     analyst = is_analyst_commentary(corpus)
 
@@ -451,6 +469,16 @@ def sanitize_summarized_article(
         if actor and not is_field_grounded(actor, corpus, strict=False):
             ko_steps = _replace_ko_step(ko_steps, "투자 주체", "명시 없음")
 
+    # Direct-quote evidence from the (enriched) press corpus.
+    kw_pool = list(monitoring_keywords or []) or list(_MONITORING_KEYWORDS)
+    kw_pool = list(dict.fromkeys(kw_pool + list(source.matched_keywords or [])))
+    evidence = collect_press_evidence(source.summary or "", kw_pool)
+    if evidence.quotes:
+        rd_evidence_quotes = evidence.quotes
+        rd_fact_basis = format_evidence_basis(evidence, fallback=rd_fact_basis)
+    elif not rd_evidence_quotes and rd_fact_basis in _GROUNDING_SKIP_VALUES:
+        rd_fact_basis = "명시 없음"
+
     return SummarizedArticle(
         title=summarized.title,
         url=summarized.url,
@@ -467,4 +495,5 @@ def sanitize_summarized_article(
         rd_match_score=rd_match_score,
         rd_proposable_area=rd_proposable,
         rd_fact_basis=rd_fact_basis,
+        rd_evidence_quotes=rd_evidence_quotes,
     )

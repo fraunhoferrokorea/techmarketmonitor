@@ -29,6 +29,14 @@ from src.rd_targeting import (
     parse_rd_fields,
     prepare_logs_for_monthly_rd,
 )
+from src.press_evidence import (
+    collect_press_evidence,
+    fetch_press_corpus,
+    format_evidence_basis,
+    looks_like_keyword_dump,
+    strip_unattested_monitoring_keywords,
+    theme_intro_from_evidence,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +52,7 @@ def _compact_entry(log: dict, ref: int, top_keywords: list[str]) -> dict:
     article = log_to_summarized_article(log)
     fields = parse_rd_fields(article.ko_summary_steps)
     relevance = classify_monthly_context_relevance(article, top_keywords)
+    quotes = list(log.get("rd_evidence_quotes") or article.rd_evidence_quotes or [])
     return {
         "ref": ref,
         "date": log.get("log_date", ""),
@@ -61,7 +70,110 @@ def _compact_entry(log: dict, ref: int, top_keywords: list[str]) -> dict:
         "fact": article.rd_fact_basis,
         "keyword_relevance": (article.keyword_relevance or "").strip(),
         "summary": article.ko_one_liner or article.llm_summary,
+        "evidence_quotes": quotes,
+        "attested_keywords": [],
+        "source_name_raw": log.get("source_name", ""),
     }
+
+
+def _attach_press_evidence(entries: list[dict], top_keywords: list[str]) -> list[dict]:
+    """Re-fetch government press text and attach attested keywords + verbatim quotes."""
+    enriched: list[dict] = []
+    for entry in entries:
+        item = dict(entry)
+        url = (item.get("url") or "").strip()
+        corpus = ""
+        if url:
+            corpus = fetch_press_corpus(
+                url,
+                title=item.get("title") or "",
+                source_name=item.get("source_name_raw") or item.get("source") or "",
+            )
+        if not corpus:
+            # Fall back to already stored fact/summary text for non-gov or fetch misses.
+            corpus = " ".join(
+                part
+                for part in (
+                    item.get("title") or "",
+                    item.get("fact") or "",
+                    item.get("summary") or "",
+                    " ".join(item.get("evidence_quotes") or []),
+                )
+                if part
+            )
+        evidence = collect_press_evidence(corpus, top_keywords)
+        item["attested_keywords"] = evidence.attested_keywords
+        if evidence.quotes:
+            item["evidence_quotes"] = evidence.quotes
+            item["fact"] = format_evidence_basis(evidence, fallback=item.get("fact") or "")
+        elif item.get("evidence_quotes"):
+            pass
+        enriched.append(item)
+        if evidence.attested_keywords:
+            logger.info(
+                "Press evidence ref=%s attested=%s quotes=%d",
+                item.get("ref"),
+                ",".join(evidence.attested_keywords[:6]),
+                len(evidence.quotes),
+            )
+    return enriched
+
+
+def _factcheck_structured(
+    structured: dict,
+    entries: list[dict],
+    top_keywords: list[str],
+) -> dict:
+    """Strip keyword-dump hallucinations from LLM monthly synthesis."""
+    by_ref = {e["ref"]: e for e in entries}
+    all_attested: list[str] = []
+    for e in entries:
+        all_attested.extend(e.get("attested_keywords") or [])
+    attested_set = list(dict.fromkeys(all_attested))
+
+    exec_summary = structured.get("executive_summary") or ""
+    if looks_like_keyword_dump(exec_summary, top_keywords):
+        exec_summary = strip_unattested_monitoring_keywords(
+            exec_summary, top_keywords, attested_set
+        )
+    structured["executive_summary"] = exec_summary
+
+    fixed_opps = []
+    for opp in structured.get("opportunities") or []:
+        field = opp.get("field") or "기타"
+        summary = opp.get("summary") or ""
+        theme_entries = [
+            by_ref[r] for r in (opp.get("refs") or []) if r in by_ref
+        ] or [e for e in entries if _theme_for_entry(e) == field]
+        theme_attested: list[str] = []
+        for e in theme_entries:
+            theme_attested.extend(e.get("attested_keywords") or [])
+        theme_attested = list(dict.fromkeys(theme_attested))
+        actors = sorted({e.get("actor", "") for e in theme_entries if e.get("actor")})
+        if looks_like_keyword_dump(summary, top_keywords) or not summary.strip():
+            summary = theme_intro_from_evidence(field, actors, theme_attested)
+        else:
+            summary = strip_unattested_monitoring_keywords(
+                summary, top_keywords, theme_attested
+            )
+            if looks_like_keyword_dump(summary, top_keywords, min_hits=4):
+                summary = theme_intro_from_evidence(field, actors, theme_attested)
+        items = []
+        for line in opp.get("items") or []:
+            cleaned = strip_unattested_monitoring_keywords(
+                line or "", top_keywords, theme_attested
+            )
+            if cleaned:
+                items.append(cleaned)
+        fixed_opps.append(
+            {
+                **opp,
+                "summary": summary,
+                "items": items or opp.get("items") or [],
+            }
+        )
+    structured["opportunities"] = fixed_opps
+    return structured
 
 
 def _synthesize_monthly_ko(
@@ -80,7 +192,7 @@ def _synthesize_monthly_ko(
 {year}년 {month}월 국내 R&D 인텔리전스 항목 {len(entries)}건(적합도 {MONTHLY_RD_MIN_SCORE}점 이상)을 바탕으로 **4~5페이지 분량**의 월간 보고서 JSON을 작성하세요.
 
 모니터링 컨텍스트 키워드(keywords.txt 전체): {kw_label}
-- 각 항목의 relevance(직접/간접/약함), matched_keywords, keyword_relevance 필드를 기준으로 중요도를 판단함.
+- 각 항목의 relevance(직접/간접/약함), matched_keywords, keyword_relevance, **attested_keywords**, **evidence_quotes** 필드를 기준으로 중요도를 판단함.
 - executive_summary·context_highlights·opportunities는 **직접·간접** 관련 항목을 정부·R&D 신호와 함께 우선 배치함.
 - 정부·공공기관 투자 주체(actor)는 유지하되, 전력·에너지·그리드 등 모니터링 키워드와 직접 연결된 항목을 상단에 둠.
 
@@ -89,23 +201,25 @@ def _synthesize_monthly_ko(
 - 모든 문장 명사형 종결(-함/-임/-었음). -습니다/-합니다 금지.
 - 한글 문장 안에 영어 단어를 섞지 말 것. 용어는 한글로 통일(예: 인텔리전스). Intelligence·인텔리gence 등 혼용 금지.
 - 소스에 없는 수치·기관명 추가 금지. **추측·제안 문구 금지**(‘제안 가능’·‘협력 가능’·‘정책 정합’ 등).
-- §4 상세·Action Plan은 **팩트만**: 일자·금액·건수·표준번호·사업명·장소·참석·시행일 등 fact/summary에 있는 구체 수치를 길게 서술.
+- **팩트체크 (필수):** 모니터링 키워드 전체를 opportunities.summary에 나열하지 말 것. attested_keywords·evidence_quotes에 있는 용어만 언급.
+- **근거는 보도자료 직접 인용:** evidence_quotes가 있으면 항목 서술·summary에 「」 인용문을 그대로 포함.
+- §4 상세·Action Plan은 **팩트만**: 일자·금액·건수·표준번호·사업명·장소·참석·시행일 등 fact/summary/evidence_quotes에 있는 구체 수치를 길게 서술.
 - 위탁 연구 니즈·제안 R&D·접근 전략·관련도 문구를 opportunities/action_plan에 쓰지 말 것(렌더러가 §4에서도 생략함).
-- keyword_relevance, fact, actor, purpose, relevance 필드를 적극 활용. pain/strategy/proposable는 참고만 하고 그대로 복사하지 말 것.
-- opportunities.summary는 분야별 서두 1~2문장(건수·[정부]·[컨텍스트] 라벨 금지).
-- opportunities.items는 항목마다 팩트 중심 2~4문장: 누가·언제·무엇(사업·표준·금액)·수치. 명사형 종결.
+- keyword_relevance, fact, actor, purpose, relevance, attested_keywords, evidence_quotes 필드를 적극 활용. pain/strategy/proposable는 참고만 하고 그대로 복사하지 말 것.
+- opportunities.summary는 분야별 서두 1~2문장(건수·[정부]·[컨텍스트] 라벨 금지). **원문에 없는 키워드 리스트 삽입 금지.**
+- opportunities.items는 항목마다 팩트 중심 2~4문장: 누가·언제·무엇(사업·표준·금액)·수치 + 가능하면 원문 인용. 명사형 종결.
 
 입력 데이터:
 {json.dumps(entries, ensure_ascii=False)}
 
 JSON 스키마:
 {{
-  "executive_summary": "5~7문장. 모니터링 키워드 직접·간접 이슈 + 국내 전력·에너지·ICT R&D 투자 트렌드 + 당월 정부·기업 핵심 수치",
+  "executive_summary": "5~7문장. attested 키워드·원문 인용 가능한 이슈만 + 국내 전력·에너지·ICT R&D 투자 트렌드 + 당월 정부·기업 핵심 수치",
   "context_highlights": [
-    {{"relevance": "직접|간접", "matched_keywords": "매칭 키워드", "summary": "핵심 이슈 2~3문장(팩트·수치)", "refs": [1]}}
+    {{"relevance": "직접|간접", "matched_keywords": "매칭 키워드", "summary": "핵심 이슈 2~3문장(팩트·수치·인용)", "refs": [1]}}
   ],
   "opportunities": [
-    {{"field": "분야명(전력·그리드/제조AI/표준·인증 등)", "summary": "분야 공통 맥락 1~2문장", "items": ["팩트 중심 항목 서술(일자·금액·사업명)", "..."], "refs": [1,2]}}
+    {{"field": "분야명(전력·그리드/제조AI/표준·인증 등)", "summary": "분야 공통 맥락 1~2문장(attested 키워드만)", "items": ["팩트+원문인용 항목 서술", "..."], "refs": [1,2]}}
   ],
   "action_plan": [
     {{"target": "부처/기업명", "contact_angle": "추진 팩트(일정·규모·시행일)", "rd_area": "핵심 팩트 요약(사업·표준·수치)", "refs": [1]}}
@@ -295,6 +409,21 @@ def _build_markdown(
                 lines.append(
                     _highlight_after_md_label(f"- **{label}:** {value}", hl)
                 )
+        quotes = item.get("evidence_quotes") or []
+        if quotes:
+            lines.append("- **원문 인용:**")
+            for quote in quotes[:3]:
+                lines.append(
+                    _highlight_after_md_label(f"  - {quote}", hl)
+                )
+        attested = item.get("attested_keywords") or []
+        if attested:
+            lines.append(
+                _highlight_after_md_label(
+                    f"- **원문 확인 키워드:** {' · '.join(attested)}",
+                    hl,
+                )
+            )
         if item.get("url"):
             lines.append(f"- **출처:** [{item.get('source') or '링크'}]({item['url']})")
         lines.append("")
@@ -375,11 +504,13 @@ def generate_rd_monthly_report(
         )
 
     compact = [_compact_entry(log, i, top_keywords) for i, log in enumerate(rd_logs, start=1)]
+    compact = _attach_press_evidence(compact, top_keywords)
     try:
         structured = _synthesize_monthly_ko(year, month, compact, top_keywords)
     except Exception as exc:
         logger.warning("LLM monthly synthesis failed (%s) — using template fallback", exc)
         structured = _fallback_structure(compact, top_keywords, year, month)
+    structured = _factcheck_structured(structured, compact, top_keywords)
 
     markdown = _build_markdown(year, month, rd_logs, compact, structured, top_keywords)
 
@@ -447,13 +578,11 @@ def _noun_clause(text: str) -> str:
 
 
 def _entry_narrative(entry: dict) -> str:
-    """One opportunity item as 5W1H-based flowing prose."""
+    """One opportunity item as 5W1H-based flowing prose (fact + quote only)."""
     actor = (entry.get("actor") or entry.get("source") or "국내 주체").strip()
     when = (entry.get("date") or "").strip()
     what = (entry.get("summary") or entry.get("title") or "").strip()
     why = (entry.get("purpose") or "").strip()
-    pain = (entry.get("pain") or "").strip()
-    how = (entry.get("strategy") or entry.get("proposable") or "").strip()
     fact = (entry.get("fact") or "").strip()
     rel = entry.get("relevance", "")
 
@@ -469,44 +598,29 @@ def _entry_narrative(entry: dict) -> str:
         sentences.append(f"정책·투자 목적은 {_noun_clause(why)}.")
     if fact and fact not in what:
         sentences.append(f"근거로는 {_noun_clause(fact)}.")
-    if pain and pain not in why:
-        sentences.append(f"필요한 위탁 연구 영역은 {_noun_clause(pain)}.")
-    if how:
-        sentences.append(f"협력 접근은 {_noun_clause(how)}.")
-    if rel in ("직접", "간접"):
-        sentences.append(f"모니터링 키워드(전력·그리드)와 {rel} 연관됨.")
+    quotes = entry.get("evidence_quotes") or []
+    if quotes and (not fact or quotes[0] not in fact):
+        sentences.append(f"보도자료 원문: {quotes[0]}")
+    attested = entry.get("attested_keywords") or []
+    if attested and rel in ("직접", "간접"):
+        sentences.append(
+            f"원문 확인 키워드({' · '.join(attested[:5])})와 {rel} 연관됨."
+        )
+    elif rel in ("직접", "간접"):
+        sentences.append(f"모니터링 키워드와 {rel} 연관됨.")
 
     return " ".join(sentences)
 
 
 def _theme_intro(theme: str, items: list[dict], top_keywords: list[str]) -> str:
-    """분야별 서두 1~2문장 — 건수 나열 대신 공통 맥락 설명."""
-    kw_label = " · ".join(top_keywords) if top_keywords else "모니터링 키워드"
-    actors = sorted({i.get("actor", "") for i in items if i.get("actor")})[:3]
-    actor_text = ", ".join(actors) if actors else "국내 정부·공공기관"
-
-    intros = {
-        "전력·그리드": (
-            f"당월 {actor_text} 등이 {kw_label}와 연계된 국가 R&D·정책 신호를 발표함. "
-            "전력 인프라·지능형 계통·송배전 분야 위탁 연구·국제 공동연구 제안 여지가 있음."
-        ),
-        "제조AI·스마트공장": (
-            f"당월 {actor_text} 등이 제조업 AI 대전환·에이전트 실증·데이터·모델 개발에 "
-            "민·관 합동 투자와 과제를 병행 추진함. 제조 현장 실증·고난도 모델 개발 협력 수요가 큼."
-        ),
-        "표준·인증·보안": (
-            f"당월 {actor_text} 등이 국가표준(KS) 제정·성능시험·인증 체계를 구축함. "
-            "표준 개발·시험평가 방법론·인증 제도 설계 분야 위탁 R&D 기회가 있음."
-        ),
-        "바이오·그린": (
-            f"당월 {actor_text} 등이 산림·그린바이오 기술 이전·공동연구·사업화를 추진함. "
-            "기술 이전 실증·공동 연구 과제 제안이 가능함."
-        ),
-    }
-    return intros.get(
-        theme,
-        f"당월 {actor_text} 등에서 국내 R&D·정책 관련 신호가 확인됨. Action Plan에 투자 주체·니즈를 반영함.",
-    )
+    """분야별 서두 — 원문에서 확인된(attested) 키워드만 언급."""
+    del top_keywords  # monitoring list must not be pasted into the lead
+    actors = sorted({i.get("actor", "") for i in items if i.get("actor")})
+    attested: list[str] = []
+    for item in items:
+        attested.extend(item.get("attested_keywords") or [])
+    attested = list(dict.fromkeys(attested))
+    return theme_intro_from_evidence(theme, actors, attested)
 
 
 def _build_executive_summary_fallback(
@@ -519,13 +633,26 @@ def _build_executive_summary_fallback(
     direct = [e for e in unique if e.get("relevance") == "직접"]
     indirect = [e for e in unique if e.get("relevance") == "간접"]
     weak = [e for e in unique if e.get("relevance") == "약함"]
-    kw_label = " · ".join(top_keywords) if top_keywords else "모니터링 키워드"
+    attested: list[str] = []
+    for e in unique:
+        attested.extend(e.get("attested_keywords") or [])
+    attested = list(dict.fromkeys(attested))
+    kw_label = (
+        " · ".join(attested[:10])
+        if attested
+        else (" · ".join(top_keywords[:5]) if top_keywords else "모니터링 키워드")
+    )
     themes = [label for label, _ in _group_by_theme(unique)]
 
     parts = [
         f"{year}년 {month}월 국내 R&D 인텔리전스 월간 집계에서 R&D 적합 {MONTHLY_RD_MIN_SCORE}점 이상 "
         f"{len(unique)}건(원본 {len(entries)}건)이 분석됨.",
-        f"{kw_label} 기준 직접 {len(direct)}건·간접 {len(indirect)}건·약함 {len(weak)}건으로 "
+        (
+            f"보도자료 원문에서 확인된 키워드({kw_label}) 기준 "
+            if attested
+            else f"모니터링 키워드 기준 "
+        )
+        + f"직접 {len(direct)}건·간접 {len(indirect)}건·약함 {len(weak)}건으로 "
         "모니터링 컨텍스트 중요도를 구분함.",
     ]
     if direct:
@@ -602,8 +729,8 @@ def _fallback_structure(
         action_plan.append(
             {
                 "target": actor,
-                "contact_angle": e.get("strategy") or e.get("purpose", ""),
-                "rd_area": e.get("proposable") or e.get("pain", ""),
+                "contact_angle": e.get("fact") or e.get("purpose", ""),
+                "rd_area": (e.get("summary") or e.get("title") or "")[:160],
                 "refs": [e["ref"]],
             }
         )

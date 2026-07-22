@@ -55,6 +55,7 @@ def _row_to_article(row: dict) -> SummarizedArticle:
         rd_match_score=int(row.get("rd_match_score") or 0),
         rd_proposable_area=row.get("rd_proposable_area") or "",
         rd_fact_basis=row.get("rd_fact_basis") or "",
+        rd_evidence_quotes=list(row.get("rd_evidence_quotes") or []),
     )
 
 
