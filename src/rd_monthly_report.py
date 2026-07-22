@@ -41,6 +41,37 @@ from src.press_evidence import (
 logger = logging.getLogger(__name__)
 
 OTHER_THEME = "기타 정부·R&D"
+_KEYWORD_FOCUS_RELEVANCE = frozenset({"직접", "간접"})
+
+
+def _apply_keyword_relevance_from_evidence(entries: list[dict]) -> None:
+    """Upgrade relevance when monitoring keywords are attested in press corpus."""
+    for entry in entries:
+        attested = [k for k in (entry.get("attested_keywords") or []) if k]
+        if not attested:
+            continue
+        # Press-attested monitoring terms are always keyword-focus (직접).
+        entry["relevance"] = "직접"
+        if not (entry.get("matched_keywords") or "").strip():
+            entry["matched_keywords"] = ", ".join(attested[:5])
+
+
+def _filter_keyword_focus_entries(
+    entries: list[dict],
+) -> tuple[list[dict], list[dict]]:
+    """Split keyword-related (직접/간접) vs off-keyword (약함 등).
+
+    Monthly §1–§5 use focus only. Off-keyword R&D noise is dropped from the
+    narrative even if the Fraunhofer R&D score was high.
+    """
+    focus: list[dict] = []
+    off: list[dict] = []
+    for entry in entries:
+        if entry.get("relevance") in _KEYWORD_FOCUS_RELEVANCE:
+            focus.append(entry)
+        else:
+            off.append(entry)
+    return focus, off
 
 
 def _compact_entry(log: dict, ref: int, top_keywords: list[str]) -> dict:
@@ -128,6 +159,10 @@ def _factcheck_structured(
     attested_set = list(dict.fromkeys(all_attested))
 
     exec_summary = structured.get("executive_summary") or ""
+    # Always drop monitoring keywords not attested in press this month.
+    exec_summary = strip_unattested_monitoring_keywords(
+        exec_summary, top_keywords, attested_set
+    )
     if looks_like_keyword_dump(exec_summary, top_keywords):
         exec_summary = strip_unattested_monitoring_keywords(
             exec_summary, top_keywords, attested_set
@@ -347,6 +382,8 @@ def _build_markdown(
     compact: list[dict],
     structured: dict,
     top_keywords: list[str],
+    *,
+    off_keyword_excluded: int = 0,
 ) -> str:
     today = date.today().isoformat()
     kws = top_keywords or []
@@ -357,6 +394,13 @@ def _build_markdown(
         ),
         kws,
     )
+    analysis_line = (
+        f"**분석 항목:** 키워드 관련 {len(compact)}건 "
+        f"(R&D 적합 {MONTHLY_RD_MIN_SCORE}점 이상 후보 {len(rd_logs)}건"
+    )
+    if off_keyword_excluded:
+        analysis_line += f" · 키워드 무관 제외 {off_keyword_excluded}건"
+    analysis_line += f") · {monthly_credibility_distribution(rd_logs)}"
     lines: list[str] = [
         "# 국내 R&D 인텔리전스 월간 보고서",
         "",
@@ -365,8 +409,7 @@ def _build_markdown(
         "**발행:** Fraunhofer Institute Korea Office · Tech Market Intelligence Monitor",
         f"**모니터링 키워드:** {kw_label}",
         "",
-        f"**분석 항목:** {len(rd_logs)}건 (R&D 적합 {MONTHLY_RD_MIN_SCORE}점 이상) · "
-        f"{monthly_credibility_distribution(rd_logs)}",
+        analysis_line,
         "",
         "## 1. Executive Summary",
         "",
@@ -600,6 +643,7 @@ def generate_rd_monthly_report(
 
     compact = [_compact_entry(log, i, top_keywords) for i, log in enumerate(rd_logs, start=1)]
     compact = _attach_press_evidence(compact, top_keywords)
+    _apply_keyword_relevance_from_evidence(compact)
     source_count = len(compact)
     compact = _dedupe_entries(compact)
     # Re-number refs after policy-level merge.
@@ -613,6 +657,25 @@ def generate_rd_monthly_report(
             year,
             month,
         )
+
+    focus, off_keyword = _filter_keyword_focus_entries(compact)
+    if off_keyword:
+        logger.info(
+            "Excluded %d off-keyword (약함) entr(y/ies) from monthly narrative for %04d-%02d",
+            len(off_keyword),
+            year,
+            month,
+        )
+    if not focus:
+        raise ValueError(
+            f"No keyword-related (직접/간접) entries for {year}-{month:02d} "
+            f"after press attestation against keywords.txt. "
+            f"R&D-score candidates={len(rd_logs)}, off-keyword={len(off_keyword)}."
+        )
+    for i, entry in enumerate(focus, start=1):
+        entry["ref"] = i
+    compact = focus
+
     try:
         structured = _synthesize_monthly_ko(year, month, compact, top_keywords, groups)
     except Exception as exc:
@@ -620,7 +683,15 @@ def generate_rd_monthly_report(
         structured = _fallback_structure(compact, top_keywords, year, month, groups)
     structured = _factcheck_structured(structured, compact, top_keywords, groups)
 
-    markdown = _build_markdown(year, month, rd_logs, compact, structured, top_keywords)
+    markdown = _build_markdown(
+        year,
+        month,
+        rd_logs,
+        compact,
+        structured,
+        top_keywords,
+        off_keyword_excluded=len(off_keyword),
+    )
 
     output_dir = settings.reports_output_dir
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -938,7 +1009,6 @@ def _build_executive_summary_fallback(
     unique = _dedupe_entries(entries)
     direct = [e for e in unique if e.get("relevance") == "직접"]
     indirect = [e for e in unique if e.get("relevance") == "간접"]
-    weak = [e for e in unique if e.get("relevance") == "약함"]
     attested: list[str] = []
     for e in unique:
         attested.extend(e.get("attested_keywords") or [])
@@ -951,15 +1021,15 @@ def _build_executive_summary_fallback(
     groups = tuple(groups or ())
 
     parts = [
-        f"{year}년 {month}월 국내 R&D 인텔리전스 월간 집계에서 R&D 적합 {MONTHLY_RD_MIN_SCORE}점 이상 "
-        f"{len(unique)}건(원본 {len(entries)}건)이 분석됨.",
+        f"{year}년 {month}월 국내 R&D 인텔리전스 월간 집계에서 "
+        f"keywords.txt 관련(직접·간접) {len(unique)}건을 분석함.",
         (
             f"보도자료 원문에서 확인된 키워드({kw_label}) 기준 "
             if attested
             else f"모니터링 키워드 기준 "
         )
-        + f"직접 {len(direct)}건·간접 {len(indirect)}건·약함 {len(weak)}건으로 "
-        "모니터링 컨텍스트 중요도를 구분함.",
+        + f"직접 {len(direct)}건·간접 {len(indirect)}건임. "
+        "키워드 무관(약함) 항목은 월간 본문에서 제외함.",
     ]
     if direct:
         top = direct[0]
@@ -967,7 +1037,7 @@ def _build_executive_summary_fallback(
             f"최우선 이슈는 **{top.get('actor') or '정부'}** — "
             f"{(top.get('summary') or top.get('title', ''))[:160]}."
         )
-    # Keyword-group sections only (from keywords.txt), never legacy 제조AI/표준 axes.
+    # keywords.txt sections only — off-keyword (약함) never enters this compact set.
     for label, items in _group_by_theme(unique, groups):
         if label == OTHER_THEME:
             continue
@@ -984,14 +1054,9 @@ def _build_executive_summary_fallback(
             f"**{g0.get('actor') or '정부'}** 관련 "
             f"{(g0.get('summary') or g0.get('title') or '')[:140]}."
         )
-    if weak:
-        parts.append(
-            f"모니터링 키워드와 원문 직접 연결이 약한 정부·R&D 신호 {len(weak)}건은 "
-            f"관련도 약함으로 §3·§4에 정리함."
-        )
     parts.append(
         "§2 컨텍스트 중요도·§3 분야별 기회·§4 타겟 상세·§5 Action Plan·§6 스코어카드에 "
-        "투자 주체·팩트 근거를 정리함."
+        "키워드 관련 투자 주체·팩트 근거만 정리함."
     )
     return _format_executive_summary_paragraphs("\n\n".join(parts))
 
@@ -1023,6 +1088,9 @@ def _fallback_structure(
 
     opportunities = []
     for theme, items in _group_by_theme(unique, groups):
+        if theme == OTHER_THEME:
+            # Off-keyword buckets must not appear in §3 after focus filter.
+            continue
         theme_items = sorted(
             items,
             key=lambda e: (_rel_rank.get(e.get("relevance", ""), 9), -e.get("score", 0)),

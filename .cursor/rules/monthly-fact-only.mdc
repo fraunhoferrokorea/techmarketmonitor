@@ -37,11 +37,12 @@ When manually editing a generated monthly, run this checklist on the draft befor
 
 ## Monitoring axis = keywords.txt only
 
-- §1 Executive Summary must **not** invent legacy buckets as monitoring “축” (`제조AI·스마트공장 축`, `표준·인증 축`, `바이오 축`).
-- §3 field labels come from `keywords.txt` section headers (`# ── 전력·에너지 … ──`) via `load_keyword_groups` / `Settings.keyword_groups`.
-- Hardcoded `_THEME_RULES` (제조AI·표준·바이오) are removed. Off-keyword hits → `기타 정부·R&D`.
-- When `keywords.txt` sections change, monthly §3 buckets follow automatically.
-- Fallback `_build_executive_summary_fallback` must not hardcode 제조AI/표준 sentences.
+- §1–§5 / scorecard narrative use **keyword-related items only** (`직접` / `간접`).
+- After press evidence: attested monitoring keywords upgrade relevance to `직접`.
+- **약함 (키워드 무관)** is excluded from monthly body even if R&D score ≥ 4 (제조AI·산양삼·대드론 등).
+- §3 field labels come from `keywords.txt` section headers via `load_keyword_groups`.
+- Hardcoded legacy themes (제조AI·표준·바이오) are removed. Do not revive them as §3 buckets.
+- Pipeline: score filter → press attest → dedupe → **keyword-focus filter** → synthesize → render.
 
 ## §4 주요 R&D 타겟 상세 (per item)
 
