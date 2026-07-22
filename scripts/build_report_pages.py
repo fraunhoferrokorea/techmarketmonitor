@@ -62,7 +62,7 @@ a:hover { color: var(--brand); }
   border-bottom: 1px solid var(--line);
 }
 .app-header-inner {
-  max-width: 1120px; margin: 0 auto; padding: 0.85rem 1.25rem;
+  max-width: 1280px; margin: 0 auto; padding: 0.85rem 1.25rem;
   display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
 }
 .brand {
@@ -80,10 +80,10 @@ a:hover { color: var(--brand); }
 .brand-text span { display: block; font-size: 0.78rem; color: var(--muted); }
 
 .layout {
-  max-width: 1120px; margin: 0 auto; padding: 1.25rem;
-  display: grid; grid-template-columns: 280px 1fr; gap: 1.25rem; align-items: start;
+  max-width: 1280px; margin: 0 auto; padding: 1.25rem;
+  display: grid; grid-template-columns: 400px 1fr; gap: 1.25rem; align-items: start;
 }
-@media (max-width: 860px) {
+@media (max-width: 980px) {
   .layout { grid-template-columns: 1fr; }
 }
 
@@ -92,7 +92,7 @@ a:hover { color: var(--brand); }
   border-radius: var(--radius); box-shadow: var(--shadow);
 }
 .sidebar { padding: 1rem; position: sticky; top: 72px; }
-@media (max-width: 860px) { .sidebar { position: static; } }
+@media (max-width: 980px) { .sidebar { position: static; } }
 
 .seg {
   display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.35rem;
@@ -194,7 +194,7 @@ a:hover { color: var(--brand); }
   margin: 0 0 0.65rem; font-size: 0.78rem; letter-spacing: 0.06em;
   text-transform: uppercase; color: var(--muted); font-weight: 700;
 }
-.date-list { list-style: none; margin: 0; padding: 0; max-height: min(70vh, 640px); overflow: auto; }
+.date-list { list-style: none; margin: 0; padding: 0; max-height: min(70vh, 640px); overflow-x: hidden; overflow-y: auto; }
 .date-list li + li { margin-top: 0.25rem; }
 .date-list a, .date-list button {
   width: 100%; text-align: left; appearance: none; border: 1px solid transparent;
@@ -284,7 +284,7 @@ mark {
 .score.low { background: var(--score-low); }
 
 .footer-note {
-  max-width: 1120px; margin: 0 auto; padding: 0 1.25rem 2rem;
+  max-width: 1280px; margin: 0 auto; padding: 0 1.25rem 2rem;
   color: var(--muted); font-size: 0.8rem;
 }
 
