@@ -5,7 +5,8 @@
 # 새 소스를 추가할 때는 name / url / category 세 필드가 필수입니다.
 # method: post 는 POST RSS만 허용하는 부처(산업통상부 등)에 사용합니다.
 # method: html / pacst 는 HTML 스크래퍼(src/fetchers/html_boards.py · pacst.py)가 수집합니다.
-# RSSFetcher가 feedparser로 가져오므로 표준 RSS 2.0 / Atom 1.0 URL이면 됩니다.
+# url: 가능하면 브라우저 목록 페이지. feed_url: 수집용 RSS(선택).
+# RSSFetcher가 feed_url(없으면 url)을 feedparser로 가져옵니다.
 #
 # 정부부처·기관: 각 누리집 보도자료만 사용 (정책브리핑 korea.kr 정책뉴스·경유 금지).
 # ─────────────────────────────────────────────────────────────────────────────
@@ -25,17 +26,20 @@ korean:
     url: https://www.msit.go.kr/user/rss/rss.do?bbsSeqNo=89
     category: korean
   - name: 산업통상부 보도자료
-    url: https://www.motir.go.kr/kor/article/ATCL3f49a5a8c/rss
+    url: https://www.motir.go.kr/kor/article/ATCL3f49a5a8c
+    feed_url: https://www.motir.go.kr/kor/article/ATCL3f49a5a8c/rss
     category: korean
     method: POST
   - name: 기후에너지환경부 보도자료
     url: https://www.mcee.go.kr/home/web/board/rss.do?menuId=286&boardMasterId=1
     category: korean
   - name: 중소벤처기업부 보도자료
-    url: https://www.mss.go.kr/rss/smba/board/86.do
+    url: https://www.mss.go.kr/site/smba/ex/bbs/List.do?cbIdx=86
+    feed_url: https://www.mss.go.kr/rss/smba/board/86.do
     category: korean
   - name: 재정경제부 보도자료
-    url: https://www.mofe.go.kr/com/detailRssTagService.do?bbsId=MOSFBBS_000000000028
+    url: https://www.mofe.go.kr/nw/nes/nesdta.do?bbsId=MOSFBBS_000000000028&menuNo=4010100
+    feed_url: https://www.mofe.go.kr/com/detailRssTagService.do?bbsId=MOSFBBS_000000000028
     category: korean
   - name: 국토교통부 보도자료
     url: https://www.molit.go.kr/USR/NEWS/m_71/lst.jsp
@@ -54,7 +58,8 @@ korean:
     category: korean
     method: pacst
   - name: KEIT 알림
-    url: https://www.keit.re.kr/rss/board.es?bid=0031
+    url: https://www.keit.re.kr/board.es?mid=a10303010000&bid=0031
+    feed_url: https://www.keit.re.kr/rss/board.es?bid=0031
     category: korean
   - name: KETEP 보도자료
     url: https://www.ketep.re.kr/
@@ -81,14 +86,17 @@ korean:
     category: korean
     method: html
   - name: KISTEP
-    url: https://www.kistep.re.kr/rss/board.es?bid=0051
+    url: https://www.kistep.re.kr/board.es?mid=a10305010000&bid=0051
+    feed_url: https://www.kistep.re.kr/rss/board.es?bid=0051
     category: korean
   - name: KIPO 보도자료
-    url: https://www.kipo.go.kr/ko/report/UXmlRssApp.do?menuCd=SCD0200618
+    url: https://www.kipo.go.kr/ko/kpoBultnMgmt.do?menuCd=SCD0200618
+    feed_url: https://www.kipo.go.kr/ko/report/UXmlRssApp.do?menuCd=SCD0200618
     category: korean
   - name: 한국전력 보도자료
-    url: https://www.kepco.co.kr/home/customer/publicity/press/rss.do
+    url: https://www.kepco.co.kr/home/media/newsroom/pr/boardList.do
     category: korean
+    method: html
   - name: 연합뉴스 산업
     url: https://www.yna.co.kr/rss/industry.xml
     category: korean

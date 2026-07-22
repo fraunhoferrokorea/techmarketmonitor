@@ -3,6 +3,7 @@ from datetime import date
 from src.fetchers.html_boards import (
     _parse_kaia,
     _parse_kasa,
+    _parse_kepco,
     _parse_kiat,
     _parse_krit,
     _parse_mnd,
@@ -128,3 +129,26 @@ def test_parse_kiat_rows() -> None:
     assert "board_id=41" in rows[0][1]
     assert "98e881b0c3bd43cfa822dfb9f68985f5" in rows[0][1]
     assert rows[0][2] == date(2026, 7, 3)
+
+
+def test_parse_kepco_rows() -> None:
+    html = """
+    <div class="media-list-item">
+      <a href="javascript:fn_Detail('15','3117');">
+        <dl>
+          <dt><span class="img-wrap"></span></dt>
+          <dd>
+            <strong class="tit">한전, 청렴·CS 신뢰도약 Week 개최</strong>
+            <span class="date">2026-07-22 10:04:05.0</span>
+          </dd>
+        </dl>
+      </a>
+    </div>
+    """
+    rows = _parse_kepco(html, set())
+    assert len(rows) == 1
+    title, url, day = rows[0]
+    assert title == "한전, 청렴·CS 신뢰도약 Week 개최"
+    assert "boardMngNo=15" in url
+    assert "boardNo=3117" in url
+    assert day == date(2026, 7, 22)

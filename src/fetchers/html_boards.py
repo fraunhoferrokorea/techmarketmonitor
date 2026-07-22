@@ -120,6 +120,13 @@ _KIAT_RE = re.compile(
     re.S,
 )
 
+_KEPCO_RE = re.compile(
+    r"""href=["']javascript:fn_Detail\('(?P<mng>\d+)','(?P<no>\d+)'\);["']\s*>\s*"""
+    r"""<dl>.*?<strong class="tit">(?P<title>.*?)</strong>\s*"""
+    r"""<span class="date">(?P<published>\d{4}-\d{2}-\d{2})""",
+    re.S,
+)
+
 _KIAT_MENU_ID = "ae72d61a9a9745febf0f0ede05b375f7"
 
 
@@ -292,6 +299,25 @@ def _parse_kiat(html: str, seen: set[str]) -> list[tuple[str, str, date]]:
     return rows
 
 
+def _parse_kepco(html: str, seen: set[str]) -> list[tuple[str, str, date]]:
+    """KEPCO newsroom PR list (boardListAjax.do fragment)."""
+    rows: list[tuple[str, str, date]] = []
+    for match in _KEPCO_RE.finditer(html):
+        day = _parse_day(match.group("published"))
+        if not day:
+            continue
+        url = (
+            "https://www.kepco.co.kr/home/media/newsroom/pr/boardView.do"
+            f"?boardMngNo={match.group('mng')}&boardNo={match.group('no')}"
+        )
+        title = _clean(match.group("title"))
+        if not title or url in seen:
+            continue
+        seen.add(url)
+        rows.append((title, url, day))
+    return rows
+
+
 class _Board:
     def __init__(
         self,
@@ -374,6 +400,14 @@ _BOARDS: tuple[_Board, ...] = (
         "KRIT 보도자료",
         "https://www.krit.re.kr/krit/bbs/press_list.do",
         _parse_krit,
+        page_param="page",
+        max_pages=5,
+    ),
+    _Board(
+        "한국전력 보도자료",
+        # List shell is JS-hydrated; items come from the Ajax fragment.
+        "https://www.kepco.co.kr/home/media/newsroom/pr/boardListAjax.do",
+        _parse_kepco,
         page_param="page",
         max_pages=5,
     ),

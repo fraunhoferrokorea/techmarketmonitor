@@ -125,7 +125,11 @@ _SOURCE_GROUPS = ("korean",)
 
 
 def _load_sources_txt(path: Path) -> list[dict]:
-    """Read one source per line: name | url | category [| method]."""
+    """Read one source per line: name | url | category [| method [| feed_url]].
+
+    ``url`` is the human-browsable page when possible. Optional ``feed_url`` is
+    the machine RSS/Atom endpoint used by RSSFetcher (e.g. POST-only feeds).
+    """
     try:
         lines = path.read_text(encoding="utf-8").splitlines()
     except FileNotFoundError:
@@ -142,10 +146,13 @@ def _load_sources_txt(path: Path) -> list[dict]:
         name, url = parts[0], parts[1]
         category = parts[2] if len(parts) > 2 else "general"
         method = parts[3] if len(parts) > 3 else "GET"
+        feed_url = parts[4] if len(parts) > 4 else ""
         if url:
             entry = {"name": name, "url": url, "category": category}
             if method and method.upper() != "GET":
                 entry["method"] = method.upper()
+            if feed_url:
+                entry["feed_url"] = feed_url
             sources.append(entry)
     return sources
 

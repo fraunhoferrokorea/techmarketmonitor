@@ -858,7 +858,7 @@ def main() -> None:
             "label": "sources.txt",
             "path": "sources.txt",
             "href": "config/sources.txt",
-            "hint": "형식: 이름 | URL | 카테고리 [| METHOD]. METHOD: GET/POST/html/pacst.",
+            "hint": "형식: 이름 | URL | 카테고리 [| METHOD [| FEED_URL]]. URL=목록페이지, FEED_URL=RSS(선택). METHOD: GET/POST/html/pacst.",
         },
     ]
 
