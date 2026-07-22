@@ -138,7 +138,7 @@ a:hover { color: var(--brand); }
   outline: 2px solid #b7ddd5; outline-offset: 1px; background: #fff;
 }
 .config-linked {
-  width: 100%; min-height: 36vh; max-height: min(70vh, 720px); overflow: auto;
+  width: 100%; min-height: min(70vh, 720px); max-height: min(75vh, 800px); overflow: auto;
   margin: 0 0 0.75rem; padding: 0.85rem 1rem;
   border: 1px solid var(--line); border-radius: 10px;
   background: #fafcfb; color: var(--ink);
@@ -151,6 +151,7 @@ a:hover { color: var(--brand); }
   text-underline-offset: 2px;
 }
 .config-linked a:hover { color: var(--brand); }
+.config-editor[hidden] { display: none !important; }
 .config-hint {
   margin: 0.75rem 0 0; color: var(--muted); font-size: 0.8rem; line-height: 1.5;
 }
@@ -330,6 +331,7 @@ _INDEX_HTML = """\
         <span class="chip neutral" id="config-meta">—</span>
         <span class="config-status" id="config-status"></span>
         <span class="spacer"></span>
+        <button type="button" class="btn ghost" id="btn-config-mode" hidden>편집</button>
         <button type="button" class="btn ghost" id="btn-reload">다시 불러오기</button>
         <button type="button" class="btn ghost" id="btn-copy">복사</button>
         <button type="button" class="btn" id="btn-download">다운로드</button>
@@ -372,6 +374,7 @@ let currentHref = null;
 let currentConfigId = null;
 let loadedText = "";
 let fileSha = null;
+let sourcesEditMode = false;
 
 function labelFor(kindName) {{
   if (kindName === "daily") return "Daily 날짜";
@@ -395,12 +398,42 @@ function escapeHtml(s) {{
 }}
 
 function linkifyConfigText(text) {{
-  // Turn bare http(s) URLs into in-place hyperlinks (same text, clickable).
-  const escaped = escapeHtml(text || "");
-  return escaped.replace(
-    /(https?:\\/\\/[^\\s<|&]+)/g,
-    (url) => `<a href="${{url}}" target="_blank" rel="noopener noreferrer">${{url}}</a>`
-  );
+  // Match URLs on raw text (allow & in query), then escape for HTML.
+  // Stop at whitespace or pipe so "url | korean" stays correct.
+  const src = text || "";
+  const re = /(https?:\\/\\/[^\\s|]+)/g;
+  let out = "";
+  let last = 0;
+  let match;
+  while ((match = re.exec(src)) !== null) {{
+    out += escapeHtml(src.slice(last, match.index));
+    const url = match[1];
+    const safe = escapeHtml(url);
+    out += `<a href="${{safe}}" target="_blank" rel="noopener noreferrer">${{safe}}</a>`;
+    last = match.index + url.length;
+  }}
+  out += escapeHtml(src.slice(last));
+  return out;
+}}
+
+function syncSourcesModeUi() {{
+  const view = qs("config-linked");
+  const editor = qs("config-editor");
+  const modeBtn = qs("btn-config-mode");
+  if (!view || !editor || !modeBtn) return;
+  if (currentConfigId !== "sources") {{
+    sourcesEditMode = false;
+    modeBtn.hidden = true;
+    view.hidden = true;
+    view.innerHTML = "";
+    editor.hidden = false;
+    return;
+  }}
+  modeBtn.hidden = false;
+  modeBtn.textContent = sourcesEditMode ? "링크 보기" : "편집";
+  view.innerHTML = linkifyConfigText(editor.value || "");
+  view.hidden = sourcesEditMode;
+  editor.hidden = !sourcesEditMode;
 }}
 
 function renderConfigLinked(text) {{
@@ -408,13 +441,17 @@ function renderConfigLinked(text) {{
   const editor = qs("config-editor");
   if (!view || !editor) return;
   if (currentConfigId === "sources") {{
-    view.hidden = false;
-    view.innerHTML = linkifyConfigText(text || "");
-    editor.style.minHeight = "22vh";
+    if (typeof text === "string" && text !== editor.value) {{
+      // keep editor as source of truth; ignore stale arg
+    }}
+    syncSourcesModeUi();
   }} else {{
+    sourcesEditMode = false;
     view.hidden = true;
     view.innerHTML = "";
-    editor.style.minHeight = "";
+    editor.hidden = false;
+    const modeBtn = qs("btn-config-mode");
+    if (modeBtn) modeBtn.hidden = true;
   }}
 }}
 
@@ -562,6 +599,7 @@ async function loadConfig(id, opts) {{
   }}
   currentConfigId = id;
   currentHref = null;
+  sourcesEditMode = false;
   renderList();
   qs("empty-state").hidden = true;
   qs("report-wrap").hidden = true;
@@ -765,6 +803,11 @@ function enhanceReport(root) {{
 qs("tab-daily").addEventListener("click", () => setTab("daily"));
 qs("tab-monthly").addEventListener("click", () => setTab("monthly"));
 qs("tab-config").addEventListener("click", () => setTab("config"));
+qs("btn-config-mode").addEventListener("click", () => {{
+  if (currentConfigId !== "sources") return;
+  sourcesEditMode = !sourcesEditMode;
+  syncSourcesModeUi();
+}});
 qs("config-editor").addEventListener("input", () => {{
   setStatus("", "");
   updateDirty();
@@ -907,7 +950,7 @@ def main() -> None:
             "label": "sources.txt",
             "path": "sources.txt",
             "href": "config/sources.txt",
-            "hint": "형식: 이름 | URL | 카테고리 [| METHOD]. URL은 브라우저에서 열리는 목록/홈(하이퍼링크). RSS 수집 주소는 config/sources.yaml 의 feed_url.",
+            "hint": "URL은 파란 하이퍼링크입니다(새 탭). 수정하려면 「편집」을 누르세요. RSS 수집 주소는 config/sources.yaml 의 feed_url.",
         },
     ]
 

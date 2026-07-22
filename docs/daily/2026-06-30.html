@@ -122,7 +122,7 @@ a:hover { color: var(--brand); }
   outline: 2px solid #b7ddd5; outline-offset: 1px; background: #fff;
 }
 .config-linked {
-  width: 100%; min-height: 36vh; max-height: min(70vh, 720px); overflow: auto;
+  width: 100%; min-height: min(70vh, 720px); max-height: min(75vh, 800px); overflow: auto;
   margin: 0 0 0.75rem; padding: 0.85rem 1rem;
   border: 1px solid var(--line); border-radius: 10px;
   background: #fafcfb; color: var(--ink);
@@ -135,6 +135,7 @@ a:hover { color: var(--brand); }
   text-underline-offset: 2px;
 }
 .config-linked a:hover { color: var(--brand); }
+.config-editor[hidden] { display: none !important; }
 .config-hint {
   margin: 0.75rem 0 0; color: var(--muted); font-size: 0.8rem; line-height: 1.5;
 }
