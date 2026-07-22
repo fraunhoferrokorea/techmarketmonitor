@@ -1036,12 +1036,9 @@ def main() -> None:
         body = _md_to_html(md_text)
         title = f"Monthly {ym}"
         _write_report(rel, title, "monthly", body)
-        # Prefer Korean period label if present
-        period = re.search(r"\*\*기간:\*\*\s*([^\n]+)", md_text)
-        label = period.group(1).strip() if period else ym
         catalog["monthly"].append(
             {
-                "label": label,
+                "label": ym,
                 "title": title,
                 "href": rel.as_posix(),
                 "meta": _monthly_meta(md_text),
