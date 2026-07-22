@@ -525,29 +525,75 @@ def _highlight_after_md_label(line: str, keywords: list[str]) -> str:
     return _highlight_keywords(line, keywords)
 
 
+_OPINION_PREFIXES = ("(의견)", "(해석)")
+
+
+def _is_opinion_line(text: str) -> bool:
+    stripped = (text or "").strip()
+    return any(stripped.startswith(p) for p in _OPINION_PREFIXES)
+
+
+def _strip_opinion_prefix(text: str) -> str:
+    stripped = (text or "").strip()
+    for prefix in _OPINION_PREFIXES:
+        if stripped.startswith(prefix):
+            return stripped[len(prefix) :].strip()
+    return stripped
+
+
+def _format_opinion_line(text: str) -> str:
+    body = _strip_opinion_prefix(text)
+    return f"(의견) {body}" if body else ""
+
+
 def _build_summary_lines(
     article: SummarizedArticle,
     top_keywords: list[str] | None = None,
 ) -> list[str]:
+    """Fact bullets first (prefer 「」 quotes); opinions on separate `(의견)` lines."""
     steps = article.ko_summary_steps
     facts: list[str] = []
+    opinions: list[str] = []
+
+    # Prefer verbatim press/article quotes as lead fact bullets.
+    for quote in (article.rd_evidence_quotes or [])[:2]:
+        q = (quote or "").strip()
+        if q and q not in facts:
+            facts.append(q)
 
     rd_heading_prefixes = ("투자 주체", "투자 목적", "위탁 연구 니즈", "접근 전략")
+    opinion_step_labels = ("위탁 연구 니즈", "접근 전략")
     for step in steps:
         cleaned = polish_korean(strip_cjk_from_korean(_strip_heading(step)))
         cleaned = re.sub(r"\[\d+\]\s*$", "", cleaned).strip()
         cleaned = normalize_korean_endings_sentences(cleaned)
-        if cleaned and not cleaned.startswith("(해석)"):
-            if any(label in step for label in rd_heading_prefixes):
-                continue
+        if not cleaned:
+            continue
+        if _is_opinion_line(cleaned) or any(label in step for label in opinion_step_labels):
+            skip_vals = ("해당 없음", "명시 없음", "팩트 부족으로 판단 보류")
+            body = _strip_opinion_prefix(cleaned)
+            if body and body not in skip_vals:
+                line = _format_opinion_line(body)
+                if line and line not in opinions:
+                    opinions.append(line)
+            continue
+        if any(label in step for label in rd_heading_prefixes):
+            continue
+        if cleaned not in facts:
             facts.append(cleaned)
         if len(facts) >= 3:
             break
 
     if len(facts) < 2 and article.llm_summary:
         headline = re.sub(r"\s*(?:Source|출처):.*$", "", article.llm_summary, flags=re.IGNORECASE).strip()
-        if headline and headline not in facts:
+        if headline and headline not in facts and not _is_opinion_line(headline):
             facts.insert(0, headline)
+
+    # Fact-basis with quotes when overview bullets are thin.
+    basis = (article.rd_fact_basis or "").strip()
+    if len(facts) < 2 and basis and basis not in ("명시 없음", "해당 없음"):
+        if basis not in facts:
+            facts.append(basis)
 
     while len(facts) < 2:
         facts.append("원문 기준 핵심 사실을 추가 확인 필요")
@@ -564,9 +610,12 @@ def _build_summary_lines(
         interpretation = f"{article.key_trends[0]} 흐름과 연결되는 시장 신호로 보임"
 
     if interpretation:
-        facts.append(f"(해석) {interpretation}")
+        line = _format_opinion_line(interpretation)
+        if line and line not in opinions:
+            opinions.append(line)
 
-    return facts[:5]
+    # Facts first, then each opinion on its own line (never mixed into fact bullets).
+    return (facts + opinions)[:6]
 
 
 def _time_label(article: SummarizedArticle, index: int) -> str:
@@ -1027,7 +1076,7 @@ def _extract_fact_sentence(
             continue
         cleaned = polish_korean(strip_cjk_from_korean(_strip_heading(raw)))
         cleaned = re.sub(r"\[\d+\]\s*$", "", cleaned).strip()
-        if not cleaned or cleaned.startswith("(해석)"):
+        if not cleaned or _is_opinion_line(cleaned):
             continue
         for sentence in _split_sentences(cleaned):
             if _is_interpretive_sentence(sentence):
@@ -1727,7 +1776,7 @@ def _build_item_block(
 
     linked_summary: list[str] = []
     for idx, line in enumerate(summary_lines):
-        if idx == 0 and _is_http_url(url) and not line.startswith("(해석)"):
+        if idx == 0 and _is_http_url(url) and not _is_opinion_line(line):
             linked_summary.append(_link_text(line, url))
         else:
             linked_summary.append(line)
