@@ -28,10 +28,14 @@ _PLAN_MAP_MAX_CHUNKS = int(os.getenv("GOV_PLAN_MAP_MAX_CHUNKS", "5"))
 _MAP_SYSTEM = """당신은 프라운호퍼 한국 사무소용 R&D·기술협력 타깃팅 분석가입니다.
 정부·공공기관 발표 원문 일부에서, 프라운호퍼 협력·기술이전·R&D 사업 기회와 연관된 사실만 추출합니다.
 우선 추출: 투자·예산·사업기간, 주관/참여 기관, MOU·공동연구·기술이전, 표준·인증·실증, 기술 격차·로드맵, 분석 키워드 연관 내용.
-원문에 없는 내용 추가 금지. 수치·연도·기관명은 원문 그대로.
+팩트체크:
+1) 원문에 없는 내용·수치·기관명 추가 금지. 수치·연도·기관명은 원문 그대로.
+2) 가능하면 원문 구절을 「」로 직접 인용해 facts에 넣음(의역보다 인용 우선).
+3) 분석 의견·추론은 facts에 넣지 말 것. 의견이 있으면 별도 "opinions"에 '(의견)' 접두로만.
 JSON만 반환:
 {
-  "facts": ["사실 1", "사실 2"],
+  "facts": ["「원문 인용 또는 팩트」", "사실 2"],
+  "opinions": ["(의견) …"],
   "section_hint": "이 구간 주제 한 줄"
 }"""
 
@@ -87,6 +91,7 @@ class FocusedDocumentSummarizer:
         chunks = chunk_plan_text(normalized)
         selected = select_relevant_chunks(chunks, self._keywords, max_chunks=max_chunks)
         facts: list[str] = []
+        opinions: list[str] = []
         kw_label = ", ".join(self._keywords)
 
         for index, chunk in enumerate(selected, start=1):
@@ -95,6 +100,7 @@ class FocusedDocumentSummarizer:
                 _MAP_SYSTEM,
                 (
                     "프라운호퍼 한국 사무소 관점: 협력·기술이전·R&D 사업·표준·실증 기회 위주로 추출.\n"
+                    "원문에 없는 내용 금지. 가능하면 「」 직접 인용. 의견은 opinions에만.\n"
                     f"문서/발표 제목: {title}\n"
                     f"분석 기준 키워드: {kw_label}\n"
                     f"원문 구간 {index}/{len(selected)}:\n{chunk[:_CHUNK_CHARS]}"
@@ -102,10 +108,24 @@ class FocusedDocumentSummarizer:
             )
             for fact in payload.get("facts") or []:
                 cleaned = str(fact).strip()
+                if cleaned.startswith("(의견)"):
+                    if cleaned not in opinions:
+                        opinions.append(cleaned)
+                    continue
                 if cleaned and cleaned not in facts:
                     facts.append(cleaned)
+            for opinion in payload.get("opinions") or []:
+                cleaned = str(opinion).strip()
+                if not cleaned:
+                    continue
+                if not cleaned.startswith("(의견)"):
+                    cleaned = f"(의견) {cleaned}"
+                if cleaned not in opinions:
+                    opinions.append(cleaned)
             if index < len(selected):
                 time.sleep(REQUEST_DELAY)
+        # Keep opinions available for reduce via attribute (facts-only return for callers).
+        self._last_opinions = opinions
         return facts
 
     def summarize_article(self, article: FilteredArticle) -> SummarizedArticle:
@@ -117,20 +137,29 @@ class FocusedDocumentSummarizer:
             raise ValueError(f"No relevant facts extracted for: {article.title[:60]}")
 
         facts_text = "\n".join(f"- {fact}" for fact in facts[:40])
+        opinions = getattr(self, "_last_opinions", []) or []
+        opinions_text = (
+            "\n".join(f"- {op}" for op in opinions[:10])
+            if opinions
+            else "(없음)"
+        )
         kw_label = ", ".join(self._keywords)
 
         time.sleep(REQUEST_DELAY)
         payload = self._chat_json(
             SYSTEM_PROMPT,
             (
-                "아래는 정부·공공기관 발표 원문에서 추출한 사실 목록입니다. "
-                "전체 원문이 아닌 이 사실만 바탕으로 프라운호퍼 한국 사무소 관점 요약을 작성하세요.\n\n"
+                "아래는 정부·공공기관 발표 원문에서 추출한 사실·의견 목록입니다. "
+                "전체 원문이 아닌 이 목록만 바탕으로 프라운호퍼 한국 사무소 관점 요약을 작성하세요.\n"
+                "규칙: (1) facts에 없는 내용 추가 금지 (2) 「」 직접 인용 유지 "
+                "(3) 의견은 keyword_relevance·위탁/접근에만 '(의견)'으로 줄 바꿔 분리.\n\n"
                 f"Title: {article.title}\n"
                 f"URL: {article.url}\n"
                 f"Source: {article.source_name} ({article.category})\n"
                 f"Matched keywords: {', '.join(article.matched_keywords)}\n"
                 f"Analysis baseline keywords: {kw_label}\n"
-                f"Extracted facts from original document:\n{facts_text}"
+                f"Extracted facts from original document:\n{facts_text}\n"
+                f"Extracted opinions (optional, not facts):\n{opinions_text}"
             ),
         )
         return _article_from_payload(article, payload)

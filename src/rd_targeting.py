@@ -314,28 +314,55 @@ def build_rd_targeting_block(
         return []
 
     score = compute_rd_match_score(article, top_keywords)
-    label_map = {
-        "investment_actor": "투자 주체",
-        "investment_purpose": "투자 목적",
-        "pain_point": "위탁 연구 니즈",
-        "approach_strategy": "접근 전략",
-    }
+    fact_label_map = (
+        ("investment_actor", "투자 주체"),
+        ("investment_purpose", "투자 목적"),
+    )
+    opinion_label_map = (
+        ("pain_point", "위탁 연구 니즈"),
+        ("approach_strategy", "접근 전략"),
+    )
+    skip_vals = ("해당 없음", "명시 없음", "팩트 부족으로 판단 보류", "")
+
     lines = [
         f"- **R&D 적합도:** {score}/5",
         "- **R&D 타겟팅 (프라운호퍼):**",
     ]
-    prop = polish_rd_field(article.rd_proposable_area or "")
-    if prop and prop not in ("해당 없음", "명시 없음"):
-        lines.append(f"  - **제안 R&D 영역:** {prop}")
+
     fact = (article.rd_fact_basis or "").strip()
-    if fact and fact not in ("명시 없음", ""):
+    if fact and fact not in skip_vals:
         lines.append(f"  - **팩트 근거:** {fact}")
-    for key, label in label_map.items():
+    quotes = [q.strip() for q in (article.rd_evidence_quotes or []) if (q or "").strip()]
+    if quotes:
+        lines.append("  - **원문 인용:**")
+        for quote in quotes[:3]:
+            lines.append(f"    - {quote}")
+
+    for key, label in fact_label_map:
         value = fields.get(key, "").strip()
-        if value:
-            if key == "approach_strategy":
-                value = _display_rd_field(value)
+        if value and value not in skip_vals:
             lines.append(f"  - **{label}:** {value}")
+
+    opinion_lines: list[str] = []
+    prop = polish_rd_field(article.rd_proposable_area or "")
+    if prop and prop not in skip_vals:
+        body = prop.removeprefix("(의견)").strip()
+        opinion_lines.append(f"  - **제안 R&D 영역:** (의견) {body}")
+    for key, label in opinion_label_map:
+        value = fields.get(key, "").strip()
+        if not value or value in skip_vals:
+            continue
+        if key == "approach_strategy":
+            value = _display_rd_field(value)
+        body = value.removeprefix("(의견)").strip()
+        if body and body not in skip_vals:
+            opinion_lines.append(f"  - **{label}:** (의견) {body}")
+
+    if opinion_lines:
+        # Blank line then opinions — keep analysis separate from source facts.
+        lines.append("")
+        lines.extend(opinion_lines)
+
     return lines if len(lines) > 2 else []
 
 

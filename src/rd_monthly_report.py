@@ -200,23 +200,27 @@ def _synthesize_monthly_ko(
 - 한국 국내 정부·기업 R&D 위탁·협력 기회만 다룸. 해외 시장·글로벌 벤더 분석 금지.
 - 모든 문장 명사형 종결(-함/-임/-었음). -습니다/-합니다 금지.
 - 한글 문장 안에 영어 단어를 섞지 말 것. 용어는 한글로 통일(예: 인텔리전스). Intelligence·인텔리gence 등 혼용 금지.
-- 소스에 없는 수치·기관명 추가 금지. **추측·제안 문구 금지**(‘제안 가능’·‘협력 가능’·‘정책 정합’ 등).
-- **팩트체크 (필수):** 모니터링 키워드 전체를 opportunities.summary에 나열하지 말 것. attested_keywords·evidence_quotes에 있는 용어만 언급.
-- **근거는 보도자료 직접 인용:** evidence_quotes가 있으면 항목 서술·summary에 「」 인용문을 그대로 포함.
+
+팩트체크 (필수):
+1) **없는 내용 금지:** 입력 항목·evidence_quotes·fact에 없는 수치·기관명·사업명·기술용어를 추가하지 말 것. 모르면 생략.
+2) **직접 인용 우선:** evidence_quotes가 있으면 항목 서술·summary·executive_summary에 「」 인용문을 원문 그대로 포함. 의역만으로 대체하지 말 것.
+3) **의견 분리:** 추측·제안·시사점·'협력 가능'·'정책 정합' 등 분석 의견은 팩트 문장과 같은 줄에 쓰지 말 것. 의견이 꼭 필요할 때만 해당 문장 앞에 '(의견)'을 붙이고 줄바꿈으로 분리. 기본은 의견 생략(팩트만).
+
+- **팩트체크 (키워드):** 모니터링 키워드 전체를 opportunities.summary에 나열하지 말 것. attested_keywords·evidence_quotes에 있는 용어만 언급.
 - §4 상세·Action Plan은 **팩트만**: 일자·금액·건수·표준번호·사업명·장소·참석·시행일 등 fact/summary/evidence_quotes에 있는 구체 수치를 길게 서술.
 - 위탁 연구 니즈·제안 R&D·접근 전략·관련도 문구를 opportunities/action_plan에 쓰지 말 것(렌더러가 §4에서도 생략함).
 - keyword_relevance, fact, actor, purpose, relevance, attested_keywords, evidence_quotes 필드를 적극 활용. pain/strategy/proposable는 참고만 하고 그대로 복사하지 말 것.
 - opportunities.summary는 분야별 서두 1~2문장(건수·[정부]·[컨텍스트] 라벨 금지). **원문에 없는 키워드 리스트 삽입 금지.**
-- opportunities.items는 항목마다 팩트 중심 2~4문장: 누가·언제·무엇(사업·표준·금액)·수치 + 가능하면 원문 인용. 명사형 종결.
+- opportunities.items는 항목마다 팩트 중심 2~4문장: 누가·언제·무엇(사업·표준·금액)·수치 + **원문 「」 인용 필수(있으면)**. 명사형 종결. 의견은 별도 문장·'(의견)' 접두만.
 
 입력 데이터:
 {json.dumps(entries, ensure_ascii=False)}
 
 JSON 스키마:
 {{
-  "executive_summary": "5~7문장. attested 키워드·원문 인용 가능한 이슈만 + 국내 전력·에너지·ICT R&D 투자 트렌드 + 당월 정부·기업 핵심 수치",
+  "executive_summary": "5~7문장. attested 키워드·원문 「」 인용 가능한 이슈만 + 국내 전력·에너지·ICT R&D 투자 트렌드 + 당월 정부·기업 핵심 수치. 없는 사실 금지",
   "context_highlights": [
-    {{"relevance": "직접|간접", "matched_keywords": "매칭 키워드", "summary": "핵심 이슈 2~3문장(팩트·수치·인용)", "refs": [1]}}
+    {{"relevance": "직접|간접", "matched_keywords": "매칭 키워드", "summary": "핵심 이슈 2~3문장(팩트·수치·「」인용). 의견은 '(의견)' 별도 문장", "refs": [1]}}
   ],
   "opportunities": [
     {{"field": "분야명(전력·그리드/제조AI/표준·인증 등)", "summary": "분야 공통 맥락 1~2문장(attested 키워드만)", "items": ["팩트+원문인용 항목 서술", "..."], "refs": [1,2]}}
@@ -231,7 +235,10 @@ JSON 스키마:
         messages=[
             {
                 "role": "system",
-                "content": "국내 R&D 타겟팅 월간 보고서 작성. JSON만 반환.",
+                "content": (
+                    "국내 R&D 타겟팅 월간 보고서 작성. JSON만 반환. "
+                    "없는 내용 금지·원문 「」 직접 인용 우선·단순 의견은 '(의견)'으로 줄 바꿔 분리."
+                ),
             },
             {"role": "user", "content": prompt},
         ],

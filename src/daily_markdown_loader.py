@@ -227,8 +227,9 @@ def _split_summary_lines(summary_lines: list[str]) -> tuple[list[str], list[str]
     key_trends: list[str] = []
 
     for line in summary_lines:
-        if line.startswith("(해석)"):
-            interpretation = line.removeprefix("(해석)").strip()
+        if line.startswith("(해석)") or line.startswith("(의견)"):
+            prefix = "(해석)" if line.startswith("(해석)") else "(의견)"
+            interpretation = line.removeprefix(prefix).strip()
             if interpretation.endswith(" 흐름과 연결되는 시장 신호로 보임"):
                 trend = interpretation.removesuffix(" 흐름과 연결되는 시장 신호로 보임").strip()
                 if trend:
