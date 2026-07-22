@@ -122,19 +122,32 @@ a:hover { color: var(--brand); }
   outline: 2px solid #b7ddd5; outline-offset: 1px; background: #fff;
 }
 .config-linked {
-  width: 100%; min-height: min(70vh, 720px); max-height: min(75vh, 800px); overflow: auto;
-  margin: 0 0 0.75rem; padding: 0.85rem 1rem;
+  width: 100%; min-height: min(50vh, 560px); max-height: min(75vh, 800px); overflow: auto;
+  margin: 0 0 0.75rem; padding: 0.65rem 0.85rem;
   border: 1px solid var(--line); border-radius: 10px;
   background: #fafcfb; color: var(--ink);
-  font-family: ui-monospace, "Cascadia Code", "Consolas", monospace;
-  font-size: 0.82rem; line-height: 1.55; white-space: pre-wrap; word-break: break-all;
 }
 .config-linked[hidden] { display: none !important; }
-.config-linked a {
-  color: var(--brand-dark); font-weight: 650; text-decoration: underline;
-  text-underline-offset: 2px;
+.config-linked .src-list {
+  list-style: none; margin: 0; padding: 0;
 }
-.config-linked a:hover { color: var(--brand); }
+.config-linked .src-list li {
+  display: flex; flex-wrap: wrap; gap: 0.35rem 0.75rem; align-items: baseline;
+  padding: 0.55rem 0.35rem; border-bottom: 1px solid #e6efec;
+  font-size: 0.9rem; line-height: 1.4;
+}
+.config-linked .src-list li:last-child { border-bottom: none; }
+.config-linked .src-name {
+  font-weight: 650; color: var(--ink); min-width: 10rem;
+}
+.config-linked .src-list a {
+  color: var(--brand-dark); font-weight: 600; text-decoration: underline;
+  text-underline-offset: 2px; word-break: break-all;
+}
+.config-linked .src-list a:hover { color: var(--brand); }
+.config-linked .src-empty {
+  margin: 1rem 0.35rem; color: var(--muted); font-size: 0.88rem;
+}
 .config-editor[hidden] { display: none !important; }
 .config-hint {
   margin: 0.75rem 0 0; color: var(--muted); font-size: 0.8rem; line-height: 1.5;

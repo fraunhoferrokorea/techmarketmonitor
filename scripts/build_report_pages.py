@@ -138,19 +138,32 @@ a:hover { color: var(--brand); }
   outline: 2px solid #b7ddd5; outline-offset: 1px; background: #fff;
 }
 .config-linked {
-  width: 100%; min-height: min(70vh, 720px); max-height: min(75vh, 800px); overflow: auto;
-  margin: 0 0 0.75rem; padding: 0.85rem 1rem;
+  width: 100%; min-height: min(50vh, 560px); max-height: min(75vh, 800px); overflow: auto;
+  margin: 0 0 0.75rem; padding: 0.65rem 0.85rem;
   border: 1px solid var(--line); border-radius: 10px;
   background: #fafcfb; color: var(--ink);
-  font-family: ui-monospace, "Cascadia Code", "Consolas", monospace;
-  font-size: 0.82rem; line-height: 1.55; white-space: pre-wrap; word-break: break-all;
 }
 .config-linked[hidden] { display: none !important; }
-.config-linked a {
-  color: var(--brand-dark); font-weight: 650; text-decoration: underline;
-  text-underline-offset: 2px;
+.config-linked .src-list {
+  list-style: none; margin: 0; padding: 0;
 }
-.config-linked a:hover { color: var(--brand); }
+.config-linked .src-list li {
+  display: flex; flex-wrap: wrap; gap: 0.35rem 0.75rem; align-items: baseline;
+  padding: 0.55rem 0.35rem; border-bottom: 1px solid #e6efec;
+  font-size: 0.9rem; line-height: 1.4;
+}
+.config-linked .src-list li:last-child { border-bottom: none; }
+.config-linked .src-name {
+  font-weight: 650; color: var(--ink); min-width: 10rem;
+}
+.config-linked .src-list a {
+  color: var(--brand-dark); font-weight: 600; text-decoration: underline;
+  text-underline-offset: 2px; word-break: break-all;
+}
+.config-linked .src-list a:hover { color: var(--brand); }
+.config-linked .src-empty {
+  margin: 1rem 0.35rem; color: var(--muted); font-size: 0.88rem;
+}
 .config-editor[hidden] { display: none !important; }
 .config-hint {
   margin: 0.75rem 0 0; color: var(--muted); font-size: 0.8rem; line-height: 1.5;
@@ -397,23 +410,32 @@ function escapeHtml(s) {{
     .replace(/"/g, "&quot;");
 }}
 
-function linkifyConfigText(text) {{
-  // Match URLs on raw text (allow & in query), then escape for HTML.
-  // Stop at whitespace or pipe so "url | korean" stays correct.
-  const src = text || "";
-  const re = /(https?:\\/\\/[^\\s|]+)/g;
-  let out = "";
-  let last = 0;
-  let match;
-  while ((match = re.exec(src)) !== null) {{
-    out += escapeHtml(src.slice(last, match.index));
-    const url = match[1];
-    const safe = escapeHtml(url);
-    out += `<a href="${{safe}}" target="_blank" rel="noopener noreferrer">${{safe}}</a>`;
-    last = match.index + url.length;
+function parseSourcesRows(text) {{
+  // Active lines only — never show the raw sources.txt dump / comments.
+  const rows = [];
+  (text || "").split(/\\r?\\n/).forEach(line => {{
+    const t = line.trim();
+    if (!t || t.startsWith("#")) return;
+    const parts = t.split("|").map(p => p.trim());
+    if (parts.length < 2) return;
+    const name = parts[0];
+    const url = parts[1];
+    if (!name || !/^https?:\\/\\//i.test(url)) return;
+    rows.push({{ name, url }});
+  }});
+  return rows;
+}}
+
+function renderSourcesLinkList(text) {{
+  const rows = parseSourcesRows(text);
+  if (!rows.length) {{
+    return '<p class="src-empty">표시할 소스가 없습니다. 「편집」에서 sources.txt를 확인하세요.</p>';
   }}
-  out += escapeHtml(src.slice(last));
-  return out;
+  return '<ul class="src-list">' + rows.map(r => {{
+    const name = escapeHtml(r.name);
+    const url = escapeHtml(r.url);
+    return `<li><span class="src-name">${{name}}</span><a href="${{url}}" target="_blank" rel="noopener noreferrer">${{url}}</a></li>`;
+  }}).join("") + "</ul>";
 }}
 
 function syncSourcesModeUi() {{
@@ -431,9 +453,16 @@ function syncSourcesModeUi() {{
   }}
   modeBtn.hidden = false;
   modeBtn.textContent = sourcesEditMode ? "링크 보기" : "편집";
-  view.innerHTML = linkifyConfigText(editor.value || "");
-  view.hidden = sourcesEditMode;
-  editor.hidden = !sourcesEditMode;
+  // Default: clickable list only. Raw sources.txt text is edit-only.
+  if (!sourcesEditMode) {{
+    view.innerHTML = renderSourcesLinkList(editor.value || "");
+    view.hidden = false;
+    editor.hidden = true;
+  }} else {{
+    view.innerHTML = "";
+    view.hidden = true;
+    editor.hidden = false;
+  }}
 }}
 
 function renderConfigLinked(text) {{
@@ -607,8 +636,15 @@ async function loadConfig(id, opts) {{
   qs("config-title").textContent = file.label;
   qs("config-hint").textContent = file.hint;
   qs("btn-github").href = `https://github.com/${{GH_REPO}}/edit/${{GH_BRANCH}}/${{file.path}}`;
-  qs("config-editor").value = "불러오는 중…";
+  qs("config-editor").value = "";
   qs("config-editor").disabled = true;
+  // Hide raw textarea immediately for sources (show list after load).
+  syncSourcesModeUi();
+  if (id === "sources") {{
+    qs("config-linked").hidden = false;
+    qs("config-linked").innerHTML = '<p class="src-empty">불러오는 중…</p>';
+    qs("config-editor").hidden = true;
+  }}
   setStatus("", "");
   history.replaceState(null, "", "#config/" + id);
   fileSha = null;
@@ -950,7 +986,7 @@ def main() -> None:
             "label": "sources.txt",
             "path": "sources.txt",
             "href": "config/sources.txt",
-            "hint": "URL은 파란 하이퍼링크입니다(새 탭). 수정하려면 「편집」을 누르세요. RSS 수집 주소는 config/sources.yaml 의 feed_url.",
+            "hint": "소스 이름 + 파란 URL만 표시합니다(새 탭). 원문 sources.txt는 「편집」에서만 보입니다. RSS는 config/sources.yaml 의 feed_url.",
         },
     ]
 
