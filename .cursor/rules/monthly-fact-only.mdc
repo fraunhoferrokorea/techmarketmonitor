@@ -1,0 +1,35 @@
+---
+description: Monthly R&D report §4 detail and Action Plan must be fact-only
+globs:
+  - src/rd_monthly_report.py
+  - output/monthly/**
+  - docs/monthly/**
+---
+
+# Monthly R&D Report — Fact-Only Detail
+
+## §4 주요 R&D 타겟 상세 (per item)
+
+Render **only**:
+1. **투자 주체**
+2. **투자 목적**
+3. **팩트 근거** — long, concrete: dates, amounts, counts, standard IDs, program names, venues, attendees, effective dates from the source press release
+4. **출처**
+
+**Do not render** in §4:
+- 위탁 연구 니즈
+- 제안 R&D
+- 접근 전략
+- 관련도 · 매칭 · 적합도
+
+## §5 Action Plan
+
+Columns: `타겟 | 핵심 팩트 | 추진 팩트` — fill with source numbers/dates, not “제안 가능함 / 협력 가능함 / 정책 정합”.
+
+## §6 스코어카드
+
+May keep score / 관련도 (appendix ranking only).
+
+## Generation
+
+`src/rd_monthly_report.py` `_build_markdown` omits speculative fields; LLM prompt forbids copying pain/strategy/proposable into opportunities/action_plan.

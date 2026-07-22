@@ -88,10 +88,12 @@ def _synthesize_monthly_ko(
 - 한국 국내 정부·기업 R&D 위탁·협력 기회만 다룸. 해외 시장·글로벌 벤더 분석 금지.
 - 모든 문장 명사형 종결(-함/-임/-었음). -습니다/-합니다 금지.
 - 한글 문장 안에 영어 단어를 섞지 말 것. 용어는 한글로 통일(예: 인텔리전스). Intelligence·인텔리gence 등 혼용 금지.
-- 소스에 없는 수치·기관명 추가 금지.
-- keyword_relevance, proposable, fact, actor/purpose/pain/strategy, relevance 필드를 적극 활용.
+- 소스에 없는 수치·기관명 추가 금지. **추측·제안 문구 금지**(‘제안 가능’·‘협력 가능’·‘정책 정합’ 등).
+- §4 상세·Action Plan은 **팩트만**: 일자·금액·건수·표준번호·사업명·장소·참석·시행일 등 fact/summary에 있는 구체 수치를 길게 서술.
+- 위탁 연구 니즈·제안 R&D·접근 전략·관련도 문구를 opportunities/action_plan에 쓰지 말 것(렌더러가 §4에서도 생략함).
+- keyword_relevance, fact, actor, purpose, relevance 필드를 적극 활용. pain/strategy/proposable는 참고만 하고 그대로 복사하지 말 것.
 - opportunities.summary는 분야별 서두 1~2문장(건수·[정부]·[컨텍스트] 라벨 금지).
-- opportunities.items는 항목마다 육하원칙 기반 2~4문장: 누가(주체)·언제(일자)·무엇(발표·사업)·왜(목적)·어떻게(협력·접근). 명사형 종결.
+- opportunities.items는 항목마다 팩트 중심 2~4문장: 누가·언제·무엇(사업·표준·금액)·수치. 명사형 종결.
 
 입력 데이터:
 {json.dumps(entries, ensure_ascii=False)}
@@ -100,13 +102,13 @@ JSON 스키마:
 {{
   "executive_summary": "5~7문장. 모니터링 키워드 직접·간접 이슈 + 국내 전력·에너지·ICT R&D 투자 트렌드 + 당월 정부·기업 핵심 수치",
   "context_highlights": [
-    {{"relevance": "직접|간접", "matched_keywords": "매칭 키워드", "summary": "핵심 이슈 2~3문장", "refs": [1]}}
+    {{"relevance": "직접|간접", "matched_keywords": "매칭 키워드", "summary": "핵심 이슈 2~3문장(팩트·수치)", "refs": [1]}}
   ],
   "opportunities": [
-    {{"field": "분야명(전력·그리드/제조AI/표준·인증 등)", "summary": "분야 공통 맥락 1~2문장", "items": ["육하원칙 기반 항목 서술", "..."], "refs": [1,2]}}
+    {{"field": "분야명(전력·그리드/제조AI/표준·인증 등)", "summary": "분야 공통 맥락 1~2문장", "items": ["팩트 중심 항목 서술(일자·금액·사업명)", "..."], "refs": [1,2]}}
   ],
   "action_plan": [
-    {{"target": "부처/기업명", "contact_angle": "접촉 논리", "rd_area": "제안 R&D", "refs": [1]}}
+    {{"target": "부처/기업명", "contact_angle": "추진 팩트(일정·규모·시행일)", "rd_area": "핵심 팩트 요약(사업·표준·수치)", "refs": [1]}}
   ]
 }}"""
     response = client.chat.completions.create(
@@ -282,26 +284,17 @@ def _build_markdown(
         )
         lines.append(f"### [{item['ref']}] {title}")
         lines.append("")
+        # Fact-only detail: omit speculative 위탁/제안/접근/관련도.
         detail_fields = [
             ("투자 주체", item.get("actor")),
             ("투자 목적", item.get("purpose")),
-            ("위탁 연구 니즈", item.get("pain")),
-            ("제안 R&D", item.get("proposable")),
-            ("접근 전략", item.get("strategy")),
-            ("팩트 근거", item.get("fact")),
+            ("팩트 근거", item.get("fact") or item.get("summary")),
         ]
         for label, value in detail_fields:
             if value:
                 lines.append(
                     _highlight_after_md_label(f"- **{label}:** {value}", hl)
                 )
-        rel = item.get("relevance", "—")
-        matched = _mark_keyword_tokens(
-            item.get("matched_keywords") or "—", hl
-        )
-        lines.append(
-            f"- **관련도:** {rel} · 매칭: {matched} · 적합도 {item['score']}/5"
-        )
         if item.get("url"):
             lines.append(f"- **출처:** [{item.get('source') or '링크'}]({item['url']})")
         lines.append("")
@@ -309,8 +302,8 @@ def _build_markdown(
     lines += [
         "## 5. Action Plan (접촉 타겟)",
         "",
-        "| 타겟 (부처/기업) | 제안 R&D 영역 | 접촉 논리 |",
-        "|----------------|--------------|----------|",
+        "| 타겟 (부처/기업) | 핵심 팩트 | 추진 팩트 |",
+        "|----------------|----------|----------|",
     ]
 
     action_plan = structured.get("action_plan") or []
