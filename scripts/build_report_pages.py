@@ -20,40 +20,6 @@ GH_BRANCH = "main"
 
 _MD_EXT = ["tables", "fenced_code", "sane_lists", "smarty"]
 
-
-def _write_sources_markdown(sources_txt: Path, dest: Path) -> None:
-    """GitHub-rendered clickable list (same browse URLs as homepage Config)."""
-    lines = [
-        "# 수집 소스 링크",
-        "",
-        "홈페이지 Config와 같은 **클릭 가능한** 목록/홈 URL입니다.",
-        "수집기 설정 원본은 [`sources.txt`](sources.txt)이고, RSS 주소는 `config/sources.yaml`의 `feed_url`입니다.",
-        "",
-    ]
-    try:
-        raw_lines = sources_txt.read_text(encoding="utf-8").splitlines()
-    except FileNotFoundError:
-        dest.write_text("\n".join(lines) + "\n", encoding="utf-8")
-        return
-
-    count = 0
-    for line in raw_lines:
-        stripped = line.strip()
-        if not stripped or stripped.startswith("#"):
-            continue
-        parts = [p.strip() for p in stripped.split("|")]
-        if len(parts) < 2:
-            continue
-        name, url = parts[0], parts[1]
-        if not name or not url.startswith(("http://", "https://")):
-            continue
-        lines.append(f"- **{name}** — [{url}]({url})")
-        count += 1
-
-    lines.extend(["", f"_총 {count}개 소스_", ""])
-    dest.write_text("\n".join(lines), encoding="utf-8")
-
-
 # Fraunhofer-inspired teal institutional palette (not purple / cream-serif)
 _CSS = """\
 :root {
@@ -445,16 +411,37 @@ function escapeHtml(s) {{
 }}
 
 function parseSourcesRows(text) {{
-  // Active lines only — never show the raw sources.txt dump / comments.
+  // Parse sources.md markdown links (same rules as src/config.py).
   const rows = [];
+  const seen = new Set();
+  const named = /^\\s*[-*]\\s+\\*\\*(.+?)\\*\\*\\s*[—–\\-:]+\\s*\\[([^\\]]*)\\]\\((https?:\\/\\/[^)\\s]+)\\)/;
+  const simple = /^\\s*[-*]\\s+\\[([^\\]]+)\\]\\((https?:\\/\\/[^)\\s]+)\\)/;
+  const anyLink = /\\[([^\\]]*)\\]\\((https?:\\/\\/[^)\\s]+)\\)/;
   (text || "").split(/\\r?\\n/).forEach(line => {{
     const t = line.trim();
     if (!t || t.startsWith("#")) return;
-    const parts = t.split("|").map(p => p.trim());
-    if (parts.length < 2) return;
-    const name = parts[0];
-    const url = parts[1];
-    if (!name || !/^https?:\\/\\//i.test(url)) return;
+    let name = "";
+    let url = "";
+    let m = t.match(named);
+    if (m) {{
+      name = m[1].trim();
+      url = m[3].trim();
+    }} else {{
+      m = t.match(simple);
+      if (m) {{
+        name = m[1].trim();
+        url = m[2].trim();
+      }} else {{
+        m = t.match(anyLink);
+        if (!m) return;
+        name = (m[1] || "").trim() || m[2].trim();
+        url = m[2].trim();
+      }}
+    }}
+    if (!url) return;
+    name = name || url;
+    if (seen.has(name)) return;
+    seen.add(name);
     rows.push({{ name, url }});
   }});
   return rows;
@@ -463,7 +450,7 @@ function parseSourcesRows(text) {{
 function renderSourcesLinkList(text) {{
   const rows = parseSourcesRows(text);
   if (!rows.length) {{
-    return '<p class="src-empty">표시할 소스가 없습니다. 「편집」에서 sources.txt를 확인하세요.</p>';
+    return '<p class="src-empty">표시할 소스가 없습니다. 「편집」에서 sources.md를 확인하세요.</p>';
   }}
   return '<ul class="src-list">' + rows.map(r => {{
     const name = escapeHtml(r.name);
@@ -487,7 +474,7 @@ function syncSourcesModeUi() {{
   }}
   modeBtn.hidden = false;
   modeBtn.textContent = sourcesEditMode ? "링크 보기" : "편집";
-  // Default: clickable list only. Raw sources.txt text is edit-only.
+  // Default: clickable list only. Raw sources.md is edit-only.
   if (!sourcesEditMode) {{
     view.innerHTML = renderSourcesLinkList(editor.value || "");
     view.hidden = false;
@@ -754,7 +741,7 @@ async function commitCurrent(ev) {{
 
   const file = CONFIG_FILES.find(f => f.id === currentConfigId);
   if (!file) {{
-    setStatus("저장 대상 파일이 없습니다. 왼쪽에서 sources.txt / keywords.txt를 다시 선택하세요", "err");
+    setStatus("저장 대상 파일이 없습니다. 왼쪽에서 sources.md / keywords.txt를 다시 선택하세요", "err");
     return;
   }}
   const content = qs("config-editor").value;
@@ -1017,10 +1004,10 @@ def main() -> None:
         },
         {
             "id": "sources",
-            "label": "sources.txt",
-            "path": "sources.txt",
-            "href": "config/sources.txt",
-            "hint": "소스 이름 + 파란 URL만 표시합니다(새 탭). 원문 sources.txt는 「편집」에서만 보입니다. RSS는 config/sources.yaml 의 feed_url.",
+            "label": "sources.md",
+            "path": "sources.md",
+            "href": "config/sources.md",
+            "hint": "마크다운 링크 목록입니다(새 탭). 링크를 추가하면 다음 수집부터 그 URL도 가져옵니다. RSS 전용 주소·방식은 config/sources.yaml.",
         },
     ]
 
@@ -1077,16 +1064,14 @@ def main() -> None:
     # Snapshot operational config files for the Config viewer.
     cfg_out = SITE_DIR / "config"
     cfg_out.mkdir(parents=True, exist_ok=True)
-    for src_name in ("keywords.txt", "sources.txt"):
+    for src_name in ("keywords.txt", "sources.md"):
         src = ROOT / src_name
         if src.is_file():
             shutil.copy2(src, cfg_out / src_name)
-
-    # GitHub-clickable mirror of sources (markdown renders hyperlinks; .txt does not).
-    sources_txt = ROOT / "sources.txt"
-    if sources_txt.is_file():
-        _write_sources_markdown(sources_txt, ROOT / "sources.md")
-        _write_sources_markdown(sources_txt, cfg_out / "sources.md")
+    # Drop legacy snapshot if present.
+    legacy_txt = cfg_out / "sources.txt"
+    if legacy_txt.exists():
+        legacy_txt.unlink()
 
     # Mirror into docs/ for branch-based (legacy) GitHub Pages.
     if DOCS_DIR.exists():

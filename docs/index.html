@@ -348,7 +348,7 @@ mark {
 
 <script>
 const REPORTS = {"daily": [{"label": "2026-07-21", "title": "Daily 2026-07-21", "href": "daily/2026-07-21.html", "meta": "3건 (기사 3 / 논문 0)"}, {"label": "2026-07-20", "title": "Daily 2026-07-20", "href": "daily/2026-07-20.html", "meta": "1건 (기사 1 / 논문 0)"}, {"label": "2026-07-19", "title": "Daily 2026-07-19", "href": "daily/2026-07-19.html", "meta": "1건 (기사 1 / 논문 0)"}, {"label": "2026-07-18", "title": "Daily 2026-07-18", "href": "daily/2026-07-18.html", "meta": "1건 (기사 1 / 논문 0)"}, {"label": "2026-07-17", "title": "Daily 2026-07-17", "href": "daily/2026-07-17.html", "meta": "0건 (기사 0 / 논문 0)"}, {"label": "2026-07-16", "title": "Daily 2026-07-16", "href": "daily/2026-07-16.html", "meta": "2건 (기사 2 / 논문 0)"}, {"label": "2026-07-15", "title": "Daily 2026-07-15", "href": "daily/2026-07-15.html", "meta": "0건 (기사 0 / 논문 0)"}, {"label": "2026-07-14", "title": "Daily 2026-07-14", "href": "daily/2026-07-14.html", "meta": "0건 (기사 0 / 논문 0)"}, {"label": "2026-07-13", "title": "Daily 2026-07-13", "href": "daily/2026-07-13.html", "meta": "1건 (기사 1 / 논문 0)"}, {"label": "2026-07-12", "title": "Daily 2026-07-12", "href": "daily/2026-07-12.html", "meta": "0건 (기사 0 / 논문 0)"}, {"label": "2026-07-11", "title": "Daily 2026-07-11", "href": "daily/2026-07-11.html", "meta": "0건 (기사 0 / 논문 0)"}, {"label": "2026-07-10", "title": "Daily 2026-07-10", "href": "daily/2026-07-10.html", "meta": "1건 (기사 1 / 논문 0)"}, {"label": "2026-07-09", "title": "Daily 2026-07-09", "href": "daily/2026-07-09.html", "meta": "20건 (기사 20 / 논문 0)"}, {"label": "2026-07-08", "title": "Daily 2026-07-08", "href": "daily/2026-07-08.html", "meta": "13건 (기사 13 / 논문 0)"}, {"label": "2026-07-07", "title": "Daily 2026-07-07", "href": "daily/2026-07-07.html", "meta": "23건 (기사 23 / 논문 0)"}, {"label": "2026-07-06", "title": "Daily 2026-07-06", "href": "daily/2026-07-06.html", "meta": "29건 (기사 29 / 논문 0)"}, {"label": "2026-07-05", "title": "Daily 2026-07-05", "href": "daily/2026-07-05.html", "meta": "29건 (기사 29 / 논문 0)"}, {"label": "2026-07-04", "title": "Daily 2026-07-04", "href": "daily/2026-07-04.html", "meta": "29건 (기사 29 / 논문 0)"}, {"label": "2026-07-03", "title": "Daily 2026-07-03", "href": "daily/2026-07-03.html", "meta": "30건 (기사 30 / 논문 0)"}, {"label": "2026-07-02", "title": "Daily 2026-07-02", "href": "daily/2026-07-02.html", "meta": "7건 (기사 7 / 논문 0)"}, {"label": "2026-07-01", "title": "Daily 2026-07-01", "href": "daily/2026-07-01.html", "meta": "0건 (기사 0 / 논문 0)"}, {"label": "2026-06-30", "title": "Daily 2026-06-30", "href": "daily/2026-06-30.html", "meta": "0건 (기사 0 / 논문 0)"}, {"label": "2026-06-29", "title": "Daily 2026-06-29", "href": "daily/2026-06-29.html", "meta": "12건 (기사 12 / 논문 0)"}], "monthly": [{"label": "2026년 6월", "title": "Monthly 2026-06", "href": "monthly/2026-06.html", "meta": "** 8건 (R&D 적합 4점 이상)"}]};
-const CONFIG_FILES = [{"id": "keywords", "label": "keywords.txt", "path": "keywords.txt", "href": "config/keywords.txt", "hint": "한 줄에 키워드 하나. # 주석·빈 줄 무시. keywords.txt 전체 줄 = 수집 필터 + 분석 (상위 3·5개 제한 없음)."}, {"id": "sources", "label": "sources.txt", "path": "sources.txt", "href": "config/sources.txt", "hint": "소스 이름 + 파란 URL만 표시합니다(새 탭). 원문 sources.txt는 「편집」에서만 보입니다. RSS는 config/sources.yaml 의 feed_url."}];
+const CONFIG_FILES = [{"id": "keywords", "label": "keywords.txt", "path": "keywords.txt", "href": "config/keywords.txt", "hint": "한 줄에 키워드 하나. # 주석·빈 줄 무시. keywords.txt 전체 줄 = 수집 필터 + 분석 (상위 3·5개 제한 없음)."}, {"id": "sources", "label": "sources.md", "path": "sources.md", "href": "config/sources.md", "hint": "마크다운 링크 목록입니다(새 탭). 링크를 추가하면 다음 수집부터 그 URL도 가져옵니다. RSS 전용 주소·방식은 config/sources.yaml."}];
 const GH_REPO = "fraunhoferrokorea/techmarketmonitor";
 const GH_BRANCH = "main";
 const TOKEN_KEY = "tmm_gh_token";
@@ -384,16 +384,37 @@ function escapeHtml(s) {
 }
 
 function parseSourcesRows(text) {
-  // Active lines only — never show the raw sources.txt dump / comments.
+  // Parse sources.md markdown links (same rules as src/config.py).
   const rows = [];
+  const seen = new Set();
+  const named = /^\s*[-*]\s+\*\*(.+?)\*\*\s*[—–\-:]+\s*\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)/;
+  const simple = /^\s*[-*]\s+\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/;
+  const anyLink = /\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)/;
   (text || "").split(/\r?\n/).forEach(line => {
     const t = line.trim();
     if (!t || t.startsWith("#")) return;
-    const parts = t.split("|").map(p => p.trim());
-    if (parts.length < 2) return;
-    const name = parts[0];
-    const url = parts[1];
-    if (!name || !/^https?:\/\//i.test(url)) return;
+    let name = "";
+    let url = "";
+    let m = t.match(named);
+    if (m) {
+      name = m[1].trim();
+      url = m[3].trim();
+    } else {
+      m = t.match(simple);
+      if (m) {
+        name = m[1].trim();
+        url = m[2].trim();
+      } else {
+        m = t.match(anyLink);
+        if (!m) return;
+        name = (m[1] || "").trim() || m[2].trim();
+        url = m[2].trim();
+      }
+    }
+    if (!url) return;
+    name = name || url;
+    if (seen.has(name)) return;
+    seen.add(name);
     rows.push({ name, url });
   });
   return rows;
@@ -402,7 +423,7 @@ function parseSourcesRows(text) {
 function renderSourcesLinkList(text) {
   const rows = parseSourcesRows(text);
   if (!rows.length) {
-    return '<p class="src-empty">표시할 소스가 없습니다. 「편집」에서 sources.txt를 확인하세요.</p>';
+    return '<p class="src-empty">표시할 소스가 없습니다. 「편집」에서 sources.md를 확인하세요.</p>';
   }
   return '<ul class="src-list">' + rows.map(r => {
     const name = escapeHtml(r.name);
@@ -426,7 +447,7 @@ function syncSourcesModeUi() {
   }
   modeBtn.hidden = false;
   modeBtn.textContent = sourcesEditMode ? "링크 보기" : "편집";
-  // Default: clickable list only. Raw sources.txt text is edit-only.
+  // Default: clickable list only. Raw sources.md is edit-only.
   if (!sourcesEditMode) {
     view.innerHTML = renderSourcesLinkList(editor.value || "");
     view.hidden = false;
@@ -693,7 +714,7 @@ async function commitCurrent(ev) {
 
   const file = CONFIG_FILES.find(f => f.id === currentConfigId);
   if (!file) {
-    setStatus("저장 대상 파일이 없습니다. 왼쪽에서 sources.txt / keywords.txt를 다시 선택하세요", "err");
+    setStatus("저장 대상 파일이 없습니다. 왼쪽에서 sources.md / keywords.txt를 다시 선택하세요", "err");
     return;
   }
   const content = qs("config-editor").value;

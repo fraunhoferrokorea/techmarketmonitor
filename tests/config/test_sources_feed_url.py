@@ -2,24 +2,32 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from src.config import _load_sources_txt, load_sources
+from src.config import _load_sources_md, load_sources
 from src.fetchers.registry import build_fetchers
 
 
-def test_load_sources_txt_no_inline_feed_url(tmp_path: Path) -> None:
-    path = tmp_path / "sources.txt"
+def test_load_sources_md_named_and_simple_links(tmp_path: Path) -> None:
+    path = tmp_path / "sources.md"
     path.write_text(
-        "산업통상부 보도자료 | https://www.motir.go.kr/kor/article/ATCL3f49a5a8c | korean | post\n"
-        "과기정통부 보도자료 | https://www.msit.go.kr/index.do | korean\n",
+        "# sources\n"
+        "- **산업통상부 보도자료** — [https://www.motir.go.kr/kor/article/ATCL3f49a5a8c]"
+        "(https://www.motir.go.kr/kor/article/ATCL3f49a5a8c)\n"
+        "- [과기정통부 보도자료](https://www.msit.go.kr/index.do)\n"
+        "- 추가 소스 [새 매체](https://example.com/news)\n",
         encoding="utf-8",
     )
-    sources = _load_sources_txt(path)
-    assert sources[0]["url"] == "https://www.motir.go.kr/kor/article/ATCL3f49a5a8c"
-    assert "feed_url" not in sources[0]
-    assert sources[0]["method"] == "POST"
+    sources = _load_sources_md(path)
+    assert [s["name"] for s in sources] == [
+        "산업통상부 보도자료",
+        "과기정통부 보도자료",
+        "새 매체",
+    ]
+    assert sources[0]["url"].endswith("/ATCL3f49a5a8c")
+    assert sources[2]["url"] == "https://example.com/news"
+    assert all("feed_url" not in s for s in sources)
 
 
-def test_load_sources_merges_feed_url_from_yaml() -> None:
+def test_load_sources_merges_feed_url_and_method_from_yaml() -> None:
     sources = {s["name"]: s for s in load_sources()}
     msit = sources["과기정통부 보도자료"]
     assert msit["url"] == "https://www.msit.go.kr/index.do"
@@ -28,6 +36,7 @@ def test_load_sources_merges_feed_url_from_yaml() -> None:
     assert motir["url"].endswith("/ATCL3f49a5a8c")
     assert motir["feed_url"].endswith("/rss")
     assert motir["method"] == "POST"
+    assert sources["국토교통부 보도자료"]["method"] == "HTML"
 
 
 def test_build_fetchers_prefers_feed_url() -> None:
@@ -44,3 +53,16 @@ def test_build_fetchers_prefers_feed_url() -> None:
     assert len(fetchers) == 1
     assert fetchers[0].url.endswith("/rss")
     assert fetchers[0].method == "POST"
+
+
+def test_md_only_link_is_fetched_via_url() -> None:
+    sources = [
+        {
+            "name": "새 매체",
+            "url": "https://example.com/rss.xml",
+            "category": "korean",
+        }
+    ]
+    fetchers = build_fetchers(sources, [])
+    assert len(fetchers) == 1
+    assert fetchers[0].url == "https://example.com/rss.xml"

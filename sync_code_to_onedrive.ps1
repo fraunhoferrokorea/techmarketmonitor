@@ -1,5 +1,5 @@
 # Cursor/Documents 쪽 코드 변경을 OneDrive(로컬 본진)로 복사
-# keywords.txt, sources.txt, .env, data/, output/, .git 은 OneDrive 쪽을 유지합니다.
+# keywords.txt, sources.md, .env, data/, output/, .git 은 OneDrive 쪽을 유지합니다.
 #
 # 사용 (PowerShell):
 #   Set-ExecutionPolicy -Scope Process Bypass
@@ -7,7 +7,7 @@
 #   .\sync_code_to_onedrive.ps1
 #
 # Cursor 구독 종료 후에는 OneDrive 폴더에서 git pull 로 코드만 받고,
-# keywords.txt / sources.txt / .env 는 OneDrive에서 직접 수정하세요.
+# keywords.txt / sources.md / .env 는 OneDrive에서 직접 수정하세요.
 
 $ErrorActionPreference = "Stop"
 
@@ -28,9 +28,9 @@ if ($docItem.LinkType -eq "Junction" -and $docItem.Target -eq $OneDrive) {
 }
 
 Write-Host "Syncing code: $Documents -> $OneDrive"
-Write-Host "(keeping OneDrive keywords.txt, sources.txt, .env, data/, output/, .git)" -ForegroundColor Yellow
+Write-Host "(keeping OneDrive keywords.txt, sources.md, .env, data/, output/, .git)" -ForegroundColor Yellow
 
-robocopy $Documents $OneDrive /E /XD data output .git __pycache__ .cursor /XF keywords.txt sources.txt .env /NFL /NDL /NJH /NJS /NP | Out-Null
+robocopy $Documents $OneDrive /E /XD data output .git __pycache__ .cursor /XF keywords.txt sources.md .env /NFL /NDL /NJH /NJS /NP | Out-Null
 
 if ($LASTEXITCODE -ge 8) {
     Write-Error "robocopy failed with exit code $LASTEXITCODE"

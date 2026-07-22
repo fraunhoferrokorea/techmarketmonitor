@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -11,7 +12,18 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 CONFIG_DIR = PROJECT_ROOT / "config"
 
 _KEYWORDS_TXT = PROJECT_ROOT / "keywords.txt"
-_SOURCES_TXT = PROJECT_ROOT / "sources.txt"
+_SOURCES_MD = PROJECT_ROOT / "sources.md"
+
+# - **Name** — [label](https://...)
+_MD_NAMED_LINK = re.compile(
+    r"^\s*[-*]\s+\*\*(.+?)\*\*\s*[—–\-:]+\s*\[([^\]]*)\]\((https?://[^)\s]+)\)",
+)
+# - [Name](https://...)
+_MD_LINK_ONLY = re.compile(
+    r"^\s*[-*]\s+\[([^\]]+)\]\((https?://[^)\s]+)\)",
+)
+# Any remaining markdown link on a bullet/line (fallback for free-form adds)
+_MD_ANY_LINK = re.compile(r"\[([^\]]*)\]\((https?://[^)\s]+)\)")
 
 _DEFAULT_KEYWORDS: list[str] = [
     "artificial intelligence", "machine learning", "large language model",
@@ -124,11 +136,16 @@ def load_settings() -> Settings:
 _SOURCE_GROUPS = ("korean",)
 
 
-def _load_sources_txt(path: Path) -> list[dict]:
-    """Read one source per line: name | url | category [| method].
+def _load_sources_md(path: Path) -> list[dict]:
+    """Parse sources.md bullet links into source entries.
 
-    ``url`` is the browser-openable list/home page (hyperlink target).
-    Optional RSS ``feed_url`` is merged from config/sources.yaml by name.
+    Supported lines (anything else with a markdown http(s) link is also picked up):
+      - **Name** — [https://example.com](https://example.com)
+      - [Name](https://example.com)
+
+    ``url`` is the browse/list page. Optional ``feed_url`` / ``method`` are merged
+    from config/sources.yaml by matching ``name``. New md-only links are still
+    collected using the md URL as the fetch address.
     """
     try:
         lines = path.read_text(encoding="utf-8").splitlines()
@@ -136,39 +153,65 @@ def _load_sources_txt(path: Path) -> list[dict]:
         return []
 
     sources: list[dict] = []
+    seen_names: set[str] = set()
     for line in lines:
         stripped = line.strip()
         if not stripped or stripped.startswith("#"):
             continue
-        parts = [part.strip() for part in stripped.split("|")]
-        if len(parts) < 2:
+
+        name = ""
+        url = ""
+        m = _MD_NAMED_LINK.match(stripped)
+        if m:
+            name, url = m.group(1).strip(), m.group(3).strip()
+        else:
+            m = _MD_LINK_ONLY.match(stripped)
+            if m:
+                name, url = m.group(1).strip(), m.group(2).strip()
+            else:
+                m = _MD_ANY_LINK.search(stripped)
+                if not m:
+                    continue
+                label, url = m.group(1).strip(), m.group(2).strip()
+                name = label or url
+
+        if not url:
             continue
-        name, url = parts[0], parts[1]
-        category = parts[2] if len(parts) > 2 else "general"
-        method = parts[3] if len(parts) > 3 else "GET"
-        if url:
-            entry = {"name": name, "url": url, "category": category}
-            if method and method.upper() != "GET":
-                entry["method"] = method.upper()
-            sources.append(entry)
+        if not name:
+            name = url
+        if name in seen_names:
+            continue
+        seen_names.add(name)
+        sources.append({"name": name, "url": url, "category": "korean"})
     return sources
 
 
-def _feed_urls_from_yaml() -> dict[str, str]:
-    """Map source name → RSS feed_url from sources.yaml (machine-only)."""
+def _yaml_source_meta() -> dict[str, dict]:
+    """Map source name → {feed_url?, method?, category?} from sources.yaml."""
     try:
         with (CONFIG_DIR / "sources.yaml").open(encoding="utf-8") as handle:
             data = yaml.safe_load(handle) or {}
     except FileNotFoundError:
         return {}
-    feeds: dict[str, str] = {}
+    meta: dict[str, dict] = {}
     for group in _SOURCE_GROUPS:
         for item in data.get(group, []) or []:
-            name = (item or {}).get("name")
-            feed = (item or {}).get("feed_url")
-            if name and feed:
-                feeds[str(name)] = str(feed)
-    return feeds
+            if not item:
+                continue
+            name = item.get("name")
+            if not name:
+                continue
+            entry: dict = {}
+            if item.get("feed_url"):
+                entry["feed_url"] = str(item["feed_url"])
+            method = item.get("method")
+            if method and str(method).upper() != "GET":
+                entry["method"] = str(method).upper()
+            if item.get("category"):
+                entry["category"] = str(item["category"])
+            if entry:
+                meta[str(name)] = entry
+    return meta
 
 
 def _load_sources_yaml() -> list[dict]:
@@ -183,12 +226,18 @@ def _load_sources_yaml() -> list[dict]:
 
 
 def load_sources() -> list[dict]:
-    raw = _load_sources_txt(_SOURCES_TXT)
+    raw = _load_sources_md(_SOURCES_MD)
     if not raw:
         return _load_sources_yaml()
-    feeds = _feed_urls_from_yaml()
+    meta = _yaml_source_meta()
     for entry in raw:
-        feed = feeds.get(entry["name"])
-        if feed:
-            entry["feed_url"] = feed
+        extra = meta.get(entry["name"])
+        if not extra:
+            continue
+        if "feed_url" in extra:
+            entry["feed_url"] = extra["feed_url"]
+        if "method" in extra:
+            entry["method"] = extra["method"]
+        if "category" in extra:
+            entry["category"] = extra["category"]
     return raw

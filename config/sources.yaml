@@ -1,8 +1,8 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# Tech Market Monitor — Source Configuration
+# Tech Market Monitor — Source Configuration (machine metadata)
 # ─────────────────────────────────────────────────────────────────────────────
-# 국내 시장·정책·ICT 소스만 수집합니다.
-# 새 소스를 추가할 때는 name / url / category 세 필드가 필수입니다.
+# 운영 소스 목록(클릭/추가)은 루트 sources.md 입니다.
+# 이 yaml은 이름 매칭으로 feed_url / method 를 보강합니다.
 # method: post 는 POST RSS만 허용하는 부처(산업통상부 등)에 사용합니다.
 # method: html / pacst 는 HTML 스크래퍼(src/fetchers/html_boards.py · pacst.py)가 수집합니다.
 # url: 브라우저에서 열리는 목록/홈. feed_url: 수집용 RSS(선택).

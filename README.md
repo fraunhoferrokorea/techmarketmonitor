@@ -173,15 +173,13 @@ Python **3.11** 권장 (GitHub Actions 기준).
 현재 주제: **전력계통·스마트그리드·BESS·AI 인프라·시장/투자** 등  
 (전력계통, 파워그리드, power grid, smart grid, BESS, demand response, data center, AI infrastructure, market size, M&A, startup funding …)
 
-### `sources.txt` — RSS 소스 (한 줄 = 소스 1개, **현재 운영 기준**)
+### `sources.md` — 수집 소스 (마크다운 링크 = 소스 1개, **현재 운영 기준**)
 
-- 형식: `이름 | URL | 카테고리 [| METHOD]`
-- **URL** = 브라우저에서 열리는 목록/홈(하이퍼링크 대상). RSS 수집 주소는 `config/sources.yaml`의 `feed_url`
-- **GitHub에서 클릭:** [`sources.md`](sources.md) (홈페이지 Config와 동일한 링크 목록)
-- `#`으로 시작하는 줄과 빈 줄은 무시
-- 이 파일만 수정하면 다음 실행부터 수집 소스 변경
-- **현재 구성:** 국내 ICT·정책·공공 R&D·전문지 + catch-up 시 **PACST·HTML 보드**
-- `sources.txt`가 없거나 비어 있으면 `config/sources.yaml`의 **`korean` 그룹만** 폴백
+- 형식: `- **이름** — [URL](URL)` 또는 `- [이름](URL)`
+- **URL** = 브라우저에서 열리는 목록/홈(하이퍼링크). 파일에 링크를 추가하면 **다음 수집부터 그 URL도 가져옵니다**
+- RSS 전용 주소·`POST`/`html`/`pacst` 방식은 이름이 같을 때 `config/sources.yaml`에서 합침
+- `#` 제목·설명 줄은 무시
+- `sources.md`가 없거나 비어 있으면 `config/sources.yaml`의 **`korean` 그룹만** 폴백
 
 | 구분 | 예시 소스 |
 |------|-----------|
@@ -195,7 +193,7 @@ Python **3.11** 권장 (GitHub Actions 기준).
 
 ### `config/sources.yaml` — RSS 소스 (레거시 / 폴백)
 
-`sources.txt` 미사용 시 **`korean` 카테고리만** 로드됩니다. 해외 피드는 레거시 yaml에 남아 있으나 기본 파이프라인에서는 참조하지 않습니다.
+`sources.md` 미사용 시 **`korean` 카테고리만** 로드됩니다. 해외 피드는 레거시 yaml에 남아 있으나 기본 파이프라인에서는 참조하지 않습니다.
 
 ---
 
