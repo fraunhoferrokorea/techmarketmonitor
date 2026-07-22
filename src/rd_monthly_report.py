@@ -165,6 +165,15 @@ def _factcheck_structured(
             )
             if cleaned:
                 items.append(cleaned)
+        # Ensure available press quotes appear in opportunity items.
+        if theme_entries:
+            existing = " ".join(items)
+            for e in theme_entries:
+                for quote in (e.get("evidence_quotes") or [])[:2]:
+                    q = (quote or "").strip()
+                    if q and q not in existing:
+                        items.append(q)
+                        existing = f"{existing} {q}"
         fixed_opps.append(
             {
                 **opp,
