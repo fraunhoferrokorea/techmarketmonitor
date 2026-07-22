@@ -136,7 +136,9 @@ def _factcheck_structured(
         exec_summary = strip_unattested_monitoring_keywords(
             exec_summary, top_keywords, attested_set
         )
-    structured["executive_summary"] = exec_summary
+    structured["executive_summary"] = _format_executive_summary_paragraphs(
+        exec_summary
+    )
 
     fixed_opps = []
     for opp in structured.get("opportunities") or []:
@@ -165,20 +167,20 @@ def _factcheck_structured(
             )
             if cleaned:
                 items.append(cleaned)
-        # Ensure available press quotes appear in opportunity items.
+        # Quotes belong in §4 detail; only append if no item already carries them.
         if theme_entries:
             existing = " ".join(items)
             for e in theme_entries:
-                for quote in (e.get("evidence_quotes") or [])[:2]:
+                for quote in (e.get("evidence_quotes") or [])[:1]:
                     q = (quote or "").strip()
                     if q and q not in existing:
-                        items.append(q)
-                        existing = f"{existing} {q}"
+                        # Prefer attaching once via narrative rebuild, not raw dump.
+                        break
         fixed_opps.append(
             {
                 **opp,
                 "summary": summary,
-                "items": items or opp.get("items") or [],
+                "items": _dedupe_opportunity_items(items or opp.get("items") or []),
             }
         )
     structured["opportunities"] = fixed_opps
@@ -203,6 +205,7 @@ def _synthesize_monthly_ko(
 모니터링 컨텍스트 키워드(keywords.txt 전체): {kw_label}
 - 각 항목의 relevance(직접/간접/약함), matched_keywords, keyword_relevance, **attested_keywords**, **evidence_quotes** 필드를 기준으로 중요도를 판단함.
 - executive_summary·context_highlights·opportunities는 **직접·간접** 관련 항목을 정부·R&D 신호와 함께 우선 배치함.
+- executive_summary는 주제가 바뀔 때마다 줄바꿈(문단 사이 빈 줄). 집계·관련도·최우선 이슈·분야축·후속 안내를 한 줄에 이어서 쓰지 말 것.
 - 정부·공공기관 투자 주체(actor)는 유지하되, 전력·에너지·그리드 등 모니터링 키워드와 직접 연결된 항목을 상단에 둠.
 
 규칙:
@@ -216,26 +219,25 @@ def _synthesize_monthly_ko(
 3) **의견 분리:** 추측·제안·시사점·'협력 가능'·'정책 정합' 등 분석 의견은 팩트 문장과 같은 줄에 쓰지 말 것. 의견이 꼭 필요할 때만 해당 문장 앞에 '(의견)'을 붙이고 줄바꿈으로 분리. 기본은 의견 생략(팩트만).
 
 - **팩트체크 (키워드):** 모니터링 키워드 전체를 opportunities.summary에 나열하지 말 것. attested_keywords·evidence_quotes에 있는 용어만 언급.
-- §4 상세·Action Plan은 **팩트만**: 일자·금액·건수·표준번호·사업명·장소·참석·시행일 등 fact/summary/evidence_quotes에 있는 구체 수치를 길게 서술.
-- 위탁 연구 니즈·제안 R&D·접근 전략·관련도 문구를 opportunities/action_plan에 쓰지 말 것(렌더러가 §4에서도 생략함).
+- §4 상세는 **팩트만**: 일자·금액·건수·표준번호·사업명·장소·참석·시행일 등 fact/summary/evidence_quotes에 있는 구체 수치를 길게 서술.
+- 위탁 연구 니즈·제안 R&D·접근 전략·관련도 문구를 opportunities에 쓰지 말 것(렌더러가 §4에서도 생략함).
 - keyword_relevance, fact, actor, purpose, relevance, attested_keywords, evidence_quotes 필드를 적극 활용. pain/strategy/proposable는 참고만 하고 그대로 복사하지 말 것.
 - opportunities.summary는 분야별 서두 1~2문장(건수·[정부]·[컨텍스트] 라벨 금지). **원문에 없는 키워드 리스트 삽입 금지.**
-- opportunities.items는 항목마다 팩트 중심 2~4문장: 누가·언제·무엇(사업·표준·금액)·수치 + **원문 「」 인용 필수(있으면)**. 명사형 종결. 의견은 별도 문장·'(의견)' 접두만.
+- opportunities.items는 항목마다 팩트 중심 1~2문장(짧게): 누가·언제·무엇·수치. **긴 「」 원문 인용은 §4에만.** 명사형 종결.
+- **중복 금지:** 동일 정책·동일 금액(예: 20조원+100조원)이 복수 부처 보도로 나와도 opportunities/action_plan에 한 번만. 투자 주체는 합쳐 표기.
+- §3은 분야별 요약, §4는 상세 카드 — 같은 「」 인용·같은 문단을 양쪽에 복붙하지 말 것.
 
 입력 데이터:
 {json.dumps(entries, ensure_ascii=False)}
 
 JSON 스키마:
 {{
-  "executive_summary": "5~7문장. attested 키워드·원문 「」 인용 가능한 이슈만 + 국내 전력·에너지·ICT R&D 투자 트렌드 + 당월 정부·기업 핵심 수치. 없는 사실 금지",
+  "executive_summary": "5~7문장. 주제(집계 건수 / 관련도 구분 / 최우선 이슈 / 분야축별 동향 / 후속 섹션 안내)가 바뀔 때마다 문단을 나누고 문단 사이에 빈 줄(\\n\\n)을 넣음. attested 키워드·원문 「」 인용 가능한 이슈만 + 국내 전력·에너지·ICT R&D 투자 트렌드 + 당월 정부·기업 핵심 수치. 없는 사실 금지. 한 덩어리 문단으로 붙이지 말 것",
   "context_highlights": [
     {{"relevance": "직접|간접", "matched_keywords": "매칭 키워드", "summary": "핵심 이슈 2~3문장(팩트·수치·「」인용). 의견은 '(의견)' 별도 문장", "refs": [1]}}
   ],
   "opportunities": [
     {{"field": "분야명(전력·그리드/제조AI/표준·인증 등)", "summary": "분야 공통 맥락 1~2문장(attested 키워드만)", "items": ["팩트+원문인용 항목 서술", "..."], "refs": [1,2]}}
-  ],
-  "action_plan": [
-    {{"target": "부처/기업명", "contact_angle": "추진 팩트(일정·규모·시행일)", "rd_area": "핵심 팩트 요약(사업·표준·수치)", "refs": [1]}}
   ]
 }}"""
     response = client.chat.completions.create(
@@ -314,7 +316,10 @@ def _build_markdown(
     kws = top_keywords or []
     kw_label = format_monitoring_keyword_header(kws)
     exec_summary = _highlight_keywords(
-        structured.get("executive_summary", "") or "", kws
+        _format_executive_summary_paragraphs(
+            structured.get("executive_summary", "") or ""
+        ),
+        kws,
     )
     lines: list[str] = [
         "# 국내 R&D 인텔리전스 월간 보고서",
@@ -329,7 +334,12 @@ def _build_markdown(
         "",
         "## 1. Executive Summary",
         "",
-        exec_summary,
+    ]
+    if exec_summary:
+        lines.extend(exec_summary.split("\n"))
+    else:
+        lines.append("")
+    lines += [
         "",
         "## 2. 컨텍스트 중요도 상위",
         "",
@@ -374,7 +384,7 @@ def _build_markdown(
             weak_items = [c for c in compact if c.get("relevance") == "약함"]
             if weak_items:
                 lines.append(
-                    f"- 정부·R&D 타깃 {len(weak_items)}건은 §5 Action Plan·§6 스코어카드에 정리함."
+                    f"- 정부·R&D 타깃 {len(weak_items)}건은 §5 스코어카드에 정리함."
                 )
 
     lines += [
@@ -441,33 +451,22 @@ def _build_markdown(
                 )
             )
         if item.get("url"):
-            lines.append(f"- **출처:** [{item.get('source') or '링크'}]({item['url']})")
+            links = [item["url"], *(item.get("alt_urls") or [])]
+            labels = [
+                s.strip()
+                for s in re.split(r"\s*·\s*", item.get("source") or "링크")
+                if s.strip()
+            ]
+            while len(labels) < len(links):
+                labels.append(labels[-1] if labels else "링크")
+            source_parts = [
+                f"[{labels[i]}]({url})" for i, url in enumerate(links)
+            ]
+            lines.append(f"- **출처:** {' · '.join(source_parts)}")
         lines.append("")
 
     lines += [
-        "## 5. Action Plan (접촉 타겟)",
-        "",
-        "| 타겟 (부처/기업) | 핵심 팩트 | 추진 팩트 |",
-        "|----------------|----------|----------|",
-    ]
-
-    action_plan = structured.get("action_plan") or []
-    if action_plan:
-        for action in action_plan:
-            target = _escape_table_cell(action.get("target", ""))
-            rd_area = _highlight_keywords(
-                _escape_table_cell(action.get("rd_area", "")), kws
-            )
-            angle = _highlight_keywords(
-                _escape_table_cell(action.get("contact_angle", "")), kws
-            )
-            lines.append(f"| {target} | {rd_area} | {angle} |")
-    else:
-        lines.append("| — | — | — |")
-
-    lines += [
-        "",
-        "## 6. 부록: 월간 R&D 스코어카드",
+        "## 5. 부록: 월간 R&D 스코어카드",
         "",
         "| 점수 | 관련도 | 날짜 | 투자 주체 | 핵심 이슈 | 출처 |",
         "|------|--------|------|----------|----------|------|",
@@ -478,12 +477,23 @@ def _build_markdown(
         issue = _highlight_keywords(
             _escape_table_cell((item["summary"] or item["title"])[:120]), hl
         )
-        url = item["url"]
-        source_label = item["source"] or url
-        if url:
-            source_cell = f"[{source_label}]({url})"
+        links = []
+        if item.get("url"):
+            links.append(item["url"])
+        links.extend(item.get("alt_urls") or [])
+        labels = [
+            s.strip()
+            for s in re.split(r"\s*·\s*", item.get("source") or "")
+            if s.strip()
+        ]
+        if links:
+            while len(labels) < len(links):
+                labels.append(labels[-1] if labels else "링크")
+            source_cell = " · ".join(
+                f"[{labels[i]}]({url})" for i, url in enumerate(links)
+            )
         else:
-            source_cell = source_label
+            source_cell = item.get("source") or "—"
         lines.append(
             f"| {item['score']}/5 "
             f"| {item.get('relevance', '—')} "
@@ -521,6 +531,19 @@ def generate_rd_monthly_report(
 
     compact = [_compact_entry(log, i, top_keywords) for i, log in enumerate(rd_logs, start=1)]
     compact = _attach_press_evidence(compact, top_keywords)
+    source_count = len(compact)
+    compact = _dedupe_entries(compact)
+    # Re-number refs after policy-level merge.
+    for i, entry in enumerate(compact, start=1):
+        entry["ref"] = i
+    if source_count != len(compact):
+        logger.info(
+            "Merged %d duplicate policy press releases → %d unique targets for %04d-%02d",
+            source_count - len(compact),
+            len(compact),
+            year,
+            month,
+        )
     try:
         structured = _synthesize_monthly_ko(year, month, compact, top_keywords)
     except Exception as exc:
@@ -538,18 +561,131 @@ def generate_rd_monthly_report(
     return output_path
 
 
+_AMOUNT_RE = re.compile(r"\d+(?:\.\d+)?(?:조|억|만)?원")
+_QUOTE_RE = re.compile(r"「[^」]{12,}」")
+
+
+def _policy_fingerprint(entry: dict) -> str:
+    """Fingerprint same policy announced via multiple ministry press releases."""
+    blob = " ".join(
+        [
+            entry.get("summary") or "",
+            entry.get("fact") or "",
+            entry.get("title") or "",
+            entry.get("purpose") or "",
+        ]
+    )
+    amounts = tuple(sorted(set(_AMOUNT_RE.findall(blob))))
+    if len(amounts) < 2:
+        return ""
+    theme = _theme_for_entry(entry)
+    # Same theme + same money figures => one policy story (e.g. 20조+100조 제조AI).
+    return f"{theme}|{'|'.join(amounts)}"
+
+
+def _merge_deduped_entry(primary: dict, secondary: dict) -> dict:
+    """Keep higher-score row; union actors/urls/quotes from the duplicate."""
+    merged = dict(primary)
+    actors = []
+    for raw in (primary.get("actor"), secondary.get("actor")):
+        for part in re.split(r"[,，·/]| 및 | 등", raw or ""):
+            name = part.strip(" .")
+            if name and name not in actors:
+                actors.append(name)
+    if actors:
+        merged["actor"] = ", ".join(actors)
+        if "등" not in merged["actor"] and len(actors) >= 2:
+            merged["actor"] = f"{merged['actor']} 등"
+    urls = []
+    for item in (primary, secondary):
+        u = (item.get("url") or "").strip()
+        if u and u not in urls:
+            urls.append(u)
+    if urls:
+        merged["url"] = urls[0]
+        merged["alt_urls"] = urls[1:]
+        sources = []
+        for item in (primary, secondary):
+            s = (item.get("source") or "").strip()
+            if s and s not in sources:
+                sources.append(s)
+        if len(sources) > 1:
+            merged["source"] = " · ".join(sources)
+    quotes = list(primary.get("evidence_quotes") or [])
+    for q in secondary.get("evidence_quotes") or []:
+        if q and q not in quotes:
+            quotes.append(q)
+    merged["evidence_quotes"] = quotes
+    fact = (primary.get("fact") or "").strip()
+    sec_fact = (secondary.get("fact") or "").strip()
+    if sec_fact and sec_fact not in fact:
+        note = " (동일 정책·복수 부처 보도 통합)"
+        merged["fact"] = (fact + note) if fact else sec_fact + note
+    elif fact and "동일 정책" not in fact:
+        merged["fact"] = f"{fact} (동일 정책·복수 부처 보도 통합)"
+    if (secondary.get("score") or 0) > (primary.get("score") or 0):
+        for key in ("summary", "title", "purpose", "relevance", "score"):
+            if secondary.get(key):
+                merged[key] = secondary[key]
+    return merged
+
+
 def _dedupe_entries(entries: list[dict]) -> list[dict]:
-    seen: set[str] = set()
-    unique: list[dict] = []
+    """Drop URL duplicates, then merge same-policy multi-ministry releases."""
+    seen_url: set[str] = set()
+    url_unique: list[dict] = []
     for entry in entries:
         key = (entry.get("url") or "").strip() or (
             f"{entry.get('date', '')}|{entry.get('title', '')}"
         )
-        if key in seen:
+        if key in seen_url:
             continue
-        seen.add(key)
+        seen_url.add(key)
+        url_unique.append(entry)
+
+    unique: list[dict] = []
+    fp_index: dict[str, int] = {}
+    for entry in url_unique:
+        fp = _policy_fingerprint(entry)
+        if fp and fp in fp_index:
+            idx = fp_index[fp]
+            unique[idx] = _merge_deduped_entry(unique[idx], entry)
+            continue
+        if fp:
+            fp_index[fp] = len(unique)
         unique.append(entry)
     return unique
+
+
+def _dedupe_opportunity_items(items: list[str]) -> list[str]:
+    """Collapse opportunity bullets that repeat the same policy amounts."""
+    kept: list[str] = []
+    seen_fps: set[str] = set()
+    for line in items:
+        text = (line or "").strip()
+        if not text:
+            continue
+        amounts = tuple(sorted(set(_AMOUNT_RE.findall(text))))
+        fp = "|".join(amounts) if len(amounts) >= 2 else ""
+        if fp and fp in seen_fps:
+            continue
+        if fp:
+            seen_fps.add(fp)
+        # Keep only the first 「」 quote if the same text is repeated in-line.
+        seen_quotes: set[str] = set()
+        def _keep_first_quote(match: re.Match[str]) -> str:
+            q = match.group(0)
+            if q in seen_quotes:
+                return ""
+            seen_quotes.add(q)
+            return q
+
+        text = _QUOTE_RE.sub(_keep_first_quote, text)
+        text = re.sub(r"\s{2,}", " ", text)
+        text = re.sub(r"(?:보도자료 원문:\s*)+$", "", text).strip(" .")
+        if text:
+            kept.append(text)
+    return kept
 
 
 def _theme_for_entry(entry: dict) -> str:
@@ -594,11 +730,10 @@ def _noun_clause(text: str) -> str:
 
 
 def _entry_narrative(entry: dict) -> str:
-    """One opportunity item as 5W1H-based flowing prose (fact + quote only)."""
+    """Short §3 opportunity bullet — fact only; long quotes stay in §4."""
     actor = (entry.get("actor") or entry.get("source") or "국내 주체").strip()
     when = (entry.get("date") or "").strip()
     what = (entry.get("summary") or entry.get("title") or "").strip()
-    why = (entry.get("purpose") or "").strip()
     fact = (entry.get("fact") or "").strip()
     rel = entry.get("relevance", "")
 
@@ -610,20 +745,20 @@ def _entry_narrative(entry: dict) -> str:
     else:
         sentences.append(f"**{actor}** — {when_phrase}국내 R&D 신호가 포착됨.")
 
-    if why:
-        sentences.append(f"정책·투자 목적은 {_noun_clause(why)}.")
-    if fact and fact not in what:
-        sentences.append(f"근거로는 {_noun_clause(fact)}.")
-    quotes = entry.get("evidence_quotes") or []
-    if quotes and (not fact or quotes[0] not in fact):
-        sentences.append(f"보도자료 원문: {quotes[0]}")
+    # Keep §3 short: add a compact fact only when it adds numbers not already in what.
+    if fact and fact not in what and not _QUOTE_RE.search(fact):
+        amounts_in_what = set(_AMOUNT_RE.findall(what))
+        amounts_in_fact = set(_AMOUNT_RE.findall(fact))
+        if amounts_in_fact - amounts_in_what:
+            compact = fact
+            if len(compact) > 120:
+                compact = compact[:117] + "…"
+            sentences.append(_noun_clause(compact) + ".")
     attested = entry.get("attested_keywords") or []
     if attested and rel in ("직접", "간접"):
         sentences.append(
-            f"원문 확인 키워드({' · '.join(attested[:5])})와 {rel} 연관됨."
+            f"원문 확인 키워드({' · '.join(attested[:3])})와 {rel} 연관됨."
         )
-    elif rel in ("직접", "간접"):
-        sentences.append(f"모니터링 키워드와 {rel} 연관됨.")
 
     return " ".join(sentences)
 
@@ -637,6 +772,20 @@ def _theme_intro(theme: str, items: list[dict], top_keywords: list[str]) -> str:
         attested.extend(item.get("attested_keywords") or [])
     attested = list(dict.fromkeys(attested))
     return theme_intro_from_evidence(theme, actors, attested)
+
+
+def _format_executive_summary_paragraphs(text: str) -> str:
+    """Split Executive Summary so each topic is its own paragraph."""
+    text = (text or "").strip()
+    if not text:
+        return ""
+    if "\n" in text:
+        paras = [p.strip() for p in re.split(r"\n+", text) if p.strip()]
+        return "\n\n".join(paras)
+    # Single block from LLM/fallback: one sentence per topic paragraph.
+    parts = re.split(r"(?<=[.!?…])\s+", text)
+    parts = [p.strip() for p in parts if p.strip()]
+    return "\n\n".join(parts) if parts else text
 
 
 def _build_executive_summary_fallback(
@@ -688,10 +837,10 @@ def _build_executive_summary_fallback(
             "국가중요시설 보안 R&D 수요로 연결됨."
         )
     parts.append(
-        "§2 컨텍스트 중요도·§3 분야별 기회·§4 타겟 상세·§5 Action Plan·§6 스코어카드에 "
-        "투자 주체·니즈·접근 전략을 정리함."
+        "§2 컨텍스트 중요도·§3 분야별 기회·§4 타겟 상세·§5 스코어카드에 "
+        "투자 주체·팩트 근거를 정리함."
     )
-    return " ".join(parts)
+    return _format_executive_summary_paragraphs("\n\n".join(parts))
 
 
 def _fallback_structure(
@@ -732,32 +881,10 @@ def _fallback_structure(
             }
         )
 
-    seen_actors: set[str] = set()
-    action_plan = []
-    for e in sorted(
-        unique,
-        key=lambda row: (_rel_rank.get(row.get("relevance", ""), 9), -row.get("score", 0)),
-    ):
-        actor = (e.get("actor") or "").strip()
-        if not actor or actor in seen_actors:
-            continue
-        seen_actors.add(actor)
-        action_plan.append(
-            {
-                "target": actor,
-                "contact_angle": e.get("fact") or e.get("purpose", ""),
-                "rd_area": (e.get("summary") or e.get("title") or "")[:160],
-                "refs": [e["ref"]],
-            }
-        )
-        if len(action_plan) >= 8:
-            break
-
     return {
         "executive_summary": _build_executive_summary_fallback(
             entries, top_keywords, year, month
         ),
         "context_highlights": context_highlights,
         "opportunities": opportunities,
-        "action_plan": action_plan,
     }

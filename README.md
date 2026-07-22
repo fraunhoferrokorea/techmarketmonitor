@@ -606,13 +606,12 @@ Cursor 규칙: `.cursor/rules/daily-research-log.mdc`
 1. **Executive Summary** — 당월 국내 R&D·투자 트렌드 (모니터링 키워드·정부 신호 통합)
 2. **컨텍스트 중요도 상위** — `keywords.txt` 상위 3개 대비 **직접·간접** 관련 이슈
 3. **Opportunities (분야별 R&D 기회)** — 전력·그리드 / 제조AI / 표준·인증 / 바이오·그린 등 **육하원칙(5W1H) 서술**
-4. **주요 R&D 타겟 상세** — 상위 8건 투자 주체·니즈·제안 R&D·관련도·출처
-5. **Action Plan (접촉 타겟)** — 부처·기업별 접촉 논리 표
-6. **부록: 월간 R&D 스코어카드** — 적합도·관련도·투자 주체·핵심 이슈·출처 링크
+4. **주요 R&D 타겟 상세** — 상위 8건 투자 주체·목적·팩트 근거·원문 인용·출처
+5. **부록: 월간 R&D 스코어카드** — 적합도·관련도·투자 주체·핵심 이슈·출처 링크
 
 ### LLM 합성
 
-- domestic R&D 항목을 compact JSON으로 LLM에 전달 → `executive_summary`, `opportunities`, `action_plan` JSON
+- domestic R&D 항목을 compact JSON으로 LLM에 전달 → `executive_summary`, `opportunities` JSON
 - 모든 문장 **명사형 종결** (`-함`/`-었음`), `-습니다` 금지
 - 소스에 없는 수치·기관명 **추가 금지**
 

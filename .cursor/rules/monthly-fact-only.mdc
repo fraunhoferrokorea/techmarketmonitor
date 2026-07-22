@@ -1,5 +1,5 @@
 ---
-description: Monthly R&D report §4 detail and Action Plan must be fact-only with press quotes
+description: Monthly R&D report §4 detail must be fact-only with press quotes
 globs:
   - src/rd_monthly_report.py
   - src/press_evidence.py
@@ -12,12 +12,14 @@ globs:
 
 ## Fact-check pipeline (required)
 
-Before writing opportunities / §4 / Action Plan:
+Before writing opportunities / §4:
 
 1. **Re-fetch** government press HTML + attachments (`press_evidence.fetch_press_corpus`).
 2. **Attest** which monitoring keywords literally appear in the corpus (`attested_keywords`).
 3. **Quote** short verbatim snippets around attested terms (`evidence_quotes`, 「」).
 4. **Reject** theme leads that dump the full `keywords.txt` list without attestation.
+5. **No invention:** never add numbers, org names, program names, or tech terms absent from entry `fact` / `evidence_quotes`.
+6. **Opinion split:** speculation/proposal stays out of fact sentences; if unavoidable, prefix `(의견)` on its own line. Default: omit opinion.
 
 Never claim “당월 … [전체 모니터링 키워드]와 연계된 신호를 발표함” unless each listed term is attested in a press release.
 
@@ -37,14 +39,20 @@ Render **only**:
 - 접근 전략
 - 관련도 · 매칭 · 적합도
 
+## §1 Executive Summary
+
+- Topic change = new paragraph (blank line between paragraphs).
+- Do not glue 집계·관련도·최우선 이슈·분야축·후속 안내 into one dense paragraph.
+- `_format_executive_summary_paragraphs` enforces this at factcheck/render time.
+
 ## §3 Opportunities summary
 
 - Use `theme_intro_from_evidence`: only attested keywords, or an explicit “원문 직접 언급 제한적” caveat.
 - `_factcheck_structured` must strip keyword-dump hallucinations from LLM output.
 
-## §5 Action Plan
+## §5 부록: 월간 R&D 스코어카드
 
-Columns: `타겟 | 핵심 팩트 | 추진 팩트` — source numbers/dates only.
+Scorecard table only (no Action Plan section).
 
 ## Generation
 

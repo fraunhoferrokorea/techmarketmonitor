@@ -238,7 +238,7 @@ def theme_intro_from_evidence(
     return generic.get(
         theme,
         f"당월 {actor_text} 등에서 국내 R&D·정책 신호가 확인됨. "
-        f"원문 근거가 있는 항목만 Action Plan에 반영함.",
+        f"원문 근거가 있는 항목만 반영함.",
     )
 
 

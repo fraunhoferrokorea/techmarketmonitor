@@ -125,13 +125,6 @@ def test_monthly_markdown_highlights_keywords():
                 "refs": [1],
             }
         ],
-        "action_plan": [
-            {
-                "target": "한전",
-                "rd_area": "스마트그리드 실증",
-                "contact_angle": "전력계통 공동연구",
-            }
-        ],
     }
     md = _build_markdown(2026, 7, [{"id": 1}], compact, structured, kws)
 
