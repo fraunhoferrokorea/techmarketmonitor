@@ -701,7 +701,8 @@ def generate_rd_monthly_report(
     return output_path
 
 
-_AMOUNT_RE = re.compile(r"\d+(?:\.\d+)?(?:조|억|만)?원")
+# Allow thousand separators (1,463억원) and optional 원
+_AMOUNT_RE = re.compile(r"\d{1,3}(?:,\d{3})+(?:\.\d+)?(?:조|억|만)?원?|\d+(?:\.\d+)?(?:조|억|만)?원")
 _QUOTE_RE = re.compile(r"「[^」]{12,}」")
 # §3 item: bold only the investment actor before the first em dash.
 _OPP_ACTOR_BOLD_RE = re.compile(

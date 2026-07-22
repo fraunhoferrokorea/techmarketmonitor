@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Daily 2026-06-17</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet"/>
+<style>:root {
+  --bg: #f3f6f5;
+  --surface: #ffffff;
+  --ink: #1a2421;
+  --muted: #5a6b66;
+  --line: #d5e0dc;
+  --brand: #008878;
+  --brand-dark: #006b5e;
+  --brand-soft: #e6f5f2;
+  --mark: #fff3bf;
+  --score-high: #008878;
+  --score-mid: #c47a00;
+  --score-low: #8a9390;
+  --shadow: 0 1px 2px rgba(26, 36, 33, 0.06), 0 8px 24px rgba(26, 36, 33, 0.06);
+  --radius: 12px;
+  --font: "Pretendard", "Noto Sans KR", "Segoe UI", system-ui, sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: var(--font);
+  color: var(--ink);
+  background:
+    radial-gradient(1200px 500px at 10% -10%, #d8efe9 0%, transparent 55%),
+    radial-gradient(900px 400px at 100% 0%, #e8eef0 0%, transparent 50%),
+    var(--bg);
+  line-height: 1.65;
+  min-height: 100vh;
+}
+a { color: var(--brand-dark); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+a:hover { color: var(--brand); }
+
+.app-header {
+  position: sticky; top: 0; z-index: 20;
+  backdrop-filter: blur(10px);
+  background: rgba(243, 246, 245, 0.88);
+  border-bottom: 1px solid var(--line);
+}
+.app-header-inner {
+  max-width: 1280px; margin: 0 auto; padding: 0.85rem 1.25rem;
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+}
+.brand {
+  display: flex; align-items: center; gap: 0.75rem; min-width: 0;
+}
+.brand-mark {
+  width: 36px; height: 36px; border-radius: 9px;
+  background: linear-gradient(145deg, var(--brand), var(--brand-dark));
+  color: #fff; font-weight: 700; font-size: 0.78rem;
+  display: grid; place-items: center; flex-shrink: 0;
+  letter-spacing: -0.02em;
+}
+.brand-text { min-width: 0; }
+.brand-text strong { display: block; font-size: 0.98rem; letter-spacing: -0.02em; }
+.brand-text span { display: block; font-size: 0.78rem; color: var(--muted); }
+
+.layout {
+  max-width: 1280px; margin: 0 auto; padding: 1.25rem;
+  display: grid; grid-template-columns: 400px 1fr; gap: 1.25rem; align-items: start;
+}
+@media (max-width: 980px) {
+  .layout { grid-template-columns: 1fr; }
+}
+
+.panel {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+}
+.sidebar { padding: 1rem; position: sticky; top: 72px; }
+@media (max-width: 980px) { .sidebar { position: static; } }
+
+.seg {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.35rem;
+  background: var(--brand-soft); padding: 0.3rem; border-radius: 10px; margin-bottom: 1rem;
+}
+.seg button {
+  appearance: none; border: 0; background: transparent; color: var(--muted);
+  font: inherit; font-weight: 600; font-size: 0.85rem; padding: 0.55rem 0.3rem;
+  border-radius: 8px; cursor: pointer; transition: 0.15s ease;
+}
+.seg button.active {
+  background: var(--surface); color: var(--brand-dark);
+  box-shadow: 0 1px 3px rgba(0, 107, 94, 0.18);
+}
+.seg button:hover:not(.active) { color: var(--ink); }
+
+.config-toolbar {
+  display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center;
+  margin: 0 0 0.85rem; padding-bottom: 0.85rem; border-bottom: 1px solid var(--line);
+}
+.config-toolbar .spacer { flex: 1; min-width: 0.5rem; }
+.btn {
+  appearance: none; border: 1px solid var(--line); background: var(--surface);
+  color: var(--ink); font: inherit; font-size: 0.85rem; font-weight: 600;
+  padding: 0.45rem 0.75rem; border-radius: 8px; cursor: pointer;
+  transition: 0.15s ease; text-decoration: none; display: inline-flex; align-items: center;
+}
+.btn:hover { border-color: #b7ddd5; background: var(--brand-soft); color: var(--brand-dark); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn.primary {
+  background: var(--brand); border-color: var(--brand); color: #fff;
+}
+.btn.primary:hover:not(:disabled) { background: var(--brand-dark); border-color: var(--brand-dark); color: #fff; }
+.btn.ghost { background: transparent; }
+.config-editor {
+  width: 100%; min-height: 36vh; resize: vertical;
+  font-family: ui-monospace, "Cascadia Code", "Consolas", monospace;
+  font-size: 0.82rem; line-height: 1.55;
+  padding: 0.85rem 1rem; border: 1px solid var(--line); border-radius: 10px;
+  background: #fafcfb; color: var(--ink); tab-size: 2;
+}
+.config-editor:focus {
+  outline: 2px solid #b7ddd5; outline-offset: 1px; background: #fff;
+}
+.config-linked {
+  width: 100%; min-height: min(50vh, 560px); max-height: min(75vh, 800px); overflow: auto;
+  margin: 0 0 0.75rem; padding: 0.65rem 0.85rem;
+  border: 1px solid var(--line); border-radius: 10px;
+  background: #fafcfb; color: var(--ink);
+}
+.config-linked[hidden] { display: none !important; }
+.config-linked .src-list {
+  list-style: none; margin: 0; padding: 0;
+}
+.config-linked .src-list li {
+  display: flex; flex-wrap: wrap; gap: 0.35rem 0.75rem; align-items: baseline;
+  padding: 0.55rem 0.35rem; border-bottom: 1px solid #e6efec;
+  font-size: 0.9rem; line-height: 1.4;
+}
+.config-linked .src-list li:last-child { border-bottom: none; }
+.config-linked .src-name {
+  font-weight: 650; color: var(--ink); min-width: 10rem;
+}
+.config-linked .src-list a {
+  color: var(--brand-dark); font-weight: 600; text-decoration: underline;
+  text-underline-offset: 2px; word-break: break-all;
+}
+.config-linked .src-list a:hover { color: var(--brand); }
+.config-linked .src-empty {
+  margin: 1rem 0.35rem; color: var(--muted); font-size: 0.88rem;
+}
+.config-editor[hidden] { display: none !important; }
+.config-hint {
+  margin: 0.75rem 0 0; color: var(--muted); font-size: 0.8rem; line-height: 1.5;
+}
+.config-status {
+  font-size: 0.8rem; font-weight: 600; color: var(--muted);
+}
+.config-status.dirty { color: var(--score-mid); }
+.config-status.ok { color: var(--brand-dark); }
+.config-status.err { color: #b42318; }
+.config-token {
+  margin-top: 1rem; padding: 0.85rem 1rem; border: 1px dashed #c5e4dd;
+  border-radius: 10px; background: #f7fbfa;
+}
+.config-token summary {
+  cursor: pointer; font-weight: 650; font-size: 0.88rem; color: var(--brand-dark);
+}
+.config-token .row {
+  display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.65rem; align-items: center;
+}
+.config-token input[type="password"] {
+  flex: 1; min-width: 180px; font: inherit; font-size: 0.85rem;
+  padding: 0.45rem 0.65rem; border: 1px solid var(--line); border-radius: 8px;
+}
+.config-token p { margin: 0.5rem 0 0; font-size: 0.78rem; color: var(--muted); }
+
+.sidebar h2 {
+  margin: 0 0 0.65rem; font-size: 0.78rem; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--muted); font-weight: 700;
+}
+.date-list { list-style: none; margin: 0; padding: 0; max-height: min(70vh, 640px); overflow-x: hidden; overflow-y: auto; }
+.date-list li + li { margin-top: 0.25rem; }
+.date-list a, .date-list button {
+  width: 100%; text-align: left; appearance: none; border: 1px solid transparent;
+  background: transparent; color: inherit; font: inherit; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+  padding: 0.65rem 0.75rem; border-radius: 8px; text-decoration: none;
+}
+.date-list a:hover, .date-list button:hover { background: var(--brand-soft); }
+.date-list a.active, .date-list button.active {
+  background: var(--brand-soft); border-color: #b7ddd5; color: var(--brand-dark); font-weight: 600;
+}
+.date-list .meta { font-size: 0.75rem; color: var(--muted); white-space: nowrap; }
+.empty-hint { color: var(--muted); font-size: 0.9rem; padding: 0.5rem 0.25rem; }
+
+.main { padding: 0; min-height: 420px; overflow: hidden; }
+.main-empty {
+  padding: 3rem 1.5rem; text-align: center; color: var(--muted);
+}
+.main-empty .icon {
+  width: 56px; height: 56px; margin: 0 auto 1rem; border-radius: 14px;
+  background: var(--brand-soft); color: var(--brand); display: grid; place-items: center;
+  font-size: 1.4rem; font-weight: 700;
+}
+.report-frame { border: 0; width: 100%; min-height: 70vh; display: block; }
+.report-wrap { padding: 1.5rem 1.75rem 2.5rem; }
+
+.report h1 {
+  margin: 0 0 0.75rem; font-size: 1.55rem; letter-spacing: -0.03em; line-height: 1.3;
+}
+.report h2 {
+  margin: 2rem 0 0.75rem; font-size: 1.15rem; letter-spacing: -0.02em;
+  padding-bottom: 0.35rem; border-bottom: 2px solid var(--brand-soft);
+}
+.report h3 {
+  margin: 1.5rem 0 0.6rem; font-size: 1.05rem;
+  padding: 0.65rem 0.85rem; background: var(--brand-soft); border-radius: 8px;
+  border-left: 4px solid var(--brand);
+}
+.report p { margin: 0.55rem 0; }
+.report ul, .report ol { padding-left: 1.25rem; }
+.report li { margin: 0.25rem 0; }
+.report hr { border: 0; border-top: 1px solid var(--line); margin: 1.5rem 0; }
+
+.report table {
+  border-collapse: separate; border-spacing: 0; width: 100%;
+  margin: 1rem 0; font-size: 0.9rem; overflow: hidden;
+  border: 1px solid var(--line); border-radius: 10px; background: #fff;
+}
+.report th, .report td {
+  padding: 0.65rem 0.75rem; text-align: left; vertical-align: top;
+  border-bottom: 1px solid var(--line);
+}
+.report th { background: #eef6f4; font-weight: 650; color: var(--brand-dark); }
+.report tr:last-child td { border-bottom: 0; }
+.report tbody tr:hover td { background: #f7fbfa; }
+
+mark {
+  background: linear-gradient(180deg, transparent 8%, var(--mark) 8%, var(--mark) 92%, transparent 92%);
+  color: inherit; padding: 0 0.12em; border-radius: 2px;
+}
+
+.stats {
+  display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.85rem 0 1.25rem;
+}
+.chip {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  padding: 0.28rem 0.65rem; border-radius: 999px; font-size: 0.8rem; font-weight: 600;
+  background: var(--brand-soft); color: var(--brand-dark); border: 1px solid #c5e4dd;
+}
+.chip.neutral { background: #f0f2f1; color: var(--muted); border-color: var(--line); }
+.kw-header {
+  margin: 0.35rem 0 1rem;
+  padding: 0.65rem 0.85rem;
+  background: var(--brand-soft);
+  border: 1px solid #c5e4dd;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+.score {
+  display: inline-block; min-width: 2.4em; text-align: center;
+  padding: 0.1rem 0.45rem; border-radius: 6px; font-weight: 700; font-size: 0.85rem;
+  color: #fff;
+}
+.score.high { background: var(--score-high); }
+.score.mid { background: var(--score-mid); }
+.score.low { background: var(--score-low); }
+
+.footer-note {
+  max-width: 1280px; margin: 0 auto; padding: 0 1.25rem 2rem;
+  color: var(--muted); font-size: 0.8rem;
+}
+
+.back-link {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  margin-bottom: 1rem; font-size: 0.9rem; font-weight: 600;
+}
+
+body { background: var(--surface); }
+.standalone { max-width: 960px; margin: 0 auto; padding: 1.25rem 1.5rem 2.5rem; }
+</style>
+</head>
+<body>
+<div class="standalone">
+  <p class="back-link"><a href="../index.html#daily">← Daily 목록</a></p>
+  <div class="report"><h1>국내 R&amp;D 인텔리전스 데일리 로그</h1>
+<p>날짜: 2026-06-17
+기록자: Tech Market Monitor (auto)
+총 항목 수: 1건 (기사 1 / 보도자료 0 / 논문 0)
+신뢰도 분포: A 1건 / B 0건 / C 0건</p>
+<h2>오늘의 R&amp;D 인텔리전스 요약</h2>
+<p><strong>모니터링 키워드:</strong> <mark>전력계통</mark> · <mark>스마트그리드</mark> · <mark>파워그리드</mark> · <mark>에너지고속도로</mark> · <mark>AI 기반 전력계통 운영</mark> 등</p>
+<p><strong>수집 현황:</strong> R&amp;D 적합 4점+ 1건 · 3점 0건 · 2점 0건 · 투자 주체 명시 1건 (대한전선, 한국전력공사)</p>
+<p>오늘 수집 1건 (R&amp;D 적합 4점 이상 1건) · 연합뉴스</p>
+<p><strong>R&amp;D 기회 스캔 (팩트 기반):</strong></p>
+<table>
+<thead>
+<tr>
+<th>R&amp;D적합</th>
+<th>핵심 이슈 (팩트)</th>
+<th>고객 타겟</th>
+<th>R&amp;D 연계 포인트</th>
+<th>팩트 체크</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>5/5</strong></td>
+<td><a href="https://www.yna.co.kr/view/AKR20260617045100003">대한전선, 1천463억 &lsquo;500㎸ <mark>HVDC</mark></a> 대한전선은 2026-06-17 공시로 한국전력공사 ‘500kV <mark>HVDC</mark> 동해안∼동서울 건설공사(EP 2단계)’를 수주했다고 밝힘. 계약 규모는 부가세 포함 1,463억원이며, 약 86km 규모 500kV <mark>HVDC</mark> XLPE 케이블 시스템을 제조·공급·시공(턴키)함. 동해안 원자력·화력·재생에너지 전력을 수도권으로 공급하기</td>
+<td>대한전선, 한국전력공사</td>
+<td><mark>HVDC</mark> 케이블·변환설비·계통 연계 시험·실증</td>
+<td>대한전선은 2026-06-17 공시로 한국전력공사 ‘500kV <mark>HVDC</mark> 동해안∼동서울 건설공사(EP 2단계)’를 수주했다고 밝힘. 계약 규모는 부가세 포함 1,463억원이며, 약 86km 규모 500kV <mark>HVDC</mark> XLPE 케이블 시스템을 제조·공급·시공(턴키)함. 동해안 원자력·화력·재생에너지 전력을 수도권으로 공급하기 위한 국가 핵심 전력망임.</td>
+</tr>
+<tr>
+<td>- <strong>상충되는 정보:</strong> (해당 없음)</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>항목 기록</h2>
+<p><a id="0930-대한전선-1천463억-500-hvdc-동해안-동서울-전력망-수주"></a></p>
+<h3>09:30 <a href="https://www.yna.co.kr/view/AKR20260617045100003">대한전선, 1천463억 &lsquo;500㎸ <mark>HVDC</mark> 동해안-동서울&rsquo; 전력망 수주</a></h3>
+<ul>
+<li><strong>자료유형:</strong> 기사</li>
+<li><strong>출처:</strong> 연합뉴스</li>
+<li><strong>저자/발행기관:</strong> 연합뉴스</li>
+<li><strong>발행일:</strong> 2026-06-17</li>
+<li><strong>링크/DOI:</strong> https://www.yna.co.kr/view/AKR20260617045100003</li>
+<li><strong>요약:</strong></li>
+<li><a href="https://www.yna.co.kr/view/AKR20260617045100003">대한전선은 2026-06-17 공시로 한국전력공사 ‘500kV <mark>HVDC</mark> 동해안∼동서울 건설공사(EP 2단계)’를 수주했다고 밝힘. 계약 규모는 부가세 포함 1,463억원이며, 약 86km 규모 500kV <mark>HVDC</mark> XLPE 케이블 시스템을 제조·공급·시공(턴키)함. 동해안 원자력·화력·재생에너지 전력을 수도권으로 공급하기 위한 국가 핵심 전력망임.</a></li>
+<li>원문 기준 핵심 사실을 추가 확인 필요</li>
+<li>
+<p>(의견) 원문에서 <mark>HVDC</mark>(초고압 직류송전)·동해안~동서울 전력망이 직접 확인됨</p>
+</li>
+<li>
+<p><strong>R&amp;D 적합도:</strong> 5/5</p>
+</li>
+<li><strong>R&amp;D 타겟팅 (프라운호퍼):</strong></li>
+<li><strong>팩트 근거:</strong> 대한전선은 2026-06-17 공시로 한국전력공사 ‘500kV <mark>HVDC</mark> 동해안∼동서울 건설공사(EP 2단계)’를 수주했다고 밝힘. 계약 규모는 부가세 포함 1,463억원이며, 약 86km 규모 500kV <mark>HVDC</mark> XLPE 케이블 시스템을 제조·공급·시공(턴키)함. 동해안 원자력·화력·재생에너지 전력을 수도권으로 공급하기 위한 국가 핵심 전력망임.</li>
+<li><strong>투자 주체:</strong> 대한전선, 한국전력공사</li>
+<li><strong>투자 목적:</strong> 동해안 발전력을 수도권으로 안정 수송하기 위한 <mark>HVDC</mark> 전력망 구축</li>
+<li><strong>제안 R&amp;D 영역:</strong> (의견) <mark>HVDC</mark> 케이블·변환설비·계통 연계 시험·실증</li>
+<li><strong>신뢰도:</strong> A</li>
+<li><strong>태그:</strong> #기술</li>
+<li><strong>비고:</strong> 분석 키워드: <mark>전력계통</mark>, <mark>스마트그리드</mark>, <mark>파워그리드</mark>, <mark>에너지고속도로</mark>, <mark>AI 기반 전력계통 운영</mark>, <mark>차세대 전력변환기</mark>, <mark>HVDC</mark>, <mark>MMC</mark>, <mark>STATCOM</mark>, <mark>배전망 디지털화</mark>, <mark>Digital Grid</mark>, <mark>장주기 ESS</mark>, <mark>계통연계</mark>, <mark>전력망 사이버보안</mark>, <mark>그리드포밍 인버터</mark>, <mark>Grid-forming Inverter</mark>, <mark>DC Grid</mark>, <mark>AI 기반 송전설비 유지관리</mark>, <mark>재생에너지 출력예측</mark> · 키워드 관련도: 직접 · 매칭: <mark>hvdc</mark></li>
+</ul>
+<hr />
+<h2>신뢰도 등급 기준</h2>
+<ul>
+<li><strong>A (높음):</strong> 정부·공공기관 원문(부처·전담기관 .go.kr/.re.kr/.or.kr 보도자료), 연합뉴스·뉴시스 1차 보도, 공공 R&amp;D·정책기관(KISTEP·KIET·KIPO·KETEP·KEIT·한국전력 등), 국내 학술지·국책연구원 동료심사 논문</li>
+<li><strong>B (중간):</strong> 국내 경제·IT·에너지 전문매체(헤럴드경제·동아일보·매일경제·전자신문·전기신문·에너지경제신문·에너지타임즈·인더스트리뉴스·ZDNet Korea 등), 2차 인용·전문자료 요약, 기업·공기업 IR/보도자료</li>
+<li><strong>C (참고):</strong> 익명 소스, 추측성 기사, 단순 재가공 콘텐츠, 미검증 블로그 — <strong>자동 생성 시에는 C가 나오지 않음. 수동 기록 시에만 사용</strong></li>
+</ul></div>
+</div>
+</body>
+</html>
