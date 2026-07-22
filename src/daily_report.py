@@ -240,10 +240,23 @@ def is_empty_daily_report(log_date: date, output_dir: Path | None = None) -> boo
     return _EMPTY_REPORT_MARKER in text
 
 
+def format_source_display_name(source_name: str) -> str:
+    """Show ministry press releases as 보도자료, not legacy 정책브리핑 labels."""
+    name = (source_name or "").strip()
+    if not name:
+        return name
+    prefix = "정책브리핑 "
+    if name.startswith(prefix):
+        org = name[len(prefix) :].strip()
+        if org:
+            return org if org.endswith("보도자료") else f"{org} 보도자료"
+    return name
+
+
 def _material_type(article: SummarizedArticle) -> str:
     if article.category == "academic":
         return "논문"
-    source = article.source_name.lower()
+    source = format_source_display_name(article.source_name).lower()
     url = article.url.lower()
     # Press-release boards / gov sources before Tier-1 research so
     # "KIPO 보도자료" etc. are not mislabeled as 보고서(시장조사).
@@ -1707,7 +1720,7 @@ def _build_item_block(
 
     heading_title = article.title.replace("…", "").replace("...", "").strip()
     heading_title = _highlight_keywords(heading_title, hl_kws)
-    source_name = (article.source_name or "").strip() or "출처"
+    source_name = format_source_display_name(article.source_name) or "출처"
     url = _article_url(article)
     heading_title = _link_text(heading_title, url)
 
@@ -1772,7 +1785,8 @@ def _build_low_relevance_section(
         url = _article_url(article)
         title_part = _link_text(title, url) if _is_http_url(url) else title
         lines.append(
-            f"{index}. [{level_ko}] {title_part} — {article.source_name}"
+            f"{index}. [{level_ko}] {title_part} — "
+            f"{format_source_display_name(article.source_name)}"
         )
     lines.append("")
     return lines
