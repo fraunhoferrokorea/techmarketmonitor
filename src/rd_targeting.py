@@ -70,6 +70,20 @@ _NON_RD_EDUCATION_EVENT = re.compile(
     re.I,
 )
 
+# Personal license/exam pass & career-profile interviews — keyword hit alone is not R&D.
+# e.g. "발송배전기술사 최연소 합격", "자격증 취득 소감", engineer aspiration quotes.
+_NON_RD_CAREER_CREDENTIAL = re.compile(
+    r"(?:기술사|기사|기능장|기능사)\s*(?:시험\s*)?(?:합격|취득|수석)"
+    r"|자격(?:증)?\s*(?:시험\s*)?(?:합격|취득|따)"
+    r"|국가\s*기술\s*자격\s*(?:시험\s*)?(?:합격|취득)"
+    r"|최연소\s*합격|합격\s*(?:소감|인터뷰|수기)"
+    r"|합격자\s*(?:인터뷰|수기|특집)"
+    r"|(?:발송\s*배전|전기|통신|토목|건축)\s*기술사"
+    r"|기술사는\s*끝이\s*아닌"
+    r"|엔지니어\s*(?:가|로)\s*될",
+    re.I,
+)
+
 _NON_RD_EDUCATION_RD_OVERRIDE = re.compile(
     r"연구\s*개발|R\s*&\s*D"
     r"|(?:연구|개발)\s*(?:과제|성과|결과|수행)"
@@ -78,7 +92,10 @@ _NON_RD_EDUCATION_RD_OVERRIDE = re.compile(
     r"|기술\s*개발|신기술\s*개발"
     r"|(?:예산|투자|공모).*?(?:연구|개발|R&D|과제)"
     r"|정책\s*발표|로드\s*맵|로드맵"
-    r"|산업\s*현장\s*실증",
+    r"|산업\s*현장\s*실증"
+    # Keep real policy/R&D about reforming credential systems.
+    r"|자격\s*(?:제도|체계)\s*(?:개편|개편안|개선|도입)"
+    r"|국가\s*기술\s*자격\s*(?:개편|개선|제도)",
     re.I,
 )
 
@@ -164,6 +181,23 @@ def is_non_rd_program_news(
     return True
 
 
+def is_career_credential_news(
+    article: RawArticle | FilteredArticle | SummarizedArticle,
+) -> bool:
+    """True for personal exam-pass / license / career-profile pieces without R&D substance.
+
+    Keyword hits like 「전력계통」 in a 기술사 합격 인터뷰 do not make Fraunhofer R&D news.
+    """
+    text = _exclusion_source_text(article)
+    if not _NON_RD_CAREER_CREDENTIAL.search(text):
+        return False
+    if _NON_RD_EDUCATION_RD_OVERRIDE.search(text):
+        return False
+    if _RD_FUNDING_SIGNAL.search(text):
+        return False
+    return True
+
+
 def is_research_outcome_without_investment_signal(
     article: RawArticle | FilteredArticle | SummarizedArticle,
 ) -> bool:
@@ -182,8 +216,10 @@ def is_excluded_rd_news(
     article: RawArticle | FilteredArticle | SummarizedArticle,
 ) -> bool:
     """True when article should be dropped from R&D news collection and scoring."""
-    return is_non_rd_program_news(article) or is_research_outcome_without_investment_signal(
-        article
+    return (
+        is_non_rd_program_news(article)
+        or is_career_credential_news(article)
+        or is_research_outcome_without_investment_signal(article)
     )
 
 

@@ -7,6 +7,7 @@ from src.rd_targeting import (
     build_rd_targeting_block,
     compute_rd_match_score,
     has_investment_signal,
+    is_career_credential_news,
     is_domestic_rd_target,
     is_excluded_rd_news,
     is_non_rd_program_news,
@@ -131,6 +132,56 @@ def test_industrial_demonstration_not_excluded() -> None:
         ],
     )
     assert not is_non_rd_program_news(article)
+
+
+def test_career_credential_pass_interview_excluded() -> None:
+    """Keyword hit alone (전력계통) must not keep a 기술사 합격 인터뷰."""
+    article = _article(
+        title=(
+            "이현석 한전 배전운영처 대리 “기술사는 끝이 아닌 "
+            "시작전력계통 미래 책임지는 엔지니어 될 것”"
+        ),
+        source_name="전기신문",
+        llm_summary=(
+            "한국전력 배전운영처 이현석 대리가 제139회 발송배전기술사에 "
+            "최연소 합격함. 전력계통 분야 차세대 전문가로 주목받고 있음."
+        ),
+        matched_keywords=["전력계통"],
+        rd_match_score=3,
+        rd_proposable_area="전력계통 기술 및 전력망 운영 최적화 연구",
+        ko_summary_steps=[
+            "**개요:** 한국전력 배전운영처 이현석 대리가 발송배전기술사에 최연소 합격함.",
+            "**투자 주체:** 명시 없음",
+            "**투자 목적:** 해당 없음",
+            "**위탁 연구 니즈:** 팩트 부족으로 판단 보류",
+            "**접근 전략:** 해당 없음",
+        ],
+    )
+    grid_kws = ["전력계통", "스마트그리드", "파워그리드"]
+
+    assert is_career_credential_news(article)
+    assert is_excluded_rd_news(article)
+    assert compute_rd_match_score(article, grid_kws) == 0
+    assert build_rd_targeting_block(article, grid_kws) == []
+
+
+def test_credential_system_reform_with_rd_budget_not_excluded() -> None:
+    article = _article(
+        title="산업부, 국가기술자격 제도 개편…전력계통 R&D 인력 양성 예산 편성",
+        llm_summary=(
+            "산업통상자원부가 국가기술자격 제도 개편안을 발표하고 "
+            "전력계통 R&D 인력 양성 지원 사업 예산을 편성함."
+        ),
+        ko_summary_steps=[
+            "**개요:** 산업부가 국가기술자격 제도 개편과 R&D 인력 양성 예산을 발표함.",
+            "**투자 주체:** 산업통상자원부",
+            "**투자 목적:** R&D 인력 양성",
+            "**위탁 연구 니즈:** 교육·평가 체계 고도화",
+            "**접근 전략:** 정책 정합",
+        ],
+    )
+    assert not is_career_credential_news(article)
+    assert not is_excluded_rd_news(article)
 
 
 def test_epidemiology_meta_analysis_excluded_from_rd_scoring() -> None:

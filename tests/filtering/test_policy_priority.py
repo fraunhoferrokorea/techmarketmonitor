@@ -218,3 +218,26 @@ def test_filter_excludes_student_field_trip_program() -> None:
         required_keywords=["전력계통"],
     )
     assert result == []
+
+
+def test_filter_excludes_career_credential_pass_interview() -> None:
+    article = RawArticle(
+        title=(
+            "이현석 한전 배전운영처 대리 “기술사는 끝이 아닌 "
+            "시작전력계통 미래 책임지는 엔지니어 될 것”"
+        ),
+        url="https://www.electimes.com/news/articleView.html?idxno=370406",
+        summary=(
+            "한국전력 배전운영처 이현석 대리가 제139회 발송배전기술사에 "
+            "최연소 합격함. 전력계통 분야 차세대 전문가로 주목."
+        ),
+        source_name="전기신문",
+        category="tech_news",
+        published_at=datetime.now(tz=timezone.utc),
+    )
+    result = filter_articles(
+        [article],
+        keywords=["전력계통", "스마트그리드"],
+        required_keywords=["전력계통"],
+    )
+    assert result == []

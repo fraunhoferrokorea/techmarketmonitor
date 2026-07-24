@@ -109,7 +109,8 @@ def filter_articles(
         )
     if dropped_non_rd:
         logger.info(
-            "Keyword filter: excluded %d non-R&D article(s) (education/career or research-outcome only)",
+            "Keyword filter: excluded %d non-R&D article(s) "
+            "(education/career/credential or research-outcome only)",
             dropped_non_rd,
         )
     if dropped_core:
