@@ -84,3 +84,10 @@ jobs:
           git commit -m "report: daily $(date -u +%Y-%m-%d)"
           git pull --rebase origin main
           git push origin HEAD:main
+
+      # Pushes made with GITHUB_TOKEN do not trigger the legacy Pages build,
+      # so the site can serve stale docs/. Request a build explicitly.
+      - name: Request GitHub Pages build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X POST "repos/${{ github.repository }}/pages/builds" || true
