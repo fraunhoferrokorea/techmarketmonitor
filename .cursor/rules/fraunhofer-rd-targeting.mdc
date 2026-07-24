@@ -22,23 +22,15 @@ Identify optimal target customers (Korean government ministries / private compan
 
 ## Required Output Structure (per item)
 
-1. **투자 주체** — Ministry / company name investing or needing technology
-2. **투자 목적** — Localization, internalization, upgrade, time compression, capability gap
-3. **위탁 연구 니즈** — High-difficulty R&D pain points where external expert (Fraunhofer) may be needed
-4. **접근 전략** — Government: policy alignment; Company: roadmap linkage
+1. **투자 주체** — Ministry / company name investing or needing technology (source fact only)
+2. **투자 목적** — Localization, internalization, upgrade, time compression, capability gap (source fact only)
+3. **팩트 근거 / 원문 인용** — Prefer 「」 verbatim quotes from press/article/paper; never invent absent numbers/names
+4. **위탁 연구 니즈** — High-difficulty R&D pain points — label `(의견)` on its own line
+5. **접근 전략** — Government: policy alignment; Company: roadmap linkage — label `(의견)` on its own line
 
 Implemented in `summarizer.py` → `ko_summary_steps` headings and rendered in `daily_report.py` as **R&D 타겟팅 (프라운호퍼)** block + daily **국내 R&D 타겟 시사점** section.
 
-## Execution Prompt (batch analysis)
-
-When analyzing an article list, derive:
-1. Technical keywords (from `keywords.txt`)
-2. Domestic investment actor (ministry/company)
-3. Investment purpose (localization / upgrade / time compression)
-4. Fraunhofer core need (domestic technology limits)
-5. Proposal strategy for that customer
-
-All content must be objective and fact-based.
+Fact-check: no invented content; maximize direct quotes; keep mere opinion on separate `(의견)` lines.
 
 ## Sorting Priority
 

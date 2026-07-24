@@ -359,8 +359,6 @@ def build_rd_targeting_block(
             opinion_lines.append(f"  - **{label}:** (의견) {body}")
 
     if opinion_lines:
-        # Blank line then opinions — keep analysis separate from source facts.
-        lines.append("")
         lines.extend(opinion_lines)
 
     return lines if len(lines) > 2 else []

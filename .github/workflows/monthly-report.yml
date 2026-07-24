@@ -2,8 +2,9 @@ name: Monthly Tech Market Report
 
 on:
   schedule:
-    # 08:30 KST = 23:30 UTC (after daily-monitor to avoid repo-push queue)
-    - cron: '30 23 * * *'
+    # 09:41 KST = 00:41 UTC (after daily-monitor; off-hour minute to avoid
+    # GitHub's congested exact-hour schedule queue)
+    - cron: '41 0 * * *'
   workflow_dispatch:
     inputs:
       year:

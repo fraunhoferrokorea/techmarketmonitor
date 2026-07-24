@@ -52,7 +52,8 @@ Avoid vague filler in summary cells: no deictic subjects ("이 기술은"), no g
 - **링크/DOI:** [원문](https://article-url)
 - **요약:**
   - Fact bullets; noun-style endings. Past: -었음/-았음/-했음. Present: -함/-임/-됨. Never -습니다/-합니다/-ㅂ니다/-다
-  - Last line: `(해석) ...`
+  - Prefer 「」 direct quotes from press/article/paper; do not invent absent facts
+  - Opinion/analysis on its own line: `(의견) ...` (never mixed into fact bullets)
 - **신뢰도:** A / B / C (auto never assigns C)
 - **태그:** #tag1 #tag2 (max 4)
 - **비고:** analysis keywords · relevance (직접/간접) · matched keywords

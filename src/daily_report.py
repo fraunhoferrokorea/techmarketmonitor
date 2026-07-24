@@ -562,17 +562,15 @@ def _build_summary_lines(
             facts.append(q)
 
     rd_heading_prefixes = ("투자 주체", "투자 목적", "위탁 연구 니즈", "접근 전략")
-    opinion_step_labels = ("위탁 연구 니즈", "접근 전략")
     for step in steps:
         cleaned = polish_korean(strip_cjk_from_korean(_strip_heading(step)))
         cleaned = re.sub(r"\[\d+\]\s*$", "", cleaned).strip()
         cleaned = normalize_korean_endings_sentences(cleaned)
         if not cleaned:
             continue
-        if _is_opinion_line(cleaned) or any(label in step for label in opinion_step_labels):
-            skip_vals = ("해당 없음", "명시 없음", "팩트 부족으로 판단 보류")
+        if _is_opinion_line(cleaned):
             body = _strip_opinion_prefix(cleaned)
-            if body and body not in skip_vals:
+            if body and body not in ("해당 없음", "명시 없음", "팩트 부족으로 판단 보류"):
                 line = _format_opinion_line(body)
                 if line and line not in opinions:
                     opinions.append(line)
@@ -1365,6 +1363,10 @@ def _best_from_relevance(keyword_relevance: str) -> str:
     """
     kr = polish_korean(strip_cjk_from_korean(keyword_relevance)).strip()
     kr = re.sub(r"\[\d+\]\s*$", "", kr).strip()
+    for prefix in ("(의견)", "(해석)"):
+        if kr.startswith(prefix):
+            kr = kr[len(prefix) :].strip()
+            break
     if not kr:
         return ""
 

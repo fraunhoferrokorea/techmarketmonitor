@@ -135,7 +135,10 @@ def test_monthly_markdown_highlights_keywords():
     assert "<mark>스마트그리드</mark>" in md
     assert "<mark>전력계통</mark>" in md
     assert "<mark>파워그리드</mark>" in md
-    assert "매칭: <mark>스마트그리드</mark>, <mark>전력계통</mark>" in md
+    # Context highlights (§2) show marked matched keywords in parentheses.
+    assert "(<mark>스마트그리드</mark>, <mark>전력계통</mark>)" in md
+    # monthly-fact-only rule: §4 detail cards must not render 관련도/매칭/적합도.
+    assert "매칭:" not in md
 
 
 def test_format_monitoring_keyword_header_top5_with_deung() -> None:

@@ -6,3 +6,4 @@ __pycache__/
 node_modules/
 output/daily/*.html
 output/site/
+output/logs/

@@ -466,8 +466,10 @@ class Summarizer:
             f"Matched keywords (all): {', '.join(article.matched_keywords)}\n"
             f"Analysis baseline keywords (all keywords.txt entries — keyword_relevance MUST explain "
             f"how THIS article relates to these, not generic keyword definitions; "
-            f"if no factual link, write '모니터링 키워드와 직접·간접 관련 없음.' and do not invent grid R&D): "
+            f"if no factual link, write '(의견) 모니터링 키워드와 직접·간접 관련 없음.' and do not invent grid R&D): "
             f"{', '.join(self._top_keywords)}\n"
+            f"FACTCHECK reminder: (1) no invented facts (2) 「」 direct quotes in fact_basis/개요 "
+            f"(3) opinions only with '(의견)' prefix, separate from fact lines.\n"
             f"Content preview: {article.summary[:preview_len]}"
         )
 

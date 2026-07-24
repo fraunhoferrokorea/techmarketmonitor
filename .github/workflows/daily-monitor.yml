@@ -2,8 +2,12 @@ name: Daily Tech Market Monitor
 
 on:
   schedule:
-    # 08:00 KST = 23:00 UTC (previous day)
-    - cron: '0 23 * * *'
+    # 08:07 KST = 23:07 UTC (previous day). Off-hour minute: exact-hour crons
+    # (especially 23:00/00:00 UTC) are heavily delayed on GitHub's shared queue.
+    - cron: '7 23 * * *'
+    # Backup run 10:37 KST in case the first schedule is delayed or dropped.
+    # daily-catchup is idempotent, so a duplicate run is a no-op.
+    - cron: '37 1 * * *'
   workflow_dispatch:
     inputs:
       date:
