@@ -271,8 +271,9 @@ def _synthesize_monthly_ko(
 - opportunities.field는 위 허용값만 사용. 제조AI·스마트공장·표준·인증·바이오 등 레거시 라벨 금지.
 - 각 항목의 relevance(직접/간접/약함), matched_keywords, keyword_relevance, **attested_keywords**, **evidence_quotes** 필드를 기준으로 중요도를 판단함.
 - executive_summary·context_highlights·opportunities는 **직접·간접** 관련 항목을 정부·R&D 신호와 함께 우선 배치함.
-- executive_summary는 주제가 바뀔 때마다 줄바꿈(문단 사이 빈 줄). 집계·관련도·최우선 이슈·분야축·후속 안내를 한 줄에 이어서 쓰지 말 것.
-- **모니터링 축 = keywords.txt만.** executive_summary에 '제조AI·스마트공장 축', '표준·인증 축', '바이오 축' 등 레거시 고정 라벨을 쓰지 말 것. 키워드 미매칭 항목은 '관련도 약함 정부·R&D 신호'로만 언급.
+- executive_summary는 **당월 핵심 팩트만** 서술. 집계 건수·직접/간접 건수·키워드 무관 제외·keywords.txt 섹션 라벨·§2~§6 후속 안내 등 **데이터 정리 방법 설명 금지**.
+- executive_summary는 주제가 바뀔 때마다 줄바꿈(문단 사이 빈 줄). 한 줄에 여러 이슈를 이어서 쓰지 말 것.
+- **모니터링 축 = keywords.txt만.** executive_summary에 '제조AI·스마트공장 축', '표준·인증 축', '바이오 축' 등 레거시 고정 라벨을 쓰지 말 것.
 - 정부·공공기관 투자 주체(actor)는 유지하되, 모니터링 키워드와 직접 연결된 항목을 상단에 둠.
 
 규칙:
@@ -300,7 +301,7 @@ def _synthesize_monthly_ko(
 
 JSON 스키마:
 {{
-  "executive_summary": "5~7문장. 주제(집계 건수 / 관련도 구분 / 최우선 이슈 / 키워드 섹션 동향 / 후속 섹션 안내)가 바뀔 때마다 문단을 나누고 문단 사이에 빈 줄(\\n\\n)을 넣음. attested 키워드·원문 「」 인용 가능한 이슈만 + 당월 정부·기업 핵심 수치. 없는 사실 금지. 한 덩어리 문단으로 붙이지 말 것",
+  "executive_summary": "항목별 핵심 팩트 3~6문장(투자 주체·수치·사업명). 주제 바뀔 때마다 문단 사이 빈 줄(\\n\\n). attested 키워드·원문 수치만. 집계·관련도 통계·제외 기준·섹션 라벨·후속 안내 금지. 없는 사실 금지. 원문 왜곡 금지",
   "context_highlights": [
     {{"relevance": "직접|간접", "matched_keywords": "매칭 키워드", "summary": "핵심 이슈 2~3문장(팩트·수치·「」인용). 의견은 '(의견)' 별도 문장", "refs": [1]}}
   ],
@@ -1007,58 +1008,34 @@ def _build_executive_summary_fallback(
     month: int,
     groups: tuple[KeywordGroup, ...] | list[KeywordGroup] | None = None,
 ) -> str:
+    """Content-only §1: entry facts, no methodology / count / section meta."""
+    _ = (top_keywords, groups)  # signature kept for callers
     unique = _dedupe_entries(entries)
-    direct = [e for e in unique if e.get("relevance") == "직접"]
-    indirect = [e for e in unique if e.get("relevance") == "간접"]
-    attested: list[str] = []
-    for e in unique:
-        attested.extend(e.get("attested_keywords") or [])
-    attested = list(dict.fromkeys(attested))
-    kw_label = (
-        " · ".join(attested[:10])
-        if attested
-        else (" · ".join(top_keywords[:5]) if top_keywords else "모니터링 키워드")
+    _rel_rank = {"직접": 0, "간접": 1}
+    ordered = sorted(
+        unique,
+        key=lambda e: (
+            _rel_rank.get(e.get("relevance", ""), 9),
+            -(e.get("score") or 0),
+            e.get("date") or "",
+        ),
     )
-    groups = tuple(groups or ())
-
-    parts = [
-        f"{year}년 {month}월 국내 R&D 인텔리전스 월간 집계에서 "
-        f"keywords.txt 관련(직접·간접) {len(unique)}건을 분석함.",
-        (
-            f"보도자료 원문에서 확인된 키워드({kw_label}) 기준 "
-            if attested
-            else f"모니터링 키워드 기준 "
-        )
-        + f"직접 {len(direct)}건·간접 {len(indirect)}건임. "
-        "키워드 무관(약함) 항목은 월간 본문에서 제외함.",
-    ]
-    if direct:
-        top = direct[0]
-        parts.append(
-            f"최우선 이슈는 **{top.get('actor') or '정부'}** — "
-            f"{(top.get('summary') or top.get('title', ''))[:160]}."
-        )
-    # keywords.txt sections only — off-keyword (약함) never enters this compact set.
-    for label, items in _group_by_theme(unique, groups):
-        if label == OTHER_THEME:
+    parts: list[str] = []
+    for e in ordered:
+        summary = (e.get("summary") or e.get("title") or "").strip()
+        if not summary:
             continue
-        focused = [
-            e
-            for e in items
-            if e.get("relevance") in ("직접", "간접") or e.get("attested_keywords")
-        ]
-        if not focused:
-            continue
-        g0 = focused[0]
+        # Avoid double period when summary already ends with sentence closer.
+        summary = summary.rstrip(".")
+        actor = (e.get("actor") or "").strip()
+        if actor:
+            parts.append(f"**{actor}** — {summary}.")
+        else:
+            parts.append(f"{summary}.")
+    if not parts:
         parts.append(
-            f"keywords.txt 섹션「{label}」에서는 "
-            f"**{g0.get('actor') or '정부'}** 관련 "
-            f"{(g0.get('summary') or g0.get('title') or '')[:140]}."
+            f"{year}년 {month}월 키워드 관련 국내 R&D 신호가 확인되지 않음."
         )
-    parts.append(
-        "§2 컨텍스트 중요도·§3 분야별 기회·§4 타겟 상세·§5 Action Plan·§6 스코어카드에 "
-        "키워드 관련 투자 주체·팩트 근거만 정리함."
-    )
     return _format_executive_summary_paragraphs("\n\n".join(parts))
 
 

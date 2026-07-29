@@ -62,9 +62,11 @@ Render **only**:
 
 ## §1 Executive Summary
 
+- **Content only:** investment actor + source facts (amounts, dates, program names). No methodology.
+- **Forbidden meta:** 집계 건수, 직접/간접 건수, 키워드 무관 제외, keywords.txt 섹션 라벨, §2~§6 후속 안내, "분석함/정리함" framing.
 - Topic change = new paragraph (blank line between paragraphs).
-- Do not glue 집계·관련도·최우선 이슈·분야축·후속 안내 into one dense paragraph.
-- `_format_executive_summary_paragraphs` enforces this at factcheck/render time.
+- Do not distort source wording; truncate only, never invent endings.
+- `_format_executive_summary_paragraphs` enforces paragraph breaks at factcheck/render time.
 
 ## §3 Opportunities summary
 
