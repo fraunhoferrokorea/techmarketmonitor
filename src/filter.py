@@ -24,7 +24,7 @@ def _normalize(text: str) -> str:
 
 def match_keywords(text: str, keywords: list[str]) -> list[str]:
     normalized = _normalize(text)
-    return [keyword for keyword in keywords if keyword in normalized]
+    return [keyword for keyword in keywords if keyword.lower() in normalized]
 
 
 def passes_collection_filter(

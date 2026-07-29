@@ -13,15 +13,24 @@ def test_all_keywords_used_for_analysis_and_filter(tmp_path: Path) -> None:
         "전력계통\n"
         "스마트그리드\n"
         "BESS\n"
+        "장주기 ESS\n"
         "에너지고속도로\n",
         encoding="utf-8",
     )
     labels, normalized, analysis, filter_kw = _load_keywords_config(kw_file)
-    assert labels == ["HVDC", "전력계통", "스마트그리드", "BESS", "에너지고속도로"]
+    assert labels == [
+        "HVDC",
+        "전력계통",
+        "스마트그리드",
+        "BESS",
+        "장주기 ESS",
+        "에너지고속도로",
+    ]
     assert analysis == labels
     assert filter_kw == normalized
     assert normalized[0] == "hvdc"
-    assert len(filter_kw) == 5
+    assert normalized[4] == "장주기 ess"
+    assert len(filter_kw) == 6
 
 
 def test_load_settings_uses_all_keywords_for_filter() -> None:
@@ -30,6 +39,8 @@ def test_load_settings_uses_all_keywords_for_filter() -> None:
         _normalize_keyword(k) for k in settings.keyword_labels
     ]
     assert settings.filter_keywords[0] == "전력계통"
+    assert "장주기 ess" in settings.filter_keywords
+    assert "ai 기반 송전설비 유지관리" in settings.filter_keywords
     assert len(settings.filter_keywords) == len(settings.keyword_labels)
     assert len(settings.filter_keywords) > 5
 

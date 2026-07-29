@@ -110,8 +110,13 @@ def load_keyword_groups(path: Path) -> tuple[KeywordGroup, ...]:
 
 
 def _normalize_keyword(keyword: str) -> str:
-    """Lowercase ASCII keywords for case-insensitive matching; keep Korean as-is."""
-    return keyword.lower() if keyword.isascii() else keyword
+    """Case-fold keywords for matching.
+
+    Article text is lowercased before substring match, so mixed Korean+ASCII
+    keywords (e.g. ``장주기 ESS``, ``AI 기반 …``) must also be lowercased or
+    they never match.
+    """
+    return keyword.lower()
 
 
 def _load_keywords_config(path: Path) -> tuple[list[str], list[str], list[str], list[str]]:
@@ -120,7 +125,7 @@ def _load_keywords_config(path: Path) -> tuple[list[str], list[str], list[str], 
     All non-comment keyword lines are used for:
     - analysis: LLM keyword_relevance, daily/monthly executive summary
     - filter: required for article collection/filter pass (gov-target exception)
-    - full normalized list: RSS fetch and matched_keywords tagging
+    - full normalized list: Google News keyword search + matched_keywords tagging
     """
     try:
         lines = path.read_text(encoding="utf-8").splitlines()

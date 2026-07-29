@@ -202,8 +202,12 @@ def is_korea_scoped(article: RawArticle | FilteredArticle | SummarizedArticle) -
     if _FOREIGN_SOURCE_NAMES.search(article.source_name):
         return False
 
+    source_has_hangul = bool(re.search(r"[가-힣]", article.source_name or ""))
     if not is_korean_media_host(host):
-        return False
+        # Keyword news search often surfaces Korean .com outlets (e2news, etoday, …)
+        # that are not on the curated host list; allow Hangul title + Hangul source.
+        if not (has_hangul and source_has_hangul):
+            return False
 
     if _FOREIGN_HEADLINE.search(article.title) and not has_korea_anchor:
         return False

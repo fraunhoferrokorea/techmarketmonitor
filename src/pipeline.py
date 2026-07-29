@@ -200,7 +200,11 @@ def run_daily_monitor(
         raise ValueError("No keywords configured — check keywords.txt in project root")
 
     sources = load_sources()
-    fetchers = build_fetchers(sources, keywords)
+    fetchers = build_fetchers(
+        sources,
+        keywords,
+        search_keywords=settings.keyword_labels,
+    )
 
     raw_articles = []
     for fetcher in fetchers:
@@ -254,7 +258,7 @@ def run_daily_monitor(
 
     filtered = filter_articles(
         recent_articles,
-        keywords,
+        settings.keyword_labels,
         required_keywords=settings.filter_keywords,
     )
     logger.info("Filtered to %d keyword-matching domestic (Korea-scoped) articles", len(filtered))
