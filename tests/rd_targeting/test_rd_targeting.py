@@ -224,3 +224,69 @@ def test_research_outcome_with_budget_not_excluded() -> None:
     )
     assert not is_research_outcome_without_investment_signal(article)
     assert not is_excluded_rd_news(article)
+
+
+def test_has_rd_topic_signal_detects_rd_lexicon() -> None:
+    from src.rd_targeting import has_rd_topic_signal
+
+    assert has_rd_topic_signal(_article())  # title has R&D
+    assert has_rd_topic_signal(
+        _article(title="산업부, 이차전지 기술개발 지원", llm_summary="지원 사업 발표.")
+    )
+    assert has_rd_topic_signal(
+        _article(title="대학 연구 성과 공유회", llm_summary="세미나 개최.")
+    )
+    assert not has_rd_topic_signal(
+        _article(
+            title="응급환자 이송체계 혁신 시범사업",
+            llm_summary="보건복지부와 소방청이 응급환자 이송체계 시범사업을 추진함.",
+            rd_proposable_area="응급의료 전달체계 개편 관련 기술개발",
+        )
+    )
+
+
+def test_rd_topic_signal_boosts_match_score() -> None:
+    from src.rd_targeting import has_rd_topic_signal
+
+    without = _article(
+        title="산업부, 이차전지 생산설비 확충 예산 편성",
+        llm_summary="산업통상자원부가 이차전지 생산설비 확충 예산을 편성함.",
+        matched_keywords=[],
+        rd_match_score=2,
+        rd_proposable_area="해당 없음",
+        ko_summary_steps=[
+            "**개요:** 산업부가 이차전지 생산설비 확충 예산을 편성함.",
+            "**투자 주체:** 산업통상자원부",
+            "**투자 목적:** 생산설비 확충",
+            "**위탁 연구 니즈:** 팩트 부족으로 판단 보류",
+            "**접근 전략:** 해당 없음",
+        ],
+    )
+    with_signal = _article(
+        title="산업부, 이차전지 기술개발·R&D 예산 편성",
+        llm_summary="산업통상자원부가 이차전지 기술개발 및 연구개발 예산을 편성함.",
+        matched_keywords=[],
+        rd_match_score=2,
+        rd_proposable_area="해당 없음",
+        ko_summary_steps=[
+            "**개요:** 산업부가 이차전지 기술개발 예산을 편성함.",
+            "**투자 주체:** 산업통상자원부",
+            "**투자 목적:** 기술 고도화",
+            "**위탁 연구 니즈:** 팩트 부족으로 판단 보류",
+            "**접근 전략:** 해당 없음",
+        ],
+    )
+
+    assert not has_rd_topic_signal(without)
+    assert has_rd_topic_signal(with_signal)
+    assert compute_rd_match_score(with_signal) == compute_rd_match_score(without) + 1
+
+
+def test_rd_topic_boost_does_not_override_exclusion() -> None:
+    article = _article(
+        title="대학생 기술 현장체험·연구 견학 프로그램",
+        llm_summary="비교과 프로그램으로 산업 현장체험과 기술 견학을 진행함.",
+        rd_match_score=3,
+    )
+    assert is_non_rd_program_news(article)
+    assert compute_rd_match_score(article) == 0

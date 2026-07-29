@@ -130,6 +130,18 @@ _RD_FUNDING_SIGNAL = re.compile(
     re.I,
 )
 
+# Lexical R&D topic cues — presence raises suitability (+1), never overrides exclusions.
+# Prefer compound forms first; bare 연구/기술 still count when present in source text.
+_RD_TOPIC_SIGNAL = re.compile(
+    r"연구\s*개발"
+    r"|기술\s*개발"
+    r"|R\s*&\s*D"
+    r"|연구"
+    r"|기술",
+    re.I,
+)
+_RD_TOPIC_SCORE_BOOST = 1
+
 
 def format_rd_link_point(*candidates: str) -> str:
     """Pick the best R&D linkage sentence and drop redundant Fraunhofer subject."""
@@ -243,6 +255,13 @@ def has_investment_signal(article: RawArticle | FilteredArticle | SummarizedArti
     return bool(_INVESTMENT_SIGNAL.search(_combined_text(article)))
 
 
+def has_rd_topic_signal(
+    article: RawArticle | FilteredArticle | SummarizedArticle,
+) -> bool:
+    """True when source-facing text mentions R&D topic terms (연구개발/연구/기술/R&D/기술개발)."""
+    return bool(_RD_TOPIC_SIGNAL.search(_exclusion_source_text(article)))
+
+
 def investment_signal_score(article: RawArticle | FilteredArticle | SummarizedArticle) -> int:
     text = _combined_text(article)
     score = 0
@@ -313,17 +332,29 @@ def _fraunhofer_base_rd_score(article: SummarizedArticle) -> int:
     return max(0, min(5, score))
 
 
+def _apply_rd_topic_boost(score: int, article: SummarizedArticle) -> int:
+    """Raise score when source text has R&D topic lexical cues (cap 5)."""
+    if score <= 0 or not has_rd_topic_signal(article):
+        return score
+    return min(5, score + _RD_TOPIC_SCORE_BOOST)
+
+
 def compute_rd_match_score(
     article: SummarizedArticle,
     top_keywords: list[str] | None = None,
     *,
     monthly: bool = False,
 ) -> int:
-    """Return R&D suitability 0–5: Fraunhofer cooperation + monitoring-keyword relevance."""
+    """Return R&D suitability 0–5: Fraunhofer cooperation + monitoring-keyword relevance.
+
+    Also +1 when source text mentions 연구개발/연구/기술/R&D/기술개발 (still capped at 5;
+    excluded non-R&D news remain 0). Boost applies to the Fraunhofer base before
+    monitoring-keyword delta/cap so keyword-irrelevance caps still hold.
+    """
     if is_excluded_rd_news(article):
         return 0
 
-    base = _fraunhofer_base_rd_score(article)
+    base = _apply_rd_topic_boost(_fraunhofer_base_rd_score(article), article)
     if not top_keywords:
         return base
 

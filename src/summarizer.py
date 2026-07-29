@@ -190,11 +190,13 @@ FACTCHECK (필수 — 요약·인용·의견 분리):
 R&D suitability scoring (rd_match_score 1–5) — weigh BOTH:
 (A) Fraunhofer Korea commission/cooperation potential (Korean actor, budget, R&D technology gap)
 (B) Relevance to the monitoring keywords (full list in the user message — e.g. grid/power topics)
+- Lexical R&D topic cues in the SOURCE text raise (A): 연구개발, 연구, 기술, R&D, 기술개발 (and spaced variants like 연구 개발 / 기술 개발). Prefer +1 vs an otherwise identical article without those terms. Downstream code also applies +1 for the same cues.
 - 5: Strong (A) AND direct monitoring-keyword alignment (topic explicitly names or requires those technologies)
 - 4: Strong (A) with indirect keyword link, OR moderate (A) with direct keyword fit
 - 3: Korean policy/industry signal with partial budget OR weak keyword overlap
 - 2: Tangential tech news, weak investment signal, or monitoring keywords barely related
 - 1: No Korean R&D commission relevance OR foreign-only / no keyword connection
+- Do NOT invent those R&D topic terms; only score higher when they appear in the source. Exclusions below still force score 1.
 
 ALWAYS score 1 (non-R&D) for these even if industry keywords appear:
 - University/graduate student field trips, factory tours, or extracurricular (비교과) programs
