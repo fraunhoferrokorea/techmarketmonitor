@@ -118,15 +118,10 @@ def _matches_analysis_keywords(
     """True when title/summary hits a daily analysis keyword (e.g. 전력계통)."""
     if not analysis_keywords:
         return False
+    from src.filter import match_keywords
+
     text = f"{article.title} {article.summary}"
-    normalized = text.lower()
-    for kw in analysis_keywords:
-        if kw.isascii():
-            if kw.lower() in normalized:
-                return True
-        elif kw in text:
-            return True
-    return False
+    return bool(match_keywords(text, analysis_keywords))
 
 
 def _article_pipeline_sort_key(

@@ -44,12 +44,49 @@ def test_mixed_script_keywords_self_match() -> None:
     )
 
 
+def test_match_keywords_ignores_whitespace() -> None:
+    settings = load_settings()
+    assert "에너지고속도로" in match_keywords(
+        "정부가 에너지 고속도로 사업을 추진함",
+        settings.keyword_labels,
+    )
+    assert "에너지고속도로" in match_keywords(
+        "에너지고속도로 착공",
+        settings.keyword_labels,
+    )
+    assert "Digital Grid" in match_keywords(
+        "digitalgrid 전환",
+        settings.keyword_labels,
+    )
+    assert "장주기 ESS" in match_keywords(
+        "장주기ESS 도입",
+        settings.keyword_labels,
+    )
+
+
 def test_google_news_search_url_encodes_keyword() -> None:
     url = google_news_search_url("장주기 ESS", days=7)
     assert "news.google.com/rss/search?" in url
     assert "hl=ko" in url
     assert "gl=KR" in url
     assert "when%3A7d" in url or "when:7d" in url
+    # Spaced + compact forms are OR-combined.
+    assert "OR" in url or "or" in url.lower() or "%20OR%20" in url
+
+
+def test_google_news_search_url_space_variants() -> None:
+    from urllib.parse import parse_qs, urlparse, unquote_plus
+
+    url = google_news_search_url("에너지고속도로", days=7)
+    q = unquote_plus(parse_qs(urlparse(url).query)["q"][0])
+    assert "에너지고속도로" in q
+    assert "when:7d" in q
+
+    url2 = google_news_search_url("Digital Grid", days=3)
+    q2 = unquote_plus(parse_qs(urlparse(url2).query)["q"][0])
+    assert "Digital Grid" in q2
+    assert "DigitalGrid" in q2
+    assert "when:3d" in q2
 
 
 def test_build_fetchers_appends_keyword_search() -> None:

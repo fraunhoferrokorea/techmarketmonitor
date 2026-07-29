@@ -10,6 +10,7 @@ from src.policy_priority import (
     is_gov_target,
     passes_gov_collection_exception,
 )
+from src.press_evidence import keyword_in_source
 from src.rd_targeting import is_excluded_rd_news
 
 logger = logging.getLogger(__name__)
@@ -23,8 +24,12 @@ def _normalize(text: str) -> str:
 
 
 def match_keywords(text: str, keywords: list[str]) -> list[str]:
-    normalized = _normalize(text)
-    return [keyword for keyword in keywords if keyword.lower() in normalized]
+    """Return keywords found in *text* (case- and whitespace-insensitive).
+
+    ``에너지고속도로`` matches ``에너지 고속도로`` and vice versa.
+    """
+    cleaned = _HTML_TAG.sub(" ", text)
+    return [keyword for keyword in keywords if keyword_in_source(keyword, cleaned)]
 
 
 def passes_collection_filter(

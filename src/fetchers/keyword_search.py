@@ -22,9 +22,38 @@ _LOOKBACK_DAYS = 7
 _MAX_RESOLVE_PER_RUN = 80
 
 
+def _search_query_variants(keyword: str) -> list[str]:
+    """Original + whitespace-stripped forms so spaced/unspaced Korean both hit."""
+    raw = (keyword or "").strip()
+    if not raw:
+        return []
+    compact = re.sub(r"\s+", "", raw)
+    variants: list[str] = []
+    for form in (raw, compact):
+        if form and form not in variants:
+            variants.append(form)
+    return variants
+
+
 def google_news_search_url(keyword: str, *, days: int = _LOOKBACK_DAYS) -> str:
-    """Build a Google News RSS search URL for one monitoring keyword (KR locale)."""
-    q = f'"{keyword}" when:{max(1, days)}d'
+    """Build a Google News RSS search URL for one monitoring keyword (KR locale).
+
+    OR-combines spaced and unspaced forms so ``에너지고속도로`` also finds
+    ``에너지 고속도로`` (and the reverse).
+    """
+    variants = _search_query_variants(keyword)
+    if not variants:
+        variants = [keyword]
+    # Quoted phrases keep multi-word English (Digital Grid); unquoted compact
+    # helps Korean compounds match regardless of publisher spacing.
+    clauses: list[str] = []
+    for form in variants:
+        quoted = f'"{form}"'
+        if quoted not in clauses:
+            clauses.append(quoted)
+        if " " not in form and form not in clauses:
+            clauses.append(form)
+    q = f'({" OR ".join(clauses)}) when:{max(1, days)}d'
     return "https://news.google.com/rss/search?" + urlencode(
         {"q": q, "hl": "ko", "gl": "KR", "ceid": "KR:ko"}
     )
