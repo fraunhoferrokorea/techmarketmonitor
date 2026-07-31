@@ -8,6 +8,8 @@ on:
     # Backup run 10:37 KST in case the first schedule is delayed or dropped.
     # daily-catchup is idempotent, so a duplicate run is a no-op.
     - cron: '37 1 * * *'
+    # Afternoon watchdog 14:07 KST if morning schedules were dropped entirely.
+    - cron: '7 5 * * *'
   workflow_dispatch:
     inputs:
       date:

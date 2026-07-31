@@ -10,7 +10,7 @@ from __future__ import annotations
 import argparse
 import calendar
 import sys
-from datetime import date
+from datetime import date, timedelta
 
 
 def last_business_day_of_month(year: int, month: int) -> date:
@@ -22,6 +22,28 @@ def last_business_day_of_month(year: int, month: int) -> date:
     return candidate
 
 
+def _today_kst() -> date:
+    try:
+        from src.daily_windows import now_kst
+
+        return now_kst().date()
+    except Exception:
+        return date.today()
+
+
+def _yesterday_daily_ready(today: date) -> tuple[bool, str]:
+    """Require yesterday's daily before LBD monthly (avoid StartWhenAvailable races)."""
+    from src.scheduler_state import load_last_completed_log_date, report_exists
+
+    yesterday = today - timedelta(days=1)
+    last_completed = load_last_completed_log_date()
+    if report_exists(yesterday) or (
+        last_completed is not None and last_completed >= yesterday
+    ):
+        return True, yesterday.isoformat()
+    return False, yesterday.isoformat()
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -29,13 +51,34 @@ def main() -> None:
         action="store_true",
         help="Exit 1 when today is not the last business day (for GitHub Actions gating).",
     )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Regenerate even if monthly_YYYY-MM.md already exists.",
+    )
     args = parser.parse_args()
 
-    today = date.today()
+    today = _today_kst()
     lbd = last_business_day_of_month(today.year, today.month)
 
     if today != lbd:
         print(f"[monthly-check] Today ({today}) is not the last business day ({lbd}). Skipping.")
+        sys.exit(1 if args.check_only else 0)
+
+    ready, yesterday = _yesterday_daily_ready(today)
+    if not ready:
+        print(
+            f"[monthly-check] Last business day ({lbd}), but daily for {yesterday} "
+            "is not ready yet. Run daily-catchup first; skipping monthly."
+        )
+        sys.exit(1 if args.check_only else 0)
+
+    from src.job_guard import monthly_report_path
+
+    report_path = monthly_report_path(today.year, today.month)
+    if report_path.is_file() and not args.force:
+        print(f"[monthly-check] Already exists: {report_path}. Skipping.")
+        # check-only exit 1 → GHA treats as "nothing to run" (same as non-LBD).
         sys.exit(1 if args.check_only else 0)
 
     if args.check_only:
@@ -44,17 +87,29 @@ def main() -> None:
 
     print(f"[monthly-check] Today IS the last business day ({lbd}). Running monthly report…")
 
-    # Import here so the script can be tested without the full venv on PATH
     import logging
 
-    from src.config import load_settings
+    from src.job_guard import pipeline_lock
     from src.monthly import run_monthly_report
 
-    settings = load_settings()
     logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
 
-    result = run_monthly_report(year=today.year, month=today.month, cleanup_daily=True)
-    print(f"[monthly-check] Done: {result}")
+    with pipeline_lock("pipeline") as acquired:
+        if not acquired:
+            print("[monthly-check] Another pipeline job is running — skip (will retry later).")
+            sys.exit(0)
+
+        if report_path.is_file() and not args.force:
+            print(f"[monthly-check] Already exists: {report_path}. Skipping.")
+            return
+
+        # Keep dailies until cloud/pages sync is confirmed (GHA already uses --no-cleanup).
+        result = run_monthly_report(
+            year=today.year,
+            month=today.month,
+            cleanup_daily=False,
+        )
+        print(f"[monthly-check] Done: {result}")
 
 
 if __name__ == "__main__":

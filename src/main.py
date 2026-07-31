@@ -162,6 +162,9 @@ def daily_reprocess_cmd(from_date: datetime, to_date: datetime, fresh: bool) -> 
 @cli.command("daily-catchup")
 def daily_catchup_cmd() -> None:
     """Run daily pipeline for every missing report through yesterday (KST)."""
+    from src.job_guard import maybe_install_scheduled_guards
+
+    maybe_install_scheduled_guards()
     settings = load_settings()
     _configure_logging(settings.log_level)
 
@@ -190,12 +193,48 @@ def daily_cmd(run_date: datetime | None) -> None:
     default=False,
     help="Keep daily markdown files after report generation.",
 )
-def monthly_cmd(year: int | None, month: int | None, no_cleanup: bool) -> None:
+@click.option(
+    "--force",
+    is_flag=True,
+    default=False,
+    help="Regenerate even if monthly_YYYY-MM.md already exists.",
+)
+def monthly_cmd(
+    year: int | None,
+    month: int | None,
+    no_cleanup: bool,
+    force: bool,
+) -> None:
     """Aggregate daily logs, generate a monthly Markdown report, and delete daily files."""
+    from src.job_guard import maybe_install_scheduled_guards, monthly_report_path, pipeline_lock
+
+    maybe_install_scheduled_guards()
     settings = load_settings()
     _configure_logging(settings.log_level)
 
-    result = run_monthly_report(year=year, month=month, cleanup_daily=not no_cleanup)
+    target = date.today()
+    y = year or target.year
+    m = month or target.month
+    existing = monthly_report_path(y, m)
+    if existing.is_file() and not force:
+        click.echo(
+            json.dumps(
+                {
+                    "year": y,
+                    "month": m,
+                    "status": "skipped_exists",
+                    "report_path": str(existing),
+                },
+                indent=2,
+            )
+        )
+        return
+
+    with pipeline_lock("pipeline") as acquired:
+        if not acquired:
+            click.echo(json.dumps({"status": "skipped_locked"}, indent=2))
+            return
+        result = run_monthly_report(year=year, month=month, cleanup_daily=not no_cleanup)
     click.echo(json.dumps(result, indent=2))
 
 

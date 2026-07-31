@@ -1,6 +1,13 @@
 @echo off
 setlocal
 cd /d "%~dp0"
+
+if /I not "%~1"=="--hidden" (
+  start "" wscript.exe //B "%~dp0run_hidden.vbs" "%~f0"
+  exit /b 0
+)
+
+set TMM_SCHEDULED=1
 set LOG=%~dp0output\logs\monthly.log
 if not exist "%~dp0output\logs" mkdir "%~dp0output\logs"
 set PYTHON=C:\Users\Admin\AppData\Local\Programs\Python\Python314\python.exe

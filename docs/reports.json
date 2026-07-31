@@ -1,6 +1,12 @@
 {
   "daily": [
     {
+      "label": "2026-07-30",
+      "title": "Daily 2026-07-30",
+      "href": "daily/2026-07-30.html",
+      "meta": "2건 (기사 2 / 보도자료 0 / 논문 0)"
+    },
+    {
       "label": "2026-07-29",
       "title": "Daily 2026-07-29",
       "href": "daily/2026-07-29.html",
@@ -296,6 +302,12 @@
     }
   ],
   "monthly": [
+    {
+      "label": "2026-07",
+      "title": "Monthly 2026-07",
+      "href": "monthly/2026-07.html",
+      "meta": "** 키워드 관련 17건 (R&D 적합 4점 이상 후보 23건"
+    },
     {
       "label": "2026-06",
       "title": "Monthly 2026-06",

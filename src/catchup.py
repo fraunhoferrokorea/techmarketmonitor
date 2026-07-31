@@ -83,6 +83,19 @@ def run_daily_catchup(
     now: datetime | None = None,
 ) -> list[dict]:
     """Run the daily pipeline for every missing report through yesterday."""
+    from src.job_guard import pipeline_lock
+
+    with pipeline_lock("pipeline") as acquired:
+        if not acquired:
+            logger.warning("daily-catchup skipped — another pipeline job holds the lock")
+            return [{"status": "skipped_locked"}]
+        return _run_daily_catchup_unlocked(settings=settings, now=now)
+
+
+def _run_daily_catchup_unlocked(
+    settings: Settings | None = None,
+    now: datetime | None = None,
+) -> list[dict]:
     settings = settings or load_settings()
     current = now or now_kst()
     store = DailyLogStore(settings.database_path)
